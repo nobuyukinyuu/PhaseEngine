@@ -1,0 +1,45 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=4
+
+_global_script_classes=[  ]
+_global_script_class_icons={
+
+}
+
+[application]
+
+config/name="PhaseEngine"
+run/main_scene="res://Control.tscn"
+run/low_processor_mode=true
+config/icon="res://icon.png"
+
+[audio]
+
+mix_rate=48000
+
+[autoload]
+
+global="*res://!globals.gd"
+
+[display]
+
+window/vsync/use_vsync=false
+
+[editor_plugins]
+
+enabled=PoolStringArray( "mono_debugger" )
+
+[rendering]
+
+quality/driver/driver_name="GLES2"
+vram_compression/import_etc=true
+vram_compression/import_etc2=false
+environment/default_clear_color=Color( 0.0862745, 0.0862745, 0.0862745, 1 )
+environment/default_environment="res://default_env.tres"

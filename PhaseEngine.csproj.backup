@@ -1,0 +1,10 @@
+<Project Sdk="Godot.NET.Sdk/3.2.3">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- <Compile Include="**/*" Exclude="script_templates/*" /> -->
+    <Compile Include="**\*.cs" Exclude="script_templates/*.cs" />
+  </ItemGroup>
+</Project>

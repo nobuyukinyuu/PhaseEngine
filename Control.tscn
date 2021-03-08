@@ -1,0 +1,111 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://EGSlider.gd" type="Script" id=1]
+[ext_resource path="res://gfx/ui/hSlider.theme" type="Theme" id=2]
+[ext_resource path="res://Label.gd" type="Script" id=3]
+[ext_resource path="res://Test2.cs" type="Script" id=4]
+
+[sub_resource type="AudioStreamGenerator" id=1]
+mix_rate = 48000.0
+
+[node name="Control" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Coarse" type="HSlider" parent="."]
+margin_left = 64.0
+margin_top = 72.0
+margin_right = 266.0
+margin_bottom = 92.0
+theme = ExtResource( 2 )
+tick_count = 9
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Fine" type="HSlider" parent="."]
+margin_left = 64.0
+margin_top = 104.0
+margin_right = 266.0
+margin_bottom = 124.0
+theme = ExtResource( 2 )
+tick_count = 9
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Detune" type="HSlider" parent="."]
+margin_left = 64.0
+margin_top = 136.0
+margin_right = 264.0
+margin_bottom = 156.0
+theme = ExtResource( 2 )
+value = 100.0
+tick_count = 9
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Accumulator" type="HSlider" parent="."]
+margin_left = 64.0
+margin_top = 232.0
+margin_right = 264.0
+margin_bottom = 252.0
+theme = ExtResource( 2 )
+max_value = 24000.0
+value = 440.0
+exp_edit = true
+tick_count = 11
+ticks_on_borders = true
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BitCrush" type="HSlider" parent="."]
+margin_left = 64.0
+margin_top = 304.0
+margin_right = 264.0
+margin_bottom = 324.0
+theme = ExtResource( 2 )
+max_value = 255.0
+value = 69.0
+tick_count = 11
+ticks_on_borders = true
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="."]
+margin_left = 456.0
+margin_top = 232.0
+margin_right = 632.0
+margin_bottom = 320.0
+text = "Ass"
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Test" type="Label" parent="."]
+margin_left = 488.0
+margin_top = 136.0
+margin_right = 720.0
+margin_bottom = 150.0
+text = "ass"
+script = ExtResource( 4 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Player" type="AudioStreamPlayer" parent="Test"]
+stream = SubResource( 1 )
+volume_db = -24.0
