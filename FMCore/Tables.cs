@@ -17,7 +17,13 @@ namespace gdsFM
 
         public static readonly float[] short2float = new float[ushort.MaxValue+1];  //Representation in float of all values of ushort
         public static short[] sin = new short[(1 << SINE_TABLE_BITS) +1];  //integral Increment/decrement can use add/sub operations to alter phase counter.
+
+        public const byte TRI_TABLE_BITS = 5;
+        public const byte TRI_TABLE_MASK = (1 << TRI_TABLE_BITS) - 1;
+        public static readonly short[] tri = {-32768,-28673,-24577,-20481,-16385,-12289,-8193,-4097,-1,4095,8191,12287,16383,20479,24575,28671,32767,
+                                                28671,24575,20479,16383,12287,8191,4095,-1,-4097,-8193,-12289,-16385,-20481,-24577,-28673,};
         public static float[] linVol = new float[ushort.MaxValue+1];
+
 
 
         static Tables()

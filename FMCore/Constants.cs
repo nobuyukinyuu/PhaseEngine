@@ -17,6 +17,13 @@ namespace gdsFM
 
         public const double Ln10 = 2.30258509299;
 
+
+
+        public const byte FRAC_PRECISION_BITS = 20;
+        public const ulong FRAC_SIZE = (1 << FRAC_PRECISION_BITS) - 1;
+        public const double ONE_PER_FRAC_SIZE = 1.0 / FRAC_SIZE;
+
+
     //This measurement was done against DX7 detune at A-4, where every 22 cycles the tone would change (-detune) samples at a recording rate of 44100hz.
     //See const definitions in glue.cs for more information about the extra-fine detune increment.
         const Decimal DETUNE_440 = 2205M / 22M;
@@ -58,8 +65,39 @@ namespace gdsFM
                 result = (short)(-result - 1);
 
             return result;
-        }
+        }     
     }
+
+
+    static internal class XorShift64Star
+    {
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static uint rotl(uint x, int k) 
+        {
+            return unchecked((x << k) | (x >> (32 - k)));
+        }
+
+
+        static uint[] s= {1,2};
+
+        public static uint Current() {
+            return s[0] * 0x9E3779BB;
+        }
+
+        public static uint Next() {
+            unchecked{
+                uint s0 = s[0];
+                uint s1 = s[1];
+                uint result = s0 * 0x9E3779BB;
+
+                s1 ^= s0;
+                s[0] = rotl(s0, 26) ^ s1 ^ (s1 << 9); // a, b
+                s[1] = rotl(s1, 13); // c
+
+                return result;
+            }
+        }   
+}
 
 
 

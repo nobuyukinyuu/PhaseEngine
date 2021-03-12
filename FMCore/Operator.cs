@@ -7,9 +7,9 @@ namespace gdsFM
     {
         public Operator() {}
 
-        public double phase;  //Phase accumulator
+        public ulong phase;  //Phase accumulator
         public uint increment;  //Phase incrementor, combined value.
-        public double noteIncrement;  //Frequency multiplier for note number.
+        public ulong noteIncrement;  //Frequency multiplier for note number.
 
 
         public float fnum;  //Used to calculate the increment, this comes from the note table of f-numbers
@@ -31,23 +31,32 @@ namespace gdsFM
         {
             
             // phase = (ulong)unchecked((long)phase + oscillator.Generate(phase, duty));
-            phase = (phase + noteIncrement);   //FIXME:  CHANGE TO TOTAL INCREMENT
+            phase += noteIncrement;   //FIXME:  CHANGE TO TOTAL INCREMENT
 
             increment++;
 
-            return oscillator.Generate(unchecked((ulong) phase), duty);
+            return oscillator.Generate(unchecked(phase >> Global.FRAC_PRECISION_BITS), duty);
         }
 
 
         public void NoteSelect(byte n)
         {
             const int NOTE_A4=69;
-            noteIncrement = IncOfFreq(440.0 * Math.Pow(2, (n-NOTE_A4)/12.0));
+            // noteIncrement = IncOfFreq(440.0 * Math.Pow(2, (n-NOTE_A4)/12.0));
+            var whole = IncOfFreq(440.0 * Math.Pow(2, (n-NOTE_A4)/12.0));
+            var frac = whole - Math.Truncate(whole);
+        
+            noteIncrement = (uint)(frac * Global.FRAC_SIZE) | ((uint)(whole) << Global.FRAC_PRECISION_BITS);
             
         }
         public void FreqSelect(double freq)
         {
-            noteIncrement = IncOfFreq(freq);
+            // noteIncrement = IncOfFreq(freq);
+            var whole = IncOfFreq(freq);
+            var frac = whole - Math.Truncate(whole);
+        
+            noteIncrement = (ulong)(frac * Global.FRAC_SIZE) | ((ulong)(whole) << Global.FRAC_PRECISION_BITS);
+            // noteIncrement &= Int32.MaxValue;
         }
 
 
