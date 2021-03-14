@@ -69,6 +69,23 @@ namespace gdsFM
             }
         }
 
+        static PinkNoise pgen = new PinkNoise();
+        public static short Pink(ulong n, ushort duty)
+        {
+            return pgen.Next();
+        }
+
+        static P_URand bgen = new P_URand();
+        static int bval = 0x7fff;
+        public static short Brown(ulong n, ushort duty)
+        {
+            bval +=  ( (ushort)bgen.urand() ) >> 5 ;
+            bval = (int) (bval * 0.99);
+            var output = (short)(bval - 0x7FFF);
+            // return unchecked((ushort)n) >= duty?  (short)(output>>1): (short)output;
+            return output;
+        }
+
 
     }
 

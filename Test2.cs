@@ -35,7 +35,7 @@ public class Test2 : Label
         acc_inc = GetNode<HSlider>("../Accumulator");
         bitCrush = GetNode<HSlider>("../BitCrush");
 
-        op.oscillator.SetWaveform(Oscillator.Absine);
+        op.oscillator.SetWaveform(Oscillator.Pink);
  
         // op.NoteSelect(0);
         op.FreqSelect(440);
