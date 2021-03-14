@@ -109,7 +109,7 @@ public class Test2 : Label
 
             for(int i=0;  i<scopeLen-1; i++)  
             {
-                DrawLine(drawCache[i], drawCache[i+1], Color.ColorN("blue"), 1, true);
+                DrawLine(drawCache[i], drawCache[i+1], Color.ColorN("cyan"), 0.5f, true);
             }
 
             // DrawPolyline(pts, Color.ColorN("blue"),1,true);

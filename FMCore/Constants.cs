@@ -12,8 +12,8 @@ namespace gdsFM
         public static float MixRate = 48000;
         public static float FracMixRate = 1/44100f;
 
-        public const double BaseHz = 440;
-        public const double BaseMult = 1 / BaseHz;
+        public const double BASE_HZ = 440;
+        public const double BASE_MULT = 1 / BASE_HZ;
 
         public const double Ln10 = 2.30258509299;
 

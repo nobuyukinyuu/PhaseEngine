@@ -38,7 +38,6 @@ namespace gdsFM
                 sin[i] =  (short) Math.Round(Math.Sin(TAU * (i/(double)(sin.Length-0)) )*short.MaxValue);
             }
 
-            System.Diagnostics.Debug.Print("OK Static");
         }
     }
 

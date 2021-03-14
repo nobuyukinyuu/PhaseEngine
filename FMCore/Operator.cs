@@ -43,7 +43,7 @@ namespace gdsFM
         {
             const int NOTE_A4=69;
             // noteIncrement = IncOfFreq(440.0 * Math.Pow(2, (n-NOTE_A4)/12.0));
-            var whole = IncOfFreq(440.0 * Math.Pow(2, (n-NOTE_A4)/12.0));
+            var whole = IncOfFreq(Global.BASE_HZ * Math.Pow(2, (n-NOTE_A4)/12.0));
             var frac = whole - Math.Truncate(whole);
         
             noteIncrement = (uint)(frac * Global.FRAC_SIZE) | ((uint)(whole) << Global.FRAC_PRECISION_BITS);
