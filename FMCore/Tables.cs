@@ -20,8 +20,21 @@ namespace gdsFM
 
         public const byte TRI_TABLE_BITS = 5;
         public const byte TRI_TABLE_MASK = (1 << TRI_TABLE_BITS) - 1;
+
+
         public static readonly short[] tri = {-32768,-28673,-24577,-20481,-16385,-12289,-8193,-4097,-1,4095,8191,12287,16383,20479,24575,28671,32767,
                                                 28671,24575,20479,16383,12287,8191,4095,-1,-4097,-8193,-12289,-16385,-20481,-24577,-28673,};
+
+
+//TODO:   Create an exponent table for values in linear increments 0-1 corresponding to the total attenuation (in decibels) an operator or final mix should have.
+//      Attenuation can be added together cheaply and converted to a value godot likes in the end stage. Bits of depth can be however many we like (16 is best),
+//      and the table mapping should go from 0-72dB attenuation, with max values clampped, perhaps corresponding to 0 at max?
+//      All other lookup tables will have to have their values converted from 0-maxValue to decibel attenuation (0 being max volume).
+//      In the linear domain, Attenuated envelope C=A*B (0-1 float).  In the log domain, log(C) = log(A) + log(b).
+
+        public const byte ATTENUATION_BITS = 16;
+        public const float MAX_ATTENUATION = 72;  //Decibels
+        
         public static float[] linVol = new float[ushort.MaxValue+1];
 
 
@@ -40,5 +53,6 @@ namespace gdsFM
 
         }
     }
+
 
 }

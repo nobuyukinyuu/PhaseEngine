@@ -1,7 +1,7 @@
 using System;
 using gdsFM;
 
-using Godot;
+// using Godot;
 
 namespace gdsFM 
 {
@@ -27,8 +27,8 @@ namespace gdsFM
     //This measurement was done against DX7 detune at A-4, where every 22 cycles the tone would change (-detune) samples at a recording rate of 44100hz.
     //See const definitions in glue.cs for more information about the extra-fine detune increment.
         const Decimal DETUNE_440 = 2205M / 22M;
-        const Decimal DETUNE_MIN = (2198M / 22M) / DETUNE_440 ;  //Smallest detune multiplier, a fraction of 1.0
-        const Decimal DETUNE_MAX = (2212M / 22M) / DETUNE_440;   //Largest detune multiplier, a multiple of 1.0    
+        // const Decimal DETUNE_MIN = (2198M / 22M) / DETUNE_440 ;  //Smallest detune multiplier, a fraction of 1.0
+        // const Decimal DETUNE_MAX = (2212M / 22M) / DETUNE_440;   //Largest detune multiplier, a multiple of 1.0    
 
 
 
@@ -50,9 +50,11 @@ namespace gdsFM
         }
 
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static double dbToLinear(double p_db) { return Math.Exp(p_db * 0.11512925464970228420089957273422);}
 
 
-    public static short Exp(ushort expVal)
+        public static short Exp(ushort expVal)
         {
             ushort signBit = (ushort) (expVal & 0x8000);
             short result = (short) (expVal & 0xFF);
