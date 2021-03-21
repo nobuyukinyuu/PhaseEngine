@@ -29,7 +29,7 @@ namespace gdsFM
         }
         public static short Sine(ulong n, ushort duty)
         {
-            return Tables.sin[unchecked((ushort)n & Tables.SINE_TABLE_MASK)];
+            return (short)Tables.sin[unchecked((ushort)n & Tables.SINE_TABLE_MASK)];
         }
         public static short Absine(ulong n, ushort duty)
         {
@@ -37,12 +37,14 @@ namespace gdsFM
         }
         public static short Saw(ulong n, ushort duty)
         {
-            return unchecked((short) (n<<1));
+            short output = Tables.logVol[unchecked((ushort)(n<<1)) ];
+            // short output = unchecked((short)(n<<1));
+            return output;
         }
 
         public static short Tri(ulong n, ushort duty)
         {
-            return Tables.tri[unchecked(n>>10 & Tables.TRI_TABLE_MASK)];
+            return Tables.logVol[Tables.tri[unchecked(n>>10 & Tables.TRI_TABLE_MASK)] + Tables.SIGNED_TO_INDEX];
         }
 
         public static short CrushedSine(ulong n, ushort bitsLost)
@@ -64,8 +66,8 @@ namespace gdsFM
                     seed ^= (ushort)(seed << 8);
                 }
                 
-                return (short)seed; 
-                return phase >= duty?  (short)0: (short)seed;
+                return Tables.logVol[seed]; 
+                return phase >= duty?  (short)0: Tables.logVol[seed];
             }
         }
 

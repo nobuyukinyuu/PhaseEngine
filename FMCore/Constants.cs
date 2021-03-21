@@ -1,6 +1,6 @@
 using System;
 using gdsFM;
-
+using System.Runtime.CompilerServices;
 // using Godot;
 
 namespace gdsFM 
@@ -10,14 +10,13 @@ namespace gdsFM
         public const int VERSION = 10;
 
         public static float MixRate = 48000;
-        public static float FracMixRate = 1/44100f;
+        public static float FracMixRate = 1/MixRate;
 
         public const double BASE_HZ = 440;
         public const double BASE_MULT = 1 / BASE_HZ;
 
-        public const double Ln10 = 2.30258509299;
 
-
+        public const ushort ENVELOPE_UPDATE_TICKS = 0;  //Number of ticks to count up to before triggering an update.
 
         public const byte FRAC_PRECISION_BITS = 20;
         public const ulong FRAC_SIZE = (1 << FRAC_PRECISION_BITS) - 1;
@@ -26,48 +25,13 @@ namespace gdsFM
 
     //This measurement was done against DX7 detune at A-4, where every 22 cycles the tone would change (-detune) samples at a recording rate of 44100hz.
     //See const definitions in glue.cs for more information about the extra-fine detune increment.
-        const Decimal DETUNE_440 = 2205M / 22M;
+        // const Decimal DETUNE_440 = 2205M / 22M;
         // const Decimal DETUNE_MIN = (2198M / 22M) / DETUNE_440 ;  //Smallest detune multiplier, a fraction of 1.0
         // const Decimal DETUNE_MAX = (2212M / 22M) / DETUNE_440;   //Largest detune multiplier, a multiple of 1.0    
 
-
-
         public static readonly byte[] multTable = {1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 20, 24, 24, 30, 30};
-        public static readonly ushort[] expTable=init_tbl(expgen), sinTable=init_tbl(lsgen);
-
-        static ushort expgen (ushort input)
-        { return (ushort) (Math.Round((Math.Pow(2,input/256.0f)-1)*1024)); }
-        static ushort lsgen (ushort input)
-        { return (ushort) (Math.Round(-Math.Log(Math.Sin((input+0.5f)*Math.PI/256/2))/Math.Log(2)*256)); }
-
-        public static ushort[] init_tbl(Func<ushort, ushort> inputFunc)
-        {
-            var exp= new ushort[0x100];
-            for (ushort i = 0; i < 0x100; i++)
-                exp[i] = inputFunc(i);
-
-            return exp;      
-        }
 
 
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static double dbToLinear(double p_db) { return Math.Exp(p_db * 0.11512925464970228420089957273422);}
-
-
-        public static short Exp(ushort expVal)
-        {
-            ushort signBit = (ushort) (expVal & 0x8000);
-            short result = (short) (expVal & 0xFF);
-
-            expVal &= 0x7FFF;
-            result =  (short) (expTable[result ^ 0xFF] << 1);
-            result |= 0x0800;
-            result >>= (expVal >> 8);
-            if (signBit>0)
-                result = (short)(-result - 1);
-
-            return result;
-        }     
     }
 
 

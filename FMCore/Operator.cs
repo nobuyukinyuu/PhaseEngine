@@ -38,6 +38,33 @@ namespace gdsFM
             return oscillator.Generate(unchecked(phase >> Global.FRAC_PRECISION_BITS), duty);
         }
 
+        public float LinearVolume(short samp)
+        {
+            var output = Tables.linVol[samp + Tables.SIGNED_TO_INDEX];
+            if (Tools.BIT(phase >> Global.FRAC_PRECISION_BITS, Tables.SINE_HALFWAY_BIT).ToBool())
+                output = -output;
+            return output;
+        }
+
+        // public short compute_volume(ushort modulation, ushort am_offset)
+        // {
+        //     // start with the upper 10 bits of the phase value plus modulation
+        //     // the low 10 bits of this result represents a full 2*PI period over
+        //     // the full sin wave
+        //     ushort phase = (ushort)((phase >> Global.FRAC_PRECISION_BITS) + modulation);
+
+        //     // get the absolute value of the sin, as attenuation, as a 4.8 fixed point value
+        //     ushort sin_attenuation = Test2.abs_sin_attenuation(phase);
+
+        //     // get the attenuation from the evelope generator as a 4.6 value, shifted up to 4.8
+        //     // ushort env_attenuation = Test2.envelope_attenuation(am_offset) << 2;
+
+        //     // combine into a 5.8 value, then convert from attenuation to 13-bit linear volume
+        //     short result = Test2.attenuation_to_volume(sin_attenuation + env_attenuation);
+
+        //     // negate if in the negative part of the sin wave (sign bit gives 14 bits)
+        //     return Tools.BIT(phase, 9).ToBool() ? (short)-result : result;
+        // }
 
         public void NoteSelect(byte n)
         {
