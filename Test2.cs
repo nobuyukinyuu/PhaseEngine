@@ -21,6 +21,7 @@ public class Test2 : Label
     Slider bitCrush;
 
     Operator op = new Operator();
+    Operator op2 = new Operator();
 
 
 
@@ -38,6 +39,7 @@ public class Test2 : Label
  
         // op.NoteSelect(0);
         op.FreqSelect(440);
+        op2.FreqSelect(4);
 
         player.Play();
 
@@ -70,16 +72,20 @@ public class Test2 : Label
         for (int i=0; i<frames;  i++)
         {
             // output[i].x = Tables.short2float[ Oscillator.CrushedSine((ulong)accumulator, (ushort) bitCrush.Value) + Tables.SIGNED_TO_INDEX ];
+            op.Clock();
+            op2.Clock();
             var samp=op.RequestSample();
+            var samp2=op2.RequestSample();
             // output[i].x = Tables.short2float[ samp + Tables.SIGNED_TO_INDEX ];
 
-            if (output[i].x < 0)
-            {
-                // GD.Print("oh " + samp + "\n");
-            }
 
-            output[i].x = attenuation_to_volume(unchecked((ushort)(samp>>2))) / 8192f ;
+            // output[i].x = attenuation_to_volume(unchecked((ushort)(samp>>0))) / 8192f ;
+            output[i].x = Tables.short2float[( op.compute_volume((ushort)samp, ushort.MaxValue)<<2 ) + Tables.SIGNED_TO_INDEX] ;
+            // output[i].x = Tables.short2float[ samp + Tables.SIGNED_TO_INDEX] ;
+            // output[i].x = Tables.short2float[Oscillator.Sine(op.phase>>20, 0) + Tables.SIGNED_TO_INDEX] ;
             output[i].y = output[i].x;
+
+
         }
 
 
@@ -127,15 +133,15 @@ public class Test2 : Label
                 DrawLine(drawCache[i], drawCache[i+1], Color.ColorN("cyan"), 0.5f, true);
             }
 
-            for (int i=0; i< 256; i++)
-            {
-                // var pos = new Vector2(i/256, 256-Tables.linVol[i] * 256);
-                // var pos = new Vector2(i, attenuation_to_volume(abs_sin_attenuation((ushort)(i*4))) /128 + 256);
-                var pos = new Vector2(i, Tables.logVol[i*256]/256);
-                var pos2 = new Vector2(i/2, (float)(Tables.atbl[i*128]/256));
-                DrawLine(pos, pos + new Vector2(0, 2), new Color("#ff0000"));
-                DrawLine(pos2, pos2 + new Vector2(0, 2), new Color("#ffff00"));
-            }
+            // for (int i=0; i< 256; i++)
+            // {
+            //     // var pos = new Vector2(i/256, 256-Tables.linVol[i] * 256);
+            //     // var pos = new Vector2(i, attenuation_to_volume(abs_sin_attenuation((ushort)(i*4))) /128 + 256);
+            //     var pos = new Vector2(i, Tables.logVol[i*256]/256);
+            //     var pos2 = new Vector2(i/2, (float)(Tables.atbl[i*128]/256));
+            //     DrawLine(pos, pos + new Vector2(0, 2), new Color("#ff0000"));
+            //     DrawLine(pos2, pos2 + new Vector2(0, 2), new Color("#ffff00"));
+            // }
 
             // DrawPolyline(pts, Color.ColorN("blue"),1,true);
 
@@ -144,8 +150,6 @@ public class Test2 : Label
             {
                 st[i] = attenuation_to_volume(abs_sin_attenuation((ushort)(i)));
             }
-
-            GD.Print(st[1]);
 
     }
 

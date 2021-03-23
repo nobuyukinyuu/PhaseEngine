@@ -3,6 +3,7 @@
 using System;
 using gdsFM;
 using System.Runtime.CompilerServices;
+using System.Numerics;
 
 namespace gdsFM 
 {
@@ -17,6 +18,7 @@ namespace gdsFM
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double Log2(double n){ return Math.Log(n) / Math.Log(2); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double Log10(double n){ return Math.Log(n) / Math.Log(10); }
         // [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double dbToLinear(double p_db) { return Math.Exp(p_db * 0.11512925464970228420089957273422);}
         // [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double linear2db(double p_lin) { return Math.Log(p_lin) * 8.6858896380650365530225783783321;}
   
@@ -142,6 +144,52 @@ namespace gdsFM
         public static bool ToBool(this ulong x) {return x>0;}
         public static bool ToBool(this byte x) {return x>0;}
 
+
+        //-------------------------------------------------
+        //  linear_to_fp - given a 32-bit signed input
+        //  value, convert it to a signed 10.3 floating-
+        //  point value
+        //-------------------------------------------------
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static short linear_to_fp(Int32 value)
+        {
+            // start with the absolute value
+            Int32 avalue = Math.Abs(value);
+
+            // compute shift to fit in 9 bits (bit 10 is the sign)
+            int shift = (32 - 9) - BitOperations.LeadingZeroCount((uint) avalue);
+
+            // if out of range, just return maximum; note that YM3012 DAC does
+            // not support a shift count of 7, so we clamp at 6
+            if (shift >= 7)
+                {shift = 6; avalue = 0x1ff;}
+            else if (shift > 0)
+                avalue >>= shift;
+            else
+                shift = 0;
+
+            // encode with shift in low 3 bits and signed mantissa in upper
+            return (short) (shift | (((value < 0) ? -avalue : avalue) << 3));
+        }
+
+
+        
+
+        //-------------------------------------------------
+        //  fp_to_linear - given a 10.3 floating-point
+        //  value, convert it to a signed 16-bit value,
+        //  clamping
+        //-------------------------------------------------
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Int32 fp_to_linear(short value)
+        {
+            return (value >> 3) << BIT(value, 0, 3);
+        }
+
+
+        
 
     }
 }

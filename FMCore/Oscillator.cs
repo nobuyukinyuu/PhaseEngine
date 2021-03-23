@@ -44,7 +44,8 @@ namespace gdsFM
 
         public static short Tri(ulong n, ushort duty)
         {
-            return Tables.logVol[Tables.tri[unchecked(n>>10 & Tables.TRI_TABLE_MASK)] + Tables.SIGNED_TO_INDEX];
+            return Tables.tri[unchecked(n>>10 & Tables.TRI_TABLE_MASK)];
+            // return Tables.logVol[Tables.tri[unchecked(n>>10 & Tables.TRI_TABLE_MASK)] + Tables.SIGNED_TO_INDEX];
         }
 
         public static short CrushedSine(ulong n, ushort bitsLost)

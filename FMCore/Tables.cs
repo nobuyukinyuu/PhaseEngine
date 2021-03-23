@@ -10,7 +10,7 @@ namespace gdsFM
         //Thoughts:  Use unchecked() to rely on rollover behavior for indexes.  Work in ushort for most of the operation.
         //      increments for sine lookup of phase can be masked off if the size is a power of 2.  (12-bit lookup?)
 
-        public const int SINE_TABLE_BITS = 15;  //We bit-shift right by the bit width of the phase counter minus this value to check the table.
+        public const int SINE_TABLE_BITS = 16;  //We bit-shift right by the bit width of the phase counter minus this value to check the table.
         public const int SINE_TABLE_SHIFT = 32 - SINE_TABLE_BITS;  //How far to shift a phase counter value to be in range of the table.
         public const int SINE_TABLE_MASK = (1 << SINE_TABLE_BITS) - 1;  //Mask for creating a rollover.
         public const int SINE_HALFWAY_BIT = SINE_TABLE_BITS - 1;
@@ -24,8 +24,9 @@ namespace gdsFM
         public const byte TRI_TABLE_MASK = (1 << TRI_TABLE_BITS) - 1;
 
 
-        public static readonly short[] tri = {-32768,-28673,-24577,-20481,-16385,-12289,-8193,-4097,-1,4095,8191,12287,16383,20479,24575,28671,32767,
-                                                28671,24575,20479,16383,12287,8191,4095,-1,-4097,-8193,-12289,-16385,-20481,-24577,-28673,};
+        public static readonly short[] tri = new short[TRI_TABLE_MASK+1];
+                                            /*= {-32768,-28673,-24577,-20481,-16385,-12289,-8193,-4097,-1,4095,8191,12287,16383,20479,24575,28671,32767,
+                                                28671,24575,20479,16383,12287,8191,4095,-1,-4097,-8193,-12289,-16385,-20481,-24577,-28673,}; */
 
 
 //TODO:   Create an exponent table for values in linear increments 0-1 corresponding to the total attenuation (in decibels) an operator or final mix should have.
@@ -55,44 +56,65 @@ namespace gdsFM
 
 
             //log
-            for(int i=0; i<logVol.Length/2; i++)
+            for(int i=0; i<logVol.Length; i++)
             {
-                var lin = -i;
-                double db = Tools.Clamp(-Tools.linear2db(i/(double)(short.MaxValue-1)), 0, MAX_DB);
-                var log = (db/(double)MAX_DB * short.MaxValue) - short.MaxValue;
-                atbl[(int)i] = log ;
+                // var lin = -i;
+                // double db = Tools.Clamp(-Tools.linear2db(i/(double)(short.MaxValue-1)), 0, MAX_DB);
+                // var log = (db/(double)MAX_DB * short.MaxValue) - short.MaxValue;
+                // atbl[(int)i] = log ;
 
-                logVol[i] = (short) Tools.Lerp(log,lin, 0.05)  ;
-                logVol[logVol.Length-1-i] = (short) logVol[i] ;
+                // logVol[i] = (short) Tools.Lerp(log,lin, 0)  ;
+                // logVol[logVol.Length-1-i] = (short) logVol[i] ;
+
+                double attenuation = Tools.Clamp( Tools.Log2((1.5* i/(double)logVol.Length) + 0.5),  -1, 1);
+                double dbScaled = attenuation  * short.MaxValue;
+                logVol[i] = (short) Math.Round(dbScaled);
+
             }
 
 
-            var thetaIncrement = TAU * (1/sin.Length);
-            for(double i=0, theta=0; i<sin.Length; i++, theta += thetaIncrement)
+            //sin
+            for(int i=0; i<sin.Length/1; i++)
             {
-                // sin[i] =  (short) Math.Round(Math.Sin(TAU * (i/(double)sin.Length) )*short.MaxValue);
-                double db = Tools.Clamp(-Tools.linear2db( Math.Abs(Math.Sin(TAU * (i+0.5) / (double)(sin.Length))) ), 0, MAX_DB);
-                double att= Math.Round( db/(double)MAX_DB * MAX_ATTENUATION_SIZE ) - (MAX_ATTENUATION_SIZE/2) -1 ;
+                sin[i] =  (short) Math.Round(Math.Sin(TAU * (i/(double)sin.Length) )*short.MaxValue);
 
+                // double db = Tools.Clamp(Tools.Log2( 1+Math.Sin(TAU * (i+0.5) / (double)(sin.Length)) ), -1, 1);
+                
+                // // double att= Math.Round( db/(double)MAX_DB * MAX_ATTENUATION_SIZE ) - (MAX_ATTENUATION_SIZE/2) -1 ;
+                
+                // double att= db * short.MaxValue ;
+                // att = logVol[(int)Math.Round(Math.Sin(TAU * (i/(double)sin.Length) )*short.MaxValue) + SIGNED_TO_INDEX];
 
-                // sin[(int)i] = (short) (Math.Sin(theta) * short.MaxValue);
+                // // sin[(int)i] = (short) (Math.Sin(theta) * short.MaxValue);
 
-                // atbl[(int)i] = att ;
-                sin[(int)i] =  (short) (att);
+                // sin[i] =  (short) (att);
+                // // sin[sin.Length-i-1] =  (short) (~(short)att);
             }
 
-
+            //exp
             for (int i=0; i<MAX_ATTENUATION_SIZE;  i++)
             {
                 //Should the table be from minVolume to maxVolume?   
-                // double attenuation = ((Math.Pow(2, i/(double)(MAX_ATTENUATION_SIZE+1)) -1) * 1) ;
-                double attenuation = Tools.dbToLinear( i/(double)(MAX_ATTENUATION_SIZE+1) * -MAX_DB)  ;
-                linVol[i] = (float) attenuation;
+                // double attenuation = Tools.dbToLinear( i/(double)(MAX_ATTENUATION_SIZE+1) * -MAX_DB)  ;
+                double attenuation = Math.Pow(2,  i/(double)(MAX_ATTENUATION_SIZE + 1)) - 1  ;
+                linVol[i] = (float) attenuation * 2 - 1;
                 }
-            linVol[0] = 1.0f;
-            linVol[MAX_ATTENUATION_SIZE] = 0.0f;  //haha eat pant
+            linVol[0] = -1.0f;
+            linVol[MAX_ATTENUATION_SIZE] = 1.0f;  //haha eat pant
 
             
+            //tri
+            for(int i=0;  i<tri.Length/1; i++)
+            {
+                // double attenuation = Tools.Clamp( Tools.linear2db(i/(double)(tri.Length/4) +1),  0, MAX_DB);
+                double attenuation = Tools.Clamp( Tools.Log2(0.5 * i/(double)(tri.Length) + 0.5)+1,  0, 1);
+                double dbScaled = attenuation * MAX_ATTENUATION_SIZE - MAX_ATTENUATION_SIZE;
+                tri[i] = (short) Math.Round(dbScaled);
+                // tri[i+tri.Length/4] = (short) Math.Round(dbScaled);
+                // tri[tri.Length/2+i] = (short)-tri[i];
+                // tri[tri.Length-i-1] = (short) tri[i];
+            }
+
 
             System.Diagnostics.Debug.Print("Shornlf");
 
