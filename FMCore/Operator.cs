@@ -5,8 +5,6 @@ namespace gdsFM
 {
     public class Operator
     {
-        public Operator() {}
-
         public ulong phase;  //Phase accumulator
         public uint increment;  //Phase incrementor, combined value.
         public ulong noteIncrement;  //Frequency multiplier for note number.
@@ -17,7 +15,12 @@ namespace gdsFM
 
         public Oscillator oscillator = new Oscillator(Oscillator.Sine);
 
+        public delegate short sampleOutputFunc(); //Primary function of the operator
+        public sampleOutputFunc operatorOutputSample;
+
         //thought:  separate into carrier and modulator funcs, carrier output being a float and modulator being double
+
+        public Operator(){ operatorOutputSample=OperatorType_ComputeLogOuput; }
 
         public void NoteOn()
         {}
@@ -33,8 +36,41 @@ namespace gdsFM
 
         public short RequestSample()
         {
-            return oscillator.Generate(unchecked(phase >> Global.FRAC_PRECISION_BITS), duty);
+            return operatorOutputSample();
+            // return oscillator.Generate(unchecked(phase >> Global.FRAC_PRECISION_BITS), duty, ref flip);
         }
+
+
+        //Sets up the operator to act as an oscillator for FM output.
+        public void SetOperatorType(Oscillator.waveFunc waveFunc)
+        {
+            oscillator.SetWaveform(waveFunc);
+            switch(waveFunc.Method.Name)
+            {
+                case "Brown":
+                case "White":
+                case "Pink":
+                {
+                    //Set the operator's sample output function to work in the linear domain.
+                    operatorOutputSample = OperatorType_Noise;
+                    return;
+                }
+            }
+
+            operatorOutputSample = OperatorType_ComputeLogOuput;
+        }  //TODO:  Operator types for filters and sample-based outputs
+
+        //Operator output type for FM 
+        public short OperatorType_ComputeLogOuput()
+        {
+            return compute_volume(0,0);
+        }
+
+        public short OperatorType_Noise()
+        {
+            return unchecked((short) oscillator.Generate(phase, duty, ref flip));
+        }
+
 
         public float LinearVolume(short samp)
         {
@@ -44,6 +80,8 @@ namespace gdsFM
             return output;
         }
 
+
+        bool flip=false;
         public short compute_volume(ushort modulation, ushort am_offset)
         {
             // start with the upper 10 bits of the phase value plus modulation
@@ -52,18 +90,19 @@ namespace gdsFM
             ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + modulation);
 
             // get the absolute value of the sin, as attenuation, as a 4.8 fixed point value
-            ushort sin_attenuation = Test2.abs_sin_attenuation(phase);
-            // ushort sin_attenuation = (ushort) (Oscillator.Sine(unchecked(this.phase >> Global.FRAC_PRECISION_BITS), 0));
+            // ushort sin_attenuation = Tables.abs_sin_attenuation(phase);
+            ushort sin_attenuation = oscillator.Generate(phase, duty, ref flip);
 
             // get the attenuation from the evelope generator as a 4.6 value, shifted up to 4.8
             // ushort env_attenuation = Test2.envelope_attenuation(am_offset) << 2;
             ushort env_attenuation = 0;
 
             // combine into a 5.8 value, then convert from attenuation to 13-bit linear volume
-            short result = (short) Test2.attenuation_to_volume((ushort)(sin_attenuation + env_attenuation));
+            short result = (short) Tables.attenuation_to_volume((ushort)(sin_attenuation + env_attenuation));
 
             // negate if in the negative part of the sin wave (sign bit gives 14 bits)
-            return Tools.BIT(phase, 9).ToBool() ? (short)-result : result;
+            return flip ? (short)-result : result;
+            // return Tools.BIT(phase, 9).ToBool() ? (short)-result : result;
         }
 
         public void NoteSelect(byte n)

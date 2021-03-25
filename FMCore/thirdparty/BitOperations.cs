@@ -46,7 +46,6 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The value.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [CLSCompliant(false)]
         public static int LeadingZeroCount(uint value)
         {
             // if (Lzcnt.IsSupported)
@@ -75,7 +74,6 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The value.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [CLSCompliant(false)]
         public static int LeadingZeroCount(ulong value)
         {
             // if (Lzcnt.X64.IsSupported)

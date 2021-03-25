@@ -152,7 +152,7 @@ namespace gdsFM
         //-------------------------------------------------
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static short linear_to_fp(Int32 value)
+        public static short linear_to_fp(Int32 value)
         {
             // start with the absolute value
             Int32 avalue = Math.Abs(value);
@@ -172,10 +172,6 @@ namespace gdsFM
             // encode with shift in low 3 bits and signed mantissa in upper
             return (short) (shift | (((value < 0) ? -avalue : avalue) << 3));
         }
-
-
-        
-
         //-------------------------------------------------
         //  fp_to_linear - given a 10.3 floating-point
         //  value, convert it to a signed 16-bit value,
@@ -183,13 +179,31 @@ namespace gdsFM
         //-------------------------------------------------
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Int32 fp_to_linear(short value)
+        public static Int32 fp_to_linear(short value)
         {
             return (value >> 3) << BIT(value, 0, 3);
         }
 
 
-        
+        public static string ToBinStr(short n, bool insert_space=true)
+        {
+            var sb = new System.Text.StringBuilder(16);
+            for (int i=0; i<16;  i++)
+            {
+                sb.Insert(0, n & 1);
+                n >>= 1;
+            }
+
+            if(insert_space)
+            {
+                for (int i=4; i<16; i+=4)
+                {
+                    sb.Insert(i, " ");
+                    i++;
+                }
+            }
+           return sb.ToString();     
+        }
 
     }
 }
