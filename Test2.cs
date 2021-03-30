@@ -78,12 +78,13 @@ public class Test2 : Label
             var samp=op.RequestSample();
             short samp2=op2.RequestSample();
 
-            // CPU TEST:  Clock the operators
-            for(int j=0; j<ops.Length; j++)
-            {
-                ops[j].Clock();
-                ops[j].RequestSample();
-            }
+
+            // // CPU TEST:  Clock the operators
+            // for(int j=0; j<ops.Length; j++)
+            // {
+            //     ops[j].Clock();
+            //     ops[j].RequestSample();
+            // }
 
 
 
