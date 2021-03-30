@@ -1,6 +1,7 @@
 using System;
 using gdsFM;
-using Godot;
+using System.Runtime.CompilerServices;
+using Godot;  //FIXME:  This is really only here to make easier to debug using godot print statements.  Remove me
 
 namespace gdsFM 
 {
@@ -185,6 +186,7 @@ namespace gdsFM
             0x3a9,0x3ae,0x3b4,0x3b9,0x3bf,0x3c4,0x3c9,0x3cf,0x3d4,0x3da,0x3df,0x3e4,0x3ea,0x3ef,0x3f5,0x3fa
         };
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort attenuation_to_volume(ushort input)
         {
             unchecked
@@ -193,6 +195,7 @@ namespace gdsFM
                 return (ushort)(((s_power_table[~input & 0xff] | (ushort)0x400) << 2) >> (input >> 8));
             }
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort abs_sin_attenuation(ushort input)
         {
             // the values here are stored as 4.8 logarithmic values for 1/4 phase
@@ -206,6 +209,41 @@ namespace gdsFM
             // return the value from the table
             return s_sin_table[input & 0xff];
         }    
+
+
+        static readonly uint[] s_increment_table =           //Envelope increment table
+        {
+            0x00000000, 0x00000000, 0x10101010, 0x10101010,  // 0-3    (0x00-0x03)
+            0x10101010, 0x10101010, 0x11101110, 0x11101110,  // 4-7    (0x04-0x07)
+            0x10101010, 0x10111010, 0x11101110, 0x11111110,  // 8-11   (0x08-0x0B)
+            0x10101010, 0x10111010, 0x11101110, 0x11111110,  // 12-15  (0x0C-0x0F)
+            0x10101010, 0x10111010, 0x11101110, 0x11111110,  // 16-19  (0x10-0x13)
+            0x10101010, 0x10111010, 0x11101110, 0x11111110,  // 20-23  (0x14-0x17)
+            0x10101010, 0x10111010, 0x11101110, 0x11111110,  // 24-27  (0x18-0x1B)
+            0x10101010, 0x10111010, 0x11101110, 0x11111110,  // 28-31  (0x1C-0x1F)
+            0x10101010, 0x10111010, 0x11101110, 0x11111110,  // 32-35  (0x20-0x23)
+            0x10101010, 0x10111010, 0x11101110, 0x11111110,  // 36-39  (0x24-0x27)
+            0x10101010, 0x10111010, 0x11101110, 0x11111110,  // 40-43  (0x28-0x2B)
+            0x10101010, 0x10111010, 0x11101110, 0x11111110,  // 44-47  (0x2C-0x2F)
+            0x11111111, 0x21112111, 0x21212121, 0x22212221,  // 48-51  (0x30-0x33)
+            0x22222222, 0x42224222, 0x42424242, 0x44424442,  // 52-55  (0x34-0x37)
+            0x44444444, 0x84448444, 0x84848484, 0x88848884,  // 56-59  (0x38-0x3B)
+            0x88888888, 0x88888888, 0x88888888, 0x88888888   // 60-63  (0x3C-0x3F)
+        };
+
+        //-------------------------------------------------
+        //  attenuation_increment - given a 6-bit ADSR
+        //  rate value and a 3-bit stepping index,
+        //  return a 4-bit increment to the attenutaion
+        //  for this step (or for the attack case, the
+        //  fractional scale factor to decrease by)
+        //-------------------------------------------------
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte attenuation_increment(byte rate, byte index)
+        {
+            return (byte) Tools.BIT(s_increment_table[rate], (byte) (4*index), 4);
+        }
 
     }
 

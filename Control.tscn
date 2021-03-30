@@ -76,6 +76,7 @@ margin_right = 264.0
 margin_bottom = 324.0
 theme = ExtResource( 2 )
 max_value = 65535.0
+step = 1.0
 value = 69.0
 tick_count = 11
 ticks_on_borders = true
@@ -85,6 +86,7 @@ __meta__ = {
 }
 
 [node name="Label" type="Label" parent="."]
+visible = false
 margin_left = 456.0
 margin_top = 232.0
 margin_right = 632.0
@@ -108,4 +110,4 @@ __meta__ = {
 
 [node name="Player" type="AudioStreamPlayer" parent="Test"]
 stream = SubResource( 1 )
-volume_db = -24.0
+volume_db = -12.0

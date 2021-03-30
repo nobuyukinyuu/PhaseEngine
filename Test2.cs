@@ -23,7 +23,7 @@ public class Test2 : Label
     Operator op = new Operator();
     Operator op2 = new Operator();
 
-
+    Operator[] ops = new Operator[128];
 
     public override void _Ready()
     {
@@ -36,7 +36,7 @@ public class Test2 : Label
         bitCrush = GetNode<HSlider>("../BitCrush");
 
         op.SetOperatorType(Oscillator.Sine);
-        op2.SetOperatorType(Oscillator.Pulse);
+        op2.SetOperatorType(Oscillator.Tri);
  
         // op.NoteSelect(0);
         op.FreqSelect(440);
@@ -44,6 +44,8 @@ public class Test2 : Label
 
         player.Play();
 
+        for(int i=0; i<ops.Length; i++)
+            ops[i] = new Operator();
     }
 
     public override void _Process(float delta)
@@ -55,7 +57,8 @@ public class Test2 : Label
 
         short samp2=op2.RequestSample();
         // this.Text = Tools.ToBinStr(op.compute_volume(0,0)) + " = " + op.compute_volume(0,0) + "\n" + op.noteIncrement.ToString();
-        this.Text = Tools.ToBinStr(samp2) + " = " + samp2.ToString() + "\n" + op.noteIncrement.ToString();
+        // this.Text = Oscillator.gen2.ToString() + " = " + samp2.ToString() + "\n" + op.noteIncrement.ToString();
+        this.Text = op.env_counter.ToString() + ",,,,, " + op.m_env_attenuation.ToString();
 
         if (buf.GetSkips() > 0)
             fill_buffer();
@@ -74,6 +77,16 @@ public class Test2 : Label
             op2.Clock();
             var samp=op.RequestSample();
             short samp2=op2.RequestSample();
+
+            // CPU TEST:  Clock the operators
+            for(int j=0; j<ops.Length; j++)
+            {
+                ops[j].Clock();
+                ops[j].RequestSample();
+            }
+
+
+
             // output[i].x = Tables.short2float[ samp + Tables.SIGNED_TO_INDEX ];
 
 
@@ -106,6 +119,12 @@ public class Test2 : Label
         op.FreqSelect(acc_inc.Value);
         op2.FreqSelect(acc_inc.Value * 5);
         Update();
+
+        if (Input.IsActionJustPressed("ui_accept"))
+        {
+            op.NoteOn();
+            op2.NoteOn();
+        }
     }
 
     // Vector2[] pts=new Vector2[scopeLen];

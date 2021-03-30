@@ -101,13 +101,13 @@ namespace gdsFM
             /// \tparam U Type of the input (generally resolved by the compiler).
             /// \param [in] n Width of the mask to generate in bits.
             /// \return Right-aligned mask of the specified width.
-            public static byte BIT(byte x, byte n, byte w) { return (byte)((x >> n) & w); }
-            public static short BIT(short x, byte n, byte w) { return (short)((x >> n) & w); }
-            public static ushort BIT(ushort x, byte n, byte w) { return (ushort)((x >> n) & w); }
-            public static int BIT(int x, byte n, byte w) { return (int)((x >> n) & w); }
-            public static uint BIT(uint x, byte n, byte w) { return (uint)((x >> n) & w); }
-            public static long BIT(long x, byte n, byte w) { return (long)((x >> n) & w); }
-            public static ulong BIT(ulong x, byte n, byte w) { return (ulong)((x >> n) & w); }
+            public static byte BIT(byte x, byte n, byte w) { return (byte)((x >> n) & make_bitmask(w)); }
+            public static short BIT(short x, byte n, byte w) { return (short)((x >> n) & make_bitmask(w)); }
+            public static ushort BIT(ushort x, byte n, byte w) { return (ushort)((x >> n) & make_bitmask(w)); }
+            public static int BIT(int x, byte n, byte w) { return (int)((x >> n) & make_bitmask(w)); }
+            public static uint BIT(uint x, byte n, byte w) { return (uint)((x >> n) & make_bitmask(w)); }
+            public static long BIT(long x, byte n, byte w) { return (long)((x >> n) & make_bitmask(w)); }
+            public static ulong BIT(ulong x, byte n, byte w) { return (ulong)((x >> n) & make_bitmask(w)); }
 
 
 

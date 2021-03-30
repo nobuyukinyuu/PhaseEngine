@@ -48,10 +48,18 @@ namespace gdsFM
             return Tables.s_sin_table[input & 0xff];
         }
 
-        // public static ushort Absine(ulong n, ushort duty)
-        // {
-        //     return (short) (Tables.sin[unchecked((ushort)n>>1 & Tables.SINE_TABLE_MASK >> 1)] );
-        // }
+        public static ushort Absine(ulong input, ushort duty, ref bool flip)
+        {
+            input = (ulong) (input >> 1);
+            if ( Tools.BIT(input, 8).ToBool() )
+                input = (ushort) ~input;
+
+
+            // return the value from the table
+            return Tables.s_sin_table[input & 0xff];
+        }
+
+
         public static ushort Saw(ulong n, ushort duty, ref bool flip)
         {
         //    flip = Tools.BIT(n, 9).ToBool();
@@ -128,7 +136,63 @@ namespace gdsFM
             return (ushort) (output);
         }
 
+        public static APU_Noise gen2 = new APU_Noise();
+        public static ushort Noise2(ulong n, ushort duty, ref bool flip)
+        {
+            gen2.ModeBit = unchecked((byte)(duty >>12));  //Sets the mode to a value 0-15 from high 4 bits.
+            gen2.pLen = (ushort)(((duty<<2) & 0x7F) +((duty>>5) & 0x7F) );  //Sets counter len to to bits 0-4 * 4, plus bits 5-11.
+            ushort gen = gen2.Current((uint)n );
+            return gen;
+        }
+
+
 
     }
 
+}
+
+
+public class APU_Noise
+{
+    ushort[] periods=ntsc_periods; //Determined from bits 0-3 of input val, mask 0xF
+    readonly static ushort[] ntsc_periods = {4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068};
+    readonly static ushort[] pal_periods = {4, 8, 14, 30, 60, 88, 118, 148, 188, 236, 354, 472, 708,  944, 1890, 3778};
+
+    public byte ModeBit{get=> mode_bit;  set=> mode_bit = (byte)((value & 0xF)+1); }
+    byte mode_bit = 1;  //1-8, determines the periodicity of the waveform.
+
+    ushort seed = 1;
+    ushort counter=0;
+
+    public void SetPeriod(byte pos) { pLen = periods[pos & 0xF]; }
+    public ushort pLen = 4068;
+
+
+    void Clock()
+    {
+        while (counter>0){
+        var fb = ( Tools.BIT(seed, 0) ^ Tools.BIT(seed, mode_bit) );
+        seed = (ushort)(seed>>1);
+
+        seed = (ushort) (seed | (fb << 14));
+
+        counter--;
+        }
+    }
+
+    public ushort Current(uint phase)
+    {
+        if (counter > pLen)  Clock();
+        counter++;
+
+        ushort output = (ushort)((seed & 0xff));
+        output = (ushort)((output<<7) | ((seed & 0x80) << 8)); 
+
+        return output;
+    }
+
+    public override string ToString()
+    {
+        return Tools.ToBinStr(unchecked((short)seed)) + "\npLen: " + pLen.ToString() + " mode: " + mode_bit.ToString();
+    }
 }

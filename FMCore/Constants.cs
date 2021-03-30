@@ -16,7 +16,7 @@ namespace gdsFM
         public const double BASE_MULT = 1 / BASE_HZ;
 
 
-        public const ushort ENVELOPE_UPDATE_TICKS = 0;  //Number of ticks to count up to before triggering an update.
+        public const ushort ENVELOPE_UPDATE_TICKS = 1;  //Number of ticks to count up to before triggering an update.
 
         public const byte FRAC_PRECISION_BITS = 20;
         public const ulong FRAC_SIZE = (1 << FRAC_PRECISION_BITS) - 1;
