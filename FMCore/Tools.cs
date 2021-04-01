@@ -19,11 +19,8 @@ namespace gdsFM
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double Log2(double n){ return Math.Log(n) / Math.Log(2); }
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double Log10(double n){ return Math.Log(n) / Math.Log(10); }
-        // [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double dbToLinear(double p_db) { return Math.Exp(p_db * 0.11512925464970228420089957273422);}
-        // [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double linear2db(double p_lin) { return Math.Log(p_lin) * 8.6858896380650365530225783783321;}
-  
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double dbToLinear(double p_db) { return Math.Pow(2, p_db );}
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double linear2db(double p_lin) { return Tools.Log2(p_lin) ;}
+
+
 
         //summary:  Slow converstion from float to fixed point.
         public static long ToFixedPoint(float n, byte decimalBitPrecision=Global.FRAC_PRECISION_BITS, bool preserveSignBit=false)
@@ -46,6 +43,7 @@ namespace gdsFM
             return whole+frac;
         }
 
+        // Clamp for c# 7.2
         public static T Clamp<T>(this T val, T min, T max) where T : IComparable<T>
         {
             if (val.CompareTo(min) < 0) return min;
@@ -54,8 +52,6 @@ namespace gdsFM
         }
 
 
-        // public static class Bits<T> where T: struct
-        // {
             /// \defgroup bitutils Useful functions for bit shuffling
             /// \{
 
@@ -68,9 +64,12 @@ namespace gdsFM
             /// \param [in] n Width of the mask to generate in bits.
             /// \return Right-aligned mask of the specified width.
 
+            // TODO:  Consider rewriting these to not rely on rollover but instead return unsigned maxValue if width is exceeded and (1<<n)-1 otherwise...
             public static uint make_bitmask(int n) { return (uint)((n < (32) ? ((1u) << n) : (0u)) - 1); }
             public static ushort make_bitmask(short n) { return (ushort)((n < (16) ? ((1u) << n) : (0u)) - 1); }
             public static ulong make_bitmask(long n) { return (ulong)((n < (64) ? ((1ul) << (int)n) : unchecked((ulong)-1))); }  // Uhhhhh.....
+
+
 
 
             /// \brief Extract a single bit from an integer
@@ -132,8 +131,6 @@ namespace gdsFM
             //     return (BIT(val, b) << sizeof...(c)) | bitswap(val, c...);
             // }
 
-        // }
-
 
         //Boolean conversion extension methods
         public static bool ToBool(this short x) {return x!=0;}
@@ -185,6 +182,7 @@ namespace gdsFM
         }
 
 
+        /// summary:  Produces a string representing the bitmask of value n.
         public static string ToBinStr(short n, bool insert_space=true)
         {
             var sb = new System.Text.StringBuilder(16);
@@ -204,6 +202,12 @@ namespace gdsFM
             }
            return sb.ToString();     
         }
+
+
+        //Branchless absolute value methods
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static short Abs(short n) {return (short)(n & short.MaxValue);}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static int Abs(int n) {return n & int.MaxValue;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static long Abs(long n) {return n & long.MaxValue;}
 
     }
 }

@@ -6,10 +6,12 @@ namespace gdsFM
     public class Operator
     {
         public ulong phase;  //Phase accumulator
-        public uint counter;  //
+        public uint counter;  //Total clock count.  
+        public float clocksNeeded;  //Clock accumulator. Consider moving this to a chip/cpu class so multiple operators can share the clock. Consider tying noise gens to chip
         public ulong noteIncrement;  //Frequency multiplier for note base hz.
 
-        public double[] feedback = new double[2];  //feedback buffer
+        public short[] fbBuf = new short[2];  //feedback buffer
+        public byte feedback = 0;
 
         public ushort duty = 32767;
 
@@ -126,6 +128,17 @@ namespace gdsFM
         }
 
 
+        /// Summary:  Calculates the self feedback of the given input with the given modulation amount.
+        public short compute_fb(ushort modulation)
+        {    
+    		var avg = (fbBuf[0] + fbBuf[1]) >> (10 - feedback);
+            var output = compute_volume(unchecked((ushort)(avg+modulation)),0);
+            fbBuf[1] = fbBuf[0];
+            fbBuf[0] = output;
+
+            return output;
+        }
+
         /// summary:  Given a MIDI note value 0-127,  produce an increment appropriate to oscillate at the tone of the note.
         public void NoteSelect(byte n)
         {
@@ -160,7 +173,7 @@ namespace gdsFM
 
     public ushort m_env_attenuation;
 
-    public byte env_state=32;
+    public byte env_state=20;
     public uint env_counter;
 
     public void EGClock(uint env_counter)

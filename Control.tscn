@@ -76,8 +76,21 @@ margin_right = 264.0
 margin_bottom = 324.0
 theme = ExtResource( 2 )
 max_value = 65535.0
-step = 1.0
 value = 69.0
+tick_count = 11
+ticks_on_borders = true
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Feedback" type="HSlider" parent="."]
+margin_left = 64.0
+margin_top = 376.0
+margin_right = 264.0
+margin_bottom = 396.0
+theme = ExtResource( 2 )
+max_value = 10.0
 tick_count = 11
 ticks_on_borders = true
 script = ExtResource( 1 )

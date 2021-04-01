@@ -9,9 +9,24 @@ namespace gdsFM
     {
         public const int VERSION = 10;
 
-        public static float MixRate = 48000;
+        private static float mixRate = 48000;
+        public static float MixRate {get => mixRate;
+            set
+            {
+                mixRate = value;
+                FracMixRate = 1/mixRate;
+                ClockMult = 48000.0f/mixRate;
+            }
+        }
+
         public static float FracMixRate = 1/MixRate;
 
+        // Number of times clock should be updated per sample. Fixed-point frac balancing may be complicated here.
+        // 32-bit precision drift over the course of 60 secs is about 42402 samples slow at 44100hz.
+        // TODO:  Speed tests using double-precision clocking to determine how much slower it would be (how much more strain on CPU)
+        public static float ClockMult = 48000.0f/MixRate; 
+
+        //Base hz used for frequency increment calculations
         public const double BASE_HZ = 440;
         public const double BASE_MULT = 1 / BASE_HZ;
 
@@ -23,11 +38,6 @@ namespace gdsFM
         public const double ONE_PER_FRAC_SIZE = 1.0 / FRAC_SIZE;
 
 
-    //This measurement was done against DX7 detune at A-4, where every 22 cycles the tone would change (-detune) samples at a recording rate of 44100hz.
-    //See const definitions in glue.cs for more information about the extra-fine detune increment.
-        // const Decimal DETUNE_440 = 2205M / 22M;
-        // const Decimal DETUNE_MIN = (2198M / 22M) / DETUNE_440 ;  //Smallest detune multiplier, a fraction of 1.0
-        // const Decimal DETUNE_MAX = (2212M / 22M) / DETUNE_440;   //Largest detune multiplier, a multiple of 1.0    
 
         public static readonly byte[] multTable = {1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 20, 24, 24, 30, 30};
 
@@ -63,7 +73,7 @@ namespace gdsFM
                 return result;
             }
         }   
-}
+    }
 
 
 
@@ -77,34 +87,4 @@ namespace gdsFM
         DELAY, FADEIN, RUNNING
     }
 
-
-    //Thoughts:  Rates probably need fixed integer math to work, then translated to a level at the very end, since increments are very small.
-    struct EGData
-    {
-        double ar,dr,sr,rr;
-        double[] rates;
-        double[] rateIncrement;
-
-        public void Reset()
-        {
-            // ar=31;dr=31;sr=6;rr=15;
-            rates = new double[] {0, 0, 120, 0};
-        }
-
-        public void Recalc()
-        {
-            rateIncrement = new double[4];
-
-            for(int i=0;  i<4;  i++)
-            {
-                rateIncrement[i] = RateMultiplier(1);
-            }
-        }
-
-
-        double RateMultiplier(float secs)
-        {
-            return secs * Global.MixRate;
-        }
-    }
 }
