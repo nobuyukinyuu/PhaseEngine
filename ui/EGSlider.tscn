@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://ui/EGSlider.gd" type="Script" id=1]
+[ext_resource path="res://gfx/ui/hSlider.theme" type="Theme" id=2]
+
+[node name="Slider" type="HSlider"]
+margin_right = 200.0
+margin_bottom = 20.0
+rect_min_size = Vector2( 128, 20 )
+theme = ExtResource( 2 )
+max_value = 64.0
+tick_count = 11
+ticks_on_borders = true
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}

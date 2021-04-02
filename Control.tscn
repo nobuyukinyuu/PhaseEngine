@@ -1,12 +1,36 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=12 format=2]
 
-[ext_resource path="res://EGSlider.gd" type="Script" id=1]
+[ext_resource path="res://ui/EGSlider.gd" type="Script" id=1]
 [ext_resource path="res://gfx/ui/hSlider.theme" type="Theme" id=2]
 [ext_resource path="res://Label.gd" type="Script" id=3]
 [ext_resource path="res://Test2.cs" type="Script" id=4]
+[ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=5]
+[ext_resource path="res://gfx/wave/0.png" type="Texture" id=6]
+[ext_resource path="res://ui/EGWavePanel.gd" type="Script" id=7]
+[ext_resource path="res://ui/EGTabBG.stylebox" type="StyleBox" id=8]
 
 [sub_resource type="AudioStreamGenerator" id=1]
 mix_rate = 48000.0
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0, 0, 0, 0.376471 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.8, 0.8, 0.8, 0.337255 )
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0, 0, 0, 0.25098 )
+border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+anti_aliasing = false
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -16,48 +40,11 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Coarse" type="HSlider" parent="."]
-margin_left = 64.0
-margin_top = 72.0
-margin_right = 266.0
-margin_bottom = 92.0
-theme = ExtResource( 2 )
-tick_count = 9
-script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Fine" type="HSlider" parent="."]
-margin_left = 64.0
-margin_top = 104.0
-margin_right = 266.0
-margin_bottom = 124.0
-theme = ExtResource( 2 )
-tick_count = 9
-script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Detune" type="HSlider" parent="."]
-margin_left = 64.0
-margin_top = 136.0
-margin_right = 264.0
-margin_bottom = 156.0
-theme = ExtResource( 2 )
-value = 100.0
-tick_count = 9
-script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="Accumulator" type="HSlider" parent="."]
-margin_left = 64.0
-margin_top = 232.0
-margin_right = 264.0
-margin_bottom = 252.0
+margin_left = 24.0
+margin_top = 304.0
+margin_right = 224.0
+margin_bottom = 324.0
 theme = ExtResource( 2 )
 max_value = 24000.0
 value = 440.0
@@ -70,10 +57,10 @@ __meta__ = {
 }
 
 [node name="BitCrush" type="HSlider" parent="."]
-margin_left = 64.0
-margin_top = 304.0
-margin_right = 264.0
-margin_bottom = 324.0
+margin_left = 24.0
+margin_top = 352.0
+margin_right = 224.0
+margin_bottom = 372.0
 theme = ExtResource( 2 )
 max_value = 65535.0
 value = 69.0
@@ -85,10 +72,10 @@ __meta__ = {
 }
 
 [node name="Feedback" type="HSlider" parent="."]
-margin_left = 64.0
-margin_top = 376.0
-margin_right = 264.0
-margin_bottom = 396.0
+margin_left = 24.0
+margin_top = 408.0
+margin_right = 224.0
+margin_bottom = 428.0
 theme = ExtResource( 2 )
 max_value = 10.0
 tick_count = 11
@@ -111,10 +98,12 @@ __meta__ = {
 }
 
 [node name="Test" type="Label" parent="."]
-margin_left = 488.0
-margin_top = 136.0
-margin_right = 720.0
-margin_bottom = 150.0
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -280.0
+margin_top = 8.0
+margin_right = -48.0
+margin_bottom = 22.0
 text = "ass"
 script = ExtResource( 4 )
 __meta__ = {
@@ -124,3 +113,282 @@ __meta__ = {
 [node name="Player" type="AudioStreamPlayer" parent="Test"]
 stream = SubResource( 1 )
 volume_db = -12.0
+
+[node name="TabContainer" type="TabContainer" parent="."]
+margin_left = 16.0
+margin_top = 16.0
+margin_right = 352.0
+margin_bottom = 264.0
+custom_styles/tab_bg = ExtResource( 8 )
+custom_styles/panel = SubResource( 3 )
+custom_constants/side_margin = 0
+tab_align = 0
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Op1" type="Tabs" parent="TabContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 1.0
+margin_top = 25.0
+margin_right = -1.0
+margin_bottom = -1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Op2" type="Tabs" parent="TabContainer"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Op3" type="Tabs" parent="TabContainer"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Op4" type="Tabs" parent="TabContainer"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Op5" type="Tabs" parent="TabContainer"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Op6" type="Tabs" parent="TabContainer"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Tune" type="GridContainer" parent="."]
+margin_left = 24.0
+margin_top = 96.0
+margin_right = 344.0
+margin_bottom = 152.0
+custom_constants/vseparation = 8
+custom_constants/hseparation = 16
+columns = 3
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Coarse" parent="Tune" instance=ExtResource( 5 )]
+margin_right = 96.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+max_value = 16.0
+
+[node name="Fine" parent="Tune" instance=ExtResource( 5 )]
+margin_left = 112.0
+margin_right = 208.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+min_value = -24.0
+max_value = 24.0
+
+[node name="Detune" parent="Tune" instance=ExtResource( 5 )]
+margin_left = 224.0
+margin_right = 320.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+min_value = -100.0
+max_value = 100.0
+
+[node name="Levels" type="GridContainer" parent="."]
+margin_left = 24.0
+margin_top = 136.0
+margin_right = 344.0
+margin_bottom = 192.0
+custom_constants/vseparation = 8
+custom_constants/hseparation = 16
+columns = 2
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Total Level" parent="Levels" instance=ExtResource( 5 )]
+margin_right = 152.0
+size_flags_horizontal = 3
+max_value = 1024.0
+value = 1024.0
+tick_count = 9
+
+[node name="Attack Level" parent="Levels" instance=ExtResource( 5 )]
+margin_left = 168.0
+margin_right = 320.0
+size_flags_horizontal = 3
+max_value = 1024.0
+value = 1024.0
+tick_count = 9
+
+[node name="Decay Level" parent="Levels" instance=ExtResource( 5 )]
+margin_top = 28.0
+margin_right = 152.0
+margin_bottom = 48.0
+size_flags_horizontal = 3
+max_value = 1024.0
+value = 1024.0
+tick_count = 9
+
+[node name="Sustain Level" parent="Levels" instance=ExtResource( 5 )]
+margin_left = 168.0
+margin_top = 28.0
+margin_right = 320.0
+margin_bottom = 48.0
+size_flags_horizontal = 3
+max_value = 1024.0
+value = 1024.0
+tick_count = 9
+
+[node name="Rates" type="GridContainer" parent="."]
+margin_left = 24.0
+margin_top = 200.0
+margin_right = 344.0
+margin_bottom = 256.0
+custom_constants/vseparation = 8
+custom_constants/hseparation = 16
+columns = 3
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="+Delay" parent="Rates" instance=ExtResource( 5 )]
+margin_right = 96.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+
+[node name="Attack" parent="Rates" instance=ExtResource( 5 )]
+margin_left = 112.0
+margin_right = 208.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+
+[node name="+Hold" parent="Rates" instance=ExtResource( 5 )]
+margin_left = 224.0
+margin_right = 320.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+
+[node name="Decay" parent="Rates" instance=ExtResource( 5 )]
+margin_top = 28.0
+margin_right = 96.0
+margin_bottom = 48.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+
+[node name="Sustain" parent="Rates" instance=ExtResource( 5 )]
+margin_left = 112.0
+margin_top = 28.0
+margin_right = 208.0
+margin_bottom = 48.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+
+[node name="Release" parent="Rates" instance=ExtResource( 5 )]
+margin_left = 224.0
+margin_top = 28.0
+margin_right = 320.0
+margin_bottom = 48.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+
+[node name="Tweak" type="GridContainer" parent="."]
+margin_left = 24.0
+margin_top = 56.0
+margin_right = 216.0
+margin_bottom = 88.0
+custom_constants/hseparation = 8
+columns = 2
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Feedback" parent="Tweak" instance=ExtResource( 5 )]
+margin_right = 56.0
+rect_min_size = Vector2( 48, 20 )
+size_flags_horizontal = 3
+max_value = 10.0
+text_offset = 7
+
+[node name="Duty" parent="Tweak" instance=ExtResource( 5 )]
+margin_left = 64.0
+margin_right = 192.0
+size_flags_horizontal = 3
+max_value = 65535.0
+
+[node name="WavePanel" type="Panel" parent="."]
+margin_left = 224.0
+margin_top = 48.0
+margin_right = 352.0
+margin_bottom = 88.0
+custom_styles/panel = SubResource( 2 )
+script = ExtResource( 7 )
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Wave" parent="WavePanel" instance=ExtResource( 5 )]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -72.0
+margin_top = 8.0
+margin_right = -8.0
+margin_bottom = 28.0
+rect_min_size = Vector2( 64, 20 )
+max_value = 9.0
+tick_count = 0
+
+[node name="Preview" type="TextureRect" parent="WavePanel"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 40.0
+margin_bottom = 32.0
+texture = ExtResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+[connection signal="value_changed" from="WavePanel/Wave" to="WavePanel" method="_on_Wave_value_changed"]

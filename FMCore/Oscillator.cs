@@ -9,7 +9,9 @@ namespace gdsFM
 
         public delegate ushort waveFunc(ulong n, ushort duty, ref bool flip);
         waveFunc wf = Sine;
-        double[] customWaveform = new double[128];
+        short[] customWaveform = new short[128];
+
+        static readonly waveFunc[] waveFuncs = {Sine, Saw, Tri, Pulse, Absine, White, Pink, Brown, Noise2};
 
         public Oscillator(waveFunc wave)    {wf=wave;}
         public void SetWaveform(waveFunc wave) {wf=wave;}
