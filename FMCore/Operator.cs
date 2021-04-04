@@ -133,7 +133,7 @@ namespace gdsFM
         /// Summary:  Calculates the self feedback of the given input with the given modulation amount.
         public short compute_fb(ushort modulation)
         {    
-    		var avg = (fbBuf[0] + fbBuf[1]) >> (10 - feedback);
+            var avg = (fbBuf[0] + fbBuf[1]) >> (10 - feedback);
             var output = compute_volume(unchecked((ushort)(avg+modulation)),0);
             fbBuf[1] = fbBuf[0];
             fbBuf[0] = output;

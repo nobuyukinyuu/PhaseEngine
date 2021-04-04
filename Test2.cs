@@ -68,17 +68,21 @@ public class Test2 : Label
     // Called from EG controls to bus to the appropriate envelope property.
     public bool SetEG(int opTarget, string property, float val)
     {
-        Operator op;
-        if (opTarget ==1) op = this.op; else op = this.op2;
+        Operator op = opTarget==1 ? this.op : op2;
 
-        op.eg[property] = unchecked((int) val);
-        GD.Print(String.Format("Set op{0}.{1} to {2}.", opTarget, property, val));
+        try {
+            op.eg[property] = unchecked((int) val);
+            GD.Print(String.Format("Set op{0}.{1} to {2}.", opTarget, property, val));
+        } catch(NullReferenceException) {
+            GD.PrintErr(String.Format("No property handler for op{0}.{1}", opTarget, property, val));
+        }
+        
         return true;
     }
 
     public Envelope GetEG(int opTarget)
     {
-        if (opTarget ==1) return this.op.eg; else return this.op2.eg;
+        return opTarget==1 ? op.eg : op2.eg;
     }
 
     void fill_buffer()
