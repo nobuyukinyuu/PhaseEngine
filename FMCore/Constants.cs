@@ -76,15 +76,4 @@ namespace gdsFM
     }
 
 
-
-    public enum EGStatus
-    {
-        DELAY, ATTACK, DECAY, SUSTAINED, RELEASED, INACTIVE
-    }
-
-    public enum LFOStatus
-    {
-        DELAY, FADEIN, RUNNING
-    }
-
 }

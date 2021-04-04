@@ -15,6 +15,8 @@ namespace gdsFM
 
         public ushort duty = 32767;
 
+        public Envelope eg = new Envelope();
+
         public Oscillator oscillator = new Oscillator(Oscillator.Sine);
 
         public delegate short sampleOutputFunc(); //Primary function of the operator
@@ -28,7 +30,7 @@ namespace gdsFM
         {
             phase=0;
             env_counter = 0;
-            m_env_attenuation = 0;
+            eg.attenuation = 0;
             
         }
         public void NoteOff()
@@ -172,55 +174,61 @@ namespace gdsFM
 //////////////////// ENVELOPE /////////////////////////
 
     public ushort m_env_attenuation;
-
-    public byte env_state=20;
     public uint env_counter;
 
     public void EGClock(uint env_counter)
     {
-	    // determine our raw 5-bit rate value
-        // byte rate = effective_rate(m_regs.adsr_rate(m_env_state), keycode);
-        byte rate = env_state;
 
-        // compute the rate shift value; this is the shift needed to
-        // apply to the env_counter such that it becomes a 5.11 fixed
-        // point number
-        byte rate_shift = (byte)(rate >> 2);
-        env_counter <<= rate_shift;
+        switch (eg.status)
+        {
+        case EGStatus.DELAY:
+            if (env_counter >> 2 < eg.delay) return;
+            else {eg.status = EGStatus.ATTACK;}
+            break;
+        case EGStatus.HOLD:
+            eg.status = EGStatus.DECAY;
+            break;
+        }
 
-        // see if the fractional part is 0; if not, it's not time to clock
-        if (Tools.BIT(env_counter, 0, 11) != 0)
-            return;
+        // default:
+            //TODO:  See if we hit our target level (use an array);  if so, bump to the next EGStatus
 
 
-        // determine the increment based on the non-fractional part of env_counter
-        byte increment = Tables.attenuation_increment(rate, (byte) Tools.BIT(env_counter, 11, 3));
+            // determine our raw 5-bit rate value
+            // byte rate = effective_rate(m_regs.adsr_rate(m_env_state), keycode);
+            byte rate = eg.rates[(byte) eg.status];
 
-        // // attack is the only one that increases
-        // if (env_state == ENV_ATTACK)
-        // {
-        //     // glitch means that attack rates of 62/63 don't increment if
-        //     // changed after the initial key on (where they are handled
-        //     // specially)
+            // compute the rate shift value; this is the shift needed to
+            // apply to the env_counter such that it becomes a 5.11 fixed
+            // point number
+            byte rate_shift = (byte)(rate >> 2);
+            env_counter <<= rate_shift;
 
-        //     // QUESTION: this check affects one of the operators on the gng credit sound
-        //     //   is it correct?
-        //     // QUESTION: does this apply only to YM2612?
-        //     // if (rate < 62)
-        //         m_env_attenuation += (~m_env_attenuation * increment) >> 4;
-        // }
+            // see if the fractional part is 0; if not, it's not time to clock
+            if (Tools.BIT(env_counter, 0, 11) != 0)
+                return;
 
-        // // all other cases are similar
-        // else
-        // {
-            // non-SSG-EG cases just apply the increment
-            // if (!m_regs.ssg_eg_enabled())
-                m_env_attenuation += increment;
+
+            // determine the increment based on the non-fractional part of env_counter
+            byte increment = Tables.attenuation_increment(rate, (byte) Tools.BIT(env_counter, 11, 3));
+
+
+            // attack is the only one that increases
+            if (eg.status == EGStatus.ATTACK)
+            {
+                eg.attenuation += (ushort) ((~eg.attenuation * increment) >> 4);
+
+            } else {  //Most envelope states simply increase the attenuation by the increment previously determined
+                eg.attenuation += increment;
+            }
 
 
             // clamp the final attenuation
-            if (m_env_attenuation >= 0x400)
-                m_env_attenuation = 0x3ff;
+            if (eg.attenuation >= 0x400)
+                eg.attenuation = 0x3ff;
+
+        //     break;
+
         // }
     }
 
@@ -232,7 +240,7 @@ namespace gdsFM
 
     ushort envelope_attenuation()//byte am_offset)
     {
-        ushort result = m_env_attenuation;
+        ushort result = eg.attenuation;
 
         // // add in LFO AM modulation
         // if (m_regs.lfo_am_enabled())

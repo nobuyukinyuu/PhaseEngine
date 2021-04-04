@@ -6,6 +6,8 @@ const charw = 8
 onready var lblPos = Vector2(rect_size.x - len(name)*charw + text_offset, -2)
 onready var lblPos2 = Vector2(rect_size.x/2 - (len(str(value))+1)*charw/2.0, rect_size.y/2)
 
+export(String) var associated_property = ""  #Determines the envelope property this slider's supposed to modify.
+
 export(int,-32,32) var text_offset = 0 setget set_offset
 var needs_recalc=false
 

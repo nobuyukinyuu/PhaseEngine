@@ -28,7 +28,7 @@ public class Test2 : Label
     public override void _Ready()
     {
         // await ToSignal(GetTree(), "idle_frame");
-        Text = "It's okay";
+
         player = GetNode<AudioStreamPlayer>("Player");
         stream = (AudioStreamGenerator) player.Stream;
         buf = (AudioStreamGeneratorPlayback) player.GetStreamPlayback();
@@ -58,11 +58,27 @@ public class Test2 : Label
         short samp2=op2.RequestSample();
         // this.Text = Tools.ToBinStr(op.compute_volume(0,0)) + " = " + op.compute_volume(0,0) + "\n" + op.noteIncrement.ToString();
         // this.Text = Oscillator.gen2.ToString() + " = " + samp2.ToString() + "\n" + op.noteIncrement.ToString();
-        this.Text = op.env_counter.ToString() + ",,,,, " + op.m_env_attenuation.ToString();
+        this.Text = op.env_counter.ToString() + ",,,,, " + op.eg.attenuation.ToString();
 
         if (buf.GetSkips() > 0)
             fill_buffer();
 
+    }
+
+    // Called from EG controls to bus to the appropriate envelope property.
+    public bool SetEG(int opTarget, string property, float val)
+    {
+        Operator op;
+        if (opTarget ==1) op = this.op; else op = this.op2;
+
+        op.eg[property] = unchecked((int) val);
+        GD.Print(String.Format("Set op{0}.{1} to {2}.", opTarget, property, val));
+        return true;
+    }
+
+    public Envelope GetEG(int opTarget)
+    {
+        if (opTarget ==1) return this.op.eg; else return this.op2.eg;
     }
 
     void fill_buffer()

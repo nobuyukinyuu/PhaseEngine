@@ -1,0 +1,240 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://ui/EGPanel.gd" type="Script" id=1]
+[ext_resource path="res://ui/EGWavePanel.gd" type="Script" id=2]
+[ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=3]
+[ext_resource path="res://gfx/wave/0.png" type="Texture" id=4]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0, 0, 0, 0.25098 )
+border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+anti_aliasing = false
+
+[node name="EGPanel" type="Tabs"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 1.0
+margin_top = 25.0
+margin_right = -1.0
+margin_bottom = -1.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Tune" type="GridContainer" parent="."]
+margin_left = 7.0
+margin_top = 55.0
+margin_right = 327.0
+margin_bottom = 111.0
+custom_constants/vseparation = 8
+custom_constants/hseparation = 16
+columns = 3
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Coarse" parent="Tune" instance=ExtResource( 3 )]
+margin_right = 96.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+max_value = 16.0
+
+[node name="Fine" parent="Tune" instance=ExtResource( 3 )]
+margin_left = 112.0
+margin_right = 208.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+min_value = -12.0
+max_value = 12.0
+
+[node name="Detune" parent="Tune" instance=ExtResource( 3 )]
+margin_left = 224.0
+margin_right = 320.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+min_value = -100.0
+
+[node name="Levels" type="GridContainer" parent="."]
+margin_left = 7.0
+margin_top = 95.0
+margin_right = 327.0
+margin_bottom = 151.0
+custom_constants/vseparation = 8
+custom_constants/hseparation = 16
+columns = 2
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Total Level" parent="Levels" instance=ExtResource( 3 )]
+margin_right = 152.0
+size_flags_horizontal = 3
+max_value = 1024.0
+value = 1024.0
+tick_count = 9
+associated_property = "tl"
+
+[node name="Attack Level" parent="Levels" instance=ExtResource( 3 )]
+margin_left = 168.0
+margin_right = 320.0
+size_flags_horizontal = 3
+max_value = 1024.0
+value = 1024.0
+tick_count = 9
+associated_property = "al"
+
+[node name="Decay Level" parent="Levels" instance=ExtResource( 3 )]
+margin_top = 28.0
+margin_right = 152.0
+margin_bottom = 48.0
+size_flags_horizontal = 3
+max_value = 1024.0
+value = 1024.0
+tick_count = 9
+associated_property = "dl"
+
+[node name="Sustain Level" parent="Levels" instance=ExtResource( 3 )]
+margin_left = 168.0
+margin_top = 28.0
+margin_right = 320.0
+margin_bottom = 48.0
+size_flags_horizontal = 3
+max_value = 1024.0
+value = 1024.0
+tick_count = 9
+associated_property = "sl"
+
+[node name="Rates" type="GridContainer" parent="."]
+margin_left = 7.0
+margin_top = 159.0
+margin_right = 327.0
+margin_bottom = 215.0
+custom_constants/vseparation = 8
+custom_constants/hseparation = 16
+columns = 3
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="+Delay" parent="Rates" instance=ExtResource( 3 )]
+margin_right = 96.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+max_value = 65535.0
+exp_edit = true
+associated_property = "delay"
+
+[node name="Attack" parent="Rates" instance=ExtResource( 3 )]
+margin_left = 112.0
+margin_right = 208.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+associated_property = "ar"
+
+[node name="+Hold" parent="Rates" instance=ExtResource( 3 )]
+margin_left = 224.0
+margin_right = 320.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+associated_property = "hold"
+
+[node name="Decay" parent="Rates" instance=ExtResource( 3 )]
+margin_top = 28.0
+margin_right = 96.0
+margin_bottom = 48.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+associated_property = "dr"
+
+[node name="Sustain" parent="Rates" instance=ExtResource( 3 )]
+margin_left = 112.0
+margin_top = 28.0
+margin_right = 208.0
+margin_bottom = 48.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+associated_property = "sr"
+
+[node name="Release" parent="Rates" instance=ExtResource( 3 )]
+margin_left = 224.0
+margin_top = 28.0
+margin_right = 320.0
+margin_bottom = 48.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+associated_property = "rr"
+
+[node name="Tweak" type="GridContainer" parent="."]
+margin_left = 7.0
+margin_top = 15.0
+margin_right = 215.0
+margin_bottom = 47.0
+custom_constants/hseparation = 16
+columns = 2
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Feedback" parent="Tweak" instance=ExtResource( 3 )]
+margin_right = 64.0
+rect_min_size = Vector2( 48, 20 )
+size_flags_horizontal = 3
+max_value = 10.0
+tick_count = 0
+text_offset = 7
+
+[node name="Duty" parent="Tweak" instance=ExtResource( 3 )]
+margin_left = 80.0
+margin_right = 208.0
+size_flags_horizontal = 3
+max_value = 65535.0
+
+[node name="WavePanel" type="Panel" parent="."]
+margin_left = 215.0
+margin_top = 7.0
+margin_right = 335.0
+margin_bottom = 47.0
+custom_styles/panel = SubResource( 1 )
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Wave" parent="WavePanel" instance=ExtResource( 3 )]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -104.0
+margin_top = 8.0
+margin_right = -48.0
+margin_bottom = 28.0
+rect_min_size = Vector2( 48, 20 )
+max_value = 9.0
+tick_count = 0
+
+[node name="Preview" type="TextureRect" parent="WavePanel"]
+margin_left = 80.0
+margin_top = 8.0
+margin_right = 112.0
+margin_bottom = 32.0
+texture = ExtResource( 4 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Frequency" parent="." instance=ExtResource( 3 )]
+margin_left = 7.0
+margin_top = 223.0
+margin_right = 327.0
+margin_bottom = 243.0
+max_value = 24000.0
+exp_edit = true
+[connection signal="value_changed" from="WavePanel/Wave" to="WavePanel" method="_on_Wave_value_changed"]
