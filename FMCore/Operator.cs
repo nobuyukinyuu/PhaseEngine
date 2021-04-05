@@ -20,7 +20,7 @@ namespace gdsFM
 
         public Oscillator oscillator = new Oscillator(Oscillator.Sine);
 
-        public delegate short sampleOutputFunc(); //Primary function of the operator
+        public delegate short sampleOutputFunc(ushort modulation); //Primary function of the operator
         public sampleOutputFunc operatorOutputSample;
 
         //thought:  separate into carrier and modulator funcs, carrier output being a float and modulator being double
@@ -58,9 +58,9 @@ namespace gdsFM
                 // EGClock(env_counter);
         }
 
-        public short RequestSample()
+        public short RequestSample(ushort modulation = 0)
         {
-            return operatorOutputSample();
+            return operatorOutputSample(modulation);
             // return oscillator.Generate(unchecked(phase >> Global.FRAC_PRECISION_BITS), duty, ref flip);
         }
 
@@ -92,17 +92,21 @@ namespace gdsFM
         }  //TODO:  Operator types for filters and sample-based outputs
 
         //Oscillator output types.  Either standard waveform (log domain), noise, or sample.
-        public short OperatorType_ComputeLogOuput()
-        {return compute_volume(0,0);}
+        public short OperatorType_ComputeLogOuput(ushort modulation)
+        {return compute_fb(modulation);}
 
-        public short OperatorType_Noise()
+        public short OperatorType_Noise(ushort modulation)
         {
-            //TODO:   BROKEN, FIX ME!  FIXME
-            var samp = unchecked((short) (oscillator.Generate(phase, duty, ref flip) >> 2));
-            ushort env_attenuation = (ushort) (envelope_attenuation() << 2);
-            short result = (short) Tables.attenuation_to_volume((ushort)(samp + env_attenuation));
+            //TODO:   BROKEN, FIX ME!  FIXME -- DOES NOT SCALE LOGARITHMICALLY
+            var samp = (short)oscillator.Generate(phase, duty, ref flip) >> 2;
+            ushort env_attenuation = (ushort) (1023-envelope_attenuation());
 
-            return flip ? (short)-result : result;
+            const float SCALE = 1.0f / 1023;
+
+            // short result = (short) Tables.attenuation_to_volume((ushort)(samp + env_attenuation));
+            short result = (short) (samp * (env_attenuation * SCALE));
+
+            return result;
         }
 
 

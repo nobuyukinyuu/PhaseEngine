@@ -139,16 +139,11 @@ public class Test2 : Label
 
 
 
-            // output[i].x = Tables.short2float[ samp + Tables.SIGNED_TO_INDEX ];
 
 
-            // output[i].x = attenuation_to_volume(unchecked((ushort)(samp>>0))) / 8192f ;
-            // output[i].x = Tables.short2float[  (short)(op.compute_volume((ushort)unchecked((samp2) >>6),  0)<<1) + Tables.SIGNED_TO_INDEX ] ;
-            
-            // output[i].x = Tables.short2float[  (short)(op.compute_fb((ushort)unchecked((samp2) >>6) )<<1) + Tables.SIGNED_TO_INDEX ] ;
-            output[i].x = Tables.short2float[  (short) (op2.compute_fb( (ushort)(op.compute_fb(0)>>4))) + Tables.SIGNED_TO_INDEX ] ;
-            // output[i].x = Tables.short2float[ samp2 + Tables.SIGNED_TO_INDEX] ;
-            // output[i].x = Tables.short2float[Oscillator.Sine(op.phase>>20, 0) + Tables.SIGNED_TO_INDEX] ;
+            // output[i].x = Tables.short2float[  (short) (op2.compute_fb( (ushort)(op.compute_fb(0)>>4))) + Tables.SIGNED_TO_INDEX ] ;
+            output[i].x = Tables.short2float[  (short) (op2.RequestSample( (ushort)(op.RequestSample()>>4))) + Tables.SIGNED_TO_INDEX ] ;
+
             output[i].y = output[i].x;
 
 
