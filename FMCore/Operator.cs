@@ -7,6 +7,7 @@ namespace gdsFM
     {
         public ulong phase;  //Phase accumulator
         public uint env_counter;  //Envelope counter
+        public uint env_hold_counter=0;  //Counter during the hold phase of an envelope
         public float clocksNeeded;  //Clock accumulator. Consider moving this to a chip/cpu class so multiple operators can share the clock. Consider tying noise gens to chip
         public ulong noteIncrement;  //Frequency multiplier for note base hz.
 
@@ -30,12 +31,15 @@ namespace gdsFM
         {
             phase=0;
             env_counter = 0;
+            env_hold_counter = 0;
             eg.attenuation = 1023;
             
-            eg.status = EGStatus.ATTACK;
+            eg.status = EGStatus.DELAY;
         }
         public void NoteOff()
-        {}
+        {
+            eg.status = EGStatus.RELEASED;
+        }
 
         public void Clock()
         {
@@ -92,7 +96,14 @@ namespace gdsFM
         {return compute_volume(0,0);}
 
         public short OperatorType_Noise()
-        {return unchecked((short) oscillator.Generate(phase, duty, ref flip));}
+        {
+            //TODO:   BROKEN, FIX ME!  FIXME
+            var samp = unchecked((short) (oscillator.Generate(phase, duty, ref flip) >> 2));
+            ushort env_attenuation = (ushort) (envelope_attenuation() << 2);
+            short result = (short) Tables.attenuation_to_volume((ushort)(samp + env_attenuation));
+
+            return flip ? (short)-result : result;
+        }
 
 
         // public float LinearVolume(short samp)
@@ -133,7 +144,7 @@ namespace gdsFM
         /// Summary:  Calculates the self feedback of the given input with the given modulation amount.
         public short compute_fb(ushort modulation)
         {    
-    		var avg = (fbBuf[0] + fbBuf[1]) >> (10 - feedback);
+            var avg = (fbBuf[0] + fbBuf[1]) >> (10 - feedback);
             var output = compute_volume(unchecked((ushort)(avg+modulation)),0);
             fbBuf[1] = fbBuf[0];
             fbBuf[0] = output;
@@ -176,30 +187,45 @@ namespace gdsFM
     {
 
         if (eg.status == EGStatus.INACTIVE) return;
-        ushort target = eg.levels[(int)eg.status];
+        ushort target;
 
         switch (eg.status)
         {
-        case EGStatus.ATTACK:
-            if (eg.attenuation == 0)  eg.status ++;
-            break;
-        case EGStatus.DECAY:
-            if (eg.attenuation >= target)  eg.status ++;
-            break;
-        case EGStatus.SUSTAINED:
-            // if (eg.attenuation >= target) return;
-            break;
         case EGStatus.DELAY:
             if (env_counter >> 2 < eg.delay) return;
             else {eg.status = EGStatus.ATTACK;  return;}  //Why return here?  Other cases set the target level.  Consider setting it here too.  FIXME
             break;
+
+        case EGStatus.ATTACK:
+            target = eg.levels[(int)EGStatus.ATTACK];
+            if (eg.attenuation == 0)  
+            {
+                eg.status = EGStatus.HOLD;
+                return;
+            }
+            break;
+
         case EGStatus.HOLD:
-            eg.status = EGStatus.DECAY;
+            if ((env_hold_counter >> 2) >= eg.hold)
+            {
+                eg.status = EGStatus.DECAY;
+                target = eg.levels[(int)EGStatus.DECAY];
+            } else {
+                env_hold_counter++; 
+                return;
+            }
+            break;
+
+        case EGStatus.DECAY:
+            target = eg.levels[(int)EGStatus.DECAY];
+            if (eg.attenuation >= target)  eg.status ++;
+            break;
+        case EGStatus.SUSTAINED:
+            // if (eg.attenuation >= target) return;
+            //TODO:  Logic to keep sustain at target attenuation until NoteOff;  check NoteOff before iterating status to release
+
             break;
         }
-
-        if (eg.status == EGStatus.INACTIVE) return;
-        target = eg.levels[(int)eg.status];
 
         // determine our raw 5-bit rate value
         // byte rate = effective_rate(m_regs.adsr_rate(m_env_state), keycode);

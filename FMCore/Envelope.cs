@@ -40,7 +40,7 @@ namespace gdsFM
             }
 
             if (levels){
-                tl=0; al=0; dl=0; sl=0; rl=L_MAX;
+                tl=0; al=0; dl=0; sl=L_MAX; rl=L_MAX;
             }
 
             // rates = new double[] {0, 0, 120, 0};
@@ -65,10 +65,28 @@ namespace gdsFM
             get {
                 Type type = typeof(Envelope);
                 System.Reflection.PropertyInfo property = type.GetProperty(propertyName);
+
+                if (property==null)
+                {
+                    System.Reflection.FieldInfo field = type.GetField(propertyName);
+                    return field.GetValue(this);
+                }
+
                 return property.GetValue(this);
             } set {
                 Type type = typeof(Envelope);
                 System.Reflection.PropertyInfo property = type.GetProperty(propertyName);
+
+                if(property==null)
+                {
+                    System.Reflection.FieldInfo field = type.GetField(propertyName);
+
+                    //Try to force unchecked conversion to the target type
+                    var unboxedVal2 = Convert.ChangeType(value, field.FieldType);
+
+                    field.SetValue(this, unboxedVal2);
+                    return;
+                }
 
                 //Try to force unchecked conversion to the target type
                 var unboxedVal = Convert.ChangeType(value, property.PropertyType);

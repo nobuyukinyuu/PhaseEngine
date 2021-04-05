@@ -11,7 +11,7 @@ namespace gdsFM
         waveFunc wf = Sine;
         short[] customWaveform = new short[128];
 
-        static readonly waveFunc[] waveFuncs = {Sine, Saw, Tri, Pulse, Absine, White, Pink, Brown, Noise2};
+        public static readonly waveFunc[] waveFuncs = {Sine, Saw, Tri, Pulse, Absine, White, Pink, Brown, Noise2};
 
         public Oscillator(waveFunc wave)    {wf=wave;}
         public void SetWaveform(waveFunc wave) {wf=wave;}
@@ -26,7 +26,7 @@ namespace gdsFM
 
         public static ushort Pulse(ulong n, ushort duty, ref bool flip)
         {
-            ushort phase = (ushort) unchecked((n<<5));
+            ushort phase = (ushort) unchecked((n<<6));
             flip = phase >= duty;
             return 0;
             // return phase >= duty? short.MaxValue : short.MinValue;

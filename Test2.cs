@@ -69,20 +69,52 @@ public class Test2 : Label
     }
 
     // Called from EG controls to bus to the appropriate envelope property.
-    public bool SetEG(int opTarget, string property, float val)
+    public void SetEG(int opTarget, string property, float val)
     {
         Operator op;
         if (opTarget ==1) op = this.op; else op = this.op2;
 
-        op.eg[property] = unchecked((int) val);
-        // GD.Print(String.Format("Set op{0}.{1} to {2}.", opTarget, property, val));
-        return true;
+        try
+        {
+            op.eg[property] = unchecked((int) val);
+            // GD.Print(String.Format("Set op{0}.eg.{1} to {2}.", opTarget, property, val));
+        } catch(NullReferenceException) {
+            GD.PrintErr(String.Format("No property handler for op{0}.eg.{1}.", opTarget, property, val));
+        }            
     }
 
     public Envelope GetEG(int opTarget)
     {
         if (opTarget ==1) return this.op.eg; else return this.op2.eg;
     }
+
+    public void SetWaveform(int opTarget, float val)
+    {
+        Operator op;
+        if (opTarget ==1) op = this.op; else op = this.op2;
+
+        try{
+            op.SetOperatorType(Oscillator.waveFuncs[(int)val]);
+        } catch(IndexOutOfRangeException e) {
+            GD.PrintErr(String.Format("Waveform {0} not implemented", val));
+        }
+    }
+
+    public void SetFeedback(int opTarget, float val)
+    {
+        Operator op;
+        if (opTarget ==1) op = this.op; else op = this.op2;
+
+        op.feedback = (byte)val;
+    }
+    public void SetDuty(int opTarget, float val)
+    {
+        Operator op;
+        if (opTarget ==1) op = this.op; else op = this.op2;
+
+        op.duty = (ushort)val;
+    }
+
 
     void fill_buffer()
     {
@@ -114,7 +146,7 @@ public class Test2 : Label
             // output[i].x = Tables.short2float[  (short)(op.compute_volume((ushort)unchecked((samp2) >>6),  0)<<1) + Tables.SIGNED_TO_INDEX ] ;
             
             // output[i].x = Tables.short2float[  (short)(op.compute_fb((ushort)unchecked((samp2) >>6) )<<1) + Tables.SIGNED_TO_INDEX ] ;
-            output[i].x = Tables.short2float[  (short) (op2.compute_volume( (ushort)(op.compute_fb(0)>>4), 0)) + Tables.SIGNED_TO_INDEX ] ;
+            output[i].x = Tables.short2float[  (short) (op2.compute_fb( (ushort)(op.compute_fb(0)>>4))) + Tables.SIGNED_TO_INDEX ] ;
             // output[i].x = Tables.short2float[ samp2 + Tables.SIGNED_TO_INDEX] ;
             // output[i].x = Tables.short2float[Oscillator.Sine(op.phase>>20, 0) + Tables.SIGNED_TO_INDEX] ;
             output[i].y = output[i].x;
@@ -137,19 +169,19 @@ public class Test2 : Label
     public override void _PhysicsProcess(float delta)
     {
         base._PhysicsProcess(delta);
-        // op.NoteSelect((byte) bitCrush.Value);
-        op2.duty = (ushort) bitCrush.Value;
+
         op2.FreqSelect(acc_inc.Value);
         op.FreqSelect(acc_inc.Value * 4);
-        Update();
+        // Update();
 
         if (Input.IsActionJustPressed("ui_accept"))
         {
             op.NoteOn();
             op2.NoteOn();
+        } else if (Input.IsActionJustPressed("ui_cancel")) {
+            op.NoteOff();
+            op2.NoteOff();
         }
-
-        op.feedback = (byte) GetNode<HSlider>("../Feedback").Value;
 
     }
 

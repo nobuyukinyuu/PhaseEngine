@@ -77,7 +77,6 @@ __meta__ = {
 margin_right = 152.0
 size_flags_horizontal = 3
 max_value = 1023.0
-value = 1023.0
 tick_count = 9
 associated_property = "tl"
 
@@ -85,8 +84,7 @@ associated_property = "tl"
 margin_left = 168.0
 margin_right = 320.0
 size_flags_horizontal = 3
-max_value = 1023.0
-value = 1023.0
+max_value = 0.0
 tick_count = 9
 associated_property = "al"
 
@@ -96,7 +94,6 @@ margin_right = 152.0
 margin_bottom = 48.0
 size_flags_horizontal = 3
 max_value = 1023.0
-value = 1023.0
 tick_count = 9
 associated_property = "dl"
 
@@ -107,7 +104,6 @@ margin_right = 320.0
 margin_bottom = 48.0
 size_flags_horizontal = 3
 max_value = 1023.0
-value = 1023.0
 tick_count = 9
 associated_property = "sl"
 
@@ -138,6 +134,7 @@ margin_right = 208.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 max_value = 63.0
+value = 63.0
 associated_property = "ar"
 
 [node name="+Hold" parent="Rates" instance=ExtResource( 3 )]
@@ -145,7 +142,8 @@ margin_left = 224.0
 margin_right = 320.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
-max_value = 63.0
+max_value = 65535.0
+exp_edit = true
 associated_property = "hold"
 
 [node name="Decay" parent="Rates" instance=ExtResource( 3 )]
@@ -155,6 +153,7 @@ margin_bottom = 48.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 max_value = 63.0
+value = 63.0
 associated_property = "dr"
 
 [node name="Sustain" parent="Rates" instance=ExtResource( 3 )]
@@ -175,6 +174,7 @@ margin_bottom = 48.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 max_value = 63.0
+value = 48.0
 associated_property = "rr"
 
 [node name="Tweak" type="GridContainer" parent="."]
