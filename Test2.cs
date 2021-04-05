@@ -44,6 +44,9 @@ public class Test2 : Label
 
         player.Play();
 
+        op.NoteOn();
+        op2.NoteOn();
+
         for(int i=0; i<ops.Length; i++)
             ops[i] = new Operator();
     }
@@ -58,7 +61,7 @@ public class Test2 : Label
         short samp2=op2.RequestSample();
         // this.Text = Tools.ToBinStr(op.compute_volume(0,0)) + " = " + op.compute_volume(0,0) + "\n" + op.noteIncrement.ToString();
         // this.Text = Oscillator.gen2.ToString() + " = " + samp2.ToString() + "\n" + op.noteIncrement.ToString();
-        this.Text = op.env_counter.ToString() + ",,,,, " + op.eg.attenuation.ToString();
+        this.Text = String.Format("{0}, {1}:  {2}", op.env_counter.ToString(), op.eg.attenuation.ToString(), op.eg.status.ToString());
 
         if (buf.GetSkips() > 0)
             fill_buffer();
@@ -72,7 +75,7 @@ public class Test2 : Label
         if (opTarget ==1) op = this.op; else op = this.op2;
 
         op.eg[property] = unchecked((int) val);
-        GD.Print(String.Format("Set op{0}.{1} to {2}.", opTarget, property, val));
+        // GD.Print(String.Format("Set op{0}.{1} to {2}.", opTarget, property, val));
         return true;
     }
 

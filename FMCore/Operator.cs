@@ -6,7 +6,7 @@ namespace gdsFM
     public class Operator
     {
         public ulong phase;  //Phase accumulator
-        public uint counter;  //Total clock count.  
+        public uint env_counter;  //Envelope counter
         public float clocksNeeded;  //Clock accumulator. Consider moving this to a chip/cpu class so multiple operators can share the clock. Consider tying noise gens to chip
         public ulong noteIncrement;  //Frequency multiplier for note base hz.
 
@@ -30,8 +30,9 @@ namespace gdsFM
         {
             phase=0;
             env_counter = 0;
-            eg.attenuation = 0;
+            eg.attenuation = 1023;
             
+            eg.status = EGStatus.ATTACK;
         }
         public void NoteOff()
         {}
@@ -40,7 +41,6 @@ namespace gdsFM
         {
             // phase = (ulong)unchecked((long)phase + oscillator.Generate(phase, duty));
             phase += noteIncrement;   //FIXME:  CHANGE TO TOTAL INCREMENT
-            counter++;
 
 
             // increment the envelope count; low two bits are the subcount, which
@@ -172,64 +172,68 @@ namespace gdsFM
 
 
 //////////////////// ENVELOPE /////////////////////////
-
-    public ushort m_env_attenuation;
-    public uint env_counter;
-
     public void EGClock(uint env_counter)
     {
 
+        if (eg.status == EGStatus.INACTIVE) return;
+        ushort target = eg.levels[(int)eg.status];
+
         switch (eg.status)
         {
+        case EGStatus.ATTACK:
+            if (eg.attenuation == 0)  eg.status ++;
+            break;
+        case EGStatus.DECAY:
+            if (eg.attenuation >= target)  eg.status ++;
+            break;
+        case EGStatus.SUSTAINED:
+            // if (eg.attenuation >= target) return;
+            break;
         case EGStatus.DELAY:
             if (env_counter >> 2 < eg.delay) return;
-            else {eg.status = EGStatus.ATTACK;}
+            else {eg.status = EGStatus.ATTACK;  return;}  //Why return here?  Other cases set the target level.  Consider setting it here too.  FIXME
             break;
         case EGStatus.HOLD:
             eg.status = EGStatus.DECAY;
             break;
         }
 
-        // default:
-            //TODO:  See if we hit our target level (use an array);  if so, bump to the next EGStatus
+        if (eg.status == EGStatus.INACTIVE) return;
+        target = eg.levels[(int)eg.status];
+
+        // determine our raw 5-bit rate value
+        // byte rate = effective_rate(m_regs.adsr_rate(m_env_state), keycode);
+        byte rate = eg.rates[(byte) eg.status];
+
+        // compute the rate shift value; this is the shift needed to
+        // apply to the env_counter such that it becomes a 5.11 fixed
+        // point number
+        byte rate_shift = (byte)(rate >> 2);
+        env_counter <<= rate_shift;
+
+        // see if the fractional part is 0; if not, it's not time to clock
+        if (Tools.BIT(env_counter, 0, 11) != 0)
+            return;
 
 
-            // determine our raw 5-bit rate value
-            // byte rate = effective_rate(m_regs.adsr_rate(m_env_state), keycode);
-            byte rate = eg.rates[(byte) eg.status];
-
-            // compute the rate shift value; this is the shift needed to
-            // apply to the env_counter such that it becomes a 5.11 fixed
-            // point number
-            byte rate_shift = (byte)(rate >> 2);
-            env_counter <<= rate_shift;
-
-            // see if the fractional part is 0; if not, it's not time to clock
-            if (Tools.BIT(env_counter, 0, 11) != 0)
-                return;
+        // determine the increment based on the non-fractional part of env_counter
+        byte increment = Tables.attenuation_increment(rate, (byte) Tools.BIT(env_counter, 11, 3));
 
 
-            // determine the increment based on the non-fractional part of env_counter
-            byte increment = Tables.attenuation_increment(rate, (byte) Tools.BIT(env_counter, 11, 3));
+        // attack is the only one that increases
+        if (eg.status == EGStatus.ATTACK)
+        {
+            eg.attenuation += (ushort) ((~eg.attenuation * increment) >> 4);
+
+        } else {  //Most envelope states simply increase the attenuation by the increment previously determined
+            eg.attenuation += increment;
+        }
 
 
-            // attack is the only one that increases
-            if (eg.status == EGStatus.ATTACK)
-            {
-                eg.attenuation += (ushort) ((~eg.attenuation * increment) >> 4);
+        // clamp the final attenuation
+        if (eg.attenuation >= 0x400)
+            eg.attenuation = 0x3ff;
 
-            } else {  //Most envelope states simply increase the attenuation by the increment previously determined
-                eg.attenuation += increment;
-            }
-
-
-            // clamp the final attenuation
-            if (eg.attenuation >= 0x400)
-                eg.attenuation = 0x3ff;
-
-        //     break;
-
-        // }
     }
 
 
