@@ -42,7 +42,7 @@ namespace gdsFM
         public const float MAX_DB = 80;  //Maximum Decibels of attenuation
         public const double ATTENUATION_UNIT = 1.0 / (double)(MAX_ATTENUATION_SIZE) * MAX_DB; //One attenuation unit in the system
         
-        public static readonly short[] logVol = new short[ushort.MaxValue+1];  //scaled decibel equivalent of a given short value..
+        public static readonly ushort[] logVol = new ushort[256];  //scaled decibel equivalent of a given short value..
         public static readonly float[] linVol = new float[MAX_ATTENUATION_SIZE+1];  //Attenuation table scaled from 0-ATTENUATION_BITS.
 
         public static readonly ushort[] saw = new ushort[256];
@@ -59,19 +59,14 @@ namespace gdsFM
             //log
             for(int i=0; i<logVol.Length; i++)
             {
-                // var lin = -i;
-                // double db = Tools.Clamp(-Tools.linear2db(i/(double)(short.MaxValue-1)), 0, MAX_DB);
-                // var log = (db/(double)MAX_DB * short.MaxValue) - short.MaxValue;
-                // atbl[(int)i] = log ;
 
-                // logVol[i] = (short) Tools.Lerp(log,lin, 0)  ;
-                // logVol[logVol.Length-1-i] = (short) logVol[i] ;
+                // double attenuation = Tools.Clamp( Tools.Log2((1.5* i/(double)logVol.Length) + 0.5),  -1, 1);
+                // double dbScaled = attenuation  * short.MaxValue;
+                // logVol[i] = (short) Math.Round(dbScaled);
 
-                double attenuation = Tools.Clamp( Tools.Log2((1.5* i/(double)logVol.Length) + 0.5),  -1, 1);
-                double dbScaled = attenuation  * short.MaxValue;
-                logVol[i] = (short) Math.Round(dbScaled);
-
+                logVol[i] = loggen((ushort)i);
             }
+            logVol[255] = 0;
 
 
             //sin
@@ -105,16 +100,6 @@ namespace gdsFM
 
             
             //tri
-            // for(int i=0;  i<tri.Length/1; i++)
-            // {
-            //     // double attenuation = Tools.Clamp( Tools.linear2db(i/(double)(tri.Length/4) +1),  0, MAX_DB);
-            //     double attenuation = Tools.Clamp( Tools.Log2(0.5 * i/(double)(tri.Length) + 0.5)+1,  0, 1);
-            //     double dbScaled = attenuation * MAX_ATTENUATION_SIZE - MAX_ATTENUATION_SIZE;
-            //     tri[i] = (ushort) Math.Round(dbScaled);
-            //     // tri[i+tri.Length/4] = (short) Math.Round(dbScaled);
-            //     // tri[tri.Length/2+i] = (short)-tri[i];
-            //     // tri[tri.Length-i-1] = (short) tri[i];
-            // }
             for (int i=0; i<tri.Length; i++)
             {
                 var inc = ((i+0.5)/(double)(tri.Length)) ;
@@ -244,6 +229,13 @@ namespace gdsFM
         {
             return (byte) Tools.BIT(s_increment_table[rate], (byte) (4*index), 4);
         }
+
+        static ushort expgen (ushort input)
+            { return (ushort) (Math.Round((Math.Pow(2,input/256.0f)-1)*1024)); }
+        static ushort loggen (ushort input)
+            { return (ushort) ( Math.Round(256*(-Tools.Log2((input+0.5)/255.0 ))  ) ); }
+            // { return (ushort) ( Math.Round(64*(-Tools.Log2((input+0.5)/32767.0 ))  ) ); }
+            // { return (ushort) ( Math.Round(128*(-Tools.Log2((input+0.5)/32768.0 ))  ) ); }
 
     }
 

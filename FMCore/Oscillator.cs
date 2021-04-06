@@ -104,14 +104,15 @@ namespace gdsFM
                 var phase = (long)n;
                 if (phase % ((byte)(duty)+1)==0)  //Using duty cycle to specify randomize interval.  FIXME:  Consider a 3rd variable so more info can be suppllied
                 {
-                    // flip = Tools.BIT(seed, 15) > 0;
                     seed ^= (ushort)(seed << 7);
                     seed ^= (ushort)(seed >> 9);
                     seed ^= (ushort)(seed << 8);
                 }
+
+                flip = Tools.BIT(seed, 15).ToBool();
                 
-                return (ushort)(seed>>1 | (seed & 0x8000)); 
-                // return phase >= duty?  (short)0: Tables.logVol[seed];
+                // return (ushort)(seed>>1 | (seed & 0x8000)); 
+                return (ushort)(Tables.logVol[seed & 0xFF]); 
             }
         }
 
@@ -124,6 +125,7 @@ namespace gdsFM
             // v = (short) (v|sign);
             // v = (short) (v >> 0);
 
+            flip = Tools.BIT(v, 14).ToBool();
             return unchecked((ushort)( v >> 1));
         }
 
@@ -134,8 +136,12 @@ namespace gdsFM
             bval +=  ( (ushort)bgen.urand() ) >> 5 ;
             bval = (int) (bval * 0.99);
             var output = (bval - 0x7FFF);
+            // flip = Tools.BIT(output, 15).ToBool();
             // return unchecked((ushort)n) >= duty?  (short)(output>>1): (short)output;
-            return (ushort) (output);
+            return (ushort) (Tables.logVol[(output) & 0xFF]);
+
+            // flip = unchecked((short)(n) < 0);
+            // return Tables.logVol[unchecked((ushort)(n>>2) & 0xFF)];
         }
 
         public static APU_Noise gen2 = new APU_Noise();

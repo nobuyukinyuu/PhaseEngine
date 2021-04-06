@@ -142,7 +142,7 @@ public class Test2 : Label
 
 
             // output[i].x = Tables.short2float[  (short) (op2.compute_fb( (ushort)(op.compute_fb(0)>>4))) + Tables.SIGNED_TO_INDEX ] ;
-            output[i].x = Tables.short2float[  (short) (op2.RequestSample( (ushort)(op.RequestSample()>>4))) + Tables.SIGNED_TO_INDEX ] ;
+            output[i].x = Tables.short2float[  (short) (op2.RequestSample( (ushort)(op.RequestSample()>>2))) + Tables.SIGNED_TO_INDEX ] ;
 
             output[i].y = output[i].x;
 

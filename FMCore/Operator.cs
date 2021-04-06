@@ -75,18 +75,18 @@ namespace gdsFM
         public void SetOperatorType(Oscillator.waveFunc waveFunc)
         {
             oscillator.SetWaveform(waveFunc);
-            switch(waveFunc.Method.Name)
-            {
-                case "Brown":
-                case "White":
-                case "Pink":
-                case "Noise2":
-                {
-                    //Set the operator's sample output function to work in the linear domain.
-                    operatorOutputSample = OperatorType_Noise;
-                    return;
-                }
-            }
+            // switch(waveFunc.Method.Name)
+            // {
+            //     case "Brown":
+            //     case "White":
+            //     case "Pink":
+            //     case "Noise2":
+            //     {
+            //         //Set the operator's sample output function to work in the linear domain.
+            //         operatorOutputSample = OperatorType_Noise;
+            //         return;
+            //     }
+            // }
 
             operatorOutputSample = OperatorType_ComputeLogOuput;
         }  //TODO:  Operator types for filters and sample-based outputs
@@ -95,18 +95,20 @@ namespace gdsFM
         public short OperatorType_ComputeLogOuput(ushort modulation)
         {return compute_fb(modulation);}
 
+
+        //Noise generators produce asymmetrical data.  Values must be translated to/from the log domain.
         public short OperatorType_Noise(ushort modulation)
         {
             //TODO:   BROKEN, FIX ME!  FIXME -- DOES NOT SCALE LOGARITHMICALLY
-            var samp = (short)oscillator.Generate(phase, duty, ref flip) >> 2;
-            ushort env_attenuation = (ushort) (1023-envelope_attenuation());
+            var samp = oscillator.Generate(phase, duty, ref flip);
+            ushort env_attenuation = (ushort) (envelope_attenuation() << 2);
 
             const float SCALE = 1.0f / 1023;
 
-            // short result = (short) Tables.attenuation_to_volume((ushort)(samp + env_attenuation));
-            short result = (short) (samp * (env_attenuation * SCALE));
+            short result = (short) Tables.attenuation_to_volume((ushort)(samp ));
+            // short result = (short) (samp * (env_attenuation * SCALE));
 
-            return result;
+            return flip ? (short)-result : result;
         }
 
 
