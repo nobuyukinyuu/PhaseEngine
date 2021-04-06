@@ -80,6 +80,7 @@ namespace gdsFM
                 case "Brown":
                 case "White":
                 case "Pink":
+                case "Noise1":
                 case "Noise2":
                 {
                     //Set the operator's sample output function to work in the linear domain.
@@ -150,7 +151,8 @@ namespace gdsFM
 
         /// Summary:  Calculates the self feedback of the given input with the given modulation amount.
         public short compute_fb(ushort modulation)
-        {    
+        {
+            if (feedback == 0) return compute_volume(modulation, 0);    
             var avg = (fbBuf[0] + fbBuf[1]) >> (10 - feedback);
             var output = compute_volume(unchecked((ushort)(avg+modulation)),0);
             fbBuf[1] = fbBuf[0];

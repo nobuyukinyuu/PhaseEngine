@@ -11,7 +11,7 @@ namespace gdsFM
         waveFunc wf = Sine;
         short[] customWaveform = new short[128];
 
-        public static readonly waveFunc[] waveFuncs = {Sine, Saw, Tri, Pulse, Absine, White, Pink, Brown, Noise2};
+        public static readonly waveFunc[] waveFuncs = {Sine, Saw, Tri, Pulse, Absine, Noise1, Pink, Brown, Noise2};
 
         public Oscillator(waveFunc wave)    {wf=wave;}
         public void SetWaveform(waveFunc wave) {wf=wave;}
@@ -95,13 +95,37 @@ namespace gdsFM
         // }
 
 
+        //White noise generator, but uses duty cycle to oscillate between on and off state
         static ushort seed=1;
         public static ushort White(ulong n, ushort duty, ref bool flip) 
         {
             unchecked
             {
-                // var phase = unchecked((ushort) n);
-                var phase = (long)n;
+                var phase = unchecked((ushort) n);
+
+                if (phase > duty) return 0;  // Comment this out if you don't want the "buzzing" duty behavior and instead would rather use the counter
+
+                // if (phase % ((byte)(duty)+1)==0)  //Using duty cycle to specify randomize interval.  FIXME:  Consider a 3rd variable so more info can be suppllied
+                {
+                    seed ^= (ushort)(seed << 7);
+                    seed ^= (ushort)(seed >> 9);
+                    seed ^= (ushort)(seed << 8);
+                }
+
+                // flip = Tools.BIT(seed, 15).ToBool();
+                
+                return (ushort)((seed>>1) | (seed & 0x8000));  
+                // return (ushort)(Tables.logVol[seed & 0xFF]); 
+            }
+        }
+
+        //Essentially the same generator as the white noise generator but only clocks based on the duty cycle rather than only outputs noise on the duty cycle
+        public static ushort Noise1(ulong n, ushort duty, ref bool flip) 
+        {
+            unchecked
+            {
+                var phase = unchecked((ushort) n);
+
                 if (phase % ((byte)(duty)+1)==0)  //Using duty cycle to specify randomize interval.  FIXME:  Consider a 3rd variable so more info can be suppllied
                 {
                     seed ^= (ushort)(seed << 7);
@@ -109,23 +133,19 @@ namespace gdsFM
                     seed ^= (ushort)(seed << 8);
                 }
 
-                flip = Tools.BIT(seed, 15).ToBool();
+                // flip = Tools.BIT(seed, 15).ToBool();
                 
-                return (ushort)(seed>>1 | (seed & 0x8000)); 
-                // return (ushort)(Tables.logVol[seed & 0xFF]); 
+                return (ushort)((seed>>1) | (seed & 0x8000));  
             }
         }
+
 
         static PinkNoise pgen = new PinkNoise();
         public static ushort Pink(ulong n, ushort duty, ref bool flip)
         {
             short v = pgen.Next();
-            // var sign = unchecked((ushort)(v & 0x8000));
-            // v = (short)((v & 0x7FFF) >> 2);
-            // v = (short) (v|sign);
-            // v = (short) (v >> 0);
 
-            flip = Tools.BIT(v, 14).ToBool();
+            // flip = Tools.BIT(v, 14).ToBool();
             return unchecked((ushort)( v >> 1));
         }
 
@@ -136,11 +156,8 @@ namespace gdsFM
             bval +=  ( (ushort)bgen.urand() ) >> 5 ;
             bval = (int) (bval * 0.99);
             var output = (bval - 0x7FFF);
-            flip = Tools.BIT(output, 15).ToBool();
+            // flip = Tools.BIT(output, 15).ToBool();
             return (ushort) (output);
-
-            // flip = unchecked((short)(n) < 0);
-            // return Tables.logVol[unchecked((ushort)(n>>2) & 0xFF)];
         }
 
         public static APU_Noise gen2 = new APU_Noise();
