@@ -58,10 +58,9 @@ public class Test2 : Label
         // this.Text = Engine.GetIdleFrames().ToString() + ":  " + Tables.sin[Engine.GetIdleFrames() & Tables.SINE_TABLE_MASK].ToString();
         // this.Text = ((short.MaxValue/stream.MixRate * acc_inc.Value)).ToString();
 
-        short samp2=op2.RequestSample();
         // this.Text = Tools.ToBinStr(op.compute_volume(0,0)) + " = " + op.compute_volume(0,0) + "\n" + op.noteIncrement.ToString();
         // this.Text = Oscillator.gen2.ToString() + " = " + samp2.ToString() + "\n" + op.noteIncrement.ToString();
-        this.Text = String.Format("{0}, {1}:  {2}", op.env_counter.ToString(), op.eg.attenuation.ToString(), op.eg.status.ToString());
+        this.Text = String.Format("{0}, {1}:  {2}", op.env_counter.ToString(), op2.ls.ToString(), op.eg.status.ToString());
 
         if (buf.GetSkips() > 0)
             fill_buffer();
@@ -126,8 +125,6 @@ public class Test2 : Label
             // output[i].x = Tables.short2float[ Oscillator.CrushedSine((ulong)accumulator, (ushort) bitCrush.Value) + Tables.SIGNED_TO_INDEX ];
             op.Clock();
             op2.Clock();
-            var samp=op.RequestSample();
-            short samp2=op2.RequestSample();
 
 
             // // CPU TEST:  Clock the operators

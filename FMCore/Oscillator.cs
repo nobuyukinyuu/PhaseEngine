@@ -111,8 +111,8 @@ namespace gdsFM
 
                 flip = Tools.BIT(seed, 15).ToBool();
                 
-                // return (ushort)(seed>>1 | (seed & 0x8000)); 
-                return (ushort)(Tables.logVol[seed & 0xFF]); 
+                return (ushort)(seed>>1 | (seed & 0x8000)); 
+                // return (ushort)(Tables.logVol[seed & 0xFF]); 
             }
         }
 
@@ -136,9 +136,8 @@ namespace gdsFM
             bval +=  ( (ushort)bgen.urand() ) >> 5 ;
             bval = (int) (bval * 0.99);
             var output = (bval - 0x7FFF);
-            // flip = Tools.BIT(output, 15).ToBool();
-            // return unchecked((ushort)n) >= duty?  (short)(output>>1): (short)output;
-            return (ushort) (Tables.logVol[(output) & 0xFF]);
+            flip = Tools.BIT(output, 15).ToBool();
+            return (ushort) (output);
 
             // flip = unchecked((short)(n) < 0);
             // return Tables.logVol[unchecked((ushort)(n>>2) & 0xFF)];
