@@ -205,9 +205,9 @@ namespace gdsFM
 
 
         //Branchless absolute value methods
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static short Abs(short n) {return (short)(n & short.MaxValue);}
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static int Abs(int n) {return n & int.MaxValue;}
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static long Abs(long n) {return n & long.MaxValue;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static short Abs(short n) {int o=n; int s=(n>>31); o^=s; o-=s; return (short)(o);}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static int Abs(int n) {int s=(n>>31); n^=s; n-=s; return n;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static long Abs(long n) {long s=(n>>31); n^=s; n-=s; return n;}
 
     }
 }

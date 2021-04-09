@@ -44,6 +44,8 @@ margin_right = 96.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 max_value = 16.0
+value = 1.0
+associated_property = "coarse"
 
 [node name="Fine" parent="Tune" instance=ExtResource( 3 )]
 margin_left = 112.0
@@ -52,6 +54,7 @@ rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 min_value = -12.0
 max_value = 12.0
+associated_property = "fine"
 
 [node name="Detune" parent="Tune" instance=ExtResource( 3 )]
 margin_left = 224.0
@@ -59,6 +62,8 @@ margin_right = 320.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 min_value = -100.0
+max_value = 100.0
+associated_property = "detune"
 
 [node name="Levels" type="GridContainer" parent="."]
 margin_left = 7.0
@@ -242,4 +247,15 @@ margin_right = 327.0
 margin_bottom = 243.0
 max_value = 24000.0
 exp_edit = true
+
+[node name="Label" type="Label" parent="."]
+margin_left = 367.0
+margin_top = 135.0
+margin_right = 749.0
+margin_bottom = 166.0
+text = "TODO:  Mult needs to be in addition to other tuning factors.
+ Make \"Fine\" cents; Make detune range 1 cent?"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 [connection signal="value_changed" from="WavePanel/Wave" to="WavePanel" method="_on_Wave_value_changed"]

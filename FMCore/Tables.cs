@@ -11,48 +11,51 @@ namespace gdsFM
         //Thoughts:  Use unchecked() to rely on rollover behavior for indexes.  Work in ushort for most of the operation.
         //      increments for sine lookup of phase can be masked off if the size is a power of 2.  (12-bit lookup?)
 
+
+        //16bit -> float stuff
+        public static readonly float[] short2float = new float[ushort.MaxValue+1];  //Representation in float of all values of ushort
+        public const ushort SIGNED_TO_INDEX = short.MaxValue+1;  //Add this value to an output of the oscillator to get an index for a 16-bit table.
+
+
+        //Sine table  (obsolete, probably unused)
         public const int SINE_TABLE_BITS = 10;  //We bit-shift right by the bit width of the phase counter minus this value to check the table.
         public const int SINE_TABLE_SHIFT = 32 - SINE_TABLE_BITS;  //How far to shift a phase counter value to be in range of the table.
         public const int SINE_TABLE_MASK = (1 << SINE_TABLE_BITS) - 1;  //Mask for creating a rollover.
         public const int SINE_HALFWAY_BIT = SINE_TABLE_BITS - 1;
 
-        public const ushort SIGNED_TO_INDEX = short.MaxValue+1;  //Add this value to an output of the oscillator to get an index for a 16-bit table.
-
-        public static readonly float[] short2float = new float[ushort.MaxValue+1];  //Representation in float of all values of ushort
         public static short[] sin = new short[(1 << SINE_TABLE_BITS) +1];  //integral Increment/decrement can use add/sub operations to alter phase counter.
 
+
+        //Triangle and saw table
         public const byte TRI_TABLE_BITS = 5;
         public const byte TRI_TABLE_MASK = (1 << TRI_TABLE_BITS) - 1;
-
-
         public static readonly ushort[] tri = new ushort[TRI_TABLE_MASK+1];
-                                            /*= {-32768,-28673,-24577,-20481,-16385,-12289,-8193,-4097,-1,4095,8191,12287,16383,20479,24575,28671,32767,
-                                                28671,24575,20479,16383,12287,8191,4095,-1,-4097,-8193,-12289,-16385,-20481,-24577,-28673,}; */
+        public static readonly ushort[] saw = new ushort[256];
+ 
 
-
-//TODO:   Create an exponent table for values in linear increments 0-1 corresponding to the total attenuation (in decibels) an operator or final mix should have.
-//      Attenuation can be added together cheaply and converted to a value godot likes in the end stage. Bits of depth can be however many we like (16 is best),
-//      and the table mapping should go from 0-72dB attenuation, with max values clampped, perhaps corresponding to 0 at max?
-//      All other lookup tables will have to have their values converted from 0-maxValue to decibel attenuation (0 being max volume).
-//      In the linear domain, Attenuated envelope C=A*B (0-1 float).  In the log domain, log(C) = log(A) + log(b).
-
+        //Attenuation conversion tables
         public const byte ATTENUATION_BITS = 16;
-
         public const uint MAX_ATTENUATION_SIZE = (1 << ATTENUATION_BITS) -1 ;
-        public const float MAX_DB = 80;  //Maximum Decibels of attenuation
-        public const double ATTENUATION_UNIT = 1.0 / (double)(MAX_ATTENUATION_SIZE) * MAX_DB; //One attenuation unit in the system
         
         public static readonly ushort[] logVol = new ushort[256];  //scaled decibel equivalent of a given short value..
         public static readonly float[] linVol = new float[MAX_ATTENUATION_SIZE+1];  //Attenuation table scaled from 0-ATTENUATION_BITS.
 
-        public static readonly ushort[] saw = new ushort[256];
 
-        public static double[] atbl = new double[sin.Length];
+        //Note transposition ratio table
+        public static readonly double[] transpose = new double[13];
+
         static Tables()
         {
             for(int i=0; i<short2float.Length; i++)
             {
                 short2float[i] = (float) (i / 32767.5) - 1;
+            }
+
+
+            //Transpose
+            for(int i=0; i<transpose.Length; i++)
+            {
+                transpose[i] = Math.Pow(2, i/12.0);
             }
 
 
@@ -194,6 +197,7 @@ namespace gdsFM
             // return the value from the table
             return s_sin_table[input & 0xff];
         }    
+
 
 
         static readonly uint[] s_increment_table =           //Envelope increment table

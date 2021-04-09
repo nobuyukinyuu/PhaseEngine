@@ -5,10 +5,9 @@ namespace gdsFM
 {
     public class Operator
     {
-        public ulong phase;  //Phase accumulator
+        public long phase;  //Phase accumulator
         public uint env_counter;  //Envelope counter
         public uint env_hold_counter=0;  //Counter during the hold phase of an envelope
-        public float clocksNeeded;  //Clock accumulator. Consider moving this to a chip/cpu class so multiple operators can share the clock. Consider tying noise gens to chip
         public ulong noteIncrement;  //Frequency multiplier for note base hz.
 
         public short[] fbBuf = new short[2];  //feedback buffer
@@ -17,13 +16,13 @@ namespace gdsFM
         public ushort duty = 32767;
 
         public Envelope eg = new Envelope();
+        public Increments pg = Increments.Prototype();
 
         public Oscillator oscillator = new Oscillator(Oscillator.Sine);
 
         public delegate short sampleOutputFunc(ushort modulation); //Primary function of the operator
         public sampleOutputFunc operatorOutputSample;
 
-        //thought:  separate into carrier and modulator funcs, carrier output being a float and modulator being double
 
         public Operator(){ operatorOutputSample=OperatorType_ComputeLogOuput; }
 
@@ -43,8 +42,7 @@ namespace gdsFM
 
         public void Clock()
         {
-            // phase = (ulong)unchecked((long)phase + oscillator.Generate(phase, duty));
-            phase += noteIncrement;   //FIXME:  CHANGE TO TOTAL INCREMENT
+            phase += pg.increment;  
 
 
             // increment the envelope count; low two bits are the subcount, which
@@ -65,10 +63,8 @@ namespace gdsFM
         }
 
         //Operator meta functions;  delegate points to either the FM operation or some other operation, like filtering, waveshape, FM+Feedback.
-        //At the top of a chain, use RequestSample() instead of this.  Special op functions can be set to passthru or silence.
+        //Special op functions can be set to passthru or silence.
         //TODO:  Consider whether there should be separate delegates for feedback-producing operators. 
-        public short Modulate(ushort input) {return 0;}
-        public short Modulate(short input) {return 0;}
 
 
         //Sets up the operator to act as an oscillator for FM output.
@@ -107,20 +103,11 @@ namespace gdsFM
             const float SCALE = 1.0f / 8192;
 
             ushort logScale = (ushort)(Tables.attenuation_to_volume(env_attenuation));
-            ls = logScale;
             short result = (short) (samp * (logScale * SCALE));
 
             return result;
         }
-        public ushort ls;
 
-        // public float LinearVolume(short samp)
-        // {
-        //     var output = Tables.linVol[samp + Tables.SIGNED_TO_INDEX];
-        //     // if (Tools.BIT(phase >> Global.FRAC_PRECISION_BITS, Tables.SINE_HALFWAY_BIT).ToBool())   output = -output;
-        //     // if (Tools.BIT(samp, 14).ToBool())   output = -output;
-        //     return output;
-        // }
 
 
         bool flip=false;

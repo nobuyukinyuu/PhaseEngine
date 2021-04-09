@@ -5,6 +5,11 @@ export(int,1,8) var operator = 1
 
 
 func _ready():
+	for o in $Tune.get_children():
+		if !o is Slider:  continue
+		o.connect("value_changed", self, "setPG", [o.associated_property])
+		
+
 	for o in $Rates.get_children():
 		if !o is Slider:  continue
 		o.connect("value_changed", self, "setEG", [o.associated_property])
@@ -21,6 +26,8 @@ func _ready():
 
 func setEG(value, property):
 	get_node(chip_loc).SetEG(operator, property, value)
+func setPG(value, property):
+	get_node(chip_loc).SetPG(operator, property, value)
 
 func setWaveform(value):
 	get_node(chip_loc).SetWaveform(operator, value)

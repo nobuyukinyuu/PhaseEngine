@@ -10,7 +10,7 @@
 [sub_resource type="AudioStreamGenerator" id=1]
 mix_rate = 48000.0
 
-[sub_resource type="StyleBoxFlat" id=3]
+[sub_resource type="StyleBoxFlat" id=2]
 bg_color = Color( 0, 0, 0, 0.376471 )
 border_width_left = 1
 border_width_top = 1
@@ -101,7 +101,7 @@ __meta__ = {
 
 [node name="Player" type="AudioStreamPlayer" parent="Test"]
 stream = SubResource( 1 )
-volume_db = -12.0
+volume_db = -6.0
 
 [node name="TabContainer" type="TabContainer" parent="."]
 margin_left = 16.0
@@ -109,7 +109,7 @@ margin_top = 16.0
 margin_right = 352.0
 margin_bottom = 296.0
 custom_styles/tab_bg = ExtResource( 8 )
-custom_styles/panel = SubResource( 3 )
+custom_styles/panel = SubResource( 2 )
 custom_constants/side_margin = 0
 tab_align = 0
 __meta__ = {

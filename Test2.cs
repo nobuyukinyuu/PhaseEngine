@@ -60,12 +60,29 @@ public class Test2 : Label
 
         // this.Text = Tools.ToBinStr(op.compute_volume(0,0)) + " = " + op.compute_volume(0,0) + "\n" + op.noteIncrement.ToString();
         // this.Text = Oscillator.gen2.ToString() + " = " + samp2.ToString() + "\n" + op.noteIncrement.ToString();
-        this.Text = String.Format("{0}, {1}:  {2}", op.env_counter.ToString(), op2.ls.ToString(), op.eg.status.ToString());
+        this.Text = String.Format("{0}, {1}:  {2}", op.env_counter.ToString(), op2.eg.attenuation.ToString(), op2.pg.increment.ToString());
 
         if (buf.GetSkips() > 0)
             fill_buffer();
 
     }
+
+    // Called from EG controls to bus to the appropriate tuning properties.
+    public void SetPG(int opTarget, string property, float val)
+    {
+        Operator op;
+        if (opTarget ==1) op = this.op; else op = this.op2;
+
+        try
+        {
+            op.pg.SetVal(property, unchecked((int) val));
+            op.pg.Recalc();
+            // GD.Print(String.Format("Set op{0}.eg.{1} to {2}.", opTarget, property, val));
+        } catch(NullReferenceException) {
+            GD.PrintErr(String.Format("No property handler for op{0}.pg.{1}.", opTarget, property, val));
+        }            
+    }
+
 
     // Called from EG controls to bus to the appropriate envelope property.
     public void SetEG(int opTarget, string property, float val)
@@ -75,16 +92,11 @@ public class Test2 : Label
 
         try
         {
-            op.eg[property] = unchecked((int) val);
+            op.eg.SetVal(property, unchecked((int) val));
             // GD.Print(String.Format("Set op{0}.eg.{1} to {2}.", opTarget, property, val));
         } catch(NullReferenceException) {
             GD.PrintErr(String.Format("No property handler for op{0}.eg.{1}.", opTarget, property, val));
         }            
-    }
-
-    public Envelope GetEG(int opTarget)
-    {
-        if (opTarget ==1) return this.op.eg; else return this.op2.eg;
     }
 
     public void SetWaveform(int opTarget, float val)

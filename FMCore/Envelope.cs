@@ -5,7 +5,7 @@ using gdsFM;
 
 namespace gdsFM 
 {
-    public class Envelope
+    public class Envelope : SpicySetGet
     {
         public ushort attenuation;  //5-bit value
         const ushort L_MAX = 1023; //Max attenuation level
@@ -55,47 +55,6 @@ namespace gdsFM
         //         rateIncrement[i] = RateMultiplier(1);
         //     }
         // }
-
-
-        #if GODOT
-        /// Property indexer.  Used to talk to/from Godot for convenience.  
-        /// In GDScript you can use obj.set(prop, val) or obj.get(prop); this is a similar feature for c#.
-        public object this[string propertyName]  //TODO:  Make this safer
-        {
-            get {
-                Type type = typeof(Envelope);
-                System.Reflection.PropertyInfo property = type.GetProperty(propertyName);
-
-                if (property==null)
-                {
-                    System.Reflection.FieldInfo field = type.GetField(propertyName);
-                    return field.GetValue(this);
-                }
-
-                return property.GetValue(this);
-            } set {
-                Type type = typeof(Envelope);
-                System.Reflection.PropertyInfo property = type.GetProperty(propertyName);
-
-                if(property==null)
-                {
-                    System.Reflection.FieldInfo field = type.GetField(propertyName);
-
-                    //Try to force unchecked conversion to the target type
-                    var unboxedVal2 = Convert.ChangeType(value, field.FieldType);
-
-                    field.SetValue(this, unboxedVal2);
-                    return;
-                }
-
-                //Try to force unchecked conversion to the target type
-                var unboxedVal = Convert.ChangeType(value, property.PropertyType);
-
-                property.SetValue(this, unboxedVal);
-
-            }
-        }
-        #endif
 
     }
 
