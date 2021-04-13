@@ -42,7 +42,7 @@ namespace gdsFM
 
 
         //Note transposition ratio table
-        public static readonly double[] transpose = new double[13];
+        public static readonly double[] transpose = new double[1300];  //10kb
 
         static Tables()
         {
@@ -55,7 +55,7 @@ namespace gdsFM
             //Transpose
             for(int i=0; i<transpose.Length; i++)
             {
-                transpose[i] = Math.Pow(2, i/12.0);
+                transpose[i] = Math.Pow(2, (i * 0.01)/12.0);
             }
 
 

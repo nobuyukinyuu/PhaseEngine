@@ -8,9 +8,14 @@
 
 config_version=4
 
-_global_script_classes=[  ]
+_global_script_classes=[ {
+"base": "Panel",
+"class": "EnvelopeDisplay",
+"language": "GDScript",
+"path": "res://ui/envelopeDisplay/EnvelopeDisplay.gd"
+} ]
 _global_script_class_icons={
-
+"EnvelopeDisplay": ""
 }
 
 [application]

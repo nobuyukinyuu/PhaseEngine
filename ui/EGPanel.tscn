@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://ui/EGPanel.gd" type="Script" id=1]
 [ext_resource path="res://ui/EGWavePanel.gd" type="Script" id=2]
 [ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=3]
 [ext_resource path="res://gfx/wave/0.png" type="Texture" id=4]
+[ext_resource path="res://gfx/ui/vCheck.png" type="Texture" id=5]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0, 0, 0, 0.25098 )
@@ -13,6 +14,55 @@ corner_radius_bottom_right = 5
 expand_margin_top = 1.0
 expand_margin_bottom = 1.0
 anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0, 0, 0, 0.25098 )
+border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+anti_aliasing = false
+
+[sub_resource type="AtlasTexture" id=3]
+atlas = ExtResource( 5 )
+region = Rect2( 32, 0, 32, 48 )
+
+[sub_resource type="AtlasTexture" id=4]
+atlas = ExtResource( 5 )
+region = Rect2( 0, 0, 32, 48 )
+
+[sub_resource type="StyleBoxFlat" id=5]
+content_margin_left = 8.0
+bg_color = Color( 0, 0, 0, 0.376471 )
+border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
+corner_radius_bottom_right = 5
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+anti_aliasing = false
+
+[sub_resource type="StyleBoxEmpty" id=6]
+
+[sub_resource type="GDScript" id=7]
+script/source = "extends CheckBox
+onready var ab = [owner.get_node(\"Tune\"), owner.get_node(\"Frequency\")]
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+#func _process(delta):
+#	pass
+
+
+func _on_FixedRatio_toggled(button_pressed):
+	var i = int(button_pressed)
+	ab[1-i].visible = true
+	ab[i].visible = false
+	
+	pass # Replace with function body.
+"
 
 [node name="EGPanel" type="Tabs"]
 anchor_right = 1.0
@@ -26,50 +76,117 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Tune" type="GridContainer" parent="."]
+[node name="Frequency" type="GridContainer" parent="."]
+visible = false
 margin_left = 7.0
-margin_top = 55.0
-margin_right = 327.0
-margin_bottom = 111.0
+margin_top = 47.0
+margin_right = 287.0
+margin_bottom = 95.0
 custom_constants/vseparation = 8
 custom_constants/hseparation = 16
-columns = 3
 __meta__ = {
 "_edit_group_": true,
 "_edit_use_anchors_": false
 }
 
-[node name="Coarse" parent="Tune" instance=ExtResource( 3 )]
-margin_right = 96.0
+[node name="Frequency" parent="Frequency" instance=ExtResource( 3 )]
+margin_right = 280.0
+size_flags_horizontal = 3
+max_value = 24000.0
+value = 440.0
+exp_edit = true
+
+[node name="H" type="HBoxContainer" parent="Frequency"]
+margin_top = 28.0
+margin_right = 280.0
+margin_bottom = 48.0
+custom_constants/separation = 16
+
+[node name="OptionButton" type="OptionButton" parent="Frequency/H"]
+margin_right = 132.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+custom_styles/normal = SubResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Detune" parent="Frequency/H" instance=ExtResource( 3 )]
+margin_left = 148.0
+margin_right = 280.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
+min_value = -32768.0
+max_value = 32767.0
+tick_count = 9
+ticks_on_borders = false
+associated_property = "detune"
+
+[node name="Tune" type="GridContainer" parent="."]
+margin_left = 7.0
+margin_top = 47.0
+margin_right = 287.0
+margin_bottom = 103.0
+custom_constants/vseparation = 8
+custom_constants/hseparation = 16
+columns = 2
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Mult" parent="Tune" instance=ExtResource( 3 )]
+margin_right = 132.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+min_value = 0.5
 max_value = 16.0
 value = 1.0
-associated_property = "coarse"
+tick_count = 5
+ticks_on_borders = false
+associated_property = "mult"
 
-[node name="Fine" parent="Tune" instance=ExtResource( 3 )]
-margin_left = 112.0
-margin_right = 208.0
+[node name="Coarse" parent="Tune" instance=ExtResource( 3 )]
+margin_left = 148.0
+margin_right = 280.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 min_value = -12.0
 max_value = 12.0
-associated_property = "fine"
+tick_count = 9
+ticks_on_borders = false
+associated_property = "coarse"
 
-[node name="Detune" parent="Tune" instance=ExtResource( 3 )]
-margin_left = 224.0
-margin_right = 320.0
+[node name="Fine" parent="Tune" instance=ExtResource( 3 )]
+margin_top = 28.0
+margin_right = 132.0
+margin_bottom = 48.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 min_value = -100.0
 max_value = 100.0
+tick_count = 9
+ticks_on_borders = false
+associated_property = "fine"
+
+[node name="Detune" parent="Tune" instance=ExtResource( 3 )]
+margin_left = 148.0
+margin_top = 28.0
+margin_right = 280.0
+margin_bottom = 48.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+min_value = -32768.0
+max_value = 32767.0
+tick_count = 9
+ticks_on_borders = false
 associated_property = "detune"
 
 [node name="Levels" type="GridContainer" parent="."]
 margin_left = 7.0
-margin_top = 95.0
+margin_top = 111.0
 margin_right = 327.0
-margin_bottom = 151.0
+margin_bottom = 167.0
 custom_constants/vseparation = 8
 custom_constants/hseparation = 16
 columns = 2
@@ -89,7 +206,7 @@ associated_property = "tl"
 margin_left = 168.0
 margin_right = 320.0
 size_flags_horizontal = 3
-max_value = 0.0
+max_value = 1023.0
 tick_count = 9
 associated_property = "al"
 
@@ -114,9 +231,9 @@ associated_property = "sl"
 
 [node name="Rates" type="GridContainer" parent="."]
 margin_left = 7.0
-margin_top = 159.0
+margin_top = 175.0
 margin_right = 327.0
-margin_bottom = 215.0
+margin_bottom = 231.0
 custom_constants/vseparation = 8
 custom_constants/hseparation = 16
 columns = 3
@@ -131,6 +248,8 @@ rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 max_value = 65535.0
 exp_edit = true
+tick_count = 5
+ticks_on_borders = false
 associated_property = "delay"
 
 [node name="Attack" parent="Rates" instance=ExtResource( 3 )]
@@ -140,6 +259,8 @@ rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 max_value = 63.0
 value = 63.0
+tick_count = 5
+ticks_on_borders = false
 associated_property = "ar"
 
 [node name="+Hold" parent="Rates" instance=ExtResource( 3 )]
@@ -149,6 +270,8 @@ rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 max_value = 65535.0
 exp_edit = true
+tick_count = 5
+ticks_on_borders = false
 associated_property = "hold"
 
 [node name="Decay" parent="Rates" instance=ExtResource( 3 )]
@@ -159,6 +282,8 @@ rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 max_value = 63.0
 value = 63.0
+tick_count = 5
+ticks_on_borders = false
 associated_property = "dr"
 
 [node name="Sustain" parent="Rates" instance=ExtResource( 3 )]
@@ -169,6 +294,8 @@ margin_bottom = 48.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 max_value = 63.0
+tick_count = 5
+ticks_on_borders = false
 associated_property = "sr"
 
 [node name="Release" parent="Rates" instance=ExtResource( 3 )]
@@ -180,6 +307,8 @@ rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 max_value = 63.0
 value = 48.0
+tick_count = 5
+ticks_on_borders = false
 associated_property = "rr"
 
 [node name="Tweak" type="GridContainer" parent="."]
@@ -213,7 +342,7 @@ margin_left = 215.0
 margin_top = 7.0
 margin_right = 335.0
 margin_bottom = 47.0
-custom_styles/panel = SubResource( 1 )
+custom_styles/panel = SubResource( 2 )
 script = ExtResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -240,22 +369,26 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Frequency" parent="." instance=ExtResource( 3 )]
-margin_left = 7.0
-margin_top = 223.0
-margin_right = 327.0
-margin_bottom = 243.0
-max_value = 24000.0
-exp_edit = true
-
-[node name="Label" type="Label" parent="."]
-margin_left = 367.0
-margin_top = 135.0
-margin_right = 749.0
-margin_bottom = 166.0
-text = "TODO:  Mult needs to be in addition to other tuning factors.
- Make \"Fine\" cents; Make detune range 1 cent?"
+[node name="FixedRatio" type="CheckBox" parent="."]
+anchor_left = -0.000978474
+anchor_top = -0.00174216
+anchor_right = -0.000978474
+anchor_bottom = -0.00174216
+margin_left = 288.0
+margin_top = 48.0
+margin_right = 334.0
+margin_bottom = 104.0
+custom_icons/checked = SubResource( 3 )
+custom_icons/unchecked = SubResource( 4 )
+custom_styles/hover = SubResource( 5 )
+custom_styles/pressed = SubResource( 5 )
+custom_styles/focus = SubResource( 6 )
+custom_styles/hover_pressed = SubResource( 5 )
+custom_styles/normal = SubResource( 5 )
+pressed = true
+script = SubResource( 7 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 [connection signal="value_changed" from="WavePanel/Wave" to="WavePanel" method="_on_Wave_value_changed"]
+[connection signal="toggled" from="FixedRatio" to="FixedRatio" method="_on_FixedRatio_toggled"]

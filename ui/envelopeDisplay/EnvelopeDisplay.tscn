@@ -1,0 +1,221 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://gfx/grid.png" type="Texture" id=1]
+[ext_resource path="res://ui/envelopeDisplay/EnvelopeADSRLine.gd" type="Script" id=2]
+[ext_resource path="res://ui/envelopeDisplay/EnvelopeDisplay.gd" type="Script" id=3]
+[ext_resource path="res://gfx/fonts/numerics_5x8.tres" type="BitmapFont" id=4]
+[ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=5]
+
+[sub_resource type="StyleBoxFlat" id=1]
+content_margin_left = 0.0
+content_margin_top = 4.0
+content_margin_bottom = 4.0
+bg_color = Color( 0.0313726, 0.0313726, 0.0627451, 1 )
+border_width_left = 12
+border_width_top = 12
+border_width_right = 12
+border_width_bottom = 12
+border_color = Color( 0, 0, 0, 1 )
+border_blend = true
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="CanvasItemMaterial" id=2]
+blend_mode = 2
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0, 0, 0, 0.796078 )
+
+[node name="EnvelopeDisplay" type="Panel"]
+margin_right = 198.0
+margin_bottom = 128.0
+custom_styles/panel = SubResource( 1 )
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+thickness = 1.2
+sl = 0.613
+Delay = 93
+Attack = 32
+Hold = 91
+Decay = 29
+Sustain = 0
+Release = 17
+
+[node name="Grid" type="TextureRect" parent="."]
+visible = false
+modulate = Color( 0.705882, 0.701961, 0.854902, 0.0627451 )
+material = SubResource( 2 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 1 )
+expand = true
+stretch_mode = 2
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="ADSR" type="HBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 4.0
+margin_right = -3.99998
+margin_bottom = -3.99999
+custom_constants/separation = 0
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Delay" type="TextureRect" parent="ADSR"]
+margin_right = 24.0
+margin_bottom = 120.0
+rect_min_size = Vector2( 24, 0 )
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.00286865
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="ADSR/Delay"]
+modulate = Color( 1, 1, 1, 0.501961 )
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_left = -4.0
+margin_top = -4.0
+margin_right = 2.0
+margin_bottom = 4.0
+custom_fonts/font = ExtResource( 4 )
+text = "23ms"
+align = 1
+valign = 1
+clip_text = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="0" type="TextureRect" parent="ADSR"]
+margin_left = 24.0
+margin_right = 41.0
+margin_bottom = 120.0
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.5
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+color = Color( 0.921569, 0.486275, 0.470588, 1 )
+thickness = 1.2
+curve = -2.0
+sl = 1.0
+
+[node name="1" type="TextureRect" parent="ADSR"]
+margin_left = 41.0
+margin_right = 65.0
+margin_bottom = 120.0
+rect_min_size = Vector2( 24, 0 )
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.2
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+reverse = true
+color = Color( 0.858824, 0.67451, 0.231373, 1 )
+thickness = 1.2
+
+[node name="Label" type="Label" parent="ADSR/1"]
+modulate = Color( 1, 1, 1, 0.501961 )
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_left = -4.0
+margin_top = -4.0
+margin_right = 4.0
+margin_bottom = 4.0
+custom_fonts/font = ExtResource( 4 )
+text = "22ms"
+align = 1
+valign = 1
+clip_text = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="2" type="TextureRect" parent="ADSR"]
+margin_left = 65.0
+margin_right = 102.0
+margin_bottom = 120.0
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.09375
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+reverse = true
+color = Color( 0.214233, 0.84375, 0.457726, 1 )
+thickness = 1.2
+sl = 0.387
+
+[node name="3" type="TextureRect" parent="ADSR"]
+margin_left = 102.0
+margin_right = 136.0
+margin_bottom = 120.0
+size_flags_horizontal = 3
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+note_off_indicator = true
+reverse = true
+color = Color( 0.215686, 0.54902, 0.843137, 1 )
+thickness = 1.2
+tl = 0.613
+
+[node name="4" type="TextureRect" parent="ADSR"]
+margin_left = 136.0
+margin_right = 161.0
+margin_bottom = 120.0
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.734375
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+reverse = true
+color = Color( 0.515317, 0.238647, 0.71875, 1 )
+thickness = 1.2
+curve = 2.0
+tl = 0.613
+sl = 1
+
+[node name="Spacer" type="TextureRect" parent="ADSR"]
+margin_left = 161.0
+margin_right = 190.0
+margin_bottom = 120.0
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.823958
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="NoPreview" type="Label" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_styles/normal = SubResource( 3 )
+custom_fonts/font = ExtResource( 5 )
+text = "No Output
+(Infinite attack)"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+[connection signal="resized" from="." to="." method="_on_EnvelopeDisplay_resized"]

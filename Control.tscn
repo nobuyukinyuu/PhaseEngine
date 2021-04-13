@@ -1,10 +1,12 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://ui/EGSlider.gd" type="Script" id=1]
 [ext_resource path="res://gfx/ui/hSlider.theme" type="Theme" id=2]
 [ext_resource path="res://Label.gd" type="Script" id=3]
 [ext_resource path="res://Test2.cs" type="Script" id=4]
 [ext_resource path="res://ui/EGPanel.tscn" type="PackedScene" id=5]
+[ext_resource path="res://ui/wiringGrid/WiringGrid.tscn" type="PackedScene" id=6]
+[ext_resource path="res://ui/envelopeDisplay/EnvelopeDisplay.tscn" type="PackedScene" id=7]
 [ext_resource path="res://ui/EGTabBG.stylebox" type="StyleBox" id=8]
 
 [sub_resource type="AudioStreamGenerator" id=1]
@@ -89,9 +91,9 @@ __meta__ = {
 [node name="Test" type="Label" parent="."]
 anchor_left = 1.0
 anchor_right = 1.0
-margin_left = -280.0
+margin_left = -656.0
 margin_top = 8.0
-margin_right = -48.0
+margin_right = -424.0
 margin_bottom = 22.0
 text = "ass"
 script = ExtResource( 4 )
@@ -107,7 +109,7 @@ volume_db = -6.0
 margin_left = 16.0
 margin_top = 16.0
 margin_right = 352.0
-margin_bottom = 296.0
+margin_bottom = 320.0
 custom_styles/tab_bg = ExtResource( 8 )
 custom_styles/panel = SubResource( 2 )
 custom_constants/side_margin = 0
@@ -132,3 +134,22 @@ margin_right = -664.0
 margin_bottom = -8.0
 chip_loc = NodePath("../Test")
 operator = 2
+
+[node name="WiringGrid" parent="." instance=ExtResource( 6 )]
+margin_left = 376.0
+margin_top = 336.0
+margin_right = 600.0
+margin_bottom = 560.0
+
+[node name="EnvelopeDisplay" parent="." instance=ExtResource( 7 )]
+margin_left = 24.0
+margin_top = 280.0
+margin_right = 344.0
+margin_bottom = 312.0
+thickness = 0.5
+sl = 0.401
+Delay = 0
+Attack = 63
+Hold = 0
+Decay = 63
+Release = 18

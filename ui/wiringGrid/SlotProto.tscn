@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://ui/wiringGrid/slot.gd" type="Script" id=1]
+[ext_resource path="res://gfx/fonts/NoteFont.tres" type="BitmapFont" id=2]
+[ext_resource path="res://ui/wiringGrid/slot.stylebox" type="StyleBox" id=3]
+
+[node name="0" type="PanelContainer"]
+self_modulate = Color( 0.6, 0.6, 0.6, 1 )
+show_behind_parent = true
+margin_right = 31.0
+margin_bottom = 31.0
+rect_min_size = Vector2( 24, 24 )
+focus_mode = 2
+mouse_filter = 1
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_styles/panel = ExtResource( 3 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="."]
+margin_left = 5.0
+margin_top = 10.0
+margin_right = 26.0
+margin_bottom = 20.0
+custom_fonts/font = ExtResource( 2 )
+align = 1
+valign = 1
+[connection signal="gui_input" from="." to="." method="_on_gui_input"]
+[connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]

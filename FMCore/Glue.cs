@@ -6,8 +6,6 @@ using System.Runtime.CompilerServices;
 
 namespace gdsFM
 {
-    public interface SpicySetGet {}
-
     public static class Glue
     {
         /// [Stand-in for] Property indexer.  Used to talk to/from Godot for convenience.  

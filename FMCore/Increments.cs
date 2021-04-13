@@ -6,7 +6,7 @@ using gdsFM;
 
 namespace gdsFM 
 {
-    public struct Increments : SpicySetGet
+    public struct Increments
     {
 
         public double hz, base_hz;
@@ -17,12 +17,15 @@ namespace gdsFM
         public long tunedIncrement;  //increment of tuned_hz
         public long increment;  // Calculated from the base frequency, multiplier, detune and pitch modifiers.
 
+
+        public bool fixedFreq;
+        public float mult;
         public int coarse, fine, detune;
 
         public static Increments Prototype()
         {
             var o = new Increments();
-            o.coarse = 1;  
+            o.mult = 1;  
             o.base_hz=o.hz=Global.BASE_HZ;
             o.increment = o.tunedIncrement = o.noteIncrement = IncOfFreq(o.hz);
             return o;
@@ -31,15 +34,31 @@ namespace gdsFM
         // Recalculates the total increment given our current tuning settings.
         public void Recalc()
         {
-            // TODO:  once notes can be specified, fixed ratio can skip the multiply and transpose operations and go straight to tuned increment.
+            // TODO:  once notes can be specified, consider storing separate fixed_hz and removing intermediary tuned_hz, maybe even base_hz --
+            //          If we use 2 copies of the envelope state instead (one for temporary changes) in Operator, less instructions are used to recalc.
+            //          OTOH, these intermediaries may be necessary to keep track of the LFO state, depending on how and where we adjust the phase....
+            //          Channel-wide/Patch-wide LFO would track phase offset separately and add them in every requested sample.
 
-            var t = Tables.transpose[Tools.Abs(fine)];
-            if (Tools.BIT(fine, 31) == 1)  t = 1/t;  //Negative transpose values are equal to the reciprocal of the positive transpose ratio
-            this.hz=this.tuned_hz = base_hz * coarse * t; //Add any modifiers to the frequency here if necessary and split into 2 lines
+            //      More LFO thoughts.... Pull full LFO cycle from the pg increment >> some amount based on PMS, then map the offset on a clock from
+            //      ± the PMS output range.  Add this lfo value to the phase.  Consider creating a PMS ratio table to avoid divisions (pre-divide)
+            //      if Rsh doesn't work to cull pitch to reasonable ranges.
+
+
+            if (fixedFreq)
+            {
+                this.hz=this.tuned_hz=base_hz;
+            } else {
+                var transpose = Math.Clamp((coarse*100) + fine, -1299, 1299);
+                
+
+                var t = Tables.transpose[Tools.Abs(transpose)];  
+                if (transpose < 0)  t = 1/t;  //Negative transpose values are equal to the reciprocal of the positive transpose ratio
+                this.hz=this.tuned_hz = base_hz * mult * t; //Add any modifiers to the frequency here if necessary and split into 2 lines
+            }
 
             tunedIncrement = IncOfFreq(this.tuned_hz) + detune;
-
             increment=tunedIncrement;
+
         }
 
         public static Increments FromNote(byte note)

@@ -1,0 +1,46 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://ui/wiringGrid/DragTree.gd" type="Script" id=1]
+[ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=2]
+
+
+[node name="DragTree" type="Control"]
+margin_right = 24.0
+margin_bottom = 25.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+target_type = 3
+tile_size = 24
+
+[node name="C" type="ColorRect" parent="."]
+margin_left = -82.0
+margin_top = 23.0
+margin_right = -38.0
+margin_bottom = 49.0
+rect_min_size = Vector2( 24, 24 )
+color = Color( 0, 0, 0, 0.627451 )
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="C"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+rect_min_size = Vector2( 24, 24 )
+custom_fonts/font = ExtResource( 2 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 1
+custom_constants/shadow_offset_y = 1
+text = "Swaps
+with"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}

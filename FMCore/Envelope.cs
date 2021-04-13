@@ -5,7 +5,7 @@ using gdsFM;
 
 namespace gdsFM 
 {
-    public class Envelope : SpicySetGet
+    public class Envelope
     {
         public ushort attenuation;  //5-bit value
         const ushort L_MAX = 1023; //Max attenuation level

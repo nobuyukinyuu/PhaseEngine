@@ -75,7 +75,7 @@ public class Test2 : Label
 
         try
         {
-            op.pg.SetVal(property, unchecked((int) val));
+            op.pg.SetVal(property, val);
             op.pg.Recalc();
             // GD.Print(String.Format("Set op{0}.eg.{1} to {2}.", opTarget, property, val));
         } catch(NullReferenceException) {
