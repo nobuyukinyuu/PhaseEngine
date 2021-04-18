@@ -5,11 +5,73 @@ namespace gdsFM
 {
     public class Chip
     {
-        public Chip()    {}
+        Voice voice = new Voice();  //Description of the timbre.
+
+        public byte opCount = 6;  //Probably should be moved to a voice class, then the chip given a unitimbral description of the voice. Realloc on major change
+        public byte polyphony = 6;
+        public Channel[] channels;
+
+        public Chip()
+        {
+            channels = new Channel[polyphony];
+        }
+
+        public Chip(byte polyphony) 
+        {
+            this.polyphony = polyphony;
+            channels = new Channel[polyphony];
+        }
+
+
+        public void Clock()
+        {
+            for (int i=0; i<channels.Length;  i++)
+            {
+                channels[i].Clock();
+            }
+        }
+
+        //TODO:  NoteOn func that can grab an unbusy note.  Should also return a handle to the channel the note was assigned.
+        //      Consider returning false/-1 instead of stealing a channel to simplify NoteOff calls if a channel was already reappropriated due to polyphony limit.
+        //      or, have an out variable for the channel and return true or false if note was stolen.  NoteOffs shouldn't do anything for "free" channels.
+
+        public short RequestSample()
+        {
+            int output=0;
+            for (int i=0; i<channels.Length;  i++)
+            {
+                output += channels[i].RequestSample();
+            }
+
+            return (short) output.Clamp(short.MinValue, short.MaxValue);
+        }
+        public short RequestSample(byte downscaleMagnitude)
+        {
+            int output=0;
+            for (int i=0; i<channels.Length;  i++)
+            {
+                output += channels[i].RequestSample();
+            }
+
+            return (short) (output>>downscaleMagnitude).Clamp(short.MinValue, short.MaxValue);
+        }
+
+        #if GODOT
+        /// Returns a floating point value useful for a godot AudioStreamGenerator. Values may exceed 1.0; clamp or alter the gain yourself!
+        public float RequestSampleF()
+        {
+            float output=0;
+            for (int i=0; i<channels.Length;  i++)
+            {
+                output += Tables.short2float[channels[i].RequestSample()+Tables.SIGNED_TO_INDEX];
+            }
+            return output;
+        }
+        #endif
+
+
     }
-
-
-    
+ 
 
 }
 

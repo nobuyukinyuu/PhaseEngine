@@ -19,9 +19,6 @@ func _on_Remove_pressed():
 	if $SlotIndicator.total_ops > 2:
 		$SlotIndicator.total_ops -=1
 		
-#	#Stupid hack cuz the size goes wacky for some reason
-#	yield(get_tree(),"idle_frame")
-#	rect_size.y = rect_min_size.y
 
 func _draw():
 	var grid = Vector2($SlotIndicator._grid.size(), 0)
