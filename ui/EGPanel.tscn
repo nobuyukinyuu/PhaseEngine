@@ -73,6 +73,7 @@ margin_right = -1.0
 margin_bottom = -1.0
 script = ExtResource( 1 )
 __meta__ = {
+"_edit_lock_": true,
 "_edit_use_anchors_": false
 }
 
@@ -200,6 +201,7 @@ margin_right = 152.0
 size_flags_horizontal = 3
 max_value = 1023.0
 tick_count = 9
+ticks_on_borders = false
 associated_property = "tl"
 
 [node name="Attack Level" parent="Levels" instance=ExtResource( 3 )]
@@ -207,8 +209,11 @@ margin_left = 168.0
 margin_right = 320.0
 size_flags_horizontal = 3
 max_value = 1023.0
-tick_count = 9
+exp_edit = true
+tick_count = 0
+ticks_on_borders = false
 associated_property = "al"
+useExpTicks = true
 
 [node name="Decay Level" parent="Levels" instance=ExtResource( 3 )]
 margin_top = 28.0
@@ -216,8 +221,11 @@ margin_right = 152.0
 margin_bottom = 48.0
 size_flags_horizontal = 3
 max_value = 1023.0
-tick_count = 9
+exp_edit = true
+tick_count = 0
+ticks_on_borders = false
 associated_property = "dl"
+useExpTicks = true
 
 [node name="Sustain Level" parent="Levels" instance=ExtResource( 3 )]
 margin_left = 168.0
@@ -226,8 +234,12 @@ margin_right = 320.0
 margin_bottom = 48.0
 size_flags_horizontal = 3
 max_value = 1023.0
-tick_count = 9
+value = 1023.0
+exp_edit = true
+tick_count = 0
+ticks_on_borders = false
 associated_property = "sl"
+useExpTicks = true
 
 [node name="Rates" type="GridContainer" parent="."]
 margin_left = 7.0
@@ -251,6 +263,7 @@ exp_edit = true
 tick_count = 5
 ticks_on_borders = false
 associated_property = "delay"
+useHoldTime = true
 
 [node name="Attack" parent="Rates" instance=ExtResource( 3 )]
 margin_left = 112.0
@@ -273,6 +286,7 @@ exp_edit = true
 tick_count = 5
 ticks_on_borders = false
 associated_property = "hold"
+useHoldTime = true
 
 [node name="Decay" parent="Rates" instance=ExtResource( 3 )]
 margin_top = 28.0

@@ -19,3 +19,5 @@ func arr_remove_all(arr:Array, item):
 		var idx = arr.find(item)
 		arr.remove(idx)
 
+func delay_frames_to_time(nFrames:int):  #Converts a delay/hold value into its time in seconds.
+	return (nFrames<<2) / (mixRate/3)

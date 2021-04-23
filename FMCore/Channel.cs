@@ -17,6 +17,7 @@ namespace gdsFM
             ops = new Operator[opCount];
             processOrder = new byte[opCount];
             connections = new byte[opCount];
+            cache = new int[opCount];
         }
 
         public void Clock()
@@ -27,11 +28,22 @@ namespace gdsFM
             }
         }
 
+        public short PriorityScore
+        {get{
+            return 0;
+            //TODO:  Some sorta thing which enumerates the operators for their envelope status and attenuation.  The higher the score, the higher the priority.
+            //      Near-silent and near-finished voices should give the lowest scores.  Use processOrder in reverse, checking connections to output only.
+            //      Stop and return the score once we hit the first operator with connections, since these don't factor into the final output level.
+        }}
+
+
         /// Main algorithm processor.
-        //  TODO:  Pass down LFO status from the chip.   Reset the operator caches to 0 on NoteOn!
+        //  TODO:  Pass down LFO status from the chip. 
         public short RequestSample()
         {
             int output = 0;
+
+            for (byte i=0; i<cache.Length; i++) cache[i] = 0;   //Clear the modulation cache.  FIXME:  Ensure this is correct!!!
 
             //For each height level in the stack, look for operators to mix down.
             //TODO:  Consider instead bringing in an ordered array with each operator from the top row down and rely solely on this (and the frontend) to keep algorithm sane.

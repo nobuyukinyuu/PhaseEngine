@@ -18,17 +18,21 @@ namespace gdsFM
         public byte rr{get=> rates[3]; set=> rates[3] = value;}
         public byte[] rates = new byte[4];
         public ushort[] levels = new ushort[5];
+        public ushort[] precalcLevels = new ushort[5];
+        public bool[] rising= {true, false, false, false};  //Precalculates which way to increment the envelope based on the target state.
+
         public ushort delay, hold;
         
         // ushort tl, al, dl, sl;  // Attenuation target levels
         public ushort tl{get=> levels[4]; set=>levels[4] = value;}
-        public ushort al{get=> levels[0]; set=>levels[0] = value;}
-        public ushort dl{get=> levels[1]; set=>levels[1] = value;}
-        public ushort sl{get=> levels[2]; set=>levels[2] = value;}
-        public ushort rl{get=> levels[3]; set=>levels[3] = value;}
+        public ushort al{get=> levels[0]; set=>RecalcLevel(0, value);}
+        public ushort dl{get=> levels[1]; set=>RecalcLevel(1, value);}
+        public ushort sl{get=> levels[2]; set=>RecalcLevel(2, value);}
+        public ushort rl{get=> levels[3]; set=>RecalcLevel(3, value);}
 
-        // double[] rates;
-        // double[] rateIncrement;
+        public byte feedback = 0;
+        public ushort duty=32767;
+
 
         public Envelope() { Reset(); }
 
@@ -41,20 +45,28 @@ namespace gdsFM
 
             if (levels){
                 tl=0; al=0; dl=0; sl=L_MAX; rl=L_MAX;
+                RecalcLevelRisings();
             }
 
-            // rates = new double[] {0, 0, 120, 0};
         }
 
-        // public void Recalc()
-        // {
-        //     rateIncrement = new double[4];
+        public void RecalcLevel(byte level, ushort amt)
+        {
+            levels[level] = amt;
+            RecalcLevelRisings();
+        }
+        public void RecalcLevelRisings()
+        {
+            //Set volume to rising if attenuation level is greater than the next envelope phase's level.
+            for (int i=0; i<3; i++)
+            {
+                    rising[i+1] = (levels[i] > levels[i+1]);
+            }
 
-        //     for(int i=0;  i<4;  i++)
-        //     {
-        //         rateIncrement[i] = RateMultiplier(1);
-        //     }
-        // }
+            // rising[(int)EGStatus.DECAY] = (al > dl);
+            // rising[(int)EGStatus.SUSTAINED] = (dl > sl);
+            // rising[(int)EGStatus.RELEASED] = (sl > rl);            
+        }
 
     }
 

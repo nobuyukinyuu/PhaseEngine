@@ -70,6 +70,12 @@ namespace gdsFM
         #endif
 
 
+        //TODO:  Channel request methods for flipping a note on.  Each channel is enumerated for PriorityScore unless one is found free (score of 0?)
+        //      Manual requested channel is nullable and should catch out-of-bounds number requests, print an error out and return null.
+        //      Auto requested channel should probably never return null....
+        public Channel RequestChannel() {return null;}
+        public Channel RequestChannel(byte channel) {return null;}
+
     }
  
 

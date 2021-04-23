@@ -11,9 +11,9 @@ namespace gdsFM
         public ulong noteIncrement;  //Frequency multiplier for note base hz.
 
         public short[] fbBuf = new short[2];  //feedback buffer
-        public byte feedback = 0;
+        // public byte feedback = 0;
 
-        public ushort duty = 32767;
+        // public ushort duty = 32767;
 
         public Envelope eg = new Envelope();
         public Increments pg = Increments.Prototype();
@@ -97,7 +97,7 @@ namespace gdsFM
         public short OperatorType_Noise(ushort modulation)
         {
             ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + modulation);
-            var samp = (short) oscillator.Generate(phase, duty, ref flip);
+            var samp = (short) oscillator.Generate(phase, eg.duty, ref flip);
             ushort env_attenuation = (ushort) (envelope_attenuation() << 2);
 
             const float SCALE = 1.0f / 8192;
@@ -120,7 +120,7 @@ namespace gdsFM
 
             // get the absolute value of the sin, as attenuation, as a 4.8 fixed point value
             // ushort sin_attenuation = Tables.abs_sin_attenuation(phase);
-            ushort sin_attenuation = oscillator.Generate(phase, duty, ref flip);
+            ushort sin_attenuation = oscillator.Generate(phase, eg.duty, ref flip);
 
             // get the attenuation from the evelope generator as a 4.6 value, shifted up to 4.8
             ushort env_attenuation = (ushort) (envelope_attenuation() << 2);
@@ -128,10 +128,12 @@ namespace gdsFM
             // ushort env_attenuation = 0;
 
             // combine into a 5.8 value, then convert from attenuation to 13-bit linear volume
-            short result = (short) Tables.attenuation_to_volume((ushort)(sin_attenuation + env_attenuation));
+            int result = Tables.attenuation_to_volume((ushort)(sin_attenuation + env_attenuation));
+
+            result = (int)(result * (1 - (eg.tl*Global.ONE_PER_THOU)));  //Floating point conversion.... expensive?
 
             // negate if in the negative part of the sin wave (sign bit gives 14 bits)
-            return flip ? (short)-result : result;
+            return flip ? (short)-result : (short)result;
             // return Tools.BIT(phase, 9).ToBool() ? (short)-result : result;
         }
 
@@ -139,8 +141,8 @@ namespace gdsFM
         /// Summary:  Calculates the self feedback of the given input with the given modulation amount.
         public short compute_fb(ushort modulation)
         {
-            if (feedback == 0) return compute_volume(modulation, 0);    
-            var avg = (fbBuf[0] + fbBuf[1]) >> (10 - feedback);
+            if (eg.feedback == 0) return compute_volume(modulation, 0);    
+            var avg = (fbBuf[0] + fbBuf[1]) >> (10 - eg.feedback);
             var output = compute_volume(unchecked((ushort)(avg+modulation)),0);
             fbBuf[1] = fbBuf[0];
             fbBuf[0] = output;
@@ -190,11 +192,10 @@ namespace gdsFM
         case EGStatus.DELAY:
             if (env_counter >> 2 < eg.delay) return;
             else {eg.status = EGStatus.ATTACK;  return;}  //Why return here?  Other cases set the target level.  Consider setting it here too.  FIXME
-            break;
 
         case EGStatus.ATTACK:
             target = eg.levels[(int)EGStatus.ATTACK];
-            if (eg.attenuation == 0)  
+            if (eg.attenuation <= target)  
             {
                 eg.status = EGStatus.HOLD;
                 return;
@@ -205,7 +206,7 @@ namespace gdsFM
             if ((env_hold_counter >> 2) >= eg.hold)
             {
                 eg.status = EGStatus.DECAY;
-                target = eg.levels[(int)EGStatus.DECAY];
+                // target = eg.levels[(int)EGStatus.DECAY];
             } else {
                 env_hold_counter++; 
                 return;
@@ -214,9 +215,11 @@ namespace gdsFM
 
         case EGStatus.DECAY:
             target = eg.levels[(int)EGStatus.DECAY];
-            if (eg.attenuation >= target)  eg.status ++;
+            if ( ((eg.attenuation >= target) && !eg.rising[(int)EGStatus.DECAY]) | (eg.rising[(int)EGStatus.DECAY] && (eg.attenuation <= target)))  eg.status ++;
             break;
         case EGStatus.SUSTAINED:
+            target = eg.levels[(int)EGStatus.SUSTAINED];
+            if ( ((eg.attenuation >= target) && !eg.rising[(int)EGStatus.SUSTAINED]) | (eg.rising[(int)EGStatus.SUSTAINED] && (eg.attenuation <= target)))  return;
             // if (eg.attenuation >= target) return;
             //TODO:  Logic to keep sustain at target attenuation until NoteOff;  check NoteOff before iterating status to release
 
@@ -243,10 +246,13 @@ namespace gdsFM
 
 
         // attack is the only one that increases
+        // if (eg.status == EGStatus.ATTACK || eg.rising[(int)eg.status])
         if (eg.status == EGStatus.ATTACK)
         {
             eg.attenuation += (ushort) ((~eg.attenuation * increment) >> 4);
 
+        } else if (eg.rising[(int)eg.status]) {  //Decrement.
+            eg.attenuation = (ushort) Math.Max(eg.attenuation-increment, 0);
         } else {  //Most envelope states simply increase the attenuation by the increment previously determined
             eg.attenuation += increment;
         }

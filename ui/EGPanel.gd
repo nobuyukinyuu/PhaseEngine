@@ -3,6 +3,7 @@ extends Tabs
 export (NodePath) var chip_loc  #Location of PhaseEngine instance in code
 export(int,1,8) var operator = 1
 
+var tt = 0
 
 func _ready():
 	for o in $Tune.get_children():
@@ -23,6 +24,16 @@ func _ready():
 	$Tweak/Duty.connect("value_changed", self, "setDuty")
 	pass
 
+#	for i in 10:
+#		var o = $VBoxContainer.get_node(str(i))
+#		o.value = i * 64
+#
+#func _on_Timer_timeout():
+#		var o = $VBoxContainer/"0"
+#		o.value = (tt%9) * 4
+#		tt+=1
+
+
 
 func setEG(value, property):
 	get_node(chip_loc).SetEG(operator, property, value)
@@ -38,3 +49,5 @@ func setFeedback(value):
 func setDuty(value):
 	get_node(chip_loc).SetDuty(operator, value)
 	
+
+

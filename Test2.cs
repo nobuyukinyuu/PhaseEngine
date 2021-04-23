@@ -53,14 +53,12 @@ public class Test2 : Label
 
     public override void _Process(float delta)
     {
-        //  this.Text = Engine.GetIdleFrames().ToString() + ":=   " + Oscillator.Sine(Engine.GetIdleFrames(), 1).ToString();
-
-        // this.Text = Engine.GetIdleFrames().ToString() + ":  " + Tables.sin[Engine.GetIdleFrames() & Tables.SINE_TABLE_MASK].ToString();
-        // this.Text = ((short.MaxValue/stream.MixRate * acc_inc.Value)).ToString();
-
-        // this.Text = Tools.ToBinStr(op.compute_volume(0,0)) + " = " + op.compute_volume(0,0) + "\n" + op.noteIncrement.ToString();
-        // this.Text = Oscillator.gen2.ToString() + " = " + samp2.ToString() + "\n" + op.noteIncrement.ToString();
-        this.Text = String.Format("{0}, {1}:  {2}", op.env_counter.ToString(), op2.eg.attenuation.ToString(), op2.pg.increment.ToString());
+        // this.Text = String.Format("{0}, {1}:  {2}", op.env_counter.ToString(), op2.eg.attenuation.ToString(), op2.pg.increment.ToString());
+        string rising;
+        if (op2.eg.status>=0 && (int)op2.eg.status < op2.eg.rising.Length)
+            rising = op2.eg.rising[(int)op2.eg.status] ? "Rising" : "Falling";
+        else rising= "x";
+        this.Text = String.Format("{0}, {1}:  {2}, {3}", op.env_counter.ToString(), op2.eg.attenuation.ToString(), op2.eg.status.ToString(), rising);
 
         if (buf.GetSkips() > 0)
             fill_buffer();
@@ -116,14 +114,14 @@ public class Test2 : Label
         Operator op;
         if (opTarget ==1) op = this.op; else op = this.op2;
 
-        op.feedback = (byte)val;
+        op.eg.feedback = (byte)val;
     }
     public void SetDuty(int opTarget, float val)
     {
         Operator op;
         if (opTarget ==1) op = this.op; else op = this.op2;
 
-        op.duty = (ushort)val;
+        op.eg.duty = (ushort)val;
     }
 
 
