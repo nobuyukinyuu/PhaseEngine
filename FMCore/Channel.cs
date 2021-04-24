@@ -8,6 +8,7 @@ namespace gdsFM
         public bool busy;
         public Operator[] ops;
 
+        //TODO:  Move these to Voice.alg
         byte[] processOrder;  //The processing order of the operators.  This should be able to be fetched from wiring grid, or a convenience func in Voice...
         byte[] connections;  //Connections for each operator.  Stored as a bitmask.  NOTE:  If we have more than 8 ops, this won't work....
         int[] cache;  //As each level of the stack gets processed, the sample cache for each operator is updated.

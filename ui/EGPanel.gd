@@ -24,14 +24,6 @@ func _ready():
 	$Tweak/Duty.connect("value_changed", self, "setDuty")
 	pass
 
-#	for i in 10:
-#		var o = $VBoxContainer.get_node(str(i))
-#		o.value = i * 64
-#
-#func _on_Timer_timeout():
-#		var o = $VBoxContainer/"0"
-#		o.value = (tt%9) * 4
-#		tt+=1
 
 
 
