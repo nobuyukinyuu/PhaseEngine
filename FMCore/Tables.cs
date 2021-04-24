@@ -185,6 +185,8 @@ namespace gdsFM
                 return (ushort)(s_power_table[input & 0xff] >> (input >> 8));
             }
         }
+
+        //NOTE:  Canonical reference moved to Oscillator.Sine()
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort abs_sin_attenuation(ushort input)
         {

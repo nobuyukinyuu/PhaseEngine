@@ -19,3 +19,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+==============================================================================
+
+
+THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
+
+This project incorporates components from the projects listed below.
+The original copyrights and licenses under which this project used or adapted 
+such components are set forth below.  All rights not expressly granted herein
+are reserved by the original author(s).
+
+1.  MAME:  ymfm.h, ymfm.cpp (BSD 3-Clause). | Copyright holder:  Aaron Giles
