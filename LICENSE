@@ -32,3 +32,4 @@ such components are set forth below.  All rights not expressly granted herein
 are reserved by the original author(s).
 
 1.  MAME:  ymfm.h, ymfm.cpp (BSD 3-Clause). | Copyright holder:  Aaron Giles
+2.  Cornucopia.Net: BitOperations.cs (MIT). |               Simon Weinberger
