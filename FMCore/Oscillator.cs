@@ -50,6 +50,24 @@ namespace gdsFM
             return Tables.s_sin_table[input & 0xff];
         }
 
+
+        //Uses arbitrary (default 10) bit lookup table to produce higher quality waveforms.  Disabled by default.
+        //May need to be paired with a deeper exp table to work properly!!  This would mean it might need a separate operator mode...
+        public static ushort SineHQ(ulong input, ushort duty, ref bool flip)
+        {
+            input <<= Tables.SINE_RATIO;
+            flip = Tools.BIT(input, Tables.SINE_SIGN_BIT).ToBool();
+
+            // if the top bit is set, we're in the second half of the curve
+            // which is a mirror image, so invert the index
+            if ( Tools.BIT(input, Tables.SINE_HIGH_BIT).ToBool() )
+                input = (ushort) ~input;
+
+
+            // return the value from the table
+            return Tables.sin[(input) & Tables.SINE_TABLE_MASK];
+        }
+
         public static ushort Absine(ulong input, ushort duty, ref bool flip)
         {
             input = (ulong) (input >> 1);

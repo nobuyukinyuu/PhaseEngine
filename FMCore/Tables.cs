@@ -17,13 +17,16 @@ namespace gdsFM
         public const ushort SIGNED_TO_INDEX = short.MaxValue+1;  //Add this value to an output of the oscillator to get an index for a 16-bit table.
 
 
-        //Sine table  (obsolete, probably unused)
-        public const int SINE_TABLE_BITS = 10;  //We bit-shift right by the bit width of the phase counter minus this value to check the table.
-        public const int SINE_TABLE_SHIFT = 32 - SINE_TABLE_BITS;  //How far to shift a phase counter value to be in range of the table.
+        //HQ Sine table  (obsolete, probably unused)
+        public const int SINE_TABLE_BITS = 12;  //We bit-shift right by the bit width of the phase counter minus this value to check the table.
+        // public const int SINE_TABLE_SHIFT = 32 - SINE_TABLE_BITS;  //How far to shift a phase counter value to be in range of the table.
+        public const int SINE_RATIO = SINE_TABLE_BITS - 8;  //How far to shift a phase counter value to be in range of the table.
+        public const int SINE_HIGH_BIT = SINE_TABLE_BITS;
+        public const int SINE_SIGN_BIT = SINE_TABLE_BITS+1;
         public const int SINE_TABLE_MASK = (1 << SINE_TABLE_BITS) - 1;  //Mask for creating a rollover.
         public const int SINE_HALFWAY_BIT = SINE_TABLE_BITS - 1;
 
-        public static short[] sin = new short[(1 << SINE_TABLE_BITS) +1];  //integral Increment/decrement can use add/sub operations to alter phase counter.
+        public static ushort[] sin = new ushort[SINE_TABLE_MASK +1];  //integral Increment/decrement can use add/sub operations to alter phase counter.
 
 
         //Triangle and saw table
@@ -37,7 +40,6 @@ namespace gdsFM
         public const byte ATTENUATION_BITS = 16;
         public const uint MAX_ATTENUATION_SIZE = (1 << ATTENUATION_BITS) -1 ;
         
-        public static readonly ushort[] logVol = new ushort[256];  //scaled decibel equivalent of a given short value..
 
 
         //Note transposition ratio table
@@ -57,36 +59,11 @@ namespace gdsFM
                 transpose[i] = Math.Pow(2, (i * 0.01)/12.0);
             }
 
-
-            //log
-            for(int i=0; i<logVol.Length; i++)
-            {
-
-                // double attenuation = Tools.Clamp( Tools.Log2((1.5* i/(double)logVol.Length) + 0.5),  -1, 1);
-                // double dbScaled = attenuation  * short.MaxValue;
-                // logVol[i] = (short) Math.Round(dbScaled);
-
-                logVol[i] = loggen((ushort)i);
-            }
-            logVol[255] = 0;
-
-
             //sin
-            for(int i=0; i<sin.Length/1; i++)
+            for(int i=0; i<sin.Length; i++)
             {
-                sin[i] =  (short) Math.Round(Math.Sin(TAU * (i/(double)sin.Length) )*short.MaxValue);
-
-                // double db = Tools.Clamp(Tools.Log2( 1+Math.Sin(TAU * (i+0.5) / (double)(sin.Length)) ), -1, 1);
-                
-                // // double att= Math.Round( db/(double)MAX_DB * MAX_ATTENUATION_SIZE ) - (MAX_ATTENUATION_SIZE/2) -1 ;
-                
-                // double att= db * short.MaxValue ;
-                // att = logVol[(int)Math.Round(Math.Sin(TAU * (i/(double)sin.Length) )*short.MaxValue) + SIGNED_TO_INDEX];
-
-                // // sin[(int)i] = (short) (Math.Sin(theta) * short.MaxValue);
-
-                // sin[i] =  (short) (att);
-                // // sin[sin.Length-i-1] =  (short) (~(short)att);
+                // sin[i] =  (short) Math.Round(Math.Sin(TAU * (i/(double)sin.Length) )*short.MaxValue);
+                sin[i] =  unchecked( (ushort) Math.Round( -Tools.Log2(Math.Sin((i+0.5) * Math.PI/sin.Length/2.0)) * 256) );
             }
             
             //tri
@@ -238,12 +215,6 @@ namespace gdsFM
             return (byte) Tools.BIT(s_increment_table[rate], (byte) (4*index), 4);
         }
 
-        static ushort expgen (ushort input)
-            { return (ushort) (Math.Round((Math.Pow(2,input/256.0f)-1)*1024)); }
-        static ushort loggen (ushort input)
-            { return (ushort) ( Math.Round(256*(-Tools.Log2((input+0.5)/255.0 ))  ) ); }
-            // { return (ushort) ( Math.Round(64*(-Tools.Log2((input+0.5)/32767.0 ))  ) ); }
-            // { return (ushort) ( Math.Round(128*(-Tools.Log2((input+0.5)/32768.0 ))  ) ); }
 
     }
 

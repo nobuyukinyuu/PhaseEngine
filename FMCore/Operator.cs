@@ -10,10 +10,15 @@ namespace gdsFM
         public uint env_hold_counter=0;  //Counter during the hold phase of an envelope
         public ulong noteIncrement;  //Frequency multiplier for note base hz.
 
-        public short[] fbBuf = new short[2];  //feedback buffer
-        // public byte feedback = 0;
 
-        // public ushort duty = 32767;
+
+        //Parameters specific to Operator
+        public short[] fbBuf = new short[2];  //feedback buffer
+
+        public byte feedback = 0;
+        public ushort duty = 32767;
+
+
 
         public Envelope eg = new Envelope();
         public Increments pg = Increments.Prototype();
@@ -26,6 +31,8 @@ namespace gdsFM
 
         public Operator(){ operatorOutputSample=OperatorType_ComputeLogOuput; }
 
+
+        public void NoteOn(Increments increments){ pg = increments;  NoteOn(); }
         public void NoteOn()
         {
             phase=0;
@@ -88,9 +95,19 @@ namespace gdsFM
             operatorOutputSample = OperatorType_ComputeLogOuput;
         }  //TODO:  Operator types for filters and sample-based outputs
 
+        public void SetOperatorType(byte waveform_index)
+        {
+            try{
+                SetOperatorType(Oscillator.waveFuncs[waveform_index]);
+            } catch(IndexOutOfRangeException e) {
+                System.Diagnostics.Debug.Print(String.Format("Waveform {0} not implemented: {1}", waveform_index, e.ToString()));
+            }
+        }
+
+
         //Oscillator output types.  Either standard waveform (log domain), noise, or sample.
         public short OperatorType_ComputeLogOuput(ushort modulation)
-        {return compute_fb(modulation);}
+        {return ComputeFeedback(modulation);}
 
 
         //Noise generators produce asymmetrical data.  Values must be translated to/from the log domain.
@@ -110,8 +127,8 @@ namespace gdsFM
 
 
 
-        bool flip=false;
-        public short compute_volume(ushort modulation, ushort am_offset)
+        bool flip=false;  // Used by the oscillator to flip the waveform's values.  TODO:  User-specified waveform inversion
+        public short ComputeVolume(ushort modulation, ushort am_offset)
         {
             // start with the upper 10 bits of the phase value plus modulation
             // the low 10 bits of this result represents a full 2*PI period over
@@ -125,7 +142,6 @@ namespace gdsFM
             // get the attenuation from the evelope generator as a 4.6 value, shifted up to 4.8
             ushort env_attenuation = (ushort) (envelope_attenuation() << 2);
             // ushort env_attenuation = envelope_attenuation(am_offset) << 2;
-            // ushort env_attenuation = 0;
 
             // combine into a 5.8 value, then convert from attenuation to 13-bit linear volume
             int result = Tables.attenuation_to_volume((ushort)(sin_attenuation + env_attenuation));
@@ -134,50 +150,22 @@ namespace gdsFM
 
             // negate if in the negative part of the sin wave (sign bit gives 14 bits)
             return flip ? (short)-result : (short)result;
-            // return Tools.BIT(phase, 9).ToBool() ? (short)-result : result;
         }
 
 
         /// Summary:  Calculates the self feedback of the given input with the given modulation amount.
-        public short compute_fb(ushort modulation)
+        public short ComputeFeedback(ushort modulation)
         {
-            if (eg.feedback == 0) return compute_volume(modulation, 0);    
+            if (eg.feedback == 0) return ComputeVolume(modulation, 0);    
             var avg = (fbBuf[0] + fbBuf[1]) >> (10 - eg.feedback);
-            var output = compute_volume(unchecked((ushort)(avg+modulation)),0);
+            var output = ComputeVolume(unchecked((ushort)(avg+modulation)),0);
             fbBuf[1] = fbBuf[0];
             fbBuf[0] = output;
 
             return output;
         }
 
-        /// summary:  Given a MIDI note value 0-127,  produce an increment appropriate to oscillate at the tone of the note.
-        public void NoteSelect(byte n)
-        {
-            const int NOTE_A4=69;
-            // noteIncrement = IncOfFreq(440.0 * Math.Pow(2, (n-NOTE_A4)/12.0));
-            var whole = IncOfFreq(Global.BASE_HZ * Math.Pow(2, (n-NOTE_A4)/12.0));
-            var frac = whole - Math.Truncate(whole);
-        
-            noteIncrement = (uint)(frac * Global.FRAC_SIZE) | ((uint)(whole) << Global.FRAC_PRECISION_BITS);
-            
-        }
-        /// summary:  Given a hz rate, produce an increment appropriate to tune the oscillator to this rate.
-        public void FreqSelect(double freq)
-        {
-            // noteIncrement = IncOfFreq(freq);
-            var whole = IncOfFreq(freq);
-            var frac = whole - Math.Truncate(whole);
-        
-            noteIncrement = (ulong)(frac * Global.FRAC_SIZE) | ((ulong)(whole) << Global.FRAC_PRECISION_BITS);
-            // noteIncrement &= Int32.MaxValue;
-        }
 
-
-        public static double FRatio { get =>  (1<<Tables.SINE_TABLE_BITS) / Global.MixRate; } // The increment of a frequency of 1 at the current mixing rate.
-        public static double IncOfFreq(double freq)  //Get the increment of a given frequency.
-        {
-            return FRatio * freq;
-        }
 
 
 //////////////////// ENVELOPE /////////////////////////

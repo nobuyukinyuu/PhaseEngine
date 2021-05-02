@@ -1,5 +1,6 @@
 using System;
 using gdsFM;
+using GdsFMJson;
 
     //Thoughts:  Rates probably need fixed integer math to work, then translated to a level at the very end, since increments are very small.
 
@@ -7,9 +8,10 @@ namespace gdsFM
 {
     public class Envelope
     {
-        public ushort attenuation;  //5-bit value
         const ushort L_MAX = 1023; //Max attenuation level
         const byte R_MAX = 63;  //Max rate
+
+        public ushort attenuation;  //5-bit value
         public EGStatus status = EGStatus.SUSTAINED;
 
         public byte ar{get=> rates[0]; set=> rates[0] = value;}
@@ -18,7 +20,6 @@ namespace gdsFM
         public byte rr{get=> rates[3]; set=> rates[3] = value;}
         public byte[] rates = new byte[4];
         public ushort[] levels = new ushort[5];
-        public ushort[] precalcLevels = new ushort[5];
         public bool[] rising= {true, false, false, false};  //Precalculates which way to increment the envelope based on the target state.
 
         public ushort delay, hold;
@@ -35,6 +36,14 @@ namespace gdsFM
 
 
         public Envelope() { Reset(); }
+
+        //Copy constructor
+        public Envelope(Envelope prototype) 
+        { 
+            var data = prototype.ToJSONString();
+            if(this.FromString(data))  RecalcLevelRisings();
+            else Reset(); //Attempt copy.  If failure, reinit envelope.
+        }
 
         public void Reset(bool rates=true, bool levels=true)
         {
@@ -66,6 +75,44 @@ namespace gdsFM
             // rising[(int)EGStatus.DECAY] = (al > dl);
             // rising[(int)EGStatus.SUSTAINED] = (dl > sl);
             // rising[(int)EGStatus.RELEASED] = (sl > rl);            
+        }
+
+        public bool FromString(string input)
+        {
+            var P = JSONData.ReadJSON(input);
+            if (P is JSONDataError) return false;
+            var j = (JSONObject) P;
+
+            try
+            {
+                rates = j.GetItem<byte>("rates", rates);
+                levels = j.GetItem<ushort>("levels", levels);
+                // rising = j.GetItem<bool>("rising", rising);
+
+                j.Assign("delay", ref delay);
+                j.Assign("hold", ref hold);
+                j.Assign("feedback", ref feedback);
+                j.Assign("duty", ref duty);
+            } catch {
+                return false;
+            }
+            
+            return true;
+        }
+
+        public string ToJSONString()
+        {
+            var o = new JSONObject();
+            o.AddPrim<byte>("rates", rates);
+            o.AddPrim<ushort>("levels", levels);
+            // o.AddPrim<bool>("rising", rising);
+
+            o.AddPrim("delay", delay);
+            o.AddPrim("hold", hold);
+            o.AddPrim("feedback", feedback);
+            o.AddPrim("duty", duty);
+
+            return o.ToJSONString();
         }
 
     }

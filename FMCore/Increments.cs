@@ -28,6 +28,7 @@ namespace gdsFM
             o.mult = 1;  
             o.base_hz=o.hz=Global.BASE_HZ;
             o.increment = o.tunedIncrement = o.noteIncrement = IncOfFreq(o.hz);
+            // o.fixedFreq = true;
             return o;
         }
 
@@ -104,7 +105,8 @@ namespace gdsFM
             return (long)(frac * Global.FRAC_SIZE) | ((long)(whole) << Global.FRAC_PRECISION_BITS);
         }
 
-        public static double FRatio { get =>  (1<<Tables.SINE_TABLE_BITS) / Global.MixRate; } // The increment of a frequency of 1 at the current mixing rate.
+        // public static double FRatio { get =>  (1<<Tables.SINE_TABLE_BITS) / Global.MixRate; } // The increment of a frequency of 1 at the current mixing rate.
+        public static double FRatio { get =>  0x400 / Global.MixRate; } //The increment of a frequency of 1 at the current mixing rate. We assume default table size of 1024.
         private static double IncOfFreqD(double freq)  //Get the increment of a given frequency as a double.
             {return FRatio * freq;}
 

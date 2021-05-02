@@ -692,6 +692,19 @@ namespace GdsFMJson{
             if (item != null)  { val = item.ToInt();  return true; }
             return false;
         }
+        public bool Assign(string name, ref ushort val)
+        {
+            JSONDataItem item = values.ContainsKey(name)? values[name] : null;
+            if (item != null)  { val = (ushort) item.ToInt();  return true; }
+            return false;
+        }
+        public bool Assign(string name, ref byte val)
+        {
+            JSONDataItem item = values.ContainsKey(name)? values[name] : null;
+            if (item != null)  { val = (byte) item.ToInt();  return true; }
+            return false;
+        }
+
         public bool Assign(string name, ref float val)
         {
             JSONDataItem item = values.ContainsKey(name)? values[name] : null;

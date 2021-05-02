@@ -38,9 +38,6 @@ public class Test2 : Label
         op.SetOperatorType(Oscillator.Sine);
         op2.SetOperatorType(Oscillator.Sine);
  
-        // op.NoteSelect(0);
-        op.FreqSelect(440);
-        op2.FreqSelect(880);
 
         player.Play();
 
@@ -172,9 +169,6 @@ public class Test2 : Label
     {
         base._PhysicsProcess(delta);
 
-        op2.FreqSelect(acc_inc.Value);
-        op.FreqSelect(acc_inc.Value * 4);
-        // Update();
 
         if (Input.IsActionJustPressed("ui_accept"))
         {
