@@ -11,7 +11,6 @@ namespace gdsFM
 
         public double hz, base_hz;
         double tuned_hz; //Frequency of base_hz * coarse * fine + detune; the tuning without any external modifiers from lfo/controllers
-        public byte midi_note;
 
         public long noteIncrement;  // Calculated from the base frequency
         public long tunedIncrement;  //increment of tuned_hz
@@ -65,7 +64,6 @@ namespace gdsFM
         public static Increments FromNote(byte note)
         {
             var o = new Increments();
-            o.midi_note = note;
             o.NoteSelect(note);
             o.increment = o.noteIncrement;
             return o;

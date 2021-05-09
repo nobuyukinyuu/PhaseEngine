@@ -14,12 +14,19 @@ namespace gdsFM
         public Chip()
         {
             channels = new Channel[polyphony];
+            InitChannels();
         }
 
         public Chip(byte polyphony) 
         {
             this.polyphony = polyphony;
             channels = new Channel[polyphony];
+            InitChannels();
+        }
+
+        void InitChannels()
+        {
+            for(int i=0; i<channels.Length; i++) channels[i] = new Channel(opCount);
         }
 
 
@@ -73,11 +80,50 @@ namespace gdsFM
         //TODO:  Channel request methods for flipping a note on.  Each channel is enumerated for PriorityScore unless one is found free (score of 0?)
         //      Manual requested channel is nullable and should catch out-of-bounds number requests, print an error out and return null.
         //      Auto requested channel should probably never return null....
-        public Channel RequestChannel() {return null;}
-        public Channel RequestChannel(byte channel) {return null;}
+        public Channel RequestChannel(short midi_note=Global.NO_NOTE_SPECIFIED) 
+        {
+            Channel best_candidate = channels[0];
+            var score = 0;
+            for(int i=0; i<channels.Length; i++)
+            {
+                var ch=channels[i];
+                if (ch.busy==BusyState.FREE) 
+                    return ch;
+                if (ch.midi_note == midi_note) //The channel we're peeking is the same note! Turn off. Might be best candidate
+                {
+                    ch.NoteOff();
+                    // continue;
+                }
+
+                var chScore = ch.PriorityScore;
+                if (chScore > score)
+                {
+                    score = chScore;
+                    best_candidate = ch;
+                }
+            }
+            return best_candidate;
+        }
+
+        // //Immediately grabs a channel whether it's busy or not.
+        // public Channel GrabChannel(byte channel) 
+        // {
+        //     var ch = channels[channel];
+        //     return ch;
+        // }
+        public Channel RequestChannel(byte channel) 
+        {
+            try
+            {
+                var ch = channels[channel];
+                return ch.busy==BusyState.FREE?  ch : null;
+            } catch {
+                System.Diagnostics.Debug.Print(String.Format("RequestChannel:  Invalid channel number {0}.",channel));
+                return null;
+            }
+        }
 
     }
- 
 
 }
 

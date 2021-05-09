@@ -5,13 +5,17 @@ namespace gdsFM
 {
     public class Channel
     {
-        public bool busy;
+        public BusyState busy;
         public Operator[] ops;
 
         //TODO:  Move these to Voice.alg
         byte[] processOrder;  //The processing order of the operators.  This should be able to be fetched from wiring grid, or a convenience func in Voice...
         byte[] connections;  //Connections for each operator.  Stored as a bitmask.  NOTE:  If we have more than 8 ops, this won't work....
         int[] cache;  //As each level of the stack gets processed, the sample cache for each operator is updated.
+
+        public byte midi_note;  //Assigned when the channel is requested and used when enumerating channels to help call early NoteOffs for duplicate notes.
+
+        public short lastSample;
 
         public Channel(byte opCount)
         {
@@ -31,12 +35,29 @@ namespace gdsFM
 
         public short PriorityScore
         {get{
-            return 0;
+            var score = Math.Abs(lastSample >> 8);  //0-127
+
+            score += (int)busy;  //1000 points if BusyState.Released;  2000 if free.
+
+            return (short)score;
             //TODO:  Some sorta thing which enumerates the operators for their envelope status and attenuation.  The higher the score, the higher the priority.
             //      Near-silent and near-finished voices should give the lowest scores.  Use processOrder in reverse, checking connections to output only.
             //      Stop and return the score once we hit the first operator with connections, since these don't factor into the final output level.
         }}
 
+
+        public void NoteOn()
+        {
+            for(byte i=0; i<ops.Length; i++)
+            {
+                var inc= /* voice.op.fixedFreq? Increments.FromFreq(hz): */ Increments.FromNote(midi_note);
+                ops[i].NoteOn(/* voice.increments */);
+            }
+        }
+        public void NoteOff()
+        {
+
+        }
 
         /// Main algorithm processor.
         //  TODO:  Pass down LFO status from the chip. 
@@ -77,7 +98,8 @@ namespace gdsFM
                 }
 
             }     
-            return (short)output.Clamp(short.MinValue, short.MaxValue);
+            lastSample = (short)output.Clamp(short.MinValue, short.MaxValue);
+            return lastSample;
         }
 
 

@@ -17,7 +17,7 @@ namespace gdsFM
         public const ushort SIGNED_TO_INDEX = short.MaxValue+1;  //Add this value to an output of the oscillator to get an index for a 16-bit table.
 
 
-        //HQ Sine table  (obsolete, probably unused)
+        //HQ Sine table  (probably unused)
         public const int SINE_TABLE_BITS = 12;  //We bit-shift right by the bit width of the phase counter minus this value to check the table.
         // public const int SINE_TABLE_SHIFT = 32 - SINE_TABLE_BITS;  //How far to shift a phase counter value to be in range of the table.
         public const int SINE_RATIO = SINE_TABLE_BITS - 8;  //How far to shift a phase counter value to be in range of the table.
@@ -36,11 +36,7 @@ namespace gdsFM
         public static readonly ushort[] saw = new ushort[256];
  
 
-        //Attenuation conversion tables
-        public const byte ATTENUATION_BITS = 16;
-        public const uint MAX_ATTENUATION_SIZE = (1 << ATTENUATION_BITS) -1 ;
-        
-
+ 
 
         //Note transposition ratio table
         public static readonly double[] transpose = new double[1300];  //10kb
@@ -163,21 +159,7 @@ namespace gdsFM
             }
         }
 
-        //NOTE:  Canonical reference moved to Oscillator.Sine()
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ushort abs_sin_attenuation(ushort input)
-        {
-            // the values here are stored as 4.8 logarithmic values for 1/4 phase
-            // this matches the internal format of the OPN chip, extracted from the die
 
-            // if the top bit is set, we're in the second half of the curve
-            // which is a mirror image, so invert the index
-            if ( Tools.BIT(input, 8).ToBool() )
-                input = (ushort) ~input;
-
-            // return the value from the table
-            return s_sin_table[input & 0xff];
-        }    
 
 
 

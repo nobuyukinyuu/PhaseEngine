@@ -23,7 +23,7 @@ public class Test2 : Label
     Operator op = new Operator();
     Operator op2 = new Operator();
 
-    Operator[] ops = new Operator[128];
+    Chip c = new Chip();
 
     public override void _Ready()
     {
@@ -44,8 +44,8 @@ public class Test2 : Label
         op.NoteOn();
         op2.NoteOn();
 
-        for(int i=0; i<ops.Length; i++)
-            ops[i] = new Operator();
+        
+
     }
 
     public override void _Process(float delta)

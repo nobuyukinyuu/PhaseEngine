@@ -41,7 +41,14 @@ namespace gdsFM
 
         public static readonly byte[] multTable = {1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 20, 24, 24, 30, 30};
 
+
+        //MIDI note special designations
+        public const short NO_NOTE_SPECIFIED = -1;
+        public const short FIXED_NOTE_SPECIFIED = 0x100;
+
     }
+
+    public enum BusyState{BUSY=0, RELEASED=500, FREE=1000} //Order of BusyState in increasing yoink priority 
 
 
     static internal class XorShift64Star
