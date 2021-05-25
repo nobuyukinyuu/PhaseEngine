@@ -39,7 +39,7 @@ func _draw():
 	var pos2:Vector2
 	var vStr
 	if useHoldTime:
-		val = global.delay_frames_to_time(value)
+		val = global.delay_frames_to_time(value) if not Engine.editor_hint else 00
 
 		var s = "s"
 		if val < 1:  

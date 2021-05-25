@@ -8,11 +8,10 @@ namespace gdsFM
 {
     public class Envelope
     {
-        const ushort L_MAX = 1023; //Max attenuation level
-        const byte R_MAX = 63;  //Max rate
+        public const ushort L_MAX = 1023; //Max attenuation level
+        public const byte R_MAX = 63;  //Max rate
 
         public ushort attenuation;  //5-bit value
-        public EGStatus status = EGStatus.SUSTAINED;
 
         public byte ar{get=> rates[0]; set=> rates[0] = value;}
         public byte dr{get=> rates[1]; set=> rates[1] = value;}
@@ -119,7 +118,7 @@ namespace gdsFM
 
     public enum EGStatus
     {
-        DELAY=-1, ATTACK, HOLD=0xFF, DECAY=1, SUSTAINED, RELEASED, INACTIVE
+        DELAY=-1, ATTACK, HOLD=-2, DECAY=1, SUSTAINED, RELEASED, INACTIVE
     }
 
     // public enum LFOStatus

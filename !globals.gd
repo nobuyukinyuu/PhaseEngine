@@ -6,6 +6,10 @@ const FilterNames = ["None", "Low Pass", "High Pass", "Bandpass (Skirt Gain)", "
 						"Notch", "All-pass", "Peaking" , "Low Shelf", "High Shelf"]
 
 const mixRate = 48000.0  #Also set in Constants.cs for the c# backend.  This is used for UI calculations only
+const NOTE_A4 = 69
+const OPERATOR_TAB_GROUP = 8
+
+signal tab_dropped  #Emitted by a tab drop preview to signal columns to check their dirty state
 
 func arr_replace(arr:Array, a, b):
 	var idx = arr.find(a)

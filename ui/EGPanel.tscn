@@ -1,10 +1,11 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://ui/EGPanel.gd" type="Script" id=1]
 [ext_resource path="res://ui/EGWavePanel.gd" type="Script" id=2]
 [ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=3]
 [ext_resource path="res://gfx/wave/0.png" type="Texture" id=4]
 [ext_resource path="res://gfx/ui/vCheck.png" type="Texture" id=5]
+[ext_resource path="res://ui/envelopeDisplay/EnvelopeDisplay.tscn" type="PackedScene" id=6]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0, 0, 0, 0.25098 )
@@ -64,6 +65,22 @@ func _on_FixedRatio_toggled(button_pressed):
 	pass # Replace with function body.
 "
 
+[sub_resource type="StyleBoxFlat" id=8]
+content_margin_left = 0.0
+content_margin_top = 4.0
+content_margin_bottom = 4.0
+bg_color = Color( 0.0313726, 0.0313726, 0.0627451, 1 )
+border_width_left = 12
+border_width_top = 12
+border_width_right = 12
+border_width_bottom = 12
+border_color = Color( 0, 0, 0, 1 )
+border_blend = true
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
 [node name="EGPanel" type="Tabs"]
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -71,9 +88,9 @@ margin_left = 1.0
 margin_top = 25.0
 margin_right = -1.0
 margin_bottom = -1.0
+rect_min_size = Vector2( 320, 280 )
 script = ExtResource( 1 )
 __meta__ = {
-"_edit_lock_": true,
 "_edit_use_anchors_": false
 }
 
@@ -404,5 +421,15 @@ script = SubResource( 7 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="EnvelopeDisplay" parent="." instance=ExtResource( 6 )]
+margin_left = 7.0
+margin_top = 239.0
+margin_right = 327.0
+margin_bottom = 271.0
+custom_styles/panel = SubResource( 8 )
+thickness = 0.5
+sl = 0.401
+Release = 18
 [connection signal="value_changed" from="WavePanel/Wave" to="WavePanel" method="_on_Wave_value_changed"]
 [connection signal="toggled" from="FixedRatio" to="FixedRatio" method="_on_FixedRatio_toggled"]

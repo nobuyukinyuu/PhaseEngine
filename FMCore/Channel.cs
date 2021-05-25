@@ -35,9 +35,19 @@ namespace gdsFM
 
         public short PriorityScore
         {get{
-            var score = Math.Abs(lastSample >> 8);  //0-127
+            int score = Math.Abs(lastSample >> 8);  //0-127 -- simple volume value
 
+            //Check busy state for free.
+            bool setFree = true;
+            for(int i=0; i<ops.Length; i++)
+            {
+                var op=ops[i];
+                if(busy==BusyState.RELEASED &&  op.egStatus != EGStatus.INACTIVE)  setFree = false;
+                score += (int)ops[i].egStatus;
+            }
+            if (setFree) busy = BusyState.FREE;
             score += (int)busy;  //1000 points if BusyState.Released;  2000 if free.
+
 
             return (short)score;
             //TODO:  Some sorta thing which enumerates the operators for their envelope status and attenuation.  The higher the score, the higher the priority.
@@ -46,17 +56,30 @@ namespace gdsFM
         }}
 
 
-        public void NoteOn()
+        public void NoteOn(byte midi_note=Global.NO_NOTE_SPECIFIED)
         {
+            if (midi_note < 0x80)  this.midi_note = midi_note;
+
             for(byte i=0; i<ops.Length; i++)
             {
-                var inc= /* voice.op.fixedFreq? Increments.FromFreq(hz): */ Increments.FromNote(midi_note);
-                ops[i].NoteOn(/* voice.increments */);
+                var op=ops[i];
+                if (!op.pg.fixedFreq)
+                    op.pg.NoteSelect(this.midi_note);
+                    op.pg.Recalc();
+                op.NoteOn();
             }
         }
+
+        // public void NoteOn(float hz)
+        // {
+        //     //TODO:  Fixed frequency note on?
+        // }
+
         public void NoteOff()
         {
-
+            if(busy==BusyState.BUSY)  busy=BusyState.RELEASED;
+            for(byte i=0; i<ops.Length; i++)
+                ops[i].NoteOff();
         }
 
         /// Main algorithm processor.

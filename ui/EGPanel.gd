@@ -25,6 +25,17 @@ func _ready():
 	pass
 
 
+onready var limiter:SceneTreeTimer = get_tree().create_timer(0)
+func _gui_input(event):
+	if limiter.time_left > 0:  return
+	var vp = get_viewport()
+	if !vp.gui_is_dragging():  return
+	#Since we're detecting a drag, might as well update the owner column's preview rect...
+#	$"..".ownerColumn.update_preview_rect($"..".ownerColumn.get_local_mouse_position())
+	$"..".ownerColumn.reset_drop_preview()
+	limiter = get_tree().create_timer(0.2)
+
+
 
 
 func setEG(value, property):

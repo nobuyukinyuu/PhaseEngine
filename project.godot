@@ -9,12 +9,18 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Control",
+"class": "DragTabPreview",
+"language": "GDScript",
+"path": "res://ui/kanbanScroll/DragTabPreview.gd"
+}, {
 "base": "Panel",
 "class": "EnvelopeDisplay",
 "language": "GDScript",
 "path": "res://ui/envelopeDisplay/EnvelopeDisplay.gd"
 } ]
 _global_script_class_icons={
+"DragTabPreview": "",
 "EnvelopeDisplay": ""
 }
 

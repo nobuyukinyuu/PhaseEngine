@@ -9,6 +9,7 @@ margin_bottom = 20.0
 rect_min_size = Vector2( 128, 20 )
 theme = ExtResource( 2 )
 max_value = 64.0
+scrollable = false
 tick_count = 11
 ticks_on_borders = true
 script = ExtResource( 1 )

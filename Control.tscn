@@ -1,27 +1,36 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=13 format=2]
 
-[ext_resource path="res://ui/EGSlider.gd" type="Script" id=1]
-[ext_resource path="res://gfx/ui/hSlider.theme" type="Theme" id=2]
-[ext_resource path="res://Label.gd" type="Script" id=3]
+[ext_resource path="res://MIDI.gd" type="Script" id=1]
 [ext_resource path="res://Test2.cs" type="Script" id=4]
 [ext_resource path="res://ui/EGPanel.tscn" type="PackedScene" id=5]
 [ext_resource path="res://ui/wiringGrid/WiringGrid.tscn" type="PackedScene" id=6]
-[ext_resource path="res://ui/envelopeDisplay/EnvelopeDisplay.tscn" type="PackedScene" id=7]
+[ext_resource path="res://ui/TabContainerStyle.tres" type="StyleBox" id=7]
 [ext_resource path="res://ui/EGTabBG.stylebox" type="StyleBox" id=8]
+[ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=9]
+[ext_resource path="res://ui/kanbanScroll/ScrollContainer.gd" type="Script" id=10]
+[ext_resource path="res://ui/kanbanScroll/TabGroup.gd" type="Script" id=11]
+[ext_resource path="res://ui/kanbanScroll/TabGroup.tscn" type="PackedScene" id=12]
 
 [sub_resource type="AudioStreamGenerator" id=1]
 mix_rate = 48000.0
 
 [sub_resource type="StyleBoxFlat" id=2]
+content_margin_left = 8.0
+content_margin_right = 8.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
 bg_color = Color( 0, 0, 0, 0.376471 )
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color( 0.8, 0.8, 0.8, 0.337255 )
+corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -31,62 +40,8 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Accumulator" type="HSlider" parent="."]
-margin_left = 808.0
-margin_top = 456.0
-margin_right = 1008.0
-margin_bottom = 476.0
-theme = ExtResource( 2 )
-max_value = 24000.0
-value = 440.0
-exp_edit = true
-tick_count = 11
-ticks_on_borders = true
+[node name="MIDI Control" type="Node" parent="."]
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="BitCrush" type="HSlider" parent="."]
-margin_left = 808.0
-margin_top = 504.0
-margin_right = 1008.0
-margin_bottom = 524.0
-theme = ExtResource( 2 )
-max_value = 65535.0
-value = 69.0
-tick_count = 11
-ticks_on_borders = true
-script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Feedback" type="HSlider" parent="."]
-margin_left = 808.0
-margin_top = 560.0
-margin_right = 1008.0
-margin_bottom = 580.0
-theme = ExtResource( 2 )
-max_value = 10.0
-tick_count = 11
-ticks_on_borders = true
-script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Label" type="Label" parent="."]
-visible = false
-margin_left = 456.0
-margin_top = 232.0
-margin_right = 632.0
-margin_bottom = 320.0
-text = "Ass"
-script = ExtResource( 3 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Test" type="Label" parent="."]
 anchor_left = 1.0
@@ -105,51 +60,87 @@ __meta__ = {
 stream = SubResource( 1 )
 volume_db = -6.0
 
-[node name="TabContainer" type="TabContainer" parent="."]
-margin_left = 16.0
-margin_top = 16.0
+[node name="EGPanel" parent="." instance=ExtResource( 5 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 0.0
+margin_top = 220.0
+margin_right = 256.0
+margin_bottom = 592.0
+chip_loc = NodePath("../Test")
+operator = 2
+
+[node name="WiringGrid" parent="." instance=ExtResource( 6 )]
+
+[node name="Column0" type="ScrollContainer" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -372.0
+custom_styles/bg = SubResource( 2 )
+follow_focus = true
+scroll_horizontal_enabled = false
+script = ExtResource( 10 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="V" type="VBoxContainer" parent="Column0"]
+margin_left = 8.0
+margin_top = 8.0
 margin_right = 352.0
-margin_bottom = 320.0
+margin_bottom = 344.0
+custom_constants/separation = 16
+alignment = 1
+
+[node name="TabGroup0" type="TabContainer" parent="Column0/V"]
+margin_right = 344.0
+margin_bottom = 300.0
+rect_min_size = Vector2( 344, 0 )
 custom_styles/tab_bg = ExtResource( 8 )
-custom_styles/panel = SubResource( 2 )
+custom_styles/panel = ExtResource( 7 )
+custom_fonts/font = ExtResource( 9 )
 custom_constants/side_margin = 0
 tab_align = 0
+drag_to_rearrange_enabled = true
+script = ExtResource( 11 )
 __meta__ = {
 "_edit_group_": true,
 "_edit_use_anchors_": false
 }
 
-[node name="Op1" parent="TabContainer" instance=ExtResource( 5 )]
+[node name="Op1" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
+margin_top = 19.0
 chip_loc = NodePath("../../Test")
 
-[node name="Op2" parent="TabContainer" instance=ExtResource( 5 )]
+[node name="Op2" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
 visible = false
+margin_top = 19.0
 chip_loc = NodePath("../../Test")
 operator = 2
 
-[node name="EGPanel" parent="." instance=ExtResource( 5 )]
-margin_left = 16.0
-margin_top = 328.0
-margin_right = -664.0
-margin_bottom = -8.0
-chip_loc = NodePath("../Test")
-operator = 2
+[node name="Op3" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
+visible = false
+margin_top = 19.0
+chip_loc = NodePath("../../Test")
+operator = 3
 
-[node name="WiringGrid" parent="." instance=ExtResource( 6 )]
-margin_left = 376.0
-margin_top = 336.0
-margin_right = 600.0
-margin_bottom = 560.0
+[node name="Op4" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
+visible = false
+margin_top = 19.0
+chip_loc = NodePath("../../Test")
+operator = 4
 
-[node name="EnvelopeDisplay" parent="." instance=ExtResource( 7 )]
-margin_left = 24.0
-margin_top = 280.0
-margin_right = 344.0
-margin_bottom = 312.0
-thickness = 0.5
-sl = 0.401
-Delay = 0
-Attack = 63
-Hold = 0
-Decay = 63
-Release = 18
+[node name="Op5" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
+visible = false
+margin_top = 19.0
+chip_loc = NodePath("../../Test")
+operator = 5
+
+[node name="Op6" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
+visible = false
+margin_top = 19.0
+chip_loc = NodePath("../../Test")
+operator = 6
+
+[node name="TabGroup1" parent="Column0/V" instance=ExtResource( 12 )]

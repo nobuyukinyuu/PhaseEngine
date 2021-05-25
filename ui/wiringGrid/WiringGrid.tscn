@@ -274,6 +274,7 @@ __meta__ = {
 }
 
 [node name="ReferenceRect" type="ReferenceRect" parent="."]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2

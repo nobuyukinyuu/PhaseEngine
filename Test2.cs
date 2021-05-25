@@ -17,13 +17,12 @@ public class Test2 : Label
     const int scopeHeight = 128;
 
 
-    Slider acc_inc;
-    Slider bitCrush;
-
     Operator op = new Operator();
     Operator op2 = new Operator();
 
     Chip c = new Chip();
+
+    Node fromMidi;
 
     public override void _Ready()
     {
@@ -32,33 +31,46 @@ public class Test2 : Label
         player = GetNode<AudioStreamPlayer>("Player");
         stream = (AudioStreamGenerator) player.Stream;
         buf = (AudioStreamGeneratorPlayback) player.GetStreamPlayback();
-        acc_inc = GetNode<HSlider>("../Accumulator");
-        bitCrush = GetNode<HSlider>("../BitCrush");
 
-        op.SetOperatorType(Oscillator.Sine);
-        op2.SetOperatorType(Oscillator.Sine);
  
 
         player.Play();
 
-        op.NoteOn();
-        op2.NoteOn();
+        // op.NoteOn();
+        // op2.NoteOn();
+        op2.eg.tl = 0;
+        op2.eg.ar = 64;
+        op2.eg.sr = 63;
 
-        
+        fromMidi = Owner.GetNode("MIDI Control");
+
+        fromMidi.Connect("note_on", this, "TryNoteOn");
+        fromMidi.Connect("note_off", this, "TryNoteOff");
 
     }
+
+    public void TryNoteOn(int midi_note, int velocity)
+    {
+        GD.Print("On?  ", midi_note, " ", velocity);
+    }
+
+    public void TryNoteOff(int midi_note)
+    {
+        GD.Print("Off?  ", midi_note);
+    }
+
 
     public override void _Process(float delta)
     {
         // this.Text = String.Format("{0}, {1}:  {2}", op.env_counter.ToString(), op2.eg.attenuation.ToString(), op2.pg.increment.ToString());
         string rising;
-        if (op2.eg.status>=0 && (int)op2.eg.status < op2.eg.rising.Length)
-            rising = op2.eg.rising[(int)op2.eg.status] ? "Rising" : "Falling";
+        if (op2.egStatus>=0 && (int)op2.egStatus < op2.eg.rising.Length)
+            rising = op2.eg.rising[(int)op2.egStatus] ? "Rising" : "Falling";
         else rising= "x";
-        this.Text = String.Format("{0}, {1}:  {2}, {3}", op.env_counter.ToString(), op2.eg.attenuation.ToString(), op2.eg.status.ToString(), rising);
+        this.Text = String.Format("{0}, {1}:  {2}, {3}", op.env_counter.ToString(), op2.eg.attenuation.ToString(), op2.egStatus.ToString(), rising);
 
-        if (buf.GetSkips() > 0)
-            fill_buffer();
+        // if (buf.GetSkips() > 0)
+        //     fill_buffer();
 
     }
 

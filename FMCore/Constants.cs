@@ -43,8 +43,8 @@ namespace gdsFM
 
 
         //MIDI note special designations
-        public const short NO_NOTE_SPECIFIED = -1;
-        public const short FIXED_NOTE_SPECIFIED = 0x100;
+        public const byte NO_NOTE_SPECIFIED = 0xFF;
+        public const byte FIXED_NOTE_SPECIFIED = 0xFE;
 
     }
 

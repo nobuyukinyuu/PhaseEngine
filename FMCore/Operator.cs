@@ -15,12 +15,10 @@ namespace gdsFM
         //Parameters specific to Operator
         public short[] fbBuf = new short[2];  //feedback buffer
 
-        public byte feedback = 0;
-        public ushort duty = 32767;
-
-
 
         public Envelope eg = new Envelope();
+        public EGStatus egStatus = EGStatus.INACTIVE;
+
         public Increments pg = Increments.Prototype();
 
         public Oscillator oscillator = new Oscillator(Oscillator.Sine);
@@ -40,11 +38,11 @@ namespace gdsFM
             env_hold_counter = 0;
             eg.attenuation = 1023;
             
-            eg.status = EGStatus.DELAY;
+            egStatus = EGStatus.DELAY;
         }
         public void NoteOff()
         {
-            eg.status = EGStatus.RELEASED;
+            egStatus = EGStatus.RELEASED;
         }
 
         public void Clock()
@@ -172,20 +170,20 @@ namespace gdsFM
     public void EGClock(uint env_counter)
     {
 
-        if (eg.status == EGStatus.INACTIVE) return;
+        if (egStatus == EGStatus.INACTIVE) return;
         ushort target;
 
-        switch (eg.status)
+        switch (egStatus)
         {
         case EGStatus.DELAY:
             if (env_counter >> 2 < eg.delay) return;
-            else {eg.status = EGStatus.ATTACK;  return;}  //Why return here?  Other cases set the target level.  Consider setting it here too.  FIXME
+            else {egStatus = EGStatus.ATTACK;  return;}  //Why return here?  Other cases set the target level.  Consider setting it here too.  FIXME
 
         case EGStatus.ATTACK:
             target = eg.levels[(int)EGStatus.ATTACK];
             if (eg.attenuation <= target)  
             {
-                eg.status = EGStatus.HOLD;
+                egStatus = EGStatus.HOLD;
                 return;
             }
             break;
@@ -193,7 +191,7 @@ namespace gdsFM
         case EGStatus.HOLD:
             if ((env_hold_counter >> 2) >= eg.hold)
             {
-                eg.status = EGStatus.DECAY;
+                egStatus = EGStatus.DECAY;
                 // target = eg.levels[(int)EGStatus.DECAY];
             } else {
                 env_hold_counter++; 
@@ -203,20 +201,35 @@ namespace gdsFM
 
         case EGStatus.DECAY:
             target = eg.levels[(int)EGStatus.DECAY];
-            if ( ((eg.attenuation >= target) && !eg.rising[(int)EGStatus.DECAY]) | (eg.rising[(int)EGStatus.DECAY] && (eg.attenuation <= target)))  eg.status ++;
+            if ( ((eg.attenuation >= target) && !eg.rising[(int)EGStatus.DECAY]) | (eg.rising[(int)EGStatus.DECAY] && (eg.attenuation <= target)))  egStatus ++;
             break;
         case EGStatus.SUSTAINED:
             target = eg.levels[(int)EGStatus.SUSTAINED];
-            if ( ((eg.attenuation >= target) && !eg.rising[(int)EGStatus.SUSTAINED]) | (eg.rising[(int)EGStatus.SUSTAINED] && (eg.attenuation <= target)))  return;
-            // if (eg.attenuation >= target) return;
-            //TODO:  Logic to keep sustain at target attenuation until NoteOff;  check NoteOff before iterating status to release
+            if ( ((eg.attenuation >= target) && !eg.rising[(int)EGStatus.SUSTAINED]) | (eg.rising[(int)EGStatus.SUSTAINED] && (eg.attenuation <= target)))  
+            {   //We're at the target sustain level.  Check if we can early exit to inactive state.
+
+                // // FIXME:  If release levels != L_MAX become supported, use the more complicated check commented out below and remove the simple check.
+                // var releaseTarget = eg.levels[(int)EGStatus.RELEASED];
+                // if(target == releaseTarget && releaseTarget == Envelope.L_MAX)  egStatus = EGStatus.INACTIVE;
+
+                if(target == Envelope.L_MAX)  egStatus = EGStatus.INACTIVE;
+                return;
+            }
+            break;
+        case EGStatus.RELEASED:
+            target = Envelope.L_MAX;  //Max attenuation until a different release level is supported (which may be never)
+            if ( ((eg.attenuation >= target) && !eg.rising[(int)EGStatus.SUSTAINED]) | (eg.rising[(int)EGStatus.SUSTAINED] && (eg.attenuation <= target)))  
+            {
+                egStatus = EGStatus.INACTIVE;
+                return;
+            }
 
             break;
         }
 
         // determine our raw 5-bit rate value
         // byte rate = effective_rate(m_regs.adsr_rate(m_env_state), keycode);
-        byte rate = eg.rates[(byte) eg.status];
+        byte rate = eg.rates[(byte) egStatus];
 
         // compute the rate shift value; this is the shift needed to
         // apply to the env_counter such that it becomes a 5.11 fixed
@@ -234,12 +247,12 @@ namespace gdsFM
 
 
         // attack is the only one that increases
-        // if (eg.status == EGStatus.ATTACK || eg.rising[(int)eg.status])
-        if (eg.status == EGStatus.ATTACK)
+        // if (egStatus == EGStatus.ATTACK || eg.rising[(int)egStatus])
+        if (egStatus == EGStatus.ATTACK)
         {
             eg.attenuation += (ushort) ((~eg.attenuation * increment) >> 4);
 
-        } else if (eg.rising[(int)eg.status]) {  //Decrement.
+        } else if (eg.rising[(int)egStatus]) {  //Decrement.
             eg.attenuation = (ushort) Math.Max(eg.attenuation-increment, 0);
         } else {  //Most envelope states simply increase the attenuation by the increment previously determined
             eg.attenuation += increment;

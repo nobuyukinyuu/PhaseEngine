@@ -38,10 +38,6 @@ namespace gdsFM
             }
         }
 
-        //TODO:  NoteOn func that can grab an unbusy note.  Should also return a handle to the channel the note was assigned.
-        //      Consider returning false/-1 instead of stealing a channel to simplify NoteOff calls if a channel was already reappropriated due to polyphony limit.
-        //      or, have an out variable for the channel and return true or false if note was stolen.  NoteOffs shouldn't do anything for "free" channels.
-
         public short RequestSample()
         {
             int output=0;
@@ -77,10 +73,40 @@ namespace gdsFM
         #endif
 
 
+        //TODO:  NoteOn func that can grab an unbusy note.  Should also return a handle to the channel the note was assigned.
+        //      Consider returning false/-1 instead of stealing a channel to simplify NoteOff calls if a channel was already reappropriated due to polyphony limit.
+        //      or, have an out variable for the channel and return true or false if note was stolen.  NoteOffs shouldn't do anything for "free" channels.
+        public bool NoteOn(Channel ch, byte midi_note)
+        {
+            if (ch == null) return false;
+            ch.NoteOn(midi_note);
+            return true;
+        }
+        public bool NoteOn(byte midi_note)
+        {
+            Channel ch = RequestChannel();
+            return NoteOn(ch, midi_note);
+        }
+
+        public bool NoteOff(Channel ch)
+        {
+            if (ch == null) return false;
+            ch.NoteOff();
+            return true;
+        }
+        public bool NoteOff(byte midi_note)
+        {
+            Channel ch = FindChannel(midi_note);
+            if (ch == null) return false;
+            ch.NoteOff();
+            return true;
+        }
+
+
         //TODO:  Channel request methods for flipping a note on.  Each channel is enumerated for PriorityScore unless one is found free (score of 0?)
         //      Manual requested channel is nullable and should catch out-of-bounds number requests, print an error out and return null.
         //      Auto requested channel should probably never return null....
-        public Channel RequestChannel(short midi_note=Global.NO_NOTE_SPECIFIED) 
+        public Channel RequestChannel(byte midi_note=Global.NO_NOTE_SPECIFIED) 
         {
             Channel best_candidate = channels[0];
             var score = 0;
@@ -92,7 +118,7 @@ namespace gdsFM
                 if (ch.midi_note == midi_note) //The channel we're peeking is the same note! Turn off. Might be best candidate
                 {
                     ch.NoteOff();
-                    // continue;
+                    // return ch;
                 }
 
                 var chScore = ch.PriorityScore;
@@ -111,7 +137,17 @@ namespace gdsFM
         //     var ch = channels[channel];
         //     return ch;
         // }
-        public Channel RequestChannel(byte channel) 
+        public Channel FindChannel(byte midi_note)
+        {
+            for(int i=0; i<channels.Length; i++)
+            {
+                var ch=channels[i];
+                if(ch.midi_note == midi_note) return ch;
+            }
+            return null;
+        }
+
+        public Channel RequestChannelOrNull(byte channel) 
         {
             try
             {
