@@ -119,7 +119,9 @@ namespace gdsFM
             const float SCALE = 1.0f / 8192;
 
             ushort logScale = (ushort)(Tables.attenuation_to_volume(env_attenuation));
-            short result = (short) (samp * (logScale * SCALE));
+
+            var tl = 1 - (eg.tl*Global.ONE_PER_THOU);
+            short result = (short) (samp * (logScale * SCALE) * tl);
 
             return result;
         }
