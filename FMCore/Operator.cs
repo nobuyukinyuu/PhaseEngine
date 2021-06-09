@@ -18,6 +18,7 @@ namespace gdsFM
 
         public Envelope eg = new Envelope();
         public EGStatus egStatus = EGStatus.INACTIVE;
+        public ushort egAttenuation = Envelope.L_MAX;  //5-bit value
 
         public Increments pg = Increments.Prototype();
 
@@ -36,8 +37,8 @@ namespace gdsFM
             phase=0;
             env_counter = 0;
             env_hold_counter = 0;
-            eg.attenuation = 1023;
-            
+
+            egAttenuation = Envelope.L_MAX;
             egStatus = EGStatus.DELAY;
         }
         public void NoteOff()
@@ -164,129 +165,129 @@ namespace gdsFM
         }
 
 
-
-
 //////////////////// ENVELOPE /////////////////////////
-    public void EGClock(uint env_counter)
-    {
-
-        if (egStatus == EGStatus.INACTIVE) return;
-        ushort target;
-
-        switch (egStatus)
+        public void EGClock(uint env_counter)
         {
-        case EGStatus.DELAY:
-            if (env_counter >> 2 < eg.delay) return;
-            else {egStatus = EGStatus.ATTACK;  return;}  //Why return here?  Other cases set the target level.  Consider setting it here too.  FIXME
 
-        case EGStatus.ATTACK:
-            target = eg.levels[(int)EGStatus.ATTACK];
-            if (eg.attenuation <= target)  
+            if (egStatus == EGStatus.INACTIVE) return;
+            ushort target;
+
+            switch (egStatus)
             {
-                egStatus = EGStatus.HOLD;
-                return;
-            }
-            break;
+            case EGStatus.DELAY:
+                if (env_counter >> 2 < eg.delay) return;
+                else {egStatus = EGStatus.ATTACK;  return;}  //Why return here?  Other cases set the target level.  Consider setting it here too.  FIXME
 
-        case EGStatus.HOLD:
-            if ((env_hold_counter >> 2) >= eg.hold)
+            case EGStatus.ATTACK:
+                target = eg.levels[(int)EGStatus.ATTACK];
+                if (egAttenuation <= target)  
+                {
+                    egStatus = EGStatus.HOLD;
+                    return;
+                }
+                break;
+
+            case EGStatus.HOLD:
+                if ((env_hold_counter >> 2) >= eg.hold)
+                {
+                    egStatus = EGStatus.DECAY;
+                    // target = eg.levels[(int)EGStatus.DECAY];
+                } else {
+                    env_hold_counter++; 
+                    return;
+                }
+                break;
+
+            case EGStatus.DECAY:
+                target = eg.levels[(int)EGStatus.DECAY];
+                if ( ((egAttenuation >= target) && !eg.rising[(int)EGStatus.DECAY]) | (eg.rising[(int)EGStatus.DECAY] && (egAttenuation <= target)))  egStatus ++;
+                break;
+            case EGStatus.SUSTAINED:
+                target = eg.levels[(int)EGStatus.SUSTAINED];
+                if ( ((egAttenuation >= target) && !eg.rising[(int)EGStatus.SUSTAINED]) | (eg.rising[(int)EGStatus.SUSTAINED] && (egAttenuation <= target)))  
+                {   //We're at the target sustain level.  Check if we can early exit to inactive state.
+
+                    // // FIXME:  If release levels != L_MAX become supported, use the more complicated check commented out below and remove the simple check.
+                    // var releaseTarget = eg.levels[(int)EGStatus.RELEASED];
+                    // if(target == releaseTarget && releaseTarget == Envelope.L_MAX)  egStatus = EGStatus.INACTIVE;
+
+                    if(target == Envelope.L_MAX)  egStatus = EGStatus.INACTIVE;
+                    return;
+                }
+                break;
+            case EGStatus.RELEASED:
+                target = Envelope.L_MAX;  //Max attenuation until a different release level is supported (which may be never)
+                if ( ((egAttenuation >= target) && !eg.rising[(int)EGStatus.SUSTAINED]) | (eg.rising[(int)EGStatus.SUSTAINED] && (egAttenuation <= target)))  
+                {
+                    egStatus = EGStatus.INACTIVE;
+                    return;
+                }
+
+                break;
+            }
+
+            // determine our raw 5-bit rate value
+            // byte rate = effective_rate(m_regs.adsr_rate(m_env_state), keycode);
+            byte rate = eg.rates[(byte) egStatus];
+
+            // compute the rate shift value; this is the shift needed to
+            // apply to the env_counter such that it becomes a 5.11 fixed
+            // point number
+            byte rate_shift = (byte)(rate >> 2);
+            env_counter <<= rate_shift;
+
+            // see if the fractional part is 0; if not, it's not time to clock
+            if (Tools.BIT(env_counter, 0, 11) != 0)
+                return;
+
+
+            // determine the increment based on the non-fractional part of env_counter
+            byte increment = Tables.attenuation_increment(rate, (byte) Tools.BIT(env_counter, 11, 3));
+
+
+            // attack is the only one that increases
+            // if (egStatus == EGStatus.ATTACK || eg.rising[(int)egStatus])
+            if (egStatus == EGStatus.ATTACK)
             {
-                egStatus = EGStatus.DECAY;
-                // target = eg.levels[(int)EGStatus.DECAY];
-            } else {
-                env_hold_counter++; 
-                return;
-            }
-            break;
+                egAttenuation += (ushort) ((~egAttenuation * increment) >> 4);
 
-        case EGStatus.DECAY:
-            target = eg.levels[(int)EGStatus.DECAY];
-            if ( ((eg.attenuation >= target) && !eg.rising[(int)EGStatus.DECAY]) | (eg.rising[(int)EGStatus.DECAY] && (eg.attenuation <= target)))  egStatus ++;
-            break;
-        case EGStatus.SUSTAINED:
-            target = eg.levels[(int)EGStatus.SUSTAINED];
-            if ( ((eg.attenuation >= target) && !eg.rising[(int)EGStatus.SUSTAINED]) | (eg.rising[(int)EGStatus.SUSTAINED] && (eg.attenuation <= target)))  
-            {   //We're at the target sustain level.  Check if we can early exit to inactive state.
-
-                // // FIXME:  If release levels != L_MAX become supported, use the more complicated check commented out below and remove the simple check.
-                // var releaseTarget = eg.levels[(int)EGStatus.RELEASED];
-                // if(target == releaseTarget && releaseTarget == Envelope.L_MAX)  egStatus = EGStatus.INACTIVE;
-
-                if(target == Envelope.L_MAX)  egStatus = EGStatus.INACTIVE;
-                return;
-            }
-            break;
-        case EGStatus.RELEASED:
-            target = Envelope.L_MAX;  //Max attenuation until a different release level is supported (which may be never)
-            if ( ((eg.attenuation >= target) && !eg.rising[(int)EGStatus.SUSTAINED]) | (eg.rising[(int)EGStatus.SUSTAINED] && (eg.attenuation <= target)))  
-            {
-                egStatus = EGStatus.INACTIVE;
-                return;
+            } else if (eg.rising[(int)egStatus]) {  //Decrement.
+                egAttenuation = (ushort) Math.Max(egAttenuation-increment, 0);
+            } else {  //Most envelope states simply increase the attenuation by the increment previously determined
+                egAttenuation += increment;
             }
 
-            break;
+
+            // clamp the final attenuation
+            if (egAttenuation >= 0x400)
+                egAttenuation = 0x3ff;
+
         }
 
-        // determine our raw 5-bit rate value
-        // byte rate = effective_rate(m_regs.adsr_rate(m_env_state), keycode);
-        byte rate = eg.rates[(byte) egStatus];
 
-        // compute the rate shift value; this is the shift needed to
-        // apply to the env_counter such that it becomes a 5.11 fixed
-        // point number
-        byte rate_shift = (byte)(rate >> 2);
-        env_counter <<= rate_shift;
+        //-------------------------------------------------
+        //  envelope_attenuation - return the effective
+        //  attenuation of the envelope
+        //-------------------------------------------------
 
-        // see if the fractional part is 0; if not, it's not time to clock
-        if (Tools.BIT(env_counter, 0, 11) != 0)
-            return;
-
-
-        // determine the increment based on the non-fractional part of env_counter
-        byte increment = Tables.attenuation_increment(rate, (byte) Tools.BIT(env_counter, 11, 3));
-
-
-        // attack is the only one that increases
-        // if (egStatus == EGStatus.ATTACK || eg.rising[(int)egStatus])
-        if (egStatus == EGStatus.ATTACK)
+        ushort envelope_attenuation()//byte am_offset)
         {
-            eg.attenuation += (ushort) ((~eg.attenuation * increment) >> 4);
+            ushort result = egAttenuation;
 
-        } else if (eg.rising[(int)egStatus]) {  //Decrement.
-            eg.attenuation = (ushort) Math.Max(eg.attenuation-increment, 0);
-        } else {  //Most envelope states simply increase the attenuation by the increment previously determined
-            eg.attenuation += increment;
+            // // add in LFO AM modulation
+            // if (m_regs.lfo_am_enabled())
+            // 	result += am_offset;
+
+            // // add in total level
+            // result += m_regs.total_level() << 3;
+
+            // clamp to max and return
+            return (result < 0x400) ? result : (ushort)0x3ff;
         }
 
 
-        // clamp the final attenuation
-        if (eg.attenuation >= 0x400)
-            eg.attenuation = 0x3ff;
-
     }
 
 
-    //-------------------------------------------------
-    //  envelope_attenuation - return the effective
-    //  attenuation of the envelope
-    //-------------------------------------------------
-
-    ushort envelope_attenuation()//byte am_offset)
-    {
-        ushort result = eg.attenuation;
-
-        // // add in LFO AM modulation
-        // if (m_regs.lfo_am_enabled())
-        // 	result += am_offset;
-
-        // // add in total level
-        // result += m_regs.total_level() << 3;
-
-        // clamp to max and return
-        return (result < 0x400) ? result : (ushort)0x3ff;
-    }
-
-
-    }
 
 }

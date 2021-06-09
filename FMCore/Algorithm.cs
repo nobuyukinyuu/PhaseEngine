@@ -11,7 +11,7 @@ namespace gdsFM
         public byte[] processOrder;  //The processing order of the operators.  This should be able to be fetched from wiring grid, or a convenience func in Voice...
         public byte[] connections;  //Connections for each operator.  Stored as a bitmask.  NOTE:  If we have more than 8 ops, this won't work....
 
-        static readonly byte[] DEFAULT_PROCESS_ORDER = {0,1,2,3,4,5,6,7};
+        public static readonly byte[] DEFAULT_PROCESS_ORDER = {0,1,2,3,4,5,6,7};
 
         public string wiringGrid; //FIXME:  Change to something sane
 

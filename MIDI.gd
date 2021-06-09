@@ -36,19 +36,16 @@ func _ready():
 
 
 func _input(event):
-		
 	if event is InputEventMIDI:
 		match event.message:
 			MIDI_MESSAGE_NOTE_ON:
 
-#				$"../Audio".AddNote(event.pitch, event.velocity, self)
 #				print("Pitch: %s\nVelocity: %s\nPressure: %s\n" % [event.pitch, event.velocity, event.pressure])
 				emit_signal("note_on", event.pitch, event.velocity)
 
 			MIDI_MESSAGE_NOTE_OFF:
 #				$"../Audio".TurnOffNote(event.pitch)
 				emit_signal("note_off", event.pitch)
-				owner.get_node("Audio").TurnOffNote(event.pitch)
 				
 
 			MIDI_MESSAGE_PITCH_BEND:
@@ -59,19 +56,22 @@ func _input(event):
 				
 				
 
-func _process(delta):
+func _process(_delta):
 	#Scan for note pressed.
 	for octave in note_keys.size():
 		for i in note_keys[octave].size():
 			var n = note_names[i] + str(octave)
 			var notenum = key_to_notenum[n]
 			if Input.is_action_just_pressed(n):  #note was pressed or released.			
-#				$"../Audio".AddNote(notenum, 127, self)
 				print(n, " Pitch: %s" % [notenum])
 				emit_signal("note_on", notenum, 127)
 					
 			elif Input.is_action_just_released(n):
 				emit_signal("note_off", notenum)
-#				owner.get_node("Audio").TurnOffNote(notenum)
 
-
+	if Input.is_action_just_pressed("debug1"):
+		var test = owner.get_node("Test")
+		test.NoteLow(true)
+	elif Input.is_action_just_released("debug1"):
+		var test = owner.get_node("Test")
+		test.NoteLow(false)

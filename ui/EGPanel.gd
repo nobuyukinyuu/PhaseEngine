@@ -1,7 +1,7 @@
 extends Tabs
 
 export (NodePath) var chip_loc  #Location of PhaseEngine instance in code
-export(int,1,8) var operator = 1
+export(int,0,8) var operator = 0
 
 var tt = 0
 
@@ -15,18 +15,23 @@ func _ready():
 		if !o is Slider:  continue
 		o.connect("value_changed", self, "setEG", [o.associated_property])
 
+	for o in $Tweak.get_children():
+		if !o is Slider:  continue
+		o.connect("value_changed", self, "setEG", [o.associated_property])
+
+
 	for o in $Levels.get_children():
 		if !o is Slider:  continue
 		o.connect("value_changed", self, "setEG", [o.associated_property])
 
 	$WavePanel/Wave.connect("value_changed", self, "setWaveform")
-	$Tweak/Feedback.connect("value_changed", self, "setFeedback")
-	$Tweak/Duty.connect("value_changed", self, "setDuty")
+#	$Tweak/Feedback.connect("value_changed", self, "setFeedback")
+#	$Tweak/Duty.connect("value_changed", self, "setDuty")
 	pass
 
 
 onready var limiter:SceneTreeTimer = get_tree().create_timer(0)
-func _gui_input(event):
+func _gui_input(_event):
 	if limiter.time_left > 0:  return
 	var vp = get_viewport()
 	if !vp.gui_is_dragging():  return

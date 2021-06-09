@@ -5,9 +5,11 @@ namespace gdsFM
 {
     public class Channel
     {
+        public long eventID;  //Unique value assigned during NoteOn event to identify it later during a NoteOff event.  Always > 0
         public BusyState busy;
         public Operator[] ops;
 
+        Voice voice;
         //TODO:  Move these to Voice.alg
         byte[] processOrder;  //The processing order of the operators.  This should be able to be fetched from wiring grid, or a convenience func in Voice...
         byte[] connections;  //Connections for each operator.  Stored as a bitmask.  NOTE:  If we have more than 8 ops, this won't work....
@@ -21,12 +23,19 @@ namespace gdsFM
         {
             ops = new Operator[opCount];
             processOrder = new byte[opCount];
+            Array.Copy(Algorithm.DEFAULT_PROCESS_ORDER, processOrder, opCount);
             connections = new byte[opCount];
             cache = new int[opCount];
+
+            for(int i=0; i<ops.Length; i++)
+            {
+                ops[i] = new Operator();
+            }
         }
 
         public void Clock()
         {
+            ProcessNextSample();
             for (byte i=0; i<ops.Length; i++)
             {
                 ops[i].Clock();
@@ -34,7 +43,8 @@ namespace gdsFM
         }
 
         public short PriorityScore
-        {get{
+        {
+          get{
             int score = Math.Abs(lastSample >> 8);  //0-127 -- simple volume value
 
             //Check busy state for free.
@@ -53,19 +63,25 @@ namespace gdsFM
             //TODO:  Some sorta thing which enumerates the operators for their envelope status and attenuation.  The higher the score, the higher the priority.
             //      Near-silent and near-finished voices should give the lowest scores.  Use processOrder in reverse, checking connections to output only.
             //      Stop and return the score once we hit the first operator with connections, since these don't factor into the final output level.
-        }}
+          }
+        }
 
 
         public void NoteOn(byte midi_note=Global.NO_NOTE_SPECIFIED)
         {
+            eventID = Global.NewEventID();
             if (midi_note < 0x80)  this.midi_note = midi_note;
 
             for(byte i=0; i<ops.Length; i++)
             {
                 var op=ops[i];
+                op.pg = voice.pgs[i];  //Set Increments to the last Voice increments value (ByVal copy)
+                op.SetOperatorType((byte)voice.opType[i]);  //Set the wave function to what the voice says it should be
+
+                //Prepare the note's increment based on calculated pitch
                 if (!op.pg.fixedFreq)
                     op.pg.NoteSelect(this.midi_note);
-                    op.pg.Recalc();
+                op.pg.Recalc();
                 op.NoteOn();
             }
         }
@@ -85,6 +101,11 @@ namespace gdsFM
         /// Main algorithm processor.
         //  TODO:  Pass down LFO status from the chip. 
         public short RequestSample()
+        {
+            return lastSample;
+        }
+
+        public void ProcessNextSample()
         {
             int output = 0;
 
@@ -121,8 +142,41 @@ namespace gdsFM
                 }
 
             }     
-            lastSample = (short)output.Clamp(short.MinValue, short.MaxValue);
-            return lastSample;
+            lastSample = (short)output.Clamp(short.MinValue, short.MaxValue);            
+        }
+
+
+
+        /// Sets this channel's voice to the specified voice.
+        public void SetVoice(Voice voice)
+        {
+            var maxOps = Math.Min(voice.egs.Length, ops.Length);
+            for (int i=0; i<maxOps;  i++)
+            {
+                ops[i].eg = voice.egs[i];
+                ops[i].pg = voice.pgs[i];  //ByVal copy
+            }
+
+            this.voice = voice;
+        }
+
+        public override string ToString()
+        {
+            var sb = new System.Text.StringBuilder();
+            string nl = Environment.NewLine;
+
+            byte i=0;
+            foreach (Operator op in ops)
+            {
+                string rising;
+                if (op.egStatus>=0 && (int)op.egStatus < op.eg.rising.Length)
+                    rising = op.eg.rising[(int)op.egStatus] ? "Rising" : "Falling";
+                else rising= "Doing nothing";
+                sb.Append( String.Format("Op{0}: {1} and {2}",  i+1, op.egStatus.ToString(), rising) );
+                sb.Append(nl);
+                i++;
+            }
+            return sb.ToString();
         }
 
 

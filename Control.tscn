@@ -13,6 +13,7 @@
 
 [sub_resource type="AudioStreamGenerator" id=1]
 mix_rate = 48000.0
+buffer_length = 0.05
 
 [sub_resource type="StyleBoxFlat" id=2]
 content_margin_left = 8.0
@@ -44,12 +45,10 @@ __meta__ = {
 script = ExtResource( 1 )
 
 [node name="Test" type="Label" parent="."]
-anchor_left = 1.0
-anchor_right = 1.0
-margin_left = -656.0
-margin_top = 8.0
-margin_right = -424.0
-margin_bottom = 22.0
+margin_left = 16.0
+margin_top = 248.0
+margin_right = 248.0
+margin_bottom = 262.0
 text = "ass"
 script = ExtResource( 4 )
 __meta__ = {
@@ -58,19 +57,21 @@ __meta__ = {
 
 [node name="Player" type="AudioStreamPlayer" parent="Test"]
 stream = SubResource( 1 )
-volume_db = -6.0
 
-[node name="EGPanel" parent="." instance=ExtResource( 5 )]
-anchor_right = 0.0
-anchor_bottom = 0.0
-margin_left = 0.0
-margin_top = 220.0
-margin_right = 256.0
-margin_bottom = 592.0
-chip_loc = NodePath("../Test")
-operator = 2
+[node name="ChInfo" type="Label" parent="Test"]
+margin_left = -16.0
+margin_top = 224.0
+margin_right = 48.0
+margin_bottom = 296.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="WiringGrid" parent="." instance=ExtResource( 6 )]
+margin_left = 16.0
+margin_top = 16.0
+margin_right = 272.0
+margin_bottom = 224.0
 
 [node name="Column0" type="ScrollContainer" parent="."]
 anchor_left = 1.0
@@ -111,36 +112,36 @@ __meta__ = {
 
 [node name="Op1" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
 margin_top = 19.0
-chip_loc = NodePath("../../Test")
+chip_loc = NodePath("../../../../Test")
 
 [node name="Op2" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
 visible = false
 margin_top = 19.0
-chip_loc = NodePath("../../Test")
-operator = 2
+chip_loc = NodePath("../../../../Test")
+operator = 1
 
 [node name="Op3" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
 visible = false
 margin_top = 19.0
-chip_loc = NodePath("../../Test")
-operator = 3
+chip_loc = NodePath("../../../../Test")
+operator = 2
 
 [node name="Op4" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
 visible = false
 margin_top = 19.0
-chip_loc = NodePath("../../Test")
-operator = 4
+chip_loc = NodePath("../../../../Test")
+operator = 3
 
 [node name="Op5" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
 visible = false
 margin_top = 19.0
-chip_loc = NodePath("../../Test")
-operator = 5
+chip_loc = NodePath("../../../../Test")
+operator = 4
 
 [node name="Op6" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
 visible = false
 margin_top = 19.0
-chip_loc = NodePath("../../Test")
-operator = 6
+chip_loc = NodePath("../../../../Test")
+operator = 5
 
 [node name="TabGroup1" parent="Column0/V" instance=ExtResource( 12 )]

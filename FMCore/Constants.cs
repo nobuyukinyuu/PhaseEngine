@@ -46,6 +46,17 @@ namespace gdsFM
         public const byte NO_NOTE_SPECIFIED = 0xFF;
         public const byte FIXED_NOTE_SPECIFIED = 0xFE;
 
+
+
+        //Global Event ID counter
+        static long eventID=0;
+        public static long EventID { get => eventID; }
+        public static long NewEventID()
+        {
+            unchecked { System.Threading.Interlocked.Increment(ref eventID); }
+            return eventID;
+        }
+
     }
 
     public enum BusyState{BUSY=0, RELEASED=500, FREE=1000} //Order of BusyState in increasing yoink priority 

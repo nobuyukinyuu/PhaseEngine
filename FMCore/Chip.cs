@@ -5,12 +5,18 @@ namespace gdsFM
 {
     public class Chip
     {
+        public const sbyte NO_CHANNEL_FOUND = -1;
+
         Voice voice = new Voice();  //Description of the timbre.
+        public Voice Voice { get => voice; set => SetVoice(value); }
+
 
         public byte opCount = 6;  //Probably should be moved to a voice class, then the chip given a unitimbral description of the voice. Realloc on major change
         public byte polyphony = 6;
         public Channel[] channels;
 
+
+        #region Constructors
         public Chip()
         {
             channels = new Channel[polyphony];
@@ -24,9 +30,23 @@ namespace gdsFM
             InitChannels();
         }
 
+        public Chip(byte polyphony, byte opCount)
+        {
+            this.opCount = opCount;            
+            this.polyphony = polyphony;
+            channels = new Channel[polyphony];
+            InitChannels();
+        }
+#endregion
+
         void InitChannels()
         {
-            for(int i=0; i<channels.Length; i++) channels[i] = new Channel(opCount);
+            for(int i=0; i<channels.Length; i++) 
+            {
+                channels[i] = new Channel(opCount);
+                channels[i].SetVoice(voice);
+            }
+
         }
 
 
@@ -76,31 +96,52 @@ namespace gdsFM
         //TODO:  NoteOn func that can grab an unbusy note.  Should also return a handle to the channel the note was assigned.
         //      Consider returning false/-1 instead of stealing a channel to simplify NoteOff calls if a channel was already reappropriated due to polyphony limit.
         //      or, have an out variable for the channel and return true or false if note was stolen.  NoteOffs shouldn't do anything for "free" channels.
-        public bool NoteOn(Channel ch, byte midi_note)
+
+
+        /// Flips on the specified channel and returns the event ID.
+        public long NoteOn(Channel ch, byte midi_note)
         {
-            if (ch == null) return false;
+            if (ch == null) return NO_CHANNEL_FOUND;
             ch.NoteOn(midi_note);
-            return true;
+            return ch.eventID;
         }
-        public bool NoteOn(byte midi_note)
+        /// Finds the best candidate for a channel and returns its event ID.
+        public long NoteOn(byte midi_note)
         {
-            Channel ch = RequestChannel();
+            Channel ch = RequestChannel(midi_note);
             return NoteOn(ch, midi_note);
         }
 
+        /// Turns off the specified channel.  Returns false if the channel is invalid.
         public bool NoteOff(Channel ch)
         {
             if (ch == null) return false;
             ch.NoteOff();
             return true;
         }
+
+        /// Turns off all channels with the corresponding midi note.
         public bool NoteOff(byte midi_note)
         {
-            Channel ch = FindChannel(midi_note);
+            var chs = FindChannels(midi_note);
+            if (chs.Length == 0) return false;
+            
+            for(int i=0; i<chs.Length;  i++)
+            {
+                chs[i].NoteOff();
+            }
+            return true;
+        }
+        /// Turns off the channel with the corresponding event ID.
+        public bool NoteOff(long eventID)
+        {
+            if (eventID <= 0) return false;
+            Channel ch = FindChannel(eventID);
             if (ch == null) return false;
             ch.NoteOff();
             return true;
         }
+
 
 
         //TODO:  Channel request methods for flipping a note on.  Each channel is enumerated for PriorityScore unless one is found free (score of 0?)
@@ -137,14 +178,25 @@ namespace gdsFM
         //     var ch = channels[channel];
         //     return ch;
         // }
-        public Channel FindChannel(byte midi_note)
+        public Channel[] FindChannels(byte midi_note)
+        {
+            var output = new System.Collections.Generic.List<Channel>(polyphony);
+            for(int i=0; i<channels.Length; i++)
+            {
+                var ch=channels[i];
+                if(ch.midi_note == midi_note) output.Add(ch);
+            }
+            return output.ToArray();
+        }
+        public Channel FindChannel(long eventID)
         {
             for(int i=0; i<channels.Length; i++)
             {
                 var ch=channels[i];
-                if(ch.midi_note == midi_note) return ch;
+                if(ch.eventID == eventID) return ch;
             }
             return null;
+
         }
 
         public Channel RequestChannelOrNull(byte channel) 
@@ -157,6 +209,14 @@ namespace gdsFM
                 System.Diagnostics.Debug.Print(String.Format("RequestChannel:  Invalid channel number {0}.",channel));
                 return null;
             }
+        }
+
+        /// Updates all channels' references to the canonical voice.
+        public void SetVoice(Voice v)
+        {
+            voice = v;
+            for (int i=0; i<channels.Length; i++)
+                channels[i].SetVoice(v);
         }
 
     }

@@ -17,10 +17,8 @@ public class Test2 : Label
     const int scopeHeight = 128;
 
 
-    Operator op = new Operator();
-    Operator op2 = new Operator();
-
-    Chip c = new Chip();
+    Chip c = new Chip(1,1);
+    long[] lastID = new long[128];  //Keeps track of the last ID pressed on a specified note, to turn it off when a noteOff event is detected.
 
     Node fromMidi;
 
@@ -38,9 +36,6 @@ public class Test2 : Label
 
         // op.NoteOn();
         // op2.NoteOn();
-        op2.eg.tl = 0;
-        op2.eg.ar = 64;
-        op2.eg.sr = 63;
 
         fromMidi = Owner.GetNode("MIDI Control");
 
@@ -49,89 +44,70 @@ public class Test2 : Label
 
     }
 
+    public void NoteLow(bool on)
+    {
+        if(on) c.NoteOn(12); else c.NoteOff(12);
+    }
+
     public void TryNoteOn(int midi_note, int velocity)
     {
-        GD.Print("On?  ", midi_note, " ", velocity);
+        lastID[midi_note] = c.NoteOn((byte)midi_note);
+        GD.Print("On?  ", midi_note, " ", velocity, ";  id=", lastID[midi_note]);
     }
 
     public void TryNoteOff(int midi_note)
     {
-        GD.Print("Off?  ", midi_note);
+        GD.Print("Off?  ", midi_note, ";  id=", lastID[midi_note]);
+        // c.NoteOff((byte)midi_note);  //Inefficient!! Consider NoteOff to the last event only.
+        c.NoteOff(lastID[midi_note]);  
     }
 
 
     public override void _Process(float delta)
     {
-        // this.Text = String.Format("{0}, {1}:  {2}", op.env_counter.ToString(), op2.eg.attenuation.ToString(), op2.pg.increment.ToString());
-        string rising;
-        if (op2.egStatus>=0 && (int)op2.egStatus < op2.eg.rising.Length)
-            rising = op2.eg.rising[(int)op2.egStatus] ? "Rising" : "Falling";
-        else rising= "x";
-        this.Text = String.Format("{0}, {1}:  {2}, {3}", op.env_counter.ToString(), op2.eg.attenuation.ToString(), op2.egStatus.ToString(), rising);
+        this.Text = c.channels[0].ToString();
+        Update();
 
-        // if (buf.GetSkips() > 0)
-        //     fill_buffer();
+
+        if (buf.GetSkips() > 0)
+            fill_buffer();
+
+        var info = GetNode<Label>("ChInfo");
+        info.Text = Performance.GetMonitor(Performance.Monitor.AudioOutputLatency).ToString();
 
     }
 
     // Called from EG controls to bus to the appropriate tuning properties.
     public void SetPG(int opTarget, string property, float val)
     {
-        Operator op;
-        if (opTarget ==1) op = this.op; else op = this.op2;
-
-        try
-        {
-            op.pg.SetVal(property, val);
-            op.pg.Recalc();
-            // GD.Print(String.Format("Set op{0}.eg.{1} to {2}.", opTarget, property, val));
-        } catch(NullReferenceException) {
-            GD.PrintErr(String.Format("No property handler for op{0}.pg.{1}.", opTarget, property, val));
-        }            
+        c.Voice.SetPG(opTarget, property, val);
     }
-
-
     // Called from EG controls to bus to the appropriate envelope property.
     public void SetEG(int opTarget, string property, float val)
     {
-        Operator op;
-        if (opTarget ==1) op = this.op; else op = this.op2;
-
-        try
-        {
-            op.eg.SetVal(property, unchecked((int) val));
-            // GD.Print(String.Format("Set op{0}.eg.{1} to {2}.", opTarget, property, val));
-        } catch(NullReferenceException) {
-            GD.PrintErr(String.Format("No property handler for op{0}.eg.{1}.", opTarget, property, val));
-        }            
+        c.Voice.SetEG(opTarget, property, val);
     }
+
 
     public void SetWaveform(int opTarget, float val)
     {
-        Operator op;
-        if (opTarget ==1) op = this.op; else op = this.op2;
-
-        try{
-            op.SetOperatorType(Oscillator.waveFuncs[(int)val]);
-        } catch(IndexOutOfRangeException e) {
-            GD.PrintErr(String.Format("Waveform {0} not implemented", val));
-        }
+        c.Voice.SetWaveform(opTarget, val);
     }
 
-    public void SetFeedback(int opTarget, float val)
-    {
-        Operator op;
-        if (opTarget ==1) op = this.op; else op = this.op2;
+    // public void SetFeedback(int opTarget, float val)
+    // {
+    //     Operator op;
+    //     if (opTarget ==1) op = this.op; else op = this.op2;
 
-        op.eg.feedback = (byte)val;
-    }
-    public void SetDuty(int opTarget, float val)
-    {
-        Operator op;
-        if (opTarget ==1) op = this.op; else op = this.op2;
+    //     op.eg.feedback = (byte)val;
+    // }
+    // public void SetDuty(int opTarget, float val)
+    // {
+    //     Operator op;
+    //     if (opTarget ==1) op = this.op; else op = this.op2;
 
-        op.eg.duty = (ushort)val;
-    }
+    //     op.eg.duty = (ushort)val;
+    // }
 
 
     void fill_buffer()
@@ -142,24 +118,16 @@ public class Test2 : Label
         for (int i=0; i<frames;  i++)
         {
             // output[i].x = Tables.short2float[ Oscillator.CrushedSine((ulong)accumulator, (ushort) bitCrush.Value) + Tables.SIGNED_TO_INDEX ];
-            op.Clock();
-            op2.Clock();
-
-
-            // // CPU TEST:  Clock the operators
-            // for(int j=0; j<ops.Length; j++)
-            // {
-            //     ops[j].Clock();
-            //     ops[j].RequestSample();
-            // }
+            c.Clock();
 
 
 
 
 
             // output[i].x = Tables.short2float[  (short) (op2.compute_fb( (ushort)(op.compute_fb(0)>>4))) + Tables.SIGNED_TO_INDEX ] ;
-            output[i].x = Tables.short2float[  (short) (op2.RequestSample( (ushort)(op.RequestSample()>>2))) + Tables.SIGNED_TO_INDEX ] ;
+            // output[i].x = Tables.short2float[  (short) (op2.RequestSample( (ushort)(op.RequestSample()>>2))) + Tables.SIGNED_TO_INDEX ] ;
 
+            output[i].x = c.RequestSampleF();
             output[i].y = output[i].x;
 
 
@@ -180,16 +148,6 @@ public class Test2 : Label
     public override void _PhysicsProcess(float delta)
     {
         base._PhysicsProcess(delta);
-
-
-        if (Input.IsActionJustPressed("ui_accept"))
-        {
-            op.NoteOn();
-            op2.NoteOn();
-        } else if (Input.IsActionJustPressed("ui_cancel")) {
-            op.NoteOff();
-            op2.NoteOff();
-        }
 
     }
 

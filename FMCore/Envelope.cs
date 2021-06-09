@@ -11,7 +11,6 @@ namespace gdsFM
         public const ushort L_MAX = 1023; //Max attenuation level
         public const byte R_MAX = 63;  //Max rate
 
-        public ushort attenuation;  //5-bit value
 
         public byte ar{get=> rates[0]; set=> rates[0] = value;}
         public byte dr{get=> rates[1]; set=> rates[1] = value;}
@@ -32,7 +31,6 @@ namespace gdsFM
 
         public byte feedback = 0;
         public ushort duty=32767;
-
 
         public Envelope() { Reset(); }
 

@@ -10,10 +10,13 @@ namespace gdsFM
 {
     public class Voice
     {
-        public byte opCount = 6;
+        public byte opCount = 6; 
+        public byte[] opType;  //Keeps track of how to set the operator on a new note.  TODO: Consider an enum of all waveforms and filters for serialization purposes
+
 
         //Consider having an array of envelopes for operators to refer to when initializing their voices as the "canonical" voice, and a temporary copy made for alterables.
         public Envelope[] egs;  //Canonical EG data for each operator.
+        public Increments[] pgs;
 
         //Consider making all Channels use references to these vars, and process them properly whenever IO comes in.
         public Algorithm alg = new Algorithm();
@@ -33,10 +36,13 @@ namespace gdsFM
         {
             this.opCount = opCount;
              egs = new Envelope[opCount];
+             pgs = new Increments[opCount];
+             opType = new byte[opCount];
 
             //Chip should pass these down when pulling a channel
-             for (int i=0; i<egs.Length; i++){
+             for (int i=0; i<opCount; i++){
                  egs[i] = new Envelope();
+                 pgs[i] = Increments.Prototype();
              }
         }
 
@@ -78,6 +84,50 @@ namespace gdsFM
             }
         }
         #endif
+
+
+        // Called from EG controls to bus to the appropriate tuning properties.
+        public void SetPG(int opTarget, string property, float val)
+        {
+            // Increments is a struct, so we need to update the canonical info from the Voice and grab a copy whenever notes turn on. 
+            // A consequence of this is that values in Increments (pitch, mainly) can't be adjusted on the fly, only on a new note.
+            
+            try
+            {
+                pgs[opTarget].SetVal(property, val);
+                // pg.Recalc();  // In Voice we don't need to recalc since note selection occurs at NoteOn only
+
+                // GD.Print(String.Format("Set op{0}.eg.{1} to {2}.", opTarget, property, val));
+            } catch(NullReferenceException) {
+                #if GODOT
+                    GD.PrintErr(String.Format("No property handler for op{0}.pg.{1}.", opTarget, property, val));
+                #else
+                    System.Diagnostics.Debug.Print(String.Format("No property handler for op{0}.pg.{1}.", opTarget, property, val));
+                #endif
+            }            
+        }
+        public void SetEG(int opTarget, string property, float val)
+        {
+            var eg = egs[opTarget];
+
+            try
+            {
+                eg.SetVal(property, unchecked((int) val));
+                // GD.Print(String.Format("Set op{0}.eg.{1} to {2}.", opTarget, property, val));
+            } catch(NullReferenceException) {
+                #if GODOT
+                    GD.PrintErr(String.Format("No property handler for op{0}.eg.{1}.", opTarget, property, val));
+                #else
+                    System.Diagnostics.Debug.Print(String.Format("No property handler for op{0}.eg.{1}.", opTarget, property, val));
+                #endif
+            }            
+        }
+
+    /// Sets the canonical waveform to reference when setting an operator's waveFunc on NoteOn.
+    public void SetWaveform(int opTarget, float val)
+    {   // NOTE:  This does NOT actually set an operator's waveFunc!  This is done in NoteOn when referencing this value from Voice.
+        opType[opTarget] = (byte)val;
+    }    
 
 
         //TODO:  Front-end IO that de/serializes the wiring grid configuration from an array (user-friendly) to processOrder and connections (code-friendly)
