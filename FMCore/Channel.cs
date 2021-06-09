@@ -6,7 +6,7 @@ namespace gdsFM
     public class Channel
     {
         public long eventID;  //Unique value assigned during NoteOn event to identify it later during a NoteOff event.  Always > 0
-        public BusyState busy;
+        public BusyState busy=BusyState.FREE;
         public Operator[] ops;
 
         Voice voice;
@@ -42,21 +42,26 @@ namespace gdsFM
             }
         }
 
-        public short PriorityScore
+        ////// PRIORITY SCORE
+        public short PriorityScore     
         {
           get{
-            int score = Math.Abs(lastSample >> 8);  //0-127 -- simple volume value
+            int score=(int)256 - (Math.Abs(lastSample >> 6)); //0-127 -- simple volume value; 
+            // int score=0; 
 
             //Check busy state for free.
             bool setFree = true;
             for(int i=0; i<ops.Length; i++)
             {
                 var op=ops[i];
-                if(busy==BusyState.RELEASED &&  op.egStatus != EGStatus.INACTIVE)  setFree = false;
-                score += (int)ops[i].egStatus;
+                if (busy==BusyState.BUSY ||
+                   (busy==BusyState.RELEASED &&  op.egStatus != EGStatus.INACTIVE) )
+                        setFree = false;
+
+                score += (int)ops[i].egStatus <<4;
             }
             if (setFree) busy = BusyState.FREE;
-            score += (int)busy;  //1000 points if BusyState.Released;  2000 if free.
+            score += (int)busy;   //512 points if BusyState.Released;  1024 if free.
 
 
             return (short)score;
@@ -83,6 +88,8 @@ namespace gdsFM
                     op.pg.NoteSelect(this.midi_note);
                 op.pg.Recalc();
                 op.NoteOn();
+
+                busy = BusyState.BUSY;                
             }
         }
 
@@ -172,7 +179,7 @@ namespace gdsFM
                 if (op.egStatus>=0 && (int)op.egStatus < op.eg.rising.Length)
                     rising = op.eg.rising[(int)op.egStatus] ? "Rising" : "Falling";
                 else rising= "Doing nothing";
-                sb.Append( String.Format("Op{0}: {1} and {2}",  i+1, op.egStatus.ToString(), rising) );
+                sb.Append( String.Format("Op{0}: {1} and {2} ({3})",  i+1, op.egStatus.ToString(), rising, op.egAttenuation) );
                 sb.Append(nl);
                 i++;
             }

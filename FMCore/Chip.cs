@@ -219,8 +219,22 @@ namespace gdsFM
                 channels[i].SetVoice(v);
         }
 
-    }
+        public override string ToString()
+        {
+            var sb = new System.Text.StringBuilder();
+            string nl = Environment.NewLine;
 
+            for (int i=0; i<channels.Length; i++)
+            {
+                var ch= channels[i];
+                sb.Append(String.Format("Ch.{0} (ID: {1}): {2} (Priority {3})", i, ch.eventID, ch.busy.ToString(), ch.PriorityScore));
+                sb.Append(nl);
+            }
+            return sb.ToString();
+        }
+
+
+    }
 }
 
 

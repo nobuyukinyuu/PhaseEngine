@@ -17,7 +17,7 @@ public class Test2 : Label
     const int scopeHeight = 128;
 
 
-    Chip c = new Chip(1,1);
+    Chip c = new Chip(4,1);
     long[] lastID = new long[128];  //Keeps track of the last ID pressed on a specified note, to turn it off when a noteOff event is detected.
 
     Node fromMidi;
@@ -73,7 +73,7 @@ public class Test2 : Label
             fill_buffer();
 
         var info = GetNode<Label>("ChInfo");
-        info.Text = Performance.GetMonitor(Performance.Monitor.AudioOutputLatency).ToString();
+        info.Text = c.ToString();
 
     }
 

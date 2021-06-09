@@ -219,7 +219,7 @@ namespace gdsFM
                 break;
             case EGStatus.RELEASED:
                 target = Envelope.L_MAX;  //Max attenuation until a different release level is supported (which may be never)
-                if ( ((egAttenuation >= target) && !eg.rising[(int)EGStatus.SUSTAINED]) | (eg.rising[(int)EGStatus.SUSTAINED] && (egAttenuation <= target)))  
+                if ( ((egAttenuation >= target) && !eg.rising[(int)EGStatus.RELEASED]) | (eg.rising[(int)EGStatus.RELEASED] && (egAttenuation <= target)))  
                 {
                     egStatus = EGStatus.INACTIVE;
                     return;

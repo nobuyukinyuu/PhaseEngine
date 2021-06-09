@@ -59,7 +59,7 @@ namespace gdsFM
 
     }
 
-    public enum BusyState{BUSY=0, RELEASED=500, FREE=1000} //Order of BusyState in increasing yoink priority 
+    public enum BusyState{BUSY=128, RELEASED=512, FREE=1024} //Order of BusyState in increasing yoink priority 
 
 
     static internal class XorShift64Star
