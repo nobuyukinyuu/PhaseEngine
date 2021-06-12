@@ -77,6 +77,21 @@ public class Test2 : Label
 
     }
 
+
+    public Godot.Collections.Dictionary GetOpValues(int whichKind, int opTarget)
+    {
+        switch(whichKind)
+        {
+            case 0: default:  //EG
+                return c.Voice.GetEG(opTarget);
+            case 1:  //PG
+                return c.Voice.GetPG(opTarget);
+        }
+    }
+
+    public int GetOpType(int opTarget){ return c.Voice.opType[opTarget]; }
+
+
     // Called from EG controls to bus to the appropriate tuning properties.
     public void SetPG(int opTarget, string property, float val)
     {

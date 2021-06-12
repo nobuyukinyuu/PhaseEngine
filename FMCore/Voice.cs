@@ -61,28 +61,33 @@ namespace gdsFM
         }
 
         #if GODOT
-        //Initializes new voice from a pure godot dict containing json data.  Necessary if changing opCount
-        public Voice(Godot.Collections.Dictionary d)
-        {
-            InitVoice((byte) d["opCount"]);
-            FromJSON( (JSONObject) JSONData.ReadJSON(d.ToString()) );
-        }
-
-        public void ChangeAlgorithm(Godot.Collections.Dictionary d)
-        {
-            wiringGrid = (String) d["grid"];  //Provide a description of the wiring grid for serialization
-            opCount = (byte) d["opCount"];
-            var order = (Godot.Collections.Array<int>) d["processOrder"];
-            var c = (Godot.Collections.Array<int>) d["connections"];
-
-            alg.processOrder = new byte[opCount];
-            alg.connections = new byte[opCount];
-            for(int i=0; i<opCount; i++)
+            //Initializes new voice from a pure godot dict containing json data.  Necessary if changing opCount
+            public Voice(Godot.Collections.Dictionary d)
             {
-                alg.processOrder[i] = (byte) order[i];
-                alg.connections[i] = (byte) c[i];
+                InitVoice((byte) d["opCount"]);
+                FromJSON( (JSONObject) JSONData.ReadJSON(d.ToString()) );
             }
-        }
+
+            public void ChangeAlgorithm(Godot.Collections.Dictionary d)
+            {
+                wiringGrid = (String) d["grid"];  //Provide a description of the wiring grid for serialization
+                opCount = (byte) d["opCount"];
+                var order = (Godot.Collections.Array<int>) d["processOrder"];
+                var c = (Godot.Collections.Array<int>) d["connections"];
+
+                alg.processOrder = new byte[opCount];
+                alg.connections = new byte[opCount];
+                for(int i=0; i<opCount; i++)
+                {
+                    alg.processOrder[i] = (byte) order[i];
+                    alg.connections[i] = (byte) c[i];
+                }
+            }
+
+        public Godot.Collections.Dictionary GetEG(int opTarget) {return egs[opTarget].GetDictionary();}
+        public Godot.Collections.Dictionary GetPG(int opTarget) {return pgs[opTarget].GetDictionary();}
+
+
         #endif
 
 

@@ -431,7 +431,7 @@ margin_right = 327.0
 margin_bottom = 271.0
 custom_styles/panel = SubResource( 8 )
 thickness = 0.5
-sl = 0.401
+sl = 0.267
 Release = 18
 [connection signal="value_changed" from="WavePanel/Wave" to="WavePanel" method="_on_Wave_value_changed"]
 [connection signal="toggled" from="FixedRatio" to="FixedRatio" method="_on_FixedRatio_toggled"]

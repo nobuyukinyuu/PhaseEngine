@@ -112,6 +112,24 @@ namespace gdsFM
             return o.ToJSONString();
         }
 
+        #if GODOT
+        public Godot.Collections.Dictionary GetDictionary()
+        {
+            var o = new Godot.Collections.Dictionary();
+            o.Add("rates", rates);
+            int[] lv = {al,dl,sl,rl,tl}; //Bussing ushort[] returns null
+            o.Add("levels", lv);
+            // o.Add("rising", rising);
+
+            o.Add("delay", delay);
+            o.Add("hold", hold);
+            o.Add("feedback", feedback);
+            o.Add("duty", duty);
+
+            return o;
+        }
+        #endif 
+
     }
 
     public enum EGStatus

@@ -21,6 +21,25 @@ namespace gdsFM
         public float mult;
         public int coarse, fine, detune;
 
+        #if GODOT
+            public Godot.Collections.Dictionary GetDictionary()
+            {
+                var o = new Godot.Collections.Dictionary();
+
+                o.Add("hz", hz);
+                o.Add("base_hz", base_hz);
+                o.Add("tuned_hz", tuned_hz);
+                o.Add("fixedFreq", fixedFreq);
+
+                o.Add("mult", mult);
+                o.Add("coarse", coarse);
+                o.Add("fine", fine);
+                o.Add("detune", detune);
+
+                return o;
+            }
+        #endif 
+
         public static Increments Prototype()
         {
             var o = new Increments();
