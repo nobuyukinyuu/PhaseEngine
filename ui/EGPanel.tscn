@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://ui/EGPanel.gd" type="Script" id=1]
 [ext_resource path="res://ui/EGWavePanel.gd" type="Script" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://gfx/wave/0.png" type="Texture" id=4]
 [ext_resource path="res://gfx/ui/vCheck.png" type="Texture" id=5]
 [ext_resource path="res://ui/envelopeDisplay/EnvelopeDisplay.tscn" type="PackedScene" id=6]
+[ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=7]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0, 0, 0, 0.25098 )
@@ -81,14 +82,36 @@ corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 
+[sub_resource type="StyleBoxFlat" id=10]
+bg_color = Color( 0.145098, 0.447059, 0.176471, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=9]
+bg_color = Color( 0.0784314, 0.141176, 0.27451, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
 [node name="EGPanel" type="Tabs"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 1.0
-margin_top = 25.0
-margin_right = -1.0
-margin_bottom = -1.0
-rect_min_size = Vector2( 320, 280 )
+margin_right = -682.0
+margin_bottom = -280.0
+rect_min_size = Vector2( 342, 280 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -97,9 +120,9 @@ __meta__ = {
 [node name="Frequency" type="GridContainer" parent="."]
 visible = false
 margin_left = 7.0
-margin_top = 47.0
+margin_top = 72.0
 margin_right = 287.0
-margin_bottom = 95.0
+margin_bottom = 120.0
 custom_constants/vseparation = 8
 custom_constants/hseparation = 16
 __meta__ = {
@@ -142,9 +165,9 @@ associated_property = "detune"
 
 [node name="Tune" type="GridContainer" parent="."]
 margin_left = 7.0
-margin_top = 47.0
+margin_top = 72.0
 margin_right = 287.0
-margin_bottom = 103.0
+margin_bottom = 128.0
 custom_constants/vseparation = 8
 custom_constants/hseparation = 16
 columns = 2
@@ -202,9 +225,9 @@ associated_property = "detune"
 
 [node name="Levels" type="GridContainer" parent="."]
 margin_left = 7.0
-margin_top = 111.0
+margin_top = 136.0
 margin_right = 327.0
-margin_bottom = 167.0
+margin_bottom = 192.0
 custom_constants/vseparation = 8
 custom_constants/hseparation = 16
 columns = 2
@@ -260,9 +283,9 @@ useExpTicks = true
 
 [node name="Rates" type="GridContainer" parent="."]
 margin_left = 7.0
-margin_top = 175.0
+margin_top = 200.0
 margin_right = 327.0
-margin_bottom = 231.0
+margin_bottom = 256.0
 custom_constants/vseparation = 8
 custom_constants/hseparation = 16
 columns = 3
@@ -344,9 +367,9 @@ associated_property = "rr"
 
 [node name="Tweak" type="GridContainer" parent="."]
 margin_left = 7.0
-margin_top = 15.0
+margin_top = 40.0
 margin_right = 215.0
-margin_bottom = 47.0
+margin_bottom = 72.0
 custom_constants/hseparation = 16
 columns = 2
 __meta__ = {
@@ -372,9 +395,9 @@ associated_property = "duty"
 
 [node name="WavePanel" type="Panel" parent="."]
 margin_left = 215.0
-margin_top = 7.0
+margin_top = 32.0
 margin_right = 335.0
-margin_bottom = 47.0
+margin_bottom = 72.0
 custom_styles/panel = SubResource( 2 )
 script = ExtResource( 2 )
 __meta__ = {
@@ -408,9 +431,9 @@ anchor_top = -0.00174216
 anchor_right = -0.000978474
 anchor_bottom = -0.00174216
 margin_left = 288.0
-margin_top = 48.0
+margin_top = 73.0
 margin_right = 334.0
-margin_bottom = 104.0
+margin_bottom = 129.0
 custom_icons/checked = SubResource( 3 )
 custom_icons/unchecked = SubResource( 4 )
 custom_styles/hover = SubResource( 5 )
@@ -426,12 +449,42 @@ __meta__ = {
 
 [node name="EnvelopeDisplay" parent="." instance=ExtResource( 6 )]
 margin_left = 7.0
-margin_top = 239.0
+margin_top = 288.0
 margin_right = 327.0
-margin_bottom = 271.0
+margin_bottom = 320.0
 custom_styles/panel = SubResource( 8 )
 thickness = 0.5
 sl = 0.267
 Release = 18
+
+[node name="Mute" type="Button" parent="."]
+margin_left = 280.0
+margin_top = 8.0
+margin_right = 338.0
+margin_bottom = 24.0
+custom_styles/pressed = SubResource( 10 )
+custom_styles/normal = SubResource( 9 )
+custom_fonts/font = ExtResource( 7 )
+toggle_mode = true
+text = "Mute"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Bypass" type="Button" parent="."]
+margin_left = 216.0
+margin_top = 8.0
+margin_right = 274.0
+margin_bottom = 24.0
+custom_styles/pressed = SubResource( 10 )
+custom_styles/normal = SubResource( 9 )
+custom_fonts/font = ExtResource( 7 )
+toggle_mode = true
+text = "Bypass"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 [connection signal="value_changed" from="WavePanel/Wave" to="WavePanel" method="_on_Wave_value_changed"]
 [connection signal="toggled" from="FixedRatio" to="FixedRatio" method="_on_FixedRatio_toggled"]
+[connection signal="toggled" from="Mute" to="." method="_on_Mute_toggled" binds= [ false ]]
+[connection signal="toggled" from="Bypass" to="." method="_on_Mute_toggled" binds= [ true ]]

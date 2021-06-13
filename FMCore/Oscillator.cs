@@ -5,8 +5,6 @@ namespace gdsFM
 {
     public class Oscillator
     {
-
-
         public delegate ushort waveFunc(ulong n, ushort duty, ref bool flip);
         waveFunc wf = Sine;
         short[] customWaveform = new short[128];

@@ -8,6 +8,9 @@ namespace gdsFM
 {
     public class Envelope
     {
+        public bool mute;
+        public bool bypass;
+
         public const ushort L_MAX = 1023; //Max attenuation level
         public const byte R_MAX = 63;  //Max rate
 

@@ -113,36 +113,54 @@ __meta__ = {
 }
 
 [node name="Op1" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
+margin_left = 1.0
 margin_top = 19.0
+margin_right = -1.0
+margin_bottom = -1.0
 chip_loc = NodePath("../../../../Test")
 
 [node name="Op2" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
 visible = false
+margin_left = 1.0
 margin_top = 19.0
+margin_right = -1.0
+margin_bottom = -1.0
 chip_loc = NodePath("../../../../Test")
 operator = 1
 
 [node name="Op3" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
 visible = false
+margin_left = 1.0
 margin_top = 19.0
+margin_right = -1.0
+margin_bottom = -1.0
 chip_loc = NodePath("../../../../Test")
 operator = 2
 
 [node name="Op4" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
 visible = false
+margin_left = 1.0
 margin_top = 19.0
+margin_right = -1.0
+margin_bottom = -1.0
 chip_loc = NodePath("../../../../Test")
 operator = 3
 
 [node name="Op5" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
 visible = false
+margin_left = 1.0
 margin_top = 19.0
+margin_right = -1.0
+margin_bottom = -1.0
 chip_loc = NodePath("../../../../Test")
 operator = 4
 
 [node name="Op6" parent="Column0/V/TabGroup0" instance=ExtResource( 5 )]
 visible = false
+margin_left = 1.0
 margin_top = 19.0
+margin_right = -1.0
+margin_bottom = -1.0
 chip_loc = NodePath("../../../../Test")
 operator = 5
 

@@ -111,7 +111,8 @@ public class Test2 : Label
 
     public void SetAlgorithm(Godot.Collections.Dictionary d){   c.Voice.SetAlgorithm(d); GD.Print("Setting algo...");    }
 
-
+    public void SetBypass(int opTarget, bool val) {c.Voice.egs[opTarget].bypass = val;}
+    public void SetMute(int opTarget, bool val) {c.Voice.egs[opTarget].mute = val;}
 
 
     void fill_buffer()

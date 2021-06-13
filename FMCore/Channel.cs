@@ -128,6 +128,8 @@ namespace gdsFM
                 var src_op = voice.alg.processOrder[o];  //Source op number.
                 int c = voice.alg.connections[ src_op ];  //Connections for the source operator.
 
+                if (ops[src_op].eg.mute)  continue;
+
                 //First, convert the source op's accumulated phase up to this point into its sample result value.
                 //For termini (top of an op stack), the phase accumulated in the cache will always be 0.
                 cache[src_op] = ops[src_op].RequestSample( (ushort)cache[src_op] );
@@ -143,9 +145,9 @@ namespace gdsFM
                 {
                     unchecked 
                     {
-                        if ( (c & 1) == 1)  //Flag is set. The destination op receives modulation from the source op and is added to the total output cache for that operator.
-                        {
-                            cache[dest_op] += cache[src_op];
+                        if ( (c & 1) == 1)  
+                        { //Flag is set. The destination op receives modulation from the source op and is added to the total output cache for that operator.
+                            cache[dest_op] +=  ops[dest_op].eg.bypass?  0: cache[src_op];
                         }
                         c >>= 1; //Crunch down and process next position. Loop continues until the connection mask has no more connections.
                     }
