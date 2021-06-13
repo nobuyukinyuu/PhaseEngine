@@ -1,5 +1,5 @@
-# ![PhaseEngine](https://raw.githubusercontent.com/nobuyukinyuu/PhaseEngine/main/gfx/logos/logo_light_150.png)
-An experimental FM-synth written in C# intended to be the successor to [gdsFM](https://github.com/nobuyukinyuu/gdsFM/), with lower CPU usage and more predictable resource allocation for use in game engines and demos.  Leverages [Godot Engine](https://github.com/godotengine/godot/) as its primary front-end.
+&nbsp;
+# ![PhaseEngine](https://raw.githubusercontent.com/nobuyukinyuu/PhaseEngine/main/gfx/logos/logo_light.png)An experimental FM-synth written in C# intended to be the successor to [gdsFM](https://github.com/nobuyukinyuu/gdsFM/), with lower CPU usage and more predictable resource allocation for use in game engines and demos.  Leverages [Godot Engine](https://github.com/godotengine/godot/) as its primary front-end.
 
 
 # Features and differences to gdsFM
