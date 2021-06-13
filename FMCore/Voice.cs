@@ -11,18 +11,20 @@ namespace gdsFM
     public class Voice
     {
         public byte opCount = 6; 
-        public byte[] opType;  //Keeps track of how to set the operator on a new note.  TODO: Consider an enum of all waveforms and filters for serialization purposes
+
+        //Keeps track of how to set the operator on a new note.  TODO: Consider an enum of all waveforms and filters for serialization purposes
+        public byte[] opType;   //Typically some kind of waveform value.
 
 
-        //Consider having an array of envelopes for operators to refer to when initializing their voices as the "canonical" voice, and a temporary copy made for alterables.
+        //Consider having an array of envelopes for ops to refer to when initializing their voices as the "canonical" voice, and a temporary copy made for alterables.
         public Envelope[] egs;  //Canonical EG data for each operator.
         public Increments[] pgs;
 
         //Consider making all Channels use references to these vars, and process them properly whenever IO comes in.
         public Algorithm alg = new Algorithm();
-        string wiringGrid;
+        // string wiringGrid;
 
-        //TODO:  Consider making this class a struct if all it contains is the algorithm and envelope values.  Voice description IO probably goes here too....
+        //TODO:  Voice description / meta probably goes here too....
         public Voice() {InitVoice(this.opCount);}
         public Voice(byte opCount) {InitVoice(opCount);}
 
@@ -68,26 +70,41 @@ namespace gdsFM
                 FromJSON( (JSONObject) JSONData.ReadJSON(d.ToString()) );
             }
 
-            public void ChangeAlgorithm(Godot.Collections.Dictionary d)
+            /// Changes the algorithm without changing the opCount.
+            public void SetAlgorithm(Godot.Collections.Dictionary d)
             {
-                wiringGrid = (String) d["grid"];  //Provide a description of the wiring grid for serialization
-                opCount = (byte) d["opCount"];
-                var order = (Godot.Collections.Array<int>) d["processOrder"];
-                var c = (Godot.Collections.Array<int>) d["connections"];
+                // Don't set opCount here.  Use a separate function to change the op count.....
+                // TODO:  Consider replacing this function with one which converts d to json and just call FromJSON()
+                alg.wiringGrid =  Convert.ToUInt32(d["grid"]);
+
+                var order = d["processOrder"] as Godot.Collections.Array;
+                var c = d["connections"] as Godot.Collections.Array;
 
                 alg.processOrder = new byte[opCount];
                 alg.connections = new byte[opCount];
                 for(int i=0; i<opCount; i++)
                 {
-                    alg.processOrder[i] = (byte) order[i];
-                    alg.connections[i] = (byte) c[i];
+                    alg.processOrder[i] = Convert.ToByte(order[i]);
+                    alg.connections[i] = Convert.ToByte(c[i]);
                 }
             }
 
-        public Godot.Collections.Dictionary GetEG(int opTarget) {return egs[opTarget].GetDictionary();}
-        public Godot.Collections.Dictionary GetPG(int opTarget) {return pgs[opTarget].GetDictionary();}
+            public Godot.Collections.Dictionary GetAlgorithm()
+            {
+                var d = new Godot.Collections.Dictionary();
 
+                d["opCount"] = opCount;
+                d["grid"] = alg.wiringGrid;
 
+                d["processOrder"] = alg.processOrder;
+                d["connections"] = alg.connections;
+
+                return d;
+
+            }
+
+            public Godot.Collections.Dictionary GetEG(int opTarget) {return egs[opTarget].GetDictionary();}
+            public Godot.Collections.Dictionary GetPG(int opTarget) {return pgs[opTarget].GetDictionary();}
         #endif
 
 
@@ -128,11 +145,11 @@ namespace gdsFM
             }            
         }
 
-    /// Sets the canonical waveform to reference when setting an operator's waveFunc on NoteOn.
-    public void SetWaveform(int opTarget, float val)
-    {   // NOTE:  This does NOT actually set an operator's waveFunc!  This is done in NoteOn when referencing this value from Voice.
-        opType[opTarget] = (byte)val;
-    }    
+        /// Sets the canonical waveform to reference when setting an operator's waveFunc on NoteOn.
+        public void SetWaveform(int opTarget, float val)
+        {   // NOTE:  This does NOT actually set an operator's waveFunc!  This is done in NoteOn when referencing this value from Voice.
+            opType[opTarget] = (byte)val;
+        }    
 
 
         //TODO:  Front-end IO that de/serializes the wiring grid configuration from an array (user-friendly) to processOrder and connections (code-friendly)
@@ -140,15 +157,14 @@ namespace gdsFM
         {
             try
             {
-                wiringGrid = data.GetItem("grid")?.ToJSONString();
-                var order = data.GetItem<byte>("processOrder", null);
+                opCount = (byte) data.GetItem("opCount", opCount);
+                alg.wiringGrid = (uint) data.GetItem("grid", 0);
+                var order = data.GetItem<byte>("processOrder", Algorithm.DefaultProcessOrder(opCount) );
+
                 var c = data.GetItem<byte>("connections", null);
-
-                var a = new Algorithm((byte) data.GetItem("opCount", opCount));
-
-                //Assumes default processOrder if none found.  This is fine for most preset connections.
-                if (order != null){ for(int i=0; i<opCount; i++)  alg.processOrder[i] = (byte) order[i]; }
                 if (c != null){ for(int i=0; i<opCount; i++)  alg.connections[i] = (byte) c[i]; }  //If no data found, assume all ops connect to output
+
+                var a = new Algorithm(opCount);
                 alg = a;
 
                 var ops = (JSONArray) data.GetItem("operators");
@@ -163,7 +179,9 @@ namespace gdsFM
                         System.Diagnostics.Debug.Print(String.Format("Voice.FromJSON:  Problem parsing envelope {0}", i));
                         continue;
                     }
-                    //Extra operator etc processing here
+
+
+                //TODO:  Phase generator processing, metadata, etc
                 }
 
 

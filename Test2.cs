@@ -17,7 +17,7 @@ public class Test2 : Label
     const int scopeHeight = 128;
 
 
-    Chip c = new Chip(4,1);
+    Chip c = new Chip(4,6);
     long[] lastID = new long[128];  //Keeps track of the last ID pressed on a specified note, to turn it off when a noteOff event is detected.
 
     Node fromMidi;
@@ -109,20 +109,9 @@ public class Test2 : Label
         c.Voice.SetWaveform(opTarget, val);
     }
 
-    // public void SetFeedback(int opTarget, float val)
-    // {
-    //     Operator op;
-    //     if (opTarget ==1) op = this.op; else op = this.op2;
+    public void SetAlgorithm(Godot.Collections.Dictionary d){   c.Voice.SetAlgorithm(d); GD.Print("Setting algo...");    }
 
-    //     op.eg.feedback = (byte)val;
-    // }
-    // public void SetDuty(int opTarget, float val)
-    // {
-    //     Operator op;
-    //     if (opTarget ==1) op = this.op; else op = this.op2;
 
-    //     op.eg.duty = (ushort)val;
-    // }
 
 
     void fill_buffer()

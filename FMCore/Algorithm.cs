@@ -13,7 +13,8 @@ namespace gdsFM
 
         public static readonly byte[] DEFAULT_PROCESS_ORDER = {0,1,2,3,4,5,6,7};
 
-        public string wiringGrid; //FIXME:  Change to something sane
+        public uint wiringGrid;  //32-bit value which contains 64 nibbles describing the contents of the grid visually.
+        
 
         public Algorithm()    {Reset();}
         public Algorithm(byte opCount)    {this.opCount = opCount;  Reset();}
@@ -25,6 +26,14 @@ namespace gdsFM
             Array.Copy(DEFAULT_PROCESS_ORDER, processOrder, opCount);
         }
 
+
+        /// Returns an array of the default process order for a given size op count.
+        public static byte[] DefaultProcessOrder(byte opCount)
+        {
+            var output = new byte[opCount];
+            Array.Copy(DEFAULT_PROCESS_ORDER, output, opCount);
+            return output;
+        }
 
         public static Algorithm FromPreset(byte preset, bool useSix=false)
         {

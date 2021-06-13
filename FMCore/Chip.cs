@@ -7,7 +7,7 @@ namespace gdsFM
     {
         public const sbyte NO_CHANNEL_FOUND = -1;
 
-        Voice voice = new Voice();  //Description of the timbre.
+        Voice voice; //= new Voice();  //Description of the timbre.
         public Voice Voice { get => voice; set => SetVoice(value); }
 
 
@@ -20,6 +20,7 @@ namespace gdsFM
         public Chip()
         {
             channels = new Channel[polyphony];
+            voice = new Voice(opCount);
             InitChannels();
         }
 
@@ -27,6 +28,7 @@ namespace gdsFM
         {
             this.polyphony = polyphony;
             channels = new Channel[polyphony];
+            voice = new Voice(opCount);
             InitChannels();
         }
 
@@ -34,6 +36,7 @@ namespace gdsFM
         {
             this.opCount = opCount;            
             this.polyphony = polyphony;
+            voice = new Voice(opCount);
             channels = new Channel[polyphony];
             InitChannels();
         }

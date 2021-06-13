@@ -1,5 +1,6 @@
 #tool
 extends PanelContainer
+class_name WiringGridSlot
 
 enum opType {NONE, CARRIER, MODULATOR, FILTER}
 export (opType) var slot_type setget set_slot_type
@@ -16,6 +17,7 @@ var dragTree = preload("res://ui/wiringGrid/DragTree.tscn")
 
 signal dropped
 signal right_clicked
+
 
 func set_slot_type(val):
 #	print("Setting Slot Type")

@@ -60,7 +60,7 @@ func set_from_op(op:int):
 	$"Rates/Attack".value = rates[0]
 	$"Rates/Decay".value = rates[1]
 	$"Rates/Sustain".value = rates[2]
-	$"Rates/Release".value = rates[2]
+	$"Rates/Release".value = rates[3]
 	
 	$"Rates/+Delay".value = d["delay"]
 	$"Rates/+Hold".value = d["hold"]
@@ -79,7 +79,7 @@ func refresh_envelope_preview():
 	var rates = d["rates"]
 	var levels = d["levels"]
 	
-	#TODO
+	#TODO:  SUPPORT ALL LEVELS
 	
 #	$EnvelopeDisplay.Attack = 
 	

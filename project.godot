@@ -18,10 +18,16 @@ _global_script_classes=[ {
 "class": "EnvelopeDisplay",
 "language": "GDScript",
 "path": "res://ui/envelopeDisplay/EnvelopeDisplay.gd"
+}, {
+"base": "PanelContainer",
+"class": "WiringGridSlot",
+"language": "GDScript",
+"path": "res://ui/wiringGrid/slot.gd"
 } ]
 _global_script_class_icons={
 "DragTabPreview": "",
-"EnvelopeDisplay": ""
+"EnvelopeDisplay": "",
+"WiringGridSlot": ""
 }
 
 [application]
@@ -29,6 +35,9 @@ _global_script_class_icons={
 config/name="PhaseEngine"
 run/main_scene="res://Control.tscn"
 run/low_processor_mode=true
+boot_splash/image="res://gfx/logos/logo_light_150.png"
+boot_splash/fullsize=false
+boot_splash/bg_color=Color( 0.0941176, 0.0941176, 0.0941176, 1 )
 config/icon="res://icon.png"
 
 [audio]

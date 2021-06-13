@@ -13,6 +13,9 @@ var isReady=false
 
 var manual_src_pos = Vector2.ONE * -1
 
+signal slot_moved
+signal op_size_changed
+
 func _ready():
 #	reinit_grid(total_ops)
 	isReady = true
@@ -69,6 +72,7 @@ func set_ops(val):  #Set the number of operators in the grid.  Property setter.
 	yield(get_tree(), "idle_frame")
 	redraw_grid()
 	visible = true
+	emit_signal("op_size_changed")
 
 
 func resize_op_array(newsz):  #Deals with re-initializing new opNodes in a larger array.
@@ -235,6 +239,8 @@ func request_move(source, dest):
 			source_op.gridPos = dest
 			dest_op.gridPos = source
 			redraw_grid()
+			
+			emit_signal("slot_moved")
 			return
 			
 		else:
@@ -242,6 +248,7 @@ func request_move(source, dest):
 			#First, remove the tree from the grid and break source ops' connections to it.
 			remove_tree_at(source)
 			move_tree(source_op, dest)
+			emit_signal("slot_moved")
 
 	else:  #User tried to drop on an empty slot.  Try to find a connection point beneath the drop point.
 		#We shouldn't try to find a connection point with a grid that contains our tree, so let's remove
@@ -256,6 +263,8 @@ func request_move(source, dest):
 			move_tree(source_op, connection_point, false)
 		else:  #We found an operator to connect to!
 			move_tree(source_op, connection_point)
+
+		emit_signal("slot_moved")
 		return
 
 
@@ -535,6 +544,29 @@ func request_connection(source, dest):
 	update()
 	
 	
+
+#Returns an array of 8-bit ints with each bit flagged with whether a slot is connected to that position's operator.
+func get_connection_descriptions():
+	var output = []
+	for i in ops.size():  output.append(0)
+
+	for op in ops:
+		if op.id == -1:  continue
+		
+		#op.connections propagate upwards through the tree.
+		for source in op.connections:
+			output[source.id] |= 1 << (op.id)
+			
+		#however, op.manual_connections propagate _downwards_ from the source id.
+		for dest in op.manual_connections:
+			output[op.id] |= 1 << (dest.id)
+	
+	return output
+
+
+func compare_height(a:opNode,b:opNode):
+	return a.gridPos.y < b.gridPos.y
+
 
 #===================== CLASS =============================
 class opNode:

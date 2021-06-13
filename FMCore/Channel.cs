@@ -11,8 +11,9 @@ namespace gdsFM
 
         Voice voice;
         //TODO:  Move these to Voice.alg
-        byte[] processOrder;  //The processing order of the operators.  This should be able to be fetched from wiring grid, or a convenience func in Voice...
-        byte[] connections;  //Connections for each operator.  Stored as a bitmask.  NOTE:  If we have more than 8 ops, this won't work....
+        // byte[] processOrder;  //The processing order of the operators.  This should be able to be fetched from wiring grid, or a convenience func in Voice...
+        // byte[] connections;  //Connections for each operator.  Stored as a bitmask.  NOTE:  If we have more than 8 ops, this won't work....
+
         int[] cache;  //As each level of the stack gets processed, the sample cache for each operator is updated.
 
         public byte midi_note;  //Assigned when the channel is requested and used when enumerating channels to help call early NoteOffs for duplicate notes.
@@ -22,9 +23,9 @@ namespace gdsFM
         public Channel(byte opCount)
         {
             ops = new Operator[opCount];
-            processOrder = new byte[opCount];
-            Array.Copy(Algorithm.DEFAULT_PROCESS_ORDER, processOrder, opCount);
-            connections = new byte[opCount];
+            // processOrder = new byte[opCount];
+            // Array.Copy(Algorithm.DEFAULT_PROCESS_ORDER, processOrder, opCount);
+            // connections = new byte[opCount];
             cache = new int[opCount];
 
             for(int i=0; i<ops.Length; i++)
@@ -114,16 +115,18 @@ namespace gdsFM
 
         public void ProcessNextSample()
         {
+            if (voice==null) return;
             int output = 0;
+
 
             for (byte i=0; i<cache.Length; i++) cache[i] = 0;   //Clear the modulation cache.  FIXME:  Ensure this is correct!!!
 
             //For each height level in the stack, look for operators to mix down.
             //TODO:  Consider instead bringing in an ordered array with each operator from the top row down and rely solely on this (and the frontend) to keep algorithm sane.
-            for (byte o=0; o<processOrder.Length;  o++)
+            for (byte o=0; o < voice.alg.processOrder.Length;  o++)
             {
-                var src_op = processOrder[o];  //Source op number.
-                int c = connections[ src_op ];  //Connections for the source operator.
+                var src_op = voice.alg.processOrder[o];  //Source op number.
+                int c = voice.alg.connections[ src_op ];  //Connections for the source operator.
 
                 //First, convert the source op's accumulated phase up to this point into its sample result value.
                 //For termini (top of an op stack), the phase accumulated in the cache will always be 0.
