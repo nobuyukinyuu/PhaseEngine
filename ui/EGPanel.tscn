@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://ui/EGPanel.gd" type="Script" id=1]
 [ext_resource path="res://ui/EGWavePanel.gd" type="Script" id=2]
@@ -82,8 +82,8 @@ corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 
-[sub_resource type="StyleBoxFlat" id=10]
-bg_color = Color( 0.145098, 0.447059, 0.176471, 1 )
+[sub_resource type="StyleBoxFlat" id=11]
+bg_color = Color( 0.447059, 0.172549, 0.145098, 1 )
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -96,6 +96,18 @@ anti_aliasing = false
 
 [sub_resource type="StyleBoxFlat" id=9]
 bg_color = Color( 0.0784314, 0.141176, 0.27451, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=10]
+bg_color = Color( 0.145098, 0.447059, 0.176471, 1 )
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -462,7 +474,7 @@ margin_left = 280.0
 margin_top = 8.0
 margin_right = 338.0
 margin_bottom = 24.0
-custom_styles/pressed = SubResource( 10 )
+custom_styles/pressed = SubResource( 11 )
 custom_styles/normal = SubResource( 9 )
 custom_fonts/font = ExtResource( 7 )
 toggle_mode = true
