@@ -541,6 +541,7 @@ func request_connection(source, dest):
 	
 #	dest_op.connections.append(source_op)
 	source_op.manual_connections.append(dest_op)
+	emit_signal("slot_moved")  #FIXME:  Maybe make a different signal for this?
 	update()
 	
 	

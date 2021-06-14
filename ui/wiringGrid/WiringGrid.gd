@@ -8,6 +8,8 @@ export (NodePath) var chip_loc  #Location of PhaseEngine instance in code
 
 func _ready():
 	$SlotIndicator.connect("slot_moved", self, "_on_slot_moved")
+	$Add.connect("pressed", self, "_on_slot_moved", [true])
+	$Remove.connect("pressed", self, "_on_slot_moved", [true])
 	pass
 
 func _physics_process(delta):
@@ -15,14 +17,15 @@ func _physics_process(delta):
 	pass
 
 
-func _on_slot_moved():
+func _on_slot_moved(delay=false):
 	if chip_loc.is_empty():  
 		printerr("_on_slot_moved():  Wiring grid isn't connected to a chip bus!")
 		return
 	
 	var d = {}  #Bussing dict
 	
-	d["opSize"] = $SlotIndicator.ops.size()
+	if delay:  yield(get_tree(), "idle_frame")
+	d["opCount"] = $SlotIndicator.ops.size()
 	d["grid"] = get_grid_description()
 	
 	d["processOrder"] = get_process_order()

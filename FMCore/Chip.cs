@@ -222,6 +222,24 @@ namespace gdsFM
                 channels[i].SetVoice(v);
         }
 
+        #if GODOT
+            /// Updates the voice's algorithm and informs the channels.
+            public void SetAlgorithm(Godot.Collections.Dictionary d)
+            {
+                if ((int)d["opCount"] != opCount)
+                {
+                    // Operator count changed.  Update channels, as the voice parameters no longer reflect their operators' current opCount.
+                    voice.SetOpCount(Convert.ToByte(d["opCount"]));
+                    // InitChannels();
+                    SetVoice(voice);  //Gives the channels a chance to change their operator count.
+                }
+
+
+                voice.SetAlgorithm(d);
+            }
+        #endif
+
+
         public override string ToString()
         {
             var sb = new System.Text.StringBuilder();

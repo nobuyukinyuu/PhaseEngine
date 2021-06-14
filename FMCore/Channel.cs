@@ -10,10 +10,6 @@ namespace gdsFM
         public Operator[] ops;
 
         Voice voice;
-        //TODO:  Move these to Voice.alg
-        // byte[] processOrder;  //The processing order of the operators.  This should be able to be fetched from wiring grid, or a convenience func in Voice...
-        // byte[] connections;  //Connections for each operator.  Stored as a bitmask.  NOTE:  If we have more than 8 ops, this won't work....
-
         int[] cache;  //As each level of the stack gets processed, the sample cache for each operator is updated.
 
         public byte midi_note;  //Assigned when the channel is requested and used when enumerating channels to help call early NoteOffs for duplicate notes.
@@ -28,7 +24,7 @@ namespace gdsFM
             // connections = new byte[opCount];
             cache = new int[opCount];
 
-            for(int i=0; i<ops.Length; i++)
+            for(int i=0; i<opCount; i++)
             {
                 ops[i] = new Operator();
             }
@@ -78,9 +74,11 @@ namespace gdsFM
             eventID = Global.NewEventID();
             if (midi_note < 0x80)  this.midi_note = midi_note;
 
-            for(byte i=0; i<ops.Length; i++)
+            var opsToProcess = (byte)Math.Min(voice.alg.opCount, ops.Length); //Prevents out of bounds if the voice changed while notes are still on.
+            for(byte i=0; i<opsToProcess; i++)
             {
                 var op=ops[i];
+                // op.eg = voice.egs[i];  //Resetting the reference dumps the old ones if the algo changed.  FIXME:  Copy the values over instead
                 op.pg = voice.pgs[i];  //Set Increments to the last Voice increments value (ByVal copy)
                 op.SetOperatorType((byte)voice.opType[i]);  //Set the wave function to what the voice says it should be
 
@@ -121,12 +119,21 @@ namespace gdsFM
 
             for (byte i=0; i<cache.Length; i++) cache[i] = 0;   //Clear the modulation cache.  FIXME:  Ensure this is correct!!!
 
+            //TODO:  Consider instead bringing in an ordered array with each operator from the top row down 
+            //       and rely solely on this (and the frontend) to keep algorithm sane.
+            
+
+            byte opsToProcess = (byte) Math.Min(voice.alg.processOrder.Length, ops.Length); //Prevents out of bounds if the voice changed while notes are still on.
+
             //For each height level in the stack, look for operators to mix down.
-            //TODO:  Consider instead bringing in an ordered array with each operator from the top row down and rely solely on this (and the frontend) to keep algorithm sane.
-            for (byte o=0; o < voice.alg.processOrder.Length;  o++)
+            for (byte o=0; o < opsToProcess;  o++)
             {
                 var src_op = voice.alg.processOrder[o];  //Source op number.
-                if (ops[src_op].eg.mute)  continue;  //Exit early if muted.
+                if (ops[src_op].eg.mute)  
+                {
+                    cache[src_op] = 0;
+                    continue;  //Exit early if muted.
+                }
 
                 int c = voice.alg.connections[ src_op ];  //Get Connections for the source operator.
 
@@ -158,13 +165,28 @@ namespace gdsFM
             lastSample = (short)output.Clamp(short.MinValue, short.MaxValue);            
         }
 
+        private void SetOpCount(byte opTarget)
+        {
+            byte opCount = (byte) ops.Length;
+            Array.Resize(ref ops, opTarget);
+            Array.Resize(ref cache, opTarget);
 
+            if (opTarget>opCount)
+            {
+                for (byte i=opCount; i<opTarget; i++)
+                {
+                    ops[i] = new Operator();
+
+                }
+            }
+
+        }
 
         /// Sets this channel's voice to the specified voice.
         public void SetVoice(Voice voice)
         {
-            var maxOps = Math.Min(voice.egs.Length, ops.Length);
-            for (int i=0; i<maxOps;  i++)
+            if(voice.opCount != ops.Length)  SetOpCount(voice.opCount);
+            for (int i=0; i<voice.opCount;  i++)
             {
                 ops[i].eg = voice.egs[i];
                 ops[i].pg = voice.pgs[i];  //ByVal copy

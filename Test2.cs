@@ -17,7 +17,7 @@ public class Test2 : Label
     const int scopeHeight = 128;
 
 
-    Chip c = new Chip(4,6);
+    Chip c = new Chip(6,6);
     long[] lastID = new long[128];  //Keeps track of the last ID pressed on a specified note, to turn it off when a noteOff event is detected.
 
     Node fromMidi;
@@ -34,8 +34,7 @@ public class Test2 : Label
 
         player.Play();
 
-        // op.NoteOn();
-        // op2.NoteOn();
+        for (int i=4; i<c.Voice.egs.Length; i++)  c.Voice.egs[i].mute = true;
 
         fromMidi = Owner.GetNode("MIDI Control");
 
@@ -89,7 +88,7 @@ public class Test2 : Label
         }
     }
 
-    public int GetOpType(int opTarget){ return c.Voice.opType[opTarget]; }
+    public int GetOpType(int opTarget){ if(opTarget >= c.opCount) return 0; else return c.Voice.opType[opTarget]; }
 
 
     // Called from EG controls to bus to the appropriate tuning properties.
@@ -109,7 +108,7 @@ public class Test2 : Label
         c.Voice.SetWaveform(opTarget, val);
     }
 
-    public void SetAlgorithm(Godot.Collections.Dictionary d){   c.Voice.SetAlgorithm(d); GD.Print("Setting algo...");    }
+    public void SetAlgorithm(Godot.Collections.Dictionary d){   c.SetAlgorithm(d); GD.Print("Setting algo...");    }
 
     public void SetBypass(int opTarget, bool val) {c.Voice.egs[opTarget].bypass = val;}
     public void SetMute(int opTarget, bool val) {c.Voice.egs[opTarget].mute = val;}

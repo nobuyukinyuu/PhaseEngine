@@ -37,7 +37,6 @@ namespace gdsFM
         public const ulong FRAC_SIZE = (1 << FRAC_PRECISION_BITS) - 1;
         public const double ONE_PER_FRAC_SIZE = 1.0 / FRAC_SIZE;
 
-        public const float ONE_PER_THOU = 1 / 1023.0f;
 
         public static readonly byte[] multTable = {1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 20, 24, 24, 30, 30};
 

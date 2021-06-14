@@ -37,6 +37,7 @@ namespace gdsFM
         void InitVoice(byte opCount)    
         {
             this.opCount = opCount;
+             alg = new Algorithm(opCount);
              egs = new Envelope[opCount];
              pgs = new Increments[opCount];
              opType = new byte[opCount];
@@ -48,7 +49,7 @@ namespace gdsFM
              }
         }
 
-        public bool ChangeAlgorithm(byte preset)
+        public bool SetPresetAlgorithm(byte preset)
         {
             if (opCount >= 6)
             {
@@ -73,7 +74,7 @@ namespace gdsFM
             /// Changes the algorithm without changing the opCount.
             public void SetAlgorithm(Godot.Collections.Dictionary d)
             {
-                // Don't set opCount here.  Use a separate function to change the op count.....
+                // FIXME:  Don't set opCount here.  Use a separate function to change the op count.....
                 // TODO:  Consider replacing this function with one which converts d to json and just call FromJSON()
                 alg.wiringGrid =  Convert.ToUInt32(d["grid"]);
 
@@ -82,7 +83,8 @@ namespace gdsFM
 
                 alg.processOrder = new byte[opCount];
                 alg.connections = new byte[opCount];
-                for(int i=0; i<opCount; i++)
+                var opsToProcess = Math.Min(alg.opCount, order.Count);
+                for(int i=0; i<opsToProcess; i++)
                 {
                     alg.processOrder[i] = Convert.ToByte(order[i]);
                     alg.connections[i] = Convert.ToByte(c[i]);
@@ -103,12 +105,35 @@ namespace gdsFM
 
             }
 
-            public Godot.Collections.Dictionary GetEG(int opTarget) {return egs[opTarget].GetDictionary();}
-            public Godot.Collections.Dictionary GetPG(int opTarget) {return pgs[opTarget].GetDictionary();}
+            public Godot.Collections.Dictionary GetEG(int opTarget) {return egs[opTarget >= opCount? 0:opTarget].GetDictionary();}
+            public Godot.Collections.Dictionary GetPG(int opTarget) {return pgs[opTarget >= opCount? 0:opTarget].GetDictionary();}
         #endif
 
 
-        // Called from EG controls to bus to the appropriate tuning properties.
+        // Called whenever the voice needs to change its operator count in the algorithm.
+        public void SetOpCount(byte opTarget)
+        {
+            Array.Resize(ref egs, opTarget);
+            Array.Resize(ref pgs, opTarget);
+            Array.Resize(ref opType, opTarget);
+
+            if (opTarget>opCount)
+            {
+                for (byte i=opCount; i<opTarget; i++)
+                {
+                    egs[i] = new Envelope();
+                    pgs[i] = Increments.Prototype();
+                }
+            }
+
+            alg.SetOpCount(opTarget);
+
+            opCount = opTarget;
+        }
+
+
+
+        /// Called from EG controls to bus to the appropriate tuning properties.
         public void SetPG(int opTarget, string property, float val)
         {
             // Increments is a struct, so we need to update the canonical info from the Voice and grab a copy whenever notes turn on. 
@@ -130,6 +155,7 @@ namespace gdsFM
         }
         public void SetEG(int opTarget, string property, float val)
         {
+            if (opTarget >= opCount) return;
             var eg = egs[opTarget];
 
             try

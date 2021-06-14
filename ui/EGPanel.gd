@@ -3,7 +3,7 @@ extends Tabs
 export (NodePath) var chip_loc  #Location of PhaseEngine instance in code
 export(int,0,8) var operator = 0
 
-var tt = 0
+
 
 func _ready():
 	for o in $Tune.get_children():
@@ -73,6 +73,9 @@ func set_from_op(op:int):
 	
 	$Tweak/Feedback.value = d["feedback"]
 	$Tweak/Duty.value = d["duty"]
+	
+	$Mute.pressed = d["mute"]
+	$Bypass.pressed = d["bypass"]
 
 func refresh_envelope_preview():
 	var d = get_node(chip_loc).GetOpValues(0, operator)

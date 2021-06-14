@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=2]
+[gd_scene load_steps=20 format=2]
 
 [ext_resource path="res://ui/EGPanel.gd" type="Script" id=1]
 [ext_resource path="res://ui/EGWavePanel.gd" type="Script" id=2]
@@ -117,6 +117,13 @@ corner_radius_bottom_right = 5
 shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=12]
+bg_color = Color( 0.0470588, 0.0470588, 0.0470588, 0.878431 )
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
 [node name="EGPanel" type="Tabs"]
 anchor_right = 1.0
@@ -251,7 +258,7 @@ __meta__ = {
 [node name="Total Level" parent="Levels" instance=ExtResource( 3 )]
 margin_right = 152.0
 size_flags_horizontal = 3
-max_value = 1023.0
+max_value = 1919.0
 tick_count = 9
 ticks_on_borders = false
 associated_property = "tl"
@@ -493,6 +500,19 @@ custom_styles/normal = SubResource( 9 )
 custom_fonts/font = ExtResource( 7 )
 toggle_mode = true
 text = "Bypass"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Disabled" type="Label" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 0
+custom_styles/normal = SubResource( 12 )
+text = "Unavailable"
+align = 1
+valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }

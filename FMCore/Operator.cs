@@ -118,10 +118,11 @@ namespace gdsFM
 
             const float SCALE = 1.0f / 8192;
 
-            ushort logScale = (ushort)(Tables.attenuation_to_volume(env_attenuation));
+            ushort logScale = (ushort)(Tables.attenuation_to_volume((ushort)(env_attenuation + eg.tl)));
 
-            var tl = 1 - (eg.tl*Global.ONE_PER_THOU);
-            short result = (short) (samp * (logScale * SCALE) * tl);
+            // var tl = 1 - (eg.tl*ONE_PER_THOU);
+            // short result = (short) (samp * (logScale * SCALE) * tl);
+            short result = (short) (samp * (logScale * SCALE) );
 
             return result;
         }
@@ -145,9 +146,9 @@ namespace gdsFM
             // ushort env_attenuation = envelope_attenuation(am_offset) << 2;
 
             // combine into a 5.8 value, then convert from attenuation to 13-bit linear volume
-            int result = Tables.attenuation_to_volume((ushort)(sin_attenuation + env_attenuation));
+            int result = Tables.attenuation_to_volume((ushort)(sin_attenuation + env_attenuation + eg.tl));
 
-            result = (int)(result * (1 - (eg.tl*Global.ONE_PER_THOU)));  //Floating point conversion.... expensive?
+            // result = (int)(result * (1 - (eg.tl*Global.ONE_PER_THOU)));  //Floating point conversion.... expensive?
 
             // negate if in the negative part of the sin wave (sign bit gives 14 bits)
             return flip ? (short)-result : (short)result;

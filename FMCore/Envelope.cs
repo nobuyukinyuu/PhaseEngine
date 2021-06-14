@@ -11,6 +11,7 @@ namespace gdsFM
         public bool mute;
         public bool bypass;
 
+        public const ushort TL_MAX = 1919; //Max total attenuation level
         public const ushort L_MAX = 1023; //Max attenuation level
         public const byte R_MAX = 63;  //Max rate
 
@@ -93,6 +94,9 @@ namespace gdsFM
                 j.Assign("hold", ref hold);
                 j.Assign("feedback", ref feedback);
                 j.Assign("duty", ref duty);
+
+                j.Assign("mute", ref mute);
+                j.Assign("bypass", ref bypass);
             } catch {
                 return false;
             }
@@ -112,6 +116,9 @@ namespace gdsFM
             o.AddPrim("feedback", feedback);
             o.AddPrim("duty", duty);
 
+            o.AddPrim("mute", mute);
+            o.AddPrim("bypass", bypass);
+
             return o.ToJSONString();
         }
 
@@ -129,6 +136,8 @@ namespace gdsFM
             o.Add("feedback", feedback);
             o.Add("duty", duty);
 
+            o.Add("mute", mute);
+            o.Add("bypass", bypass);
             return o;
         }
         #endif 

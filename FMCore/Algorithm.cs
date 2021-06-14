@@ -20,12 +20,29 @@ namespace gdsFM
         public Algorithm(byte opCount)    {this.opCount = opCount;  Reset();}
         void Reset()
         {
-            processOrder = new byte[opCount];
+            processOrder = DefaultProcessOrder(opCount);
             connections = new byte[opCount];
-
-            Array.Copy(DEFAULT_PROCESS_ORDER, processOrder, opCount);
+            wiringGrid = 0;  //FIXME:  Determine default wiring grid for the number of operators
         }
+        public void SetOpCount(byte opTarget)
+        {
+            //If the op size is smaller than before, break the algorithm back to the default.
+            //This is necessary in case any one connection relies on another which is deleted.
+            if (opTarget<opCount)
+            {
+                opCount = opTarget;
+                Reset();
+            } else {
+                Array.Resize(ref connections, opTarget);
+                Array.Resize(ref processOrder, opTarget);
+                for (byte i=opCount; i<opTarget; i++)
+                {
+                    processOrder[i] = i;
+                }
 
+                opCount = opTarget;
+            }
+        }
 
         /// Returns an array of the default process order for a given size op count.
         public static byte[] DefaultProcessOrder(byte opCount)
