@@ -103,6 +103,11 @@ public class Test2 : Label
         c.Voice.SetEG(opTarget, property, val);
     }
 
+    public void SetFixedFreq(int opTarget, bool isFixed) { c.Voice.pgs[opTarget].fixedFreq = isFixed; }
+    public void SetFrequency(int opTarget, float freq)
+    {
+        c.Voice.pgs[opTarget].FreqSelect(freq);
+    }
 
     public void SetWaveform(int opTarget, float val)
     {

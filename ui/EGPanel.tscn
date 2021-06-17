@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=2]
+[gd_scene load_steps=22 format=2]
 
 [ext_resource path="res://ui/EGPanel.gd" type="Script" id=1]
 [ext_resource path="res://ui/EGWavePanel.gd" type="Script" id=2]
@@ -7,10 +7,27 @@
 [ext_resource path="res://gfx/ui/vCheck.png" type="Texture" id=5]
 [ext_resource path="res://ui/envelopeDisplay/EnvelopeDisplay.tscn" type="PackedScene" id=6]
 [ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=7]
+[ext_resource path="res://ui/FixedFrequency.gd" type="Script" id=8]
+[ext_resource path="res://gfx/fonts/NoteFont.tres" type="BitmapFont" id=9]
+
+[sub_resource type="StyleBoxFlat" id=13]
+bg_color = Color( 0.501961, 0.501961, 0.501961, 0.25098 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+anti_aliasing = false
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0, 0, 0, 0.25098 )
-border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
 corner_radius_top_left = 5
 corner_radius_bottom_right = 5
 expand_margin_top = 1.0
@@ -44,27 +61,6 @@ expand_margin_bottom = 1.0
 anti_aliasing = false
 
 [sub_resource type="StyleBoxEmpty" id=6]
-
-[sub_resource type="GDScript" id=7]
-script/source = "extends CheckBox
-onready var ab = [owner.get_node(\"Tune\"), owner.get_node(\"Frequency\")]
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
-
-
-func _on_FixedRatio_toggled(button_pressed):
-	var i = int(button_pressed)
-	ab[1-i].visible = true
-	ab[i].visible = false
-	
-	pass # Replace with function body.
-"
 
 [sub_resource type="StyleBoxFlat" id=8]
 content_margin_left = 0.0
@@ -141,9 +137,10 @@ visible = false
 margin_left = 8.0
 margin_top = 72.0
 margin_right = 288.0
-margin_bottom = 120.0
+margin_bottom = 124.0
 custom_constants/vseparation = 8
 custom_constants/hseparation = 16
+script = ExtResource( 8 )
 __meta__ = {
 "_edit_group_": true,
 "_edit_use_anchors_": false
@@ -159,20 +156,26 @@ exp_edit = true
 [node name="H" type="HBoxContainer" parent="Frequency"]
 margin_top = 28.0
 margin_right = 280.0
-margin_bottom = 48.0
-custom_constants/separation = 16
+margin_bottom = 52.0
+custom_constants/separation = 4
 
-[node name="OptionButton" type="OptionButton" parent="Frequency/H"]
-margin_right = 132.0
-margin_bottom = 20.0
+[node name="Presets" type="OptionButton" parent="Frequency/H"]
+margin_right = 138.0
+margin_bottom = 24.0
+rect_min_size = Vector2( 0, 24 )
 size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_styles/hover = SubResource( 13 )
+custom_styles/pressed = SubResource( 1 )
 custom_styles/normal = SubResource( 1 )
+custom_fonts/font = ExtResource( 9 )
+text = "A-4"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Detune" parent="Frequency/H" instance=ExtResource( 3 )]
-margin_left = 148.0
+margin_left = 142.0
 margin_right = 280.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
@@ -461,7 +464,6 @@ custom_styles/focus = SubResource( 6 )
 custom_styles/hover_pressed = SubResource( 5 )
 custom_styles/normal = SubResource( 5 )
 pressed = true
-script = SubResource( 7 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -518,7 +520,11 @@ valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+[connection signal="value_changed" from="Frequency/Frequency" to="." method="setFreq"]
+[connection signal="item_selected" from="Frequency/H/Presets" to="Frequency" method="_on_Presets_item_selected"]
+[connection signal="pressed" from="Frequency/H/Presets" to="Frequency" method="_on_Presets_pressed"]
+[connection signal="value_changed" from="Frequency/H/Detune" to="." method="setPG" binds= [ "detune" ]]
 [connection signal="value_changed" from="WavePanel/Wave" to="WavePanel" method="_on_Wave_value_changed"]
-[connection signal="toggled" from="FixedRatio" to="FixedRatio" method="_on_FixedRatio_toggled"]
+[connection signal="toggled" from="FixedRatio" to="." method="_on_FixedRatio_toggled"]
 [connection signal="toggled" from="Mute" to="." method="_on_Mute_toggled" binds= [ false ]]
 [connection signal="toggled" from="Bypass" to="." method="_on_Mute_toggled" binds= [ true ]]

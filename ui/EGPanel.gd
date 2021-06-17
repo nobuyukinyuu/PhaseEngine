@@ -135,6 +135,16 @@ func setDuty(value):
 	get_node(chip_loc).SetDuty(operator, value)
 	
 
+onready var ab = [$Tune, $Frequency]
+func _on_FixedRatio_toggled(button_pressed):
+	var i = int(button_pressed)
+	ab[1-i].visible = true
+	ab[i].visible = false
+	
+	if !chip_loc.is_empty():
+		get_node(chip_loc).SetFixedFreq(operator, !button_pressed)
+func setFreq(value):
+	get_node(chip_loc).SetFrequency(operator, value)
 
 
 func _on_Mute_toggled(button_pressed, bypass:bool):

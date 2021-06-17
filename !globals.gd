@@ -9,7 +9,18 @@ const mixRate = 48000.0  #Also set in Constants.cs for the c# backend.  This is 
 const NOTE_A4 = 69
 const OPERATOR_TAB_GROUP = 8
 
+var periods = []  #Size 128 +1
+
 signal tab_dropped  #Emitted by a tab drop preview to signal columns to check their dirty state
+
+func _ready():
+	# Generate the period frequencies of every note based on center tuning (A-4) at 440hz
+	# Calculated from the equal temperment note ratio (12th root of 2).
+	periods.clear()
+	periods.resize(129)  #Extra field accounts for G#9
+	for i in periods.size():
+		periods[i] = 440.0 * pow(2, (i-NOTE_A4) / 12.0 )
+	
 
 func arr_replace(arr:Array, a, b):
 	var idx = arr.find(a)
