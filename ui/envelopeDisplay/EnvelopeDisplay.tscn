@@ -37,13 +37,13 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 thickness = 1.2
-sl = 0.613
-Delay = 93
-Attack = 32
-Hold = 91
+sl = 0.75
+Delay = 32
+Attack = 14
+Hold = 97
 Decay = 29
 Sustain = 0
-Release = 17
+Release = 8
 
 [node name="Grid" type="TextureRect" parent="."]
 visible = false
@@ -77,7 +77,7 @@ margin_right = 24.0
 margin_bottom = 120.0
 rect_min_size = Vector2( 24, 0 )
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.00286865
+size_flags_stretch_ratio = 0.00100708
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -92,7 +92,7 @@ margin_top = -4.0
 margin_right = 2.0
 margin_bottom = 4.0
 custom_fonts/font = ExtResource( 4 )
-text = "23ms"
+text = "8ms"
 align = 1
 valign = 1
 clip_text = true
@@ -102,10 +102,10 @@ __meta__ = {
 
 [node name="0" type="TextureRect" parent="ADSR"]
 margin_left = 24.0
-margin_right = 41.0
+margin_right = 56.0
 margin_bottom = 120.0
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.5
+size_flags_stretch_ratio = 0.78125
 script = ExtResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -113,11 +113,12 @@ __meta__ = {
 color = Color( 0.921569, 0.486275, 0.470588, 1 )
 thickness = 1.2
 curve = -2.0
-sl = 1.0
+p1 = 1.0
+p2 = 0.0
 
 [node name="1" type="TextureRect" parent="ADSR"]
-margin_left = 41.0
-margin_right = 65.0
+margin_left = 56.0
+margin_right = 80.0
 margin_bottom = 120.0
 rect_min_size = Vector2( 24, 0 )
 size_flags_horizontal = 3
@@ -126,9 +127,9 @@ script = ExtResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-reverse = true
 color = Color( 0.858824, 0.67451, 0.231373, 1 )
 thickness = 1.2
+p2 = 0.0
 
 [node name="Label" type="Label" parent="ADSR/1"]
 modulate = Color( 1, 1, 1, 0.501961 )
@@ -140,7 +141,7 @@ margin_top = -4.0
 margin_right = 4.0
 margin_bottom = 4.0
 custom_fonts/font = ExtResource( 4 )
-text = "22ms"
+text = "24ms"
 align = 1
 valign = 1
 clip_text = true
@@ -149,23 +150,22 @@ __meta__ = {
 }
 
 [node name="2" type="TextureRect" parent="ADSR"]
-margin_left = 65.0
-margin_right = 102.0
+margin_left = 80.0
+margin_right = 84.0
 margin_bottom = 120.0
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 1.09375
+size_flags_stretch_ratio = 0.109375
 script = ExtResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-reverse = true
 color = Color( 0.214233, 0.84375, 0.457726, 1 )
 thickness = 1.2
-sl = 0.387
+p2 = 0.0
 
 [node name="3" type="TextureRect" parent="ADSR"]
-margin_left = 102.0
-margin_right = 136.0
+margin_left = 84.0
+margin_right = 125.0
 margin_bottom = 120.0
 size_flags_horizontal = 3
 script = ExtResource( 2 )
@@ -173,34 +173,30 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 note_off_indicator = true
-reverse = true
 color = Color( 0.215686, 0.54902, 0.843137, 1 )
 thickness = 1.2
-tl = 0.613
+p2 = 0.0
 
 [node name="4" type="TextureRect" parent="ADSR"]
-margin_left = 136.0
+margin_left = 125.0
 margin_right = 161.0
 margin_bottom = 120.0
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.734375
+size_flags_stretch_ratio = 0.875
 script = ExtResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-reverse = true
 color = Color( 0.515317, 0.238647, 0.71875, 1 )
 thickness = 1.2
-curve = 2.0
-tl = 0.613
-sl = 1
+curve = 0.5
 
 [node name="Spacer" type="TextureRect" parent="ADSR"]
 margin_left = 161.0
 margin_right = 190.0
 margin_bottom = 120.0
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.823958
+size_flags_stretch_ratio = 0.683333
 __meta__ = {
 "_edit_use_anchors_": false
 }

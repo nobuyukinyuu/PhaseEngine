@@ -82,7 +82,7 @@ corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 
-[sub_resource type="StyleBoxFlat" id=11]
+[sub_resource type="StyleBoxFlat" id=9]
 bg_color = Color( 0.447059, 0.172549, 0.145098, 1 )
 border_width_left = 1
 border_width_top = 1
@@ -94,7 +94,7 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=9]
+[sub_resource type="StyleBoxFlat" id=10]
 bg_color = Color( 0.0784314, 0.141176, 0.27451, 1 )
 border_width_left = 1
 border_width_top = 1
@@ -106,7 +106,7 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=10]
+[sub_resource type="StyleBoxFlat" id=11]
 bg_color = Color( 0.145098, 0.447059, 0.176471, 1 )
 border_width_left = 1
 border_width_top = 1
@@ -129,8 +129,8 @@ corner_radius_bottom_left = 12
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -682.0
-margin_bottom = -280.0
-rect_min_size = Vector2( 342, 280 )
+margin_bottom = -296.0
+rect_min_size = Vector2( 342, 300 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -138,9 +138,9 @@ __meta__ = {
 
 [node name="Frequency" type="GridContainer" parent="."]
 visible = false
-margin_left = 7.0
+margin_left = 8.0
 margin_top = 72.0
-margin_right = 287.0
+margin_right = 288.0
 margin_bottom = 120.0
 custom_constants/vseparation = 8
 custom_constants/hseparation = 16
@@ -183,9 +183,9 @@ ticks_on_borders = false
 associated_property = "detune"
 
 [node name="Tune" type="GridContainer" parent="."]
-margin_left = 7.0
+margin_left = 8.0
 margin_top = 72.0
-margin_right = 287.0
+margin_right = 288.0
 margin_bottom = 128.0
 custom_constants/vseparation = 8
 custom_constants/hseparation = 16
@@ -243,9 +243,9 @@ ticks_on_borders = false
 associated_property = "detune"
 
 [node name="Levels" type="GridContainer" parent="."]
-margin_left = 7.0
+margin_left = 8.0
 margin_top = 136.0
-margin_right = 327.0
+margin_right = 328.0
 margin_bottom = 192.0
 custom_constants/vseparation = 8
 custom_constants/hseparation = 16
@@ -301,9 +301,9 @@ associated_property = "sl"
 useExpTicks = true
 
 [node name="Rates" type="GridContainer" parent="."]
-margin_left = 7.0
+margin_left = 8.0
 margin_top = 200.0
-margin_right = 327.0
+margin_right = 328.0
 margin_bottom = 256.0
 custom_constants/vseparation = 8
 custom_constants/hseparation = 16
@@ -385,9 +385,9 @@ ticks_on_borders = false
 associated_property = "rr"
 
 [node name="Tweak" type="GridContainer" parent="."]
-margin_left = 7.0
+margin_left = 8.0
 margin_top = 40.0
-margin_right = 215.0
+margin_right = 216.0
 margin_bottom = 72.0
 custom_constants/hseparation = 16
 columns = 2
@@ -413,9 +413,9 @@ max_value = 65535.0
 associated_property = "duty"
 
 [node name="WavePanel" type="Panel" parent="."]
-margin_left = 215.0
+margin_left = 216.0
 margin_top = 32.0
-margin_right = 335.0
+margin_right = 336.0
 margin_bottom = 72.0
 custom_styles/panel = SubResource( 2 )
 script = ExtResource( 2 )
@@ -449,9 +449,9 @@ anchor_left = -0.000978474
 anchor_top = -0.00174216
 anchor_right = -0.000978474
 anchor_bottom = -0.00174216
-margin_left = 288.0
+margin_left = 289.0
 margin_top = 73.0
-margin_right = 334.0
+margin_right = 335.0
 margin_bottom = 129.0
 custom_icons/checked = SubResource( 3 )
 custom_icons/unchecked = SubResource( 4 )
@@ -467,22 +467,24 @@ __meta__ = {
 }
 
 [node name="EnvelopeDisplay" parent="." instance=ExtResource( 6 )]
-margin_left = 7.0
-margin_top = 288.0
-margin_right = 327.0
-margin_bottom = 320.0
+margin_top = 256.0
+margin_right = 340.0
+margin_bottom = 296.0
 custom_styles/panel = SubResource( 8 )
-thickness = 0.5
-sl = 0.267
-Release = 18
+sl = 1.0
+Delay = 0
+Attack = 63
+Hold = 0
+Decay = 63
+Release = 48
 
 [node name="Mute" type="Button" parent="."]
 margin_left = 280.0
 margin_top = 8.0
 margin_right = 338.0
 margin_bottom = 24.0
-custom_styles/pressed = SubResource( 11 )
-custom_styles/normal = SubResource( 9 )
+custom_styles/pressed = SubResource( 9 )
+custom_styles/normal = SubResource( 10 )
 custom_fonts/font = ExtResource( 7 )
 toggle_mode = true
 text = "Mute"
@@ -495,8 +497,8 @@ margin_left = 216.0
 margin_top = 8.0
 margin_right = 274.0
 margin_bottom = 24.0
-custom_styles/pressed = SubResource( 10 )
-custom_styles/normal = SubResource( 9 )
+custom_styles/pressed = SubResource( 11 )
+custom_styles/normal = SubResource( 10 )
 custom_fonts/font = ExtResource( 7 )
 toggle_mode = true
 text = "Bypass"

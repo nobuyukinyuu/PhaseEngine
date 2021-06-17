@@ -8,9 +8,13 @@ export (NodePath) var chip_loc  #Location of PhaseEngine instance in code
 
 func _ready():
 	$SlotIndicator.connect("slot_moved", self, "_on_slot_moved")
-	$Add.connect("pressed", self, "_on_slot_moved", [true])
-	$Remove.connect("pressed", self, "_on_slot_moved", [true])
-	pass
+	
+	yield(get_tree(),"idle_frame")
+	yield(get_tree(),"idle_frame")
+	yield(get_tree(),"idle_frame")
+	if !chip_loc.is_empty():
+		$SlotIndicator.total_ops = get_node(chip_loc).GetOpCount()
+
 
 func _physics_process(delta):
 	update()
@@ -25,7 +29,7 @@ func _on_slot_moved(delay=false):
 	var d = {}  #Bussing dict
 	
 	if delay:  yield(get_tree(), "idle_frame")
-	d["opCount"] = $SlotIndicator.ops.size()
+	d["opCount"] = $SlotIndicator.total_ops
 	d["grid"] = get_grid_description()
 	
 	d["processOrder"] = get_process_order()
@@ -37,11 +41,13 @@ func _on_slot_moved(delay=false):
 func _on_Add_pressed():
 	if $SlotIndicator.total_ops < MAX_OPS:
 		$SlotIndicator.total_ops +=1
+		_on_slot_moved()
 
 
 func _on_Remove_pressed():
 	if $SlotIndicator.total_ops > 2:
 		$SlotIndicator.total_ops -=1
+		_on_slot_moved()
 		
 
 #Describes the wiring grid in terms of a 32-bit integer.  Only works when MAX_OPS <= 8,

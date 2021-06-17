@@ -14,6 +14,7 @@ func _ready():
 	for o in $Rates.get_children():
 		if !o is Slider:  continue
 		o.connect("value_changed", self, "setEG", [o.associated_property])
+		o.connect("value_changed", self, "update_env", [o])
 
 	for o in $Tweak.get_children():
 		if !o is Slider:  continue
@@ -23,6 +24,7 @@ func _ready():
 	for o in $Levels.get_children():
 		if !o is Slider:  continue
 		o.connect("value_changed", self, "setEG", [o.associated_property])
+		o.connect("value_changed", self, "update_env", [o])
 
 	$WavePanel/Wave.connect("value_changed", self, "setWaveform")
 #	$Tweak/Feedback.connect("value_changed", self, "setFeedback")
@@ -62,11 +64,12 @@ func set_from_op(op:int):
 	$"Rates/Sustain".value = rates[2]
 	$"Rates/Release".value = rates[3]
 	
+	
 	$"Rates/+Delay".value = d["delay"]
 	$"Rates/+Hold".value = d["hold"]
 
 	var levels = d["levels"]
-	$"Levels/Total Level".value = levels[4]
+	$"Levels/Total Level".value = levels[4] 
 	$"Levels/Attack Level".value = levels[0]
 	$"Levels/Decay Level".value = levels[1]
 	$"Levels/Sustain Level".value = levels[2]
@@ -77,15 +80,44 @@ func set_from_op(op:int):
 	$Mute.pressed = d["mute"]
 	$Bypass.pressed = d["bypass"]
 
+	refresh_envelope_preview()
+
 func refresh_envelope_preview():
 	var d = get_node(chip_loc).GetOpValues(0, operator)
 	var rates = d["rates"]
 	var levels = d["levels"]
+
+	$EnvelopeDisplay.Attack = rates[0]
+	$EnvelopeDisplay.Decay = rates[1]
+	$EnvelopeDisplay.Sustain = rates[2]
+	$EnvelopeDisplay.Release = rates[3]
+
+	$EnvelopeDisplay.Delay = d["delay"]
+	$EnvelopeDisplay.Hold = d["hold"]
 	
-	#TODO:  SUPPORT ALL LEVELS
+	$EnvelopeDisplay.tl = levels[4] / 1920.0
+	$EnvelopeDisplay.al = levels[0] / 1024.0
+	$EnvelopeDisplay.dl = levels[1] / 1024.0
+	$EnvelopeDisplay.sl = levels[2] / 1024.0
+
+#Updates a single part of the envelope preview.
+const env_map = {"ar":"Attack", "dr":"Decay", "sr":"Sustain", "rr":"Release"}
+func update_env(value, sender:EGSlider):
+	var prop = sender.associated_property
+#	match prop:
+#		"tl", "al", "dl", "sl", "decay", "hold":
+#			$EnvelopeDisplay.set(prop, sender.value)
+#			return
+#
+#	if prop.ends_with("r") and len(prop) == 2:  #Rate
+#		$EnvelopeDisplay.set(env_map[prop], sender.value)
 	
-#	$EnvelopeDisplay.Attack = 
-	
+	if prop == "tl":
+		$EnvelopeDisplay.call("update_" + prop, value/1920.0)
+	elif prop.ends_with("l"):
+		$EnvelopeDisplay.call("update_" + prop, value/1024.0)
+	else:
+		$EnvelopeDisplay.call("update_" + prop, value)
 
 
 func setEG(value, property):

@@ -78,7 +78,7 @@ namespace gdsFM
                 saw[i] = (ushort) ( (float) Math.Round(-Tools.Log2(inc*2) * 256));
             }
 
-            System.Diagnostics.Debug.Print("Shornlf");
+            // System.Diagnostics.Debug.Print("Shornlf");
 
         }
 

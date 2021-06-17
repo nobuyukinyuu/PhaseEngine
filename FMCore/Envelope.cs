@@ -49,7 +49,7 @@ namespace gdsFM
         public void Reset(bool rates=true, bool levels=true)
         {
             if (rates){
-                ar=R_MAX;dr=R_MAX;sr=16;rr=R_MAX;
+                ar=R_MAX;dr=R_MAX;sr=0;rr=R_MAX;
                 delay=0; hold=0; 
             }
 

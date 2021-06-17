@@ -1,4 +1,5 @@
 tool
+class_name EGSlider
 extends HSlider
 var font = preload("res://gfx/fonts/spelunkid_font.tres")
 var font2 = preload("res://gfx/fonts/numerics_8x10.tres")

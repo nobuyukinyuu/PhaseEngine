@@ -12,17 +12,19 @@ var dc=-1 setget update_dc
 var sc= 1 setget update_sc
 var rc= 2 setget update_rc
 
-export(float,0,1) var tl=1.0  setget update_tl #Total level
+export(float,0,1) var tl=0.0  setget update_tl #Total level
+export(float,0,1) var al=0.0  setget update_al #Attack level
+export(float,0,1) var dl=0.0  setget update_dl #Decay level
 export(float,0,1) var sl=1.0  setget update_sl #sustain level
 
 export(int, 0, 65535, 1) var Delay=0 setget update_delay
 export(int, 0, 63) var Attack=63 setget update_ar
-export(int, 0, 65535, 1) var Hold=0 setget update_hr
+export(int, 0, 65535, 1) var Hold=0 setget update_hold
 export(int, 0, 63) var Decay=63 setget update_dr
 export(int, 0, 63) var Sustain=63 setget update_sr
 export(int, 0, 63) var Release=15 setget update_rr
 
-var dl = 1.0
+var del = 1.0  #Delay
 var ar = 1.0  #Between epsilon and 1. lerp between 63-0
 var hr = 1.0  
 var dr = 1.0  #Ratio of DR to SR should add up to 2.  Map the range on env update.
@@ -30,19 +32,15 @@ var sr = 1.0
 var rr = 1.0  #Between epsilon and 1.  Lerp between 15-0
 
 func update_tl(value):
-#	if value >= 1:  
-#		value = log(value)/log(10) / 2
-#		tl = value
-#	else:
 	tl = value #/ 100.0
-		
+	update_vol()
+func update_al(value):
+	al = value #/ 100.0
+	update_vol()
+func update_dl(value):
+	dl = value #/ 100.0
 	update_vol()
 func update_sl(value):
-#	if value >= 1:  
-#		var lin = log(value)/log(10) / 2
-#		value = lerp(lin, value / 100.0, 0.5)
-#		sl = value
-#	else:
 	sl = value #/ 100.0
 	update_vol()
 
@@ -65,14 +63,14 @@ func update_rc(val):
 
 func update_delay(val):
 	Delay = val
-	dl = lerp(2, 0, (65535-val)/65536.0) #if val >= 8192 else 0.2
+	del = lerp(2, 0, (65535-val)/65536.0) #if val >= 8192 else 0.2
 	update_env()
 	
 func update_ar(val):
 	Attack = val
 	ar = lerp(1, 0, val/64.0)
 	update_env()
-func update_hr(val):
+func update_hold(val):
 	Hold = val
 	hr = lerp(2, 0, (65535-val)/65536.0) if val >= 8192 else 0.2
 	update_env()
@@ -101,40 +99,41 @@ func update_rr(val):
 
 func update_env():
 	if !self.is_inside_tree():  return
-	$ADSR/"0".tl = tl		  #Attack level end
-	$ADSR/"1".tl = tl		  #Hold Level start
-	$ADSR/"1".sl = 0		  #Hold Level end
-	$ADSR/"2".tl = tl		  #Decay level start
+	for i in 5:
+		$ADSR.get_node(str(i)).tl = tl
+	
+	
+	var al2 = pow(al,0.5)
+	$ADSR/"0".p2 =  al2	  #Attack level end
+	$ADSR/"1".p1 =  al2	  #Hold Level start
+	$ADSR/"1".p2 =  al2	  #Hold Level end
+	$ADSR/"2".p1 =  al2	  #Decay level start
 
-	var sl2 = sl * tl
-	$ADSR/"2".sl = 1.0-sl	  #Decay Level end
-	$ADSR/"3".tl = sl2	 #Sustain level start
-	
-	var rl= sl
-	
-	$ADSR/"3".sl = 1.0-sr*sr   #Sustain level final
-	$ADSR/"4".tl = sr*sr*sl*tl   #Release level start
+	var dl2 = pow(dl,0.5)
+	$ADSR/"2".p2 =  dl2	  #Decay Level end
+	$ADSR/"3".p1 =  dl2	  #Sustain level start
 
-	if Release < 1:
-		$ADSR/"4".sl = 0.5-(rr/2.0)  #Release level end  (Lerp between 0 and rlev at rrate)
-	else:
-		$ADSR/"4".sl = 1  #Release level end  (Lerp between 0 and rlev at rrate)		
+	$ADSR/"3".p2 =  pow(sl, 0.5) if Sustain > 0 else dl2  #Sustain level final
+
+	$ADSR/"4".p1 =  $ADSR/"3".p2						#Release level start
+	$ADSR/"4".p2 = $ADSR/"3".p2 if Release == 0 else 1  #Release level end
 	
-	$ADSR/"0".size_flags_stretch_ratio = ar
+	$ADSR/"0".size_flags_stretch_ratio = ar*vol_diff(1,al)
 	$ADSR/"1".size_flags_stretch_ratio = hr
-	$ADSR/"2".size_flags_stretch_ratio = dr if Decay>0 else 0
-	$ADSR/"3".size_flags_stretch_ratio = sr
+	$ADSR/"2".size_flags_stretch_ratio = dr*vol_diff(al,dl) if Decay>0 else 0
+	$ADSR/"3".size_flags_stretch_ratio = sr*vol_diff(dl,sl) if Sustain>0 else 1
 	$ADSR/"4".size_flags_stretch_ratio = rr
 	
 	if $ADSR/"2".size_flags_stretch_ratio==0:
 		$ADSR/"2".visible=false
-		$ADSR/"0".tl=sl*tl
-		$ADSR/"1".tl=sl*tl
+		$ADSR/"3".visible=false
+		$ADSR/"4".p1=al2
 	else:
 		$ADSR/"2".visible=true
+		$ADSR/"3".visible=true
 		
 
-	$ADSR/Delay.size_flags_stretch_ratio = dl
+	$ADSR/Delay.size_flags_stretch_ratio = del
 	$ADSR/Delay.visible = Delay > 0
 
 	update_labels()
@@ -142,6 +141,9 @@ func update_env():
 	$ADSR/Spacer.size_flags_stretch_ratio = lerp(2,0, (ar+hr+dr+sr+rr) / 6.0)
 	
 	update()
+
+func vol_diff(a, b):  	#Provides a level differential to tweak rate widths.
+	return max(0.1, abs(a-b) )
 
 func update_labels():
 #	if Delay >= 1000:
@@ -181,7 +183,7 @@ func update_thickness(val):
 	thickness = val
 	
 	if !self.is_inside_tree():  return
-	for i in 4:
+	for i in 5:
 		var o = $ADSR.get_node(str(i))
 		o.thickness = thickness
 		o.update()

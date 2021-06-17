@@ -17,7 +17,7 @@ public class Test2 : Label
     const int scopeHeight = 128;
 
 
-    Chip c = new Chip(6,6);
+    Chip c = new Chip(6,3);
     long[] lastID = new long[128];  //Keeps track of the last ID pressed on a specified note, to turn it off when a noteOff event is detected.
 
     Node fromMidi;
@@ -34,7 +34,7 @@ public class Test2 : Label
 
         player.Play();
 
-        for (int i=4; i<c.Voice.egs.Length; i++)  c.Voice.egs[i].mute = true;
+        // for (int i=4; i<c.Voice.egs.Length; i++)  c.Voice.egs[i].mute = true;
 
         fromMidi = Owner.GetNode("MIDI Control");
 
@@ -89,6 +89,7 @@ public class Test2 : Label
     }
 
     public int GetOpType(int opTarget){ if(opTarget >= c.opCount) return 0; else return c.Voice.opType[opTarget]; }
+    public int GetOpCount() { return c.opCount; }
 
 
     // Called from EG controls to bus to the appropriate tuning properties.
