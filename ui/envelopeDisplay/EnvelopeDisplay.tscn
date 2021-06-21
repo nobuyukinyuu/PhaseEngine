@@ -112,7 +112,7 @@ __meta__ = {
 }
 color = Color( 0.921569, 0.486275, 0.470588, 1 )
 thickness = 1.2
-curve = -2.0
+curve = 0.5
 p1 = 1.0
 p2 = 0.0
 

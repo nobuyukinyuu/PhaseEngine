@@ -9,7 +9,7 @@ namespace gdsFM
         waveFunc wf = Sine;
         short[] customWaveform = new short[128];
 
-        public static readonly waveFunc[] waveFuncs = {Sine, Saw, Tri, Pulse, Absine, Noise1, Pink, Brown, Noise2};
+        public static readonly waveFunc[] waveFuncs = {Sine, Saw, Tri, Pulse, Absine, White, Pink, Brown, Noise2};
 
         public Oscillator(waveFunc wave)    {wf=wave;}
         public void SetWaveform(waveFunc wave) {wf=wave;}
@@ -27,7 +27,6 @@ namespace gdsFM
             ushort phase = (ushort) unchecked((n<<6));
             flip = phase >= duty;
             return 0;
-            // return phase >= duty? short.MaxValue : short.MinValue;
         }
         public static ushort Sine(ulong input, ushort duty, ref bool flip)
         {
@@ -113,7 +112,7 @@ namespace gdsFM
 
         //White noise generator, but uses duty cycle to oscillate between on and off state
         static ushort seed=1;
-        public static ushort White(ulong n, ushort duty, ref bool flip) 
+        public static ushort White(ulong n, ushort duty, ref bool flip)
         {
             unchecked
             {
@@ -136,7 +135,7 @@ namespace gdsFM
         }
 
         //Essentially the same generator as the white noise generator but only clocks based on the duty cycle rather than only outputs noise on the duty cycle
-        public static ushort Noise1(ulong n, ushort duty, ref bool flip) 
+        public static ushort Noise1(ulong n, ushort duty, ref bool flip)
         {
             unchecked
             {

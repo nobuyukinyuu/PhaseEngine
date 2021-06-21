@@ -30,7 +30,8 @@ func _ready():
 #	$Tweak/Feedback.connect("value_changed", self, "setFeedback")
 #	$Tweak/Duty.connect("value_changed", self, "setDuty")
 
-	set_from_op(operator)
+	if !chip_loc.is_empty():
+		set_from_op(operator)
 
 
 onready var limiter:SceneTreeTimer = get_tree().create_timer(0)

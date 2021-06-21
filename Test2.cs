@@ -11,8 +11,6 @@ public class Test2 : Label
     AudioStreamGeneratorPlayback buf;
     AudioStreamPlayer player;
 
-    //1hz = Table size (or short.maxValue) / MixRate
-
     const int scopeLen = 256;
     const int scopeHeight = 128;
 
@@ -30,7 +28,7 @@ public class Test2 : Label
         stream = (AudioStreamGenerator) player.Stream;
         buf = (AudioStreamGeneratorPlayback) player.GetStreamPlayback();
 
- 
+        stream.MixRate = Global.MixRate;
 
         player.Play();
 

@@ -7,6 +7,7 @@ const FilterNames = ["None", "Low Pass", "High Pass", "Bandpass (Skirt Gain)", "
 
 const mixRate = 48000.0  #Also set in Constants.cs for the c# backend.  This is used for UI calculations only
 const NOTE_A4 = 69
+const note_names = ["A-", "A#", "B-", "C-", "C#", "D-", "D#", "E-", "F-", "F#", "G-", "G#"]
 const OPERATOR_TAB_GROUP = 8
 
 var periods = []  #Size 128 +1
@@ -36,3 +37,12 @@ func arr_remove_all(arr:Array, item):
 
 func delay_frames_to_time(nFrames:int):  #Converts a delay/hold value into its time in seconds.
 	return (nFrames<<2) / (mixRate/3)
+
+func note_name(midi_note:int):
+	if midi_note < 0 or midi_note >= 128:
+		return ""
+
+	var octave = "" if midi_note < 12 else floor((midi_note-12)/12)
+	var note = note_names[(midi_note+3) % 12]
+		
+	return note + str(octave)

@@ -6,6 +6,7 @@ namespace gdsFM
     public class Operator
     {
         public long phase;  //Phase accumulator
+        bool flip=false;  // Used by the oscillator to flip the waveform's values.  TODO:  User-specified waveform inversion
         public uint env_counter;  //Envelope counter
         public uint env_hold_counter=0;  //Counter during the hold phase of an envelope
         public ulong noteIncrement;  //Frequency multiplier for note base hz.
@@ -129,7 +130,6 @@ namespace gdsFM
 
 
 
-        bool flip=false;  // Used by the oscillator to flip the waveform's values.  TODO:  User-specified waveform inversion
         public short ComputeVolume(ushort modulation, ushort am_offset)
         {
             // start with the upper 10 bits of the phase value plus modulation
@@ -156,9 +156,16 @@ namespace gdsFM
 
 
         /// Summary:  Calculates the self feedback of the given input with the given modulation amount.
+        public short lBuf;
         public short ComputeFeedback(ushort modulation)
         {
-            if (eg.feedback == 0) return ComputeVolume(modulation, 0);    
+            if (eg.feedback == 0) 
+            {
+                // return (ComputeVolume(modulation, 0));
+                //Linear interpolation buffer;  Is this worth it?
+                lBuf = (short)((ComputeVolume(modulation, 0) + lBuf) >> 1);
+                return lBuf;
+            }
             var avg = (fbBuf[0] + fbBuf[1]) >> (10 - eg.feedback);
             var output = ComputeVolume(unchecked((ushort)(avg+modulation)),0);
             fbBuf[1] = fbBuf[0];
@@ -179,7 +186,8 @@ namespace gdsFM
             {
             case EGStatus.DELAY:
                 if (env_counter >> 2 < eg.delay) return;
-                else {egStatus = EGStatus.ATTACK;  return;}  //Why return here?  Other cases set the target level.  Consider setting it here too.  FIXME
+                //Why return here?  Other cases set the target level.  Consider setting it here too.  FIXME
+                else {egStatus = EGStatus.ATTACK;  phase=0; return;}  
 
             case EGStatus.ATTACK:
                 target = eg.levels[(int)EGStatus.ATTACK];

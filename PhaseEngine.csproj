@@ -4,7 +4,6 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
   <ItemGroup>
-    <!-- <Compile Include="**/*" Exclude="script_templates/*" /> -->
     <!-- <Compile Include="**\*.cs" Exclude="script_templates/*.cs" /> -->
     <Compile Include="./*.cs" Exclude="script_templates/*.cs" />
     <Compile Include="FMCore/**/*.cs" />
