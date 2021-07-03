@@ -15,7 +15,7 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 
 ## Different
 * Based on more traditional paradigms, comparable to most other FM synths under the hood
-  * Envelopes use attenuation in the log domain rather than mixing linear volume (with the exception of overall total level).
+  * Envelopes use attenuation in the log domain rather than mixing linear volume.
   * Only one envelope curve type supported (exponential).
   * Envelope state changes are specified in iteration rates (like most other FM synths) instead of pure length (like in gdsFM).
   * Modulating phase is done using simple addition, without piping the result through a "modulation technique" oscillator.

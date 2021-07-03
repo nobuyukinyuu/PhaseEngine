@@ -9,6 +9,12 @@ namespace gdsFM
     public struct Increments
     {
 
+        //TODO:  Consider changing this from a struct to a class, and having a nullable field refer to the "next" increment in a chain.
+        //       The idea being to define increment sweeps as linear slides from one increment to another, calculated once based on time
+        //       when the next note in a chain of increments is met.  This allows non-interactive (but fast) pitch bends, which can be 
+        //       separated back into requisite parts if necessary (for example in a tracked note structure).  During editing, moving
+        //       the bend would take the relevant increment references and update it.
+
         public double hz, base_hz;
         double tuned_hz; //Frequency of base_hz * coarse * fine + detune; the tuning without any external modifiers from lfo/controllers
 

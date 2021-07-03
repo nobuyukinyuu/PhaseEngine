@@ -170,7 +170,7 @@ margin_top = 336.0
 margin_bottom = 356.0
 
 [node name="ResponseCurve" parent="." instance=ExtResource( 2 )]
-margin_left = 8.0
+margin_left = 336.0
 margin_top = 288.0
-margin_right = 304.0
+margin_right = 648.0
 margin_bottom = 592.0

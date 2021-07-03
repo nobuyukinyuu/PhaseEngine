@@ -123,7 +123,7 @@ corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
-[sub_resource type="GDScript" id=14]
+[sub_resource type="GDScript" id=13]
 script/source = "extends Button
 
 const icon_offset = Vector2(1, 4)
@@ -566,7 +566,7 @@ theme = ExtResource( 12 )
 text = "Velocity"
 icon = ExtResource( 11 )
 align = 2
-script = SubResource( 14 )
+script = SubResource( 13 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -581,7 +581,7 @@ theme = ExtResource( 12 )
 text = "KSR"
 icon = ExtResource( 11 )
 align = 2
-script = SubResource( 14 )
+script = SubResource( 13 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -596,7 +596,7 @@ theme = ExtResource( 12 )
 text = "KSL"
 icon = ExtResource( 11 )
 align = 2
-script = SubResource( 14 )
+script = SubResource( 13 )
 __meta__ = {
 "_edit_use_anchors_": false
 }

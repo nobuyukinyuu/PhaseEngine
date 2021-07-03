@@ -35,7 +35,6 @@ namespace gdsFM
         public static readonly ushort[] tri = new ushort[TRI_TABLE_MASK+1];
         public static readonly ushort[] saw = new ushort[256];
  
- 
 
         //Note transposition ratio table
         public static readonly double[] transpose = new double[1300];  //10kb
@@ -80,8 +79,6 @@ namespace gdsFM
             // System.Diagnostics.Debug.Print("Shornlf");
 
         }
-
-
 
 
 

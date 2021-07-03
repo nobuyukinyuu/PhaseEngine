@@ -1,0 +1,144 @@
+[gd_scene load_steps=18 format=2]
+
+[ext_resource path="res://ui/responseCurve/PresetMenu.theme" type="Theme" id=2]
+[ext_resource path="res://gfx/fonts/numerics_5x8.tres" type="BitmapFont" id=3]
+[ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=4]
+[ext_resource path="res://gfx/ui/godot_icons/icon_action_paste.svg" type="Texture" id=5]
+[ext_resource path="res://gfx/ui/godot_icons/icon_action_copy.svg" type="Texture" id=6]
+[ext_resource path="res://gfx/ui/vu/tick.png" type="Texture" id=7]
+[ext_resource path="res://gfx/ui/vu/grabber.png" type="Texture" id=8]
+[ext_resource path="res://gfx/ui/godot_icons/icon_curve_linear.svg" type="Texture" id=9]
+[ext_resource path="res://gfx/ui/icon_12th_root.svg" type="Texture" id=10]
+[ext_resource path="res://gfx/ui/godot_icons/icon_curve_in_out.svg" type="Texture" id=11]
+[ext_resource path="res://gfx/ui/vu/minmax_slider_label.png" type="Texture" id=12]
+[ext_resource path="res://gfx/ui/godot_icons/icon_curve_in.svg" type="Texture" id=13]
+[ext_resource path="res://gfx/ui/godot_icons/icon_curve_out.svg" type="Texture" id=14]
+[ext_resource path="res://gfx/ui/godot_icons/icon_curve_out_in.svg" type="Texture" id=15]
+
+[sub_resource type="StyleBoxFlat" id=1]
+draw_center = false
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.0941176, 0.156863, 0.254902, 1 )
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+expand_margin_left = 3.0
+expand_margin_right = 5.0
+expand_margin_top = 3.0
+expand_margin_bottom = 4.0
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0.0705882, 0.117647, 0.215686, 0.627451 )
+expand_margin_left = 1.0
+expand_margin_right = 3.0
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0.0705882, 0.117647, 0.192157, 0.498039 )
+expand_margin_left = 1.0
+expand_margin_right = 3.0
+
+[node name="Node2D" type="Node2D"]
+
+[node name="Ref" type="ReferenceRect" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+editor_only = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CPMenu" type="PopupMenu" parent="."]
+margin_left = 392.0
+margin_top = 192.0
+margin_right = 512.0
+margin_bottom = 250.0
+theme = ExtResource( 2 )
+items = [ "Copy", ExtResource( 6 ), 0, false, false, 0, 0, null, "", false, "", null, 0, false, false, 2, 0, null, "", true, "Paste", ExtResource( 5 ), 0, false, false, 2, 0, null, "", false ]
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="lblMinMax" type="Label" parent="."]
+margin_left = 356.0
+margin_top = 270.0
+margin_right = 371.0
+margin_bottom = 278.0
+custom_fonts/font = ExtResource( 3 )
+custom_colors/font_color = Color( 0.188235, 0.631373, 0.752941, 1 )
+text = "00/[]"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextureRect" type="TextureRect" parent="."]
+modulate = Color( 1, 1, 1, 0.65098 )
+margin_left = 355.0
+margin_top = 54.0
+margin_right = 380.0
+margin_bottom = 59.0
+texture = ExtResource( 12 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="lblTitle" type="Label" parent="."]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -14.0
+custom_fonts/font = ExtResource( 4 )
+custom_colors/font_color = Color( 0.188235, 0.631373, 0.752941, 1 )
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="EaseSubmenu" type="PopupMenu" parent="."]
+visible = true
+margin_left = 34.0
+margin_top = 28.0
+margin_right = 154.0
+margin_bottom = 146.0
+theme = ExtResource( 2 )
+items = [ "Linear", ExtResource( 9 ), 0, false, false, 0, 0, null, "", false, "In", ExtResource( 13 ), 0, false, false, 1, 0, null, "", false, "Out", ExtResource( 14 ), 0, false, false, 2, 0, null, "", false, "In-Out", ExtResource( 11 ), 0, false, false, 3, 0, null, "", false, "Out-In", ExtResource( 15 ), 0, false, false, 4, 0, null, "", false, "Even Temp", ExtResource( 10 ), 0, false, false, 5, 0, null, "", false ]
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="sldMin" type="VSlider" parent="."]
+margin_left = 352.0
+margin_top = 64.0
+margin_right = 368.0
+margin_bottom = 264.0
+custom_icons/tick = ExtResource( 7 )
+custom_icons/grabber_highlight = ExtResource( 8 )
+custom_icons/grabber = ExtResource( 8 )
+custom_styles/slider = SubResource( 1 )
+custom_styles/grabber_area_highlight = SubResource( 2 )
+custom_styles/grabber_area = SubResource( 3 )
+tick_count = 11
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="sldMax" type="VSlider" parent="."]
+margin_left = 368.0
+margin_top = 64.0
+margin_right = 378.0
+margin_bottom = 264.0
+custom_icons/tick = ExtResource( 7 )
+custom_icons/grabber_highlight = ExtResource( 8 )
+custom_icons/grabber = ExtResource( 8 )
+custom_styles/slider = SubResource( 1 )
+custom_styles/grabber_area_highlight = SubResource( 2 )
+custom_styles/grabber_area = SubResource( 3 )
+value = 100.0
+tick_count = 11
+__meta__ = {
+"_edit_use_anchors_": false
+}

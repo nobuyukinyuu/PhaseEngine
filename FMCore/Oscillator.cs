@@ -28,6 +28,7 @@ namespace gdsFM
             flip = phase >= duty;
             return 0;
         }
+
         public static ushort Sine(ulong input, ushort duty, ref bool flip)
         {
             // return (short)Tables.sin[unchecked((ushort)n & Tables.SINE_TABLE_MASK)];

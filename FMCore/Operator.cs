@@ -151,7 +151,7 @@ namespace gdsFM
             // result = (int)(result * (1 - (eg.tl*Global.ONE_PER_THOU)));  //Floating point conversion.... expensive?
 
             // negate if in the negative part of the sin wave (sign bit gives 14 bits)
-            return flip ? (short)-result : (short)result;
+            return flip? (short)-result : (short)result;
         }
 
 

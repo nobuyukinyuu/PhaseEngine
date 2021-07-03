@@ -1,9 +1,9 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=31 format=2]
 
 [ext_resource path="res://ui/responseCurve/bg.gd" type="Script" id=1]
 [ext_resource path="res://gfx/ui/vu/ruler16.png" type="Texture" id=2]
 [ext_resource path="res://gfx/ui/vu/response_curve.png" type="Texture" id=3]
-[ext_resource path="res://gfx/fonts/small_numerics_thin.tres" type="BitmapFont" id=4]
+[ext_resource path="res://ui/responseCurve/ResponseCurve.gd" type="Script" id=4]
 [ext_resource path="res://gfx/ui/vu/btnPreset1.png" type="Texture" id=5]
 [ext_resource path="res://gfx/ui/vu/btnPreset2.png" type="Texture" id=6]
 [ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=7]
@@ -11,6 +11,18 @@
 [ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=9]
 [ext_resource path="res://ui/responseCurve/SplitAuxillary.gd" type="Script" id=10]
 [ext_resource path="res://ui/responseCurve/Split.gd" type="Script" id=11]
+[ext_resource path="res://ui/responseCurve/PresetMenu.theme" type="Theme" id=12]
+[ext_resource path="res://gfx/fonts/numerics_5x8.tres" type="BitmapFont" id=13]
+[ext_resource path="res://gfx/ui/godot_icons/icon_curve_in.svg" type="Texture" id=14]
+[ext_resource path="res://gfx/ui/icon_12th_root.svg" type="Texture" id=15]
+[ext_resource path="res://gfx/ui/godot_icons/icon_curve_linear.svg" type="Texture" id=16]
+[ext_resource path="res://gfx/ui/godot_icons/icon_curve_out_in.svg" type="Texture" id=17]
+[ext_resource path="res://gfx/ui/vu/grabber.png" type="Texture" id=18]
+[ext_resource path="res://gfx/ui/godot_icons/icon_curve_out.svg" type="Texture" id=19]
+[ext_resource path="res://gfx/ui/vu/tick.png" type="Texture" id=20]
+[ext_resource path="res://gfx/ui/godot_icons/icon_curve_in_out.svg" type="Texture" id=21]
+[ext_resource path="res://gfx/ui/vu/minmax_slider_label.png" type="Texture" id=22]
+[ext_resource path="res://ui/responseCurve/btnPresets.gd" type="Script" id=23]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0, 0, 0, 0.878431 )
@@ -42,19 +54,47 @@ region_rect = Rect2( 0, 0, 16, 24 )
 texture = ExtResource( 5 )
 region_rect = Rect2( 0, 0, 16, 24 )
 
+[sub_resource type="StyleBoxFlat" id=5]
+draw_center = false
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.0941176, 0.156863, 0.254902, 1 )
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+expand_margin_left = 3.0
+expand_margin_right = 5.0
+expand_margin_top = 3.0
+expand_margin_bottom = 4.0
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=6]
+bg_color = Color( 0.0705882, 0.117647, 0.215686, 0.627451 )
+expand_margin_left = 1.0
+expand_margin_right = 3.0
+
+[sub_resource type="StyleBoxFlat" id=7]
+bg_color = Color( 0.0705882, 0.117647, 0.192157, 0.498039 )
+expand_margin_left = 1.0
+expand_margin_right = 3.0
+
 [node name="ResponseCurve" type="Panel"]
-margin_right = 296.0
+margin_right = 320.0
 margin_bottom = 304.0
-rect_min_size = Vector2( 296, 304 )
+rect_min_size = Vector2( 320, 304 )
 custom_styles/panel = SubResource( 1 )
+script = ExtResource( 4 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="VU" type="Panel" parent="."]
-margin_left = 24.0
+margin_left = 32.0
 margin_top = 16.0
-margin_right = 280.0
+margin_right = 288.0
 margin_bottom = 272.0
 custom_styles/panel = SubResource( 2 )
 script = ExtResource( 1 )
@@ -64,8 +104,8 @@ __meta__ = {
 
 [node name="response_curve" type="TextureRect" parent="."]
 modulate = Color( 0.466667, 0.670588, 1, 1 )
-margin_left = 8.0
-margin_right = 96.0
+margin_left = 16.0
+margin_right = 104.0
 margin_bottom = 7.0
 texture = ExtResource( 3 )
 __meta__ = {
@@ -73,9 +113,9 @@ __meta__ = {
 }
 
 [node name="ValueRuler" type="TextureRect" parent="."]
-margin_left = 8.0
+margin_left = 16.0
 margin_top = 16.0
-margin_right = 18.0
+margin_right = 26.0
 margin_bottom = 273.0
 texture = ExtResource( 2 )
 stretch_mode = 2
@@ -85,9 +125,9 @@ __meta__ = {
 
 [node name="OctaveRuler" type="TextureRect" parent="."]
 modulate = Color( 0.376471, 0.376471, 0.376471, 1 )
-margin_left = 24.0
+margin_left = 32.0
 margin_top = 276.0
-margin_right = 280.0
+margin_right = 288.0
 margin_bottom = 286.0
 texture = ExtResource( 8 )
 stretch_mode = 2
@@ -97,56 +137,79 @@ __meta__ = {
 }
 
 [node name="lblValue" type="Label" parent="."]
+margin_left = 6.0
 margin_top = 16.0
-margin_right = 8.0
+margin_right = 16.0
 margin_bottom = 288.0
-custom_fonts/font = ExtResource( 4 )
+grow_horizontal = 0
+custom_fonts/font = ExtResource( 13 )
+custom_constants/line_spacing = 0
 text = "63
+
 
 
 56
 
 
+
 48
+
 
 
 40
 
 
+
 32
+
 
 
 24
 
 
+
 16
+
 
 
 8
 
 
 "
+align = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Button" type="Button" parent="."]
-margin_left = 280.0
+[node name="btnPresets" type="MenuButton" parent="."]
+margin_left = 296.0
 margin_top = 16.0
-margin_right = 296.0
+margin_right = 312.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 16, 24 )
 custom_styles/hover = SubResource( 3 )
 custom_styles/pressed = SubResource( 4 )
 custom_styles/normal = SubResource( 4 )
+flat = false
+script = ExtResource( 23 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="EaseSubmenu" type="PopupMenu" parent="btnPresets"]
+margin_left = 32.0
+margin_right = 152.0
+margin_bottom = 138.0
+theme = ExtResource( 12 )
+items = [ "Linear", ExtResource( 16 ), 0, false, false, 0, 0, null, "", false, "In", ExtResource( 14 ), 0, false, false, 1, 0, null, "", false, "Out", ExtResource( 19 ), 0, false, false, 2, 0, null, "", false, "In-Out", ExtResource( 21 ), 0, false, false, 3, 0, null, "", false, "Out-In", ExtResource( 17 ), 0, false, false, 4, 0, null, "", false, "Even Temp", ExtResource( 15 ), 0, false, false, 5, 0, null, "", false ]
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Label" type="Label" parent="."]
-margin_left = 8.0
+margin_left = 16.0
 margin_top = 288.0
-margin_right = 72.0
+margin_right = 80.0
 margin_bottom = 302.0
 mouse_filter = 0
 custom_fonts/font = ExtResource( 7 )
@@ -159,9 +222,9 @@ __meta__ = {
 }
 
 [node name="lblOctave" type="Label" parent="."]
-margin_left = 72.0
+margin_left = 80.0
 margin_top = 288.0
-margin_right = 288.0
+margin_right = 296.0
 margin_bottom = 302.0
 mouse_filter = 0
 custom_fonts/font = ExtResource( 9 )
@@ -169,6 +232,76 @@ custom_colors/font_color = Color( 0.15, 0.5025, 0.6, 1 )
 text = "1  2  3  4  5  6  7  8  9  "
 valign = 1
 script = ExtResource( 10 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MinMax" type="Control" parent="."]
+margin_left = 288.0
+margin_top = 40.0
+margin_right = 320.0
+margin_bottom = 280.0
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="lblMinMax" type="Label" parent="MinMax"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = -10.0
+margin_right = 29.0
+margin_bottom = -2.0
+custom_fonts/font = ExtResource( 13 )
+custom_colors/font_color = Color( 0.188235, 0.631373, 0.752941, 1 )
+text = "[]/[]"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MinMaxTexture" type="TextureRect" parent="MinMax"]
+modulate = Color( 1, 1, 1, 0.65098 )
+margin_left = 3.0
+margin_top = 6.0
+margin_right = 28.0
+margin_bottom = 11.0
+texture = ExtResource( 22 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="sldMin" type="VSlider" parent="MinMax"]
+anchor_bottom = 1.0
+margin_top = 16.0
+margin_right = 16.0
+margin_bottom = -16.0
+custom_icons/tick = ExtResource( 20 )
+custom_icons/grabber_highlight = ExtResource( 18 )
+custom_icons/grabber = ExtResource( 18 )
+custom_styles/slider = SubResource( 5 )
+custom_styles/grabber_area_highlight = SubResource( 6 )
+custom_styles/grabber_area = SubResource( 7 )
+value = 100.0
+tick_count = 11
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="sldMax" type="VSlider" parent="MinMax"]
+anchor_bottom = 1.0
+margin_left = 16.0
+margin_top = 16.0
+margin_right = 26.0
+margin_bottom = -16.0
+custom_icons/tick = ExtResource( 20 )
+custom_icons/grabber_highlight = ExtResource( 18 )
+custom_icons/grabber = ExtResource( 18 )
+custom_styles/slider = SubResource( 5 )
+custom_styles/grabber_area_highlight = SubResource( 6 )
+custom_styles/grabber_area = SubResource( 7 )
+value = 100.0
+tick_count = 11
 __meta__ = {
 "_edit_use_anchors_": false
 }
