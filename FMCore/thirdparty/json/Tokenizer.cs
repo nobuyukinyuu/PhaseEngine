@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using GdsFMJson;
+using static System.Globalization.CultureInfo;
 
 namespace GdsFMJson
 {
@@ -66,13 +67,13 @@ public class JSONToken {
 	public string GetValueString() {
 		switch (tokenType) {
 			case TOKEN_FLOAT:
-				return Convert.ToString(this.value);
+				return Convert.ToString(this.value, InvariantCulture);
 			case TOKEN_INTEGER:
-				return Convert.ToString(this.value);
+				return Convert.ToString(this.value, InvariantCulture);
 			case TOKEN_NULL:
 				return "NULL";
 			default:
-                return Convert.ToString(this.value) ?? "null";
+                return Convert.ToString(this.value, InvariantCulture) ?? "null";
 		}	
 	}
 	

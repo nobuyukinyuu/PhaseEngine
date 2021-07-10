@@ -5,12 +5,14 @@ const font = preload("res://gfx/fonts/spelunkid_font_bold.tres")
 
 var bar = []
 enum {BAR_NONE, BAR_EMPTY, BAR_FULL, BAR_PEAK}
+enum ranges {rates, velocity, levels}
+
 
 const COL_MAX=32
 const ROW_MAX=128
 const tick_size = Vector2(6,2)
 
-var tbl = []
+var tbl:PoolIntArray = []
 export (int, 0, 128) var split=128
 
 
@@ -40,7 +42,7 @@ func _gui_input(event):
 		var pos = stepify(mpos.x/2, 4)
 		if pos >= 128:  return
 		for i in 4:
-			tbl[pos+i] = mpos.y/2
+			tbl[pos+i] = ROW_MAX-mpos.y/2
 		update()
 
 	if event is InputEventMouseButton and !event.pressed:
@@ -76,4 +78,44 @@ func _draw():
 
 
 
+#Returns a vector of the table position and value.
+func get_table_pos(lock_x=false, mouse=get_local_mouse_position()) -> Vector2:
+#	var mouse = get_local_mouse_position()
+#	if lock_x:  mouse.x = last_column
+	var arpos = clamp(int(lerp(0, 127, mouse.x / float(rect_size.x))) , 0, 127)
+	var val = clamp(lerp(100,0, mouse.y / float(rect_size.y)) , 0, ROW_MAX)
+	return Vector2(arpos, val)
+	
+func _make_custom_tooltip(_for_text):
+	var p = $ToolTipProto.duplicate()
+#	p.text = for_text
+	var pos = get_table_pos()
+	var hint2 = ""
+	
+	if pos.x >=12:  #Display a helpful octave indicator on A and C notes.
+		if int(pos.x) % 12 == 0:  hint2 = "n.a-%s\n" % (int(pos.x/12)-1)
+		if int(pos.x) % 12 == 2:  hint2 = "n.c-%s\n" % (int(pos.x/12)-1)
+	
+	var yValue = tbl[int(pos.x)]
+
+
+#FIXME:   Alternative intents
+	match owner.intent:
+		ranges.rates:
+			pass
+		ranges.levels:
+			pass
+		ranges.velocity:
+			pass
+
+
+#	if owner.float_scale and owner.rate_scale:
+#		yValue = 10000.0/ yValue if yValue>0 else 0
+#
+#		yValue = str(int(yValue)) + "%" if yValue>0 else "0"
+#	elif owner.float_scale:
+#		yValue = str(yValue).pad_decimals(2) + "%"
+	
+	p.text = "%sx: %s\ny: %s\n0n:%s" % [hint2, pos.x, yValue, String(pos.y).pad_decimals(2)]
+	return p
 

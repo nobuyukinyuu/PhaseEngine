@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=2]
+[gd_scene load_steps=33 format=2]
 
 [ext_resource path="res://ui/responseCurve/bg.gd" type="Script" id=1]
 [ext_resource path="res://gfx/ui/vu/ruler16.png" type="Texture" id=2]
@@ -23,6 +23,7 @@
 [ext_resource path="res://gfx/ui/godot_icons/icon_curve_in_out.svg" type="Texture" id=21]
 [ext_resource path="res://gfx/ui/vu/minmax_slider_label.png" type="Texture" id=22]
 [ext_resource path="res://ui/responseCurve/btnPresets.gd" type="Script" id=23]
+[ext_resource path="res://gfx/fonts/numerics_7seg.tres" type="BitmapFont" id=24]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0, 0, 0, 0.878431 )
@@ -45,6 +46,22 @@ expand_margin_left = 6.0
 expand_margin_right = 4.0
 expand_margin_top = 6.0
 expand_margin_bottom = 6.0
+
+[sub_resource type="StyleBoxFlat" id=8]
+bg_color = Color( 0, 0, 0, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.0627451, 0.254902, 0.356863, 1 )
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+expand_margin_left = 3.0
+expand_margin_right = 4.0
+expand_margin_top = 2.0
+expand_margin_bottom = 3.0
 
 [sub_resource type="StyleBoxTexture" id=3]
 texture = ExtResource( 6 )
@@ -96,8 +113,22 @@ margin_left = 32.0
 margin_top = 16.0
 margin_right = 288.0
 margin_bottom = 272.0
+hint_tooltip = "[Table not set]"
 custom_styles/panel = SubResource( 2 )
 script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ToolTipProto" type="Label" parent="VU"]
+visible = false
+margin_left = -104.0
+margin_right = -54.0
+margin_bottom = 22.0
+custom_styles/normal = SubResource( 8 )
+custom_fonts/font = ExtResource( 24 )
+custom_colors/font_color = Color( 0.352941, 0.878431, 0.878431, 1 )
+text = "0ff"
 __meta__ = {
 "_edit_use_anchors_": false
 }

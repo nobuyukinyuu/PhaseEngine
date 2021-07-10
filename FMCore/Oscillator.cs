@@ -66,6 +66,20 @@ namespace gdsFM
             return Tables.sin[(input) & Tables.SINE_TABLE_MASK];
         }
 
+        public static ushort Sine2(ulong input, ushort duty, ref bool flip)
+        {
+            var angle = (duty / (double)ushort.MaxValue) * 2 - 1 ;
+            var phase = ( (input <<6) / (double)ushort.MaxValue) * Tables.TAU + (Math.PI/2);
+
+            var output = (angle + Math.Cos(phase)) / Math.Sqrt(  Math.Pow(angle + Math.Cos(phase), 2) + Math.Pow(Math.Sin(phase),2) );
+
+            // var square = output>=0?  1: -1;
+            // output = Tools.Lerp(output, square, 0.5);
+
+            return unchecked( (ushort)(output * short.MaxValue/4) );
+        }
+                
+
         public static ushort Absine(ulong input, ushort duty, ref bool flip)
         {
             input = (ulong) (input >> 1);

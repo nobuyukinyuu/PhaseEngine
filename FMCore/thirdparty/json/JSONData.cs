@@ -3,11 +3,14 @@ using System.Diagnostics;
 using System.Text;
 using System.Collections.Generic;
 using GdsFMJson;
+using static System.Globalization.CultureInfo;
 
 namespace GdsFMJson{
 
     public class JSONData
     {
+        
+
         public static string WriteJSON(JSONDataItem jsonDataItem){
             return jsonDataItem.ToJSONString();
         }
@@ -213,9 +216,9 @@ namespace GdsFMJson{
             while (input > 0){
                 nibble = input & 0xF;
                 if (nibble < 10){
-                    retString[index] = ((char)(48+nibble)).ToString();
+                    retString[index] = ((char)(48+nibble)).ToString(InvariantCulture);
                 } else {
-                    retString[index] = ((char)(55+nibble)).ToString();
+                    retString[index] = ((char)(55+nibble)).ToString(InvariantCulture);
                 }
                 index -=1;
                 input >>= 4;
@@ -296,7 +299,7 @@ namespace GdsFMJson{
                 charCode <<= 4;
                 charCode += HexCharToInt(hexString[i]);
             }
-            return ((char)(charCode)).ToString();
+            return ((char)(charCode)).ToString(InvariantCulture);
         }
     }
 
@@ -405,7 +408,7 @@ namespace GdsFMJson{
 
         public override string ToString(){
             Parse();
-            return Convert.ToString(value);
+            return Convert.ToString(value, InvariantCulture);
         }
     }
 
@@ -426,7 +429,7 @@ namespace GdsFMJson{
         }
 
         public override string ToString(){
-            return Convert.ToString(value);
+            return Convert.ToString(value, InvariantCulture);
         }
     }
 

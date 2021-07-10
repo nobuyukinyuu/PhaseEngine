@@ -85,6 +85,7 @@ namespace gdsFM
                 case "Pink":
                 case "Noise1":
                 case "Noise2":
+                case "Sine2":
                 {
                     //Set the operator's sample output function to work in the linear domain.
                     operatorOutputSample = OperatorType_Noise;

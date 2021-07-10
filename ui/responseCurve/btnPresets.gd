@@ -4,7 +4,7 @@ enum {BOTH_SIDES, LEFT_ONLY, RIGHT_ONLY}
 
 const CURVEMAP = [1, 2, 0.5, -2, -0.5]
 
-var defaults = {owner.ranges.velocity: "x"}
+onready var defaults = {owner.ranges.velocity: "x"}
 
 func _ready():
 	
