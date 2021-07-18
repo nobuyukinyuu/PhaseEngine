@@ -47,7 +47,7 @@ expand_margin_right = 4.0
 expand_margin_top = 6.0
 expand_margin_bottom = 6.0
 
-[sub_resource type="StyleBoxFlat" id=8]
+[sub_resource type="StyleBoxFlat" id=3]
 bg_color = Color( 0, 0, 0, 1 )
 border_width_left = 1
 border_width_top = 1
@@ -63,15 +63,15 @@ expand_margin_right = 4.0
 expand_margin_top = 2.0
 expand_margin_bottom = 3.0
 
-[sub_resource type="StyleBoxTexture" id=3]
+[sub_resource type="StyleBoxTexture" id=4]
 texture = ExtResource( 6 )
 region_rect = Rect2( 0, 0, 16, 24 )
 
-[sub_resource type="StyleBoxTexture" id=4]
+[sub_resource type="StyleBoxTexture" id=5]
 texture = ExtResource( 5 )
 region_rect = Rect2( 0, 0, 16, 24 )
 
-[sub_resource type="StyleBoxFlat" id=5]
+[sub_resource type="StyleBoxFlat" id=6]
 draw_center = false
 border_width_left = 1
 border_width_top = 1
@@ -88,12 +88,12 @@ expand_margin_top = 3.0
 expand_margin_bottom = 4.0
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=6]
+[sub_resource type="StyleBoxFlat" id=7]
 bg_color = Color( 0.0705882, 0.117647, 0.215686, 0.627451 )
 expand_margin_left = 1.0
 expand_margin_right = 3.0
 
-[sub_resource type="StyleBoxFlat" id=7]
+[sub_resource type="StyleBoxFlat" id=8]
 bg_color = Color( 0.0705882, 0.117647, 0.192157, 0.498039 )
 expand_margin_left = 1.0
 expand_margin_right = 3.0
@@ -125,7 +125,7 @@ visible = false
 margin_left = -104.0
 margin_right = -54.0
 margin_bottom = 22.0
-custom_styles/normal = SubResource( 8 )
+custom_styles/normal = SubResource( 3 )
 custom_fonts/font = ExtResource( 24 )
 custom_colors/font_color = Color( 0.352941, 0.878431, 0.878431, 1 )
 text = "0ff"
@@ -218,9 +218,9 @@ margin_top = 16.0
 margin_right = 312.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 16, 24 )
-custom_styles/hover = SubResource( 3 )
-custom_styles/pressed = SubResource( 4 )
-custom_styles/normal = SubResource( 4 )
+custom_styles/hover = SubResource( 4 )
+custom_styles/pressed = SubResource( 5 )
+custom_styles/normal = SubResource( 5 )
 flat = false
 script = ExtResource( 23 )
 __meta__ = {
@@ -310,9 +310,9 @@ margin_bottom = -16.0
 custom_icons/tick = ExtResource( 20 )
 custom_icons/grabber_highlight = ExtResource( 18 )
 custom_icons/grabber = ExtResource( 18 )
-custom_styles/slider = SubResource( 5 )
-custom_styles/grabber_area_highlight = SubResource( 6 )
-custom_styles/grabber_area = SubResource( 7 )
+custom_styles/slider = SubResource( 6 )
+custom_styles/grabber_area_highlight = SubResource( 7 )
+custom_styles/grabber_area = SubResource( 8 )
 value = 100.0
 tick_count = 11
 __meta__ = {
@@ -328,9 +328,9 @@ margin_bottom = -16.0
 custom_icons/tick = ExtResource( 20 )
 custom_icons/grabber_highlight = ExtResource( 18 )
 custom_icons/grabber = ExtResource( 18 )
-custom_styles/slider = SubResource( 5 )
-custom_styles/grabber_area_highlight = SubResource( 6 )
-custom_styles/grabber_area = SubResource( 7 )
+custom_styles/slider = SubResource( 6 )
+custom_styles/grabber_area_highlight = SubResource( 7 )
+custom_styles/grabber_area = SubResource( 8 )
 value = 100.0
 tick_count = 11
 __meta__ = {

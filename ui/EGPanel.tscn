@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=2]
+[gd_scene load_steps=38 format=2]
 
 [ext_resource path="res://ui/EGPanel.gd" type="Script" id=1]
 [ext_resource path="res://ui/EGWavePanel.gd" type="Script" id=2]
@@ -9,8 +9,18 @@
 [ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=7]
 [ext_resource path="res://ui/FixedFrequency.gd" type="Script" id=8]
 [ext_resource path="res://gfx/fonts/NoteFont.tres" type="BitmapFont" id=9]
+[ext_resource path="res://gfx/wave/3.png" type="Texture" id=10]
 [ext_resource path="res://gfx/ui/16x16.png" type="Texture" id=11]
 [ext_resource path="res://ui/FlatButton.theme" type="Theme" id=12]
+[ext_resource path="res://gfx/wave/2.png" type="Texture" id=13]
+[ext_resource path="res://gfx/wave/7.png" type="Texture" id=14]
+[ext_resource path="res://gfx/wave/8a.png" type="Texture" id=15]
+[ext_resource path="res://gfx/wave/9.png" type="Texture" id=16]
+[ext_resource path="res://gfx/wave/1.png" type="Texture" id=17]
+[ext_resource path="res://gfx/wave/5.png" type="Texture" id=18]
+[ext_resource path="res://gfx/wave/6.png" type="Texture" id=19]
+[ext_resource path="res://gfx/wave/8.png" type="Texture" id=20]
+[ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=21]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.501961, 0.501961, 0.501961, 0.25098 )
@@ -43,6 +53,47 @@ corner_radius_top_left = 5
 corner_radius_bottom_right = 5
 expand_margin_top = 1.0
 expand_margin_bottom = 1.0
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=16]
+bg_color = Color( 0, 0, 0, 0.941176 )
+border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+expand_margin_left = 12.0
+expand_margin_right = 12.0
+expand_margin_top = 16.0
+expand_margin_bottom = 12.0
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=15]
+content_margin_left = 2.0
+content_margin_right = 2.0
+content_margin_top = 2.0
+content_margin_bottom = 2.0
+bg_color = Color( 0.278431, 0.388235, 0.564706, 0.737255 )
+border_width_left = 1
+border_width_top = 1
+border_color = Color( 0.8, 0.8, 0.8, 0.380392 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=14]
+content_margin_left = 2.0
+content_margin_right = 2.0
+content_margin_top = 2.0
+content_margin_bottom = 2.0
+bg_color = Color( 0.0784314, 0.0862745, 0.14902, 0.737255 )
+border_width_left = 1
+border_width_top = 1
+border_color = Color( 0.8, 0.8, 0.8, 0.380392 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
 [sub_resource type="AtlasTexture" id=4]
@@ -183,7 +234,7 @@ __meta__ = {
 [node name="Frequency" parent="Frequency" instance=ExtResource( 3 )]
 margin_right = 280.0
 size_flags_horizontal = 3
-max_value = 24000.0
+max_value = 18000.0
 value = 440.0
 exp_edit = true
 
@@ -482,6 +533,123 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Popup" type="PopupDialog" parent="WavePanel"]
+visible = true
+margin_left = 128.0
+margin_top = 32.0
+margin_right = 200.0
+margin_bottom = 176.0
+custom_styles/panel = SubResource( 16 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="WavePanel/Popup"]
+anchor_right = 1.0
+margin_top = -12.0
+margin_right = 8.0
+margin_bottom = -4.0
+custom_fonts/font = ExtResource( 21 )
+custom_colors/font_color = Color( 0.384314, 0.717647, 0.831373, 0.639216 )
+text = "Waveform="
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="G" type="GridContainer" parent="WavePanel/Popup"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/vseparation = 2
+custom_constants/hseparation = 2
+columns = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Wave0" type="Button" parent="WavePanel/Popup/G"]
+margin_right = 36.0
+margin_bottom = 28.0
+custom_styles/hover = SubResource( 15 )
+custom_styles/normal = SubResource( 14 )
+icon = ExtResource( 4 )
+
+[node name="Wave1" type="Button" parent="WavePanel/Popup/G"]
+margin_left = 38.0
+margin_right = 74.0
+margin_bottom = 28.0
+custom_styles/hover = SubResource( 15 )
+custom_styles/normal = SubResource( 14 )
+icon = ExtResource( 13 )
+
+[node name="Wave2" type="Button" parent="WavePanel/Popup/G"]
+margin_top = 30.0
+margin_right = 36.0
+margin_bottom = 58.0
+custom_styles/hover = SubResource( 15 )
+custom_styles/normal = SubResource( 14 )
+icon = ExtResource( 17 )
+
+[node name="Wave3" type="Button" parent="WavePanel/Popup/G"]
+margin_left = 38.0
+margin_top = 30.0
+margin_right = 74.0
+margin_bottom = 58.0
+custom_styles/hover = SubResource( 15 )
+custom_styles/normal = SubResource( 14 )
+icon = ExtResource( 10 )
+
+[node name="Wave4" type="Button" parent="WavePanel/Popup/G"]
+margin_top = 60.0
+margin_right = 36.0
+margin_bottom = 88.0
+custom_styles/hover = SubResource( 15 )
+custom_styles/normal = SubResource( 14 )
+icon = ExtResource( 18 )
+
+[node name="Wave5" type="Button" parent="WavePanel/Popup/G"]
+margin_left = 38.0
+margin_top = 60.0
+margin_right = 74.0
+margin_bottom = 88.0
+custom_styles/hover = SubResource( 15 )
+custom_styles/normal = SubResource( 14 )
+icon = ExtResource( 19 )
+
+[node name="Wave6" type="Button" parent="WavePanel/Popup/G"]
+margin_top = 90.0
+margin_right = 36.0
+margin_bottom = 118.0
+custom_styles/hover = SubResource( 15 )
+custom_styles/normal = SubResource( 14 )
+icon = ExtResource( 14 )
+
+[node name="Wave7" type="Button" parent="WavePanel/Popup/G"]
+margin_left = 38.0
+margin_top = 90.0
+margin_right = 74.0
+margin_bottom = 118.0
+custom_styles/hover = SubResource( 15 )
+custom_styles/normal = SubResource( 14 )
+icon = ExtResource( 15 )
+
+[node name="Wave8" type="Button" parent="WavePanel/Popup/G"]
+margin_top = 120.0
+margin_right = 36.0
+margin_bottom = 148.0
+custom_styles/hover = SubResource( 15 )
+custom_styles/normal = SubResource( 14 )
+icon = ExtResource( 20 )
+
+[node name="Wave9" type="Button" parent="WavePanel/Popup/G"]
+margin_left = 38.0
+margin_top = 120.0
+margin_right = 74.0
+margin_bottom = 148.0
+custom_styles/hover = SubResource( 15 )
+custom_styles/normal = SubResource( 14 )
+icon = ExtResource( 16 )
+
 [node name="FixedRatio" type="CheckBox" parent="."]
 anchor_left = -0.000978474
 anchor_top = -0.00174216
@@ -605,6 +773,7 @@ __meta__ = {
 [connection signal="pressed" from="Frequency/H/Presets" to="Frequency" method="_on_Presets_pressed"]
 [connection signal="value_changed" from="Frequency/H/Detune" to="." method="setPG" binds= [ "detune" ]]
 [connection signal="value_changed" from="WavePanel/Wave" to="WavePanel" method="_on_Wave_value_changed"]
+[connection signal="gui_input" from="WavePanel/Preview" to="WavePanel" method="_on_Preview_gui_input"]
 [connection signal="toggled" from="FixedRatio" to="." method="_on_FixedRatio_toggled"]
 [connection signal="toggled" from="Mute" to="." method="_on_Mute_toggled" binds= [ false ]]
 [connection signal="toggled" from="Bypass" to="." method="_on_Mute_toggled" binds= [ true ]]

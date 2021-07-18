@@ -33,8 +33,9 @@ public class P_URand
     public int seed
     {
         get => _seed;
-        set {if (value==0) _seed = (int)(DateTime.Now.ToBinary() & int.MaxValue);  else _seed = value;}
+        set {if (value<=0) reseed(value);  else _seed = value;}
     }
+    void reseed(int buff=0) {_seed = (int)(DateTime.Now.ToBinary() & int.MaxValue) + buff;}
 
     public int urand()
     {

@@ -109,7 +109,7 @@ public class Test2 : Label
 
     public void SetWaveform(int opTarget, float val)
     {
-        c.Voice.SetWaveform(opTarget, val);
+        c.Voice.SetWaveform(opTarget, (int)val);
     }
 
     public void SetAlgorithm(Godot.Collections.Dictionary d){   c.SetAlgorithm(d); GD.Print("Setting algo...");    }

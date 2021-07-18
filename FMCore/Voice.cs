@@ -172,7 +172,7 @@ namespace gdsFM
         }
 
         /// Sets the canonical waveform to reference when setting an operator's waveFunc on NoteOn.
-        public void SetWaveform(int opTarget, float val)
+        public void SetWaveform(int opTarget, int val)
         {   // NOTE:  This does NOT actually set an operator's waveFunc!  This is done in NoteOn when referencing this value from Voice.
             opType[opTarget] = (byte)val;
         }    

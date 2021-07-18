@@ -85,7 +85,7 @@ namespace gdsFM
                 case "Pink":
                 case "Noise1":
                 case "Noise2":
-                case "Sine2":
+                case "Sine3":
                 {
                     //Set the operator's sample output function to work in the linear domain.
                     operatorOutputSample = OperatorType_Noise;
@@ -115,7 +115,7 @@ namespace gdsFM
         public short OperatorType_Noise(ushort modulation)
         {
             ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + modulation);
-            var samp = (short) oscillator.Generate(phase, eg.duty, ref flip);
+            var samp = (short) oscillator.Generate(phase, eg.duty, ref flip, 0);
             ushort env_attenuation = (ushort) (envelope_attenuation() << 2);
 
             const float SCALE = 1.0f / 8192;
@@ -140,7 +140,7 @@ namespace gdsFM
 
             // get the absolute value of the sin, as attenuation, as a 4.8 fixed point value
             // ushort sin_attenuation = Tables.abs_sin_attenuation(phase);
-            ushort sin_attenuation = oscillator.Generate(phase, eg.duty, ref flip);
+            ushort sin_attenuation = oscillator.Generate(phase, eg.duty, ref flip, (int)pg.hz);
 
             // get the attenuation from the evelope generator as a 4.6 value, shifted up to 4.8
             ushort env_attenuation = (ushort) (envelope_attenuation() << 2);

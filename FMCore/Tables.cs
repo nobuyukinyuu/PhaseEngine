@@ -39,11 +39,20 @@ namespace gdsFM
         //Note transposition ratio table
         public static readonly double[] transpose = new double[1300];  //10kb
 
+        //Duty cycle increment ratio table
+        public static readonly float[] dutyRatio = new float[ushort.MaxValue+1];  //256kb
+
         static Tables()
         {
             for(int i=0; i<short2float.Length; i++)
             {
                 short2float[i] = (float) (i / 32767.5) - 1;
+            }
+
+
+            for(int i=1; i<dutyRatio.Length; i++)  //Start at 1 to avoid divide by zero!
+            {
+                dutyRatio[i] = (float) (0xFFFF / (double)i) ;
             }
 
 
