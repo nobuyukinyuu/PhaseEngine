@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=2]
+[gd_scene load_steps=27 format=2]
 
 [ext_resource path="res://gfx/fonts/numerics_7seg.tres" type="BitmapFont" id=1]
 [ext_resource path="res://ui/responseCurve/PresetMenu.theme" type="Theme" id=2]
@@ -15,6 +15,8 @@
 [ext_resource path="res://gfx/ui/godot_icons/icon_curve_in.svg" type="Texture" id=13]
 [ext_resource path="res://gfx/ui/godot_icons/icon_curve_out.svg" type="Texture" id=14]
 [ext_resource path="res://gfx/ui/godot_icons/icon_curve_out_in.svg" type="Texture" id=15]
+[ext_resource path="res://ui/wiringGrid/slot.stylebox" type="StyleBox" id=16]
+[ext_resource path="res://icon.png" type="Texture" id=18]
 
 [sub_resource type="StyleBoxFlat" id=1]
 draw_center = false
@@ -58,6 +60,111 @@ expand_margin_left = 3.0
 expand_margin_right = 4.0
 expand_margin_top = 2.0
 expand_margin_bottom = 3.0
+
+[sub_resource type="Shader" id=5]
+code = "shader_type canvas_item;
+render_mode skip_vertex_transform;
+
+uniform float skew_x : hint_range(-1,1) = 0.0;
+uniform float skew_y : hint_range(-1,1) = 0.0;
+
+uniform float origin_x : hint_range(-500,500) = 0.0;
+uniform float origin_y : hint_range(-500,500) = 0.0;
+
+
+const vec2 origin= vec2(0.5);
+const float TAU = 3.14*2.0;
+
+void vertex()
+{
+//	VERTEX += origin*32.0;
+	
+	vec2 v = VERTEX - vec2(0.5);
+	vec2 a = 1.0/TEXTURE_PIXEL_SIZE;
+	
+		
+	mat2 xform = mat2(
+		vec2(1.0, (skew_x) ),
+		vec2(skew_y, 1.0)
+	);
+	
+	mat3 xform2 = mat3(
+		vec3(1.0,skew_y*2.0, 0.0),
+		vec3(-skew_x*2.0,1.0, 0.0),
+		vec3(0.0, 0.0, 1.0)
+//		vec4(0.0, 0.0  , 0.0,1.0)
+	);
+
+
+	VERTEX -= vec2(origin_x, origin_y);
+	
+//	VERTEX *= xform;
+	VERTEX = (xform2 * vec3(VERTEX, 1.0)).xy;
+	
+	VERTEX += vec2(origin_x, origin_y);
+	
+	VERTEX = (EXTRA_MATRIX * (WORLD_MATRIX * vec4(VERTEX, 0.0, 1.0) )).xy;
+
+
+
+//	VERTEX += vec2(skew_x, skew_y);
+// VERTEX += vec2(cos(TIME)*100.0, sin(TIME)*100.0);
+
+//	VERTEX.x += VERTEX.y * skew_x;
+//	VERTEX.y += VERTEX.x * skew_y;
+}
+
+void fragment()
+{
+}"
+
+[sub_resource type="ShaderMaterial" id=6]
+shader = SubResource( 5 )
+shader_param/skew_x = 0.0
+shader_param/skew_y = -0.2
+shader_param/origin_x = 64.0
+shader_param/origin_y = 64.0
+
+[sub_resource type="Shader" id=7]
+code = "shader_type canvas_item;
+
+uniform float xSkew: hint_range(-1.0, 1.0) = 0.0;
+uniform float ySkew: hint_range(-1.0, 1.0) = 0.0;
+
+void vertex(){
+	VERTEX *= 2.0;
+}
+
+void fragment(){
+
+	vec2 s = vec2((-0.25 + xSkew * UV.y + xSkew * -0.5),
+				 (-0.25 + ySkew * UV.x + ySkew * -0.5));
+
+	
+	vec2 uv2 = (UV+ s) * 2.0;
+
+	vec4 c;
+
+	if ( uv2.x > 1.0 || uv2.y > 1.0 || uv2.x < 0.0 || uv2.y < 0.0 )
+	{
+		c = vec4(0);
+		return;
+	} else {
+		 c = textureLod(TEXTURE, uv2, 0.0f).rgba
+	}
+
+	COLOR = c;
+}"
+
+[sub_resource type="ShaderMaterial" id=8]
+shader = SubResource( 7 )
+shader_param/xSkew = 0.0
+shader_param/ySkew = -0.4
+
+[sub_resource type="ShaderMaterial" id=9]
+shader = SubResource( 7 )
+shader_param/xSkew = -1.0
+shader_param/ySkew = 1.0
 
 [node name="Node2D" type="Node2D"]
 
@@ -171,3 +278,42 @@ text = "0ff"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Label2" type="Panel" parent="."]
+material = SubResource( 6 )
+margin_left = 256.0
+margin_top = 384.0
+margin_right = 384.0
+margin_bottom = 512.0
+custom_styles/panel = ExtResource( 16 )
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="Label2"]
+use_parent_material = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 4 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 1
+custom_constants/shadow_offset_y = 1
+text = "Test 123
+SAMPLE TEXT"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="logo_dark_150" type="Sprite" parent="."]
+material = SubResource( 8 )
+position = Vector2( 448, 448 )
+texture = ExtResource( 18 )
+
+[node name="logo_dark_151" type="Sprite" parent="."]
+material = SubResource( 9 )
+position = Vector2( 384, 536 )
+scale = Vector2( 2, 0.765625 )
+texture = ExtResource( 18 )

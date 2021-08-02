@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=2]
+[gd_scene load_steps=36 format=2]
 
 [ext_resource path="res://ui/EGPanel.gd" type="Script" id=1]
 [ext_resource path="res://ui/EGWavePanel.gd" type="Script" id=2]
@@ -10,8 +10,7 @@
 [ext_resource path="res://ui/FixedFrequency.gd" type="Script" id=8]
 [ext_resource path="res://gfx/fonts/NoteFont.tres" type="BitmapFont" id=9]
 [ext_resource path="res://gfx/wave/3.png" type="Texture" id=10]
-[ext_resource path="res://gfx/ui/16x16.png" type="Texture" id=11]
-[ext_resource path="res://ui/FlatButton.theme" type="Theme" id=12]
+[ext_resource path="res://ui/responseCurve/responseButton/ResponseButton.tscn" type="PackedScene" id=11]
 [ext_resource path="res://gfx/wave/2.png" type="Texture" id=13]
 [ext_resource path="res://gfx/wave/7.png" type="Texture" id=14]
 [ext_resource path="res://gfx/wave/8a.png" type="Texture" id=15]
@@ -55,7 +54,7 @@ expand_margin_top = 1.0
 expand_margin_bottom = 1.0
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=16]
+[sub_resource type="StyleBoxFlat" id=4]
 bg_color = Color( 0, 0, 0, 0.941176 )
 border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
 corner_radius_top_left = 5
@@ -66,7 +65,7 @@ expand_margin_top = 16.0
 expand_margin_bottom = 12.0
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=15]
+[sub_resource type="StyleBoxFlat" id=5]
 content_margin_left = 2.0
 content_margin_right = 2.0
 content_margin_top = 2.0
@@ -81,7 +80,7 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=14]
+[sub_resource type="StyleBoxFlat" id=6]
 content_margin_left = 2.0
 content_margin_right = 2.0
 content_margin_top = 2.0
@@ -96,15 +95,15 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
-[sub_resource type="AtlasTexture" id=4]
+[sub_resource type="AtlasTexture" id=7]
 atlas = ExtResource( 5 )
 region = Rect2( 32, 0, 32, 48 )
 
-[sub_resource type="AtlasTexture" id=5]
+[sub_resource type="AtlasTexture" id=8]
 atlas = ExtResource( 5 )
 region = Rect2( 0, 0, 32, 48 )
 
-[sub_resource type="StyleBoxFlat" id=6]
+[sub_resource type="StyleBoxFlat" id=9]
 content_margin_left = 8.0
 bg_color = Color( 0, 0, 0, 0.376471 )
 border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
@@ -113,9 +112,9 @@ expand_margin_top = 1.0
 expand_margin_bottom = 1.0
 anti_aliasing = false
 
-[sub_resource type="StyleBoxEmpty" id=7]
+[sub_resource type="StyleBoxEmpty" id=10]
 
-[sub_resource type="StyleBoxFlat" id=8]
+[sub_resource type="StyleBoxFlat" id=11]
 content_margin_left = 0.0
 content_margin_top = 4.0
 content_margin_bottom = 4.0
@@ -131,7 +130,7 @@ corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 
-[sub_resource type="StyleBoxFlat" id=9]
+[sub_resource type="StyleBoxFlat" id=12]
 bg_color = Color( 0.447059, 0.172549, 0.145098, 1 )
 border_width_left = 1
 border_width_top = 1
@@ -143,7 +142,7 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=10]
+[sub_resource type="StyleBoxFlat" id=13]
 bg_color = Color( 0.0784314, 0.141176, 0.27451, 1 )
 border_width_left = 1
 border_width_top = 1
@@ -155,7 +154,7 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=11]
+[sub_resource type="StyleBoxFlat" id=14]
 bg_color = Color( 0.145098, 0.447059, 0.176471, 1 )
 border_width_left = 1
 border_width_top = 1
@@ -167,44 +166,12 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=12]
+[sub_resource type="StyleBoxFlat" id=15]
 bg_color = Color( 0.0470588, 0.0470588, 0.0470588, 0.878431 )
 corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
-
-[sub_resource type="GDScript" id=13]
-script/source = "extends Button
-
-const icon_offset = Vector2(1, 4)
-
-# Declare member variables here. Examples:
-# var a = 2
-# var b = \"text\"
-
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
-
-func _draw():
-	draw_texture(preload(\"res://gfx/ui/none16.png\"), icon_offset)
-	
-	
-#	for x in 16:
-#		var offset = icon_offset
-#		offset.x += x
-#		offset.y += 16
-#		var pos2 = Vector2(offset.x, offset.y - ease((16-x)/16.0, 2)*16 )
-#		draw_line(offset, pos2, Color(1,1,1, 0.25), 1.0, false)
-#		draw_line(pos2, Vector2(pos2.x-1, pos2.y), Color(1,1,1), 1, true)
-"
 
 [node name="EGPanel" type="Tabs"]
 anchor_right = 1.0
@@ -539,7 +506,7 @@ margin_left = 128.0
 margin_top = 32.0
 margin_right = 200.0
 margin_bottom = 176.0
-custom_styles/panel = SubResource( 16 )
+custom_styles/panel = SubResource( 4 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -570,24 +537,24 @@ __meta__ = {
 [node name="Wave0" type="Button" parent="WavePanel/Popup/G"]
 margin_right = 36.0
 margin_bottom = 28.0
-custom_styles/hover = SubResource( 15 )
-custom_styles/normal = SubResource( 14 )
+custom_styles/hover = SubResource( 5 )
+custom_styles/normal = SubResource( 6 )
 icon = ExtResource( 4 )
 
 [node name="Wave1" type="Button" parent="WavePanel/Popup/G"]
 margin_left = 38.0
 margin_right = 74.0
 margin_bottom = 28.0
-custom_styles/hover = SubResource( 15 )
-custom_styles/normal = SubResource( 14 )
+custom_styles/hover = SubResource( 5 )
+custom_styles/normal = SubResource( 6 )
 icon = ExtResource( 13 )
 
 [node name="Wave2" type="Button" parent="WavePanel/Popup/G"]
 margin_top = 30.0
 margin_right = 36.0
 margin_bottom = 58.0
-custom_styles/hover = SubResource( 15 )
-custom_styles/normal = SubResource( 14 )
+custom_styles/hover = SubResource( 5 )
+custom_styles/normal = SubResource( 6 )
 icon = ExtResource( 17 )
 
 [node name="Wave3" type="Button" parent="WavePanel/Popup/G"]
@@ -595,16 +562,16 @@ margin_left = 38.0
 margin_top = 30.0
 margin_right = 74.0
 margin_bottom = 58.0
-custom_styles/hover = SubResource( 15 )
-custom_styles/normal = SubResource( 14 )
+custom_styles/hover = SubResource( 5 )
+custom_styles/normal = SubResource( 6 )
 icon = ExtResource( 10 )
 
 [node name="Wave4" type="Button" parent="WavePanel/Popup/G"]
 margin_top = 60.0
 margin_right = 36.0
 margin_bottom = 88.0
-custom_styles/hover = SubResource( 15 )
-custom_styles/normal = SubResource( 14 )
+custom_styles/hover = SubResource( 5 )
+custom_styles/normal = SubResource( 6 )
 icon = ExtResource( 18 )
 
 [node name="Wave5" type="Button" parent="WavePanel/Popup/G"]
@@ -612,16 +579,16 @@ margin_left = 38.0
 margin_top = 60.0
 margin_right = 74.0
 margin_bottom = 88.0
-custom_styles/hover = SubResource( 15 )
-custom_styles/normal = SubResource( 14 )
+custom_styles/hover = SubResource( 5 )
+custom_styles/normal = SubResource( 6 )
 icon = ExtResource( 19 )
 
 [node name="Wave6" type="Button" parent="WavePanel/Popup/G"]
 margin_top = 90.0
 margin_right = 36.0
 margin_bottom = 118.0
-custom_styles/hover = SubResource( 15 )
-custom_styles/normal = SubResource( 14 )
+custom_styles/hover = SubResource( 5 )
+custom_styles/normal = SubResource( 6 )
 icon = ExtResource( 14 )
 
 [node name="Wave7" type="Button" parent="WavePanel/Popup/G"]
@@ -629,16 +596,16 @@ margin_left = 38.0
 margin_top = 90.0
 margin_right = 74.0
 margin_bottom = 118.0
-custom_styles/hover = SubResource( 15 )
-custom_styles/normal = SubResource( 14 )
+custom_styles/hover = SubResource( 5 )
+custom_styles/normal = SubResource( 6 )
 icon = ExtResource( 15 )
 
 [node name="Wave8" type="Button" parent="WavePanel/Popup/G"]
 margin_top = 120.0
 margin_right = 36.0
 margin_bottom = 148.0
-custom_styles/hover = SubResource( 15 )
-custom_styles/normal = SubResource( 14 )
+custom_styles/hover = SubResource( 5 )
+custom_styles/normal = SubResource( 6 )
 icon = ExtResource( 20 )
 
 [node name="Wave9" type="Button" parent="WavePanel/Popup/G"]
@@ -646,8 +613,8 @@ margin_left = 38.0
 margin_top = 120.0
 margin_right = 74.0
 margin_bottom = 148.0
-custom_styles/hover = SubResource( 15 )
-custom_styles/normal = SubResource( 14 )
+custom_styles/hover = SubResource( 5 )
+custom_styles/normal = SubResource( 6 )
 icon = ExtResource( 16 )
 
 [node name="FixedRatio" type="CheckBox" parent="."]
@@ -659,13 +626,13 @@ margin_left = 289.0
 margin_top = 73.0
 margin_right = 335.0
 margin_bottom = 129.0
-custom_icons/checked = SubResource( 4 )
-custom_icons/unchecked = SubResource( 5 )
-custom_styles/hover = SubResource( 6 )
-custom_styles/pressed = SubResource( 6 )
-custom_styles/focus = SubResource( 7 )
-custom_styles/hover_pressed = SubResource( 6 )
-custom_styles/normal = SubResource( 6 )
+custom_icons/checked = SubResource( 7 )
+custom_icons/unchecked = SubResource( 8 )
+custom_styles/hover = SubResource( 9 )
+custom_styles/pressed = SubResource( 9 )
+custom_styles/focus = SubResource( 10 )
+custom_styles/hover_pressed = SubResource( 9 )
+custom_styles/normal = SubResource( 9 )
 pressed = true
 __meta__ = {
 "_edit_use_anchors_": false
@@ -675,7 +642,7 @@ __meta__ = {
 margin_top = 256.0
 margin_right = 340.0
 margin_bottom = 296.0
-custom_styles/panel = SubResource( 8 )
+custom_styles/panel = SubResource( 11 )
 sl = 1.0
 Delay = 0
 Attack = 63
@@ -688,8 +655,8 @@ margin_left = 280.0
 margin_top = 8.0
 margin_right = 338.0
 margin_bottom = 24.0
-custom_styles/pressed = SubResource( 9 )
-custom_styles/normal = SubResource( 10 )
+custom_styles/pressed = SubResource( 12 )
+custom_styles/normal = SubResource( 13 )
 custom_fonts/font = ExtResource( 7 )
 toggle_mode = true
 text = "Mute"
@@ -702,8 +669,8 @@ margin_left = 216.0
 margin_top = 8.0
 margin_right = 274.0
 margin_bottom = 24.0
-custom_styles/pressed = SubResource( 11 )
-custom_styles/normal = SubResource( 10 )
+custom_styles/pressed = SubResource( 14 )
+custom_styles/normal = SubResource( 13 )
 custom_fonts/font = ExtResource( 7 )
 toggle_mode = true
 text = "Bypass"
@@ -716,7 +683,7 @@ visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 0
-custom_styles/normal = SubResource( 12 )
+custom_styles/normal = SubResource( 15 )
 text = "Unavailable"
 align = 1
 valign = 1
@@ -724,50 +691,27 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Button" type="Button" parent="."]
-modulate = Color( 0.435294, 0.815686, 0.945098, 1 )
-margin_left = 120.0
-margin_top = 8.0
-margin_right = 204.0
-margin_bottom = 32.0
-theme = ExtResource( 12 )
-text = "Velocity"
-icon = ExtResource( 11 )
-align = 2
-script = SubResource( 13 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Button2" type="Button" parent="."]
-modulate = Color( 0.435294, 0.815686, 0.945098, 1 )
+[node name="KSR" parent="." instance=ExtResource( 11 )]
 margin_left = 8.0
 margin_top = 8.0
 margin_right = 52.0
 margin_bottom = 32.0
-theme = ExtResource( 12 )
-text = "KSR"
-icon = ExtResource( 11 )
-align = 2
-script = SubResource( 13 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="Button3" type="Button" parent="."]
-modulate = Color( 0.435294, 0.815686, 0.945098, 1 )
+[node name="KSL" parent="." instance=ExtResource( 11 )]
 margin_left = 64.0
 margin_top = 8.0
 margin_right = 108.0
 margin_bottom = 32.0
-theme = ExtResource( 12 )
 text = "KSL"
-icon = ExtResource( 11 )
-align = 2
-script = SubResource( 13 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+intent = 2
+
+[node name="Velocity" parent="." instance=ExtResource( 11 )]
+margin_left = 120.0
+margin_top = 8.0
+margin_right = 204.0
+margin_bottom = 32.0
+text = "Velocity"
+intent = 1
 [connection signal="value_changed" from="Frequency/Frequency" to="." method="setFreq"]
 [connection signal="item_selected" from="Frequency/H/Presets" to="Frequency" method="_on_Presets_item_selected"]
 [connection signal="pressed" from="Frequency/H/Presets" to="Frequency" method="_on_Presets_pressed"]

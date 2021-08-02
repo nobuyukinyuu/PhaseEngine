@@ -2,19 +2,21 @@ tool
 extends Control
 const indicators = preload("res://gfx/ui/vu/rc_indicator.png")
 const font = preload("res://gfx/fonts/spelunkid_font_bold.tres")
+const font2 = preload("res://gfx/fonts/numerics_7seg.tres")
 
 var bar = []
 enum {BAR_NONE, BAR_EMPTY, BAR_FULL, BAR_PEAK}
 enum ranges {rates, velocity, levels}
-
+var rMax = {ranges.rates: 63, ranges.velocity: 1023, ranges.levels: 1023}
 
 const COL_MAX=32
 const ROW_MAX=128
 const tick_size = Vector2(6,2)
 
-var tbl:PoolIntArray = []
+var tbl = []
 export (int, 0, 128) var split=128
 
+var changing=-1
 
 func _ready():
 	for i in 4:
@@ -27,26 +29,29 @@ func _ready():
 		
 		bar.append(p)
 	
-	for i in 128:
-		tbl.append( int(ease((127-i)/128.0, -2) * 128) )
 
-#func _physics_process(delta):
-#	update()
+	for i in 128:
+		tbl.append(0)
+#		tbl.append( int(ease((127-i)/128.0, -2) * 128) )
+
 
 func _gui_input(event):
 	var mpos = get_local_mouse_position()
 	mpos.x = clamp(mpos.x, 0, rect_size.x)
-	mpos.y = clamp(mpos.y, 0, rect_size.y)
+	mpos.y = clamp(mpos.y, 2, rect_size.y)  #Fixes some off by one issue
 	
 	if Input.is_mouse_button_pressed(BUTTON_LEFT):
 		var pos = stepify(mpos.x/2, 4)
 		if pos >= 128:  return
 		for i in 4:
 			tbl[pos+i] = ROW_MAX-mpos.y/2
+			
+		changing = ROW_MAX-mpos.y/2
 		update()
 
 	if event is InputEventMouseButton and !event.pressed:
 		owner.get_node("OctaveRuler").active = false
+		changing = -1
 		update()
 
 func _draw():
@@ -76,9 +81,16 @@ func _draw():
 			draw_string(font, get_local_mouse_position() + Vector2(16, 18), note, ColorN("black"))
 			draw_string(font, get_local_mouse_position() + Vector2(14, 16), note)
 
+	#Draw changing indicator.  Be sure to scale to proper
+	if changing>=0:
+		var scaleVal = round((rMax[owner.intent] / 127.0) * changing)
+		draw_string(font2, get_local_mouse_position() + Vector2(16, 18), str(scaleVal), ColorN("black"))
+		draw_string(font2, get_local_mouse_position() + Vector2(14, 16), str(scaleVal))
+			
 
 
-#Returns a vector of the table position and value.
+
+#Returns a vector of the table position and value percentage.
 func get_table_pos(lock_x=false, mouse=get_local_mouse_position()) -> Vector2:
 #	var mouse = get_local_mouse_position()
 #	if lock_x:  mouse.x = last_column
@@ -93,13 +105,14 @@ func _make_custom_tooltip(_for_text):
 	var hint2 = ""
 	
 	if pos.x >=12:  #Display a helpful octave indicator on A and C notes.
-		if int(pos.x) % 12 == 0:  hint2 = "n.a-%s\n" % (int(pos.x/12)-1)
-		if int(pos.x) % 12 == 2:  hint2 = "n.c-%s\n" % (int(pos.x/12)-1)
+		if int(pos.x) % 12 == 0:  hint2 = "n. c-%s\n" % (int(pos.x/12)-1)
+		if int(pos.x) % 12 == 9:  hint2 = "n. a-%s\n" % (int(pos.x/12)-1)
 	
 	var yValue = tbl[int(pos.x)]
 
 
 #FIXME:   Alternative intents
+	yValue *= rMax[owner.intent]/127.0
 	match owner.intent:
 		ranges.rates:
 			pass
@@ -108,6 +121,9 @@ func _make_custom_tooltip(_for_text):
 		ranges.velocity:
 			pass
 
+	#Set hint3 to scaled values if minmax has been altered
+	var hint3 = ""
+	
 
 #	if owner.float_scale and owner.rate_scale:
 #		yValue = 10000.0/ yValue if yValue>0 else 0
@@ -116,6 +132,6 @@ func _make_custom_tooltip(_for_text):
 #	elif owner.float_scale:
 #		yValue = str(yValue).pad_decimals(2) + "%"
 	
-	p.text = "%sx: %s\ny: %s\n0n:%s" % [hint2, pos.x, yValue, String(pos.y).pad_decimals(2)]
+	p.text = "%sx: %s\ny: %s \n0n:%s%%" % [hint2, pos.x, round(yValue), String(pos.y).pad_decimals(2)]
 	return p
 

@@ -108,6 +108,16 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="response_curve" type="TextureRect" parent="."]
+modulate = Color( 0.466667, 0.670588, 1, 1 )
+margin_left = 16.0
+margin_right = 104.0
+margin_bottom = 7.0
+texture = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="VU" type="Panel" parent="."]
 margin_left = 32.0
 margin_top = 16.0
@@ -133,16 +143,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="response_curve" type="TextureRect" parent="."]
-modulate = Color( 0.466667, 0.670588, 1, 1 )
-margin_left = 16.0
-margin_right = 104.0
-margin_bottom = 7.0
-texture = ExtResource( 3 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="ValueRuler" type="TextureRect" parent="."]
 margin_left = 16.0
 margin_top = 16.0
@@ -158,7 +158,7 @@ __meta__ = {
 modulate = Color( 0.376471, 0.376471, 0.376471, 1 )
 margin_left = 32.0
 margin_top = 276.0
-margin_right = 288.0
+margin_right = 287.0
 margin_bottom = 286.0
 texture = ExtResource( 8 )
 stretch_mode = 2
@@ -267,6 +267,23 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="lblVelocity" type="Label" parent="."]
+visible = false
+margin_left = 80.0
+margin_top = 288.0
+margin_right = 296.0
+margin_bottom = 302.0
+mouse_filter = 0
+custom_fonts/font = ExtResource( 13 )
+custom_colors/font_color = Color( 0.15, 0.5025, 0.6, 1 )
+text = "32     48    64    80     96    112   127"
+align = 2
+valign = 1
+script = ExtResource( 10 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="MinMax" type="Control" parent="."]
 margin_left = 288.0
 margin_top = 40.0
@@ -336,3 +353,5 @@ tick_count = 11
 __meta__ = {
 "_edit_use_anchors_": false
 }
+[connection signal="value_changed" from="MinMax/sldMin" to="." method="_on_sldMinMax_value_changed" binds= [ false ]]
+[connection signal="value_changed" from="MinMax/sldMax" to="." method="_on_sldMinMax_value_changed" binds= [ true ]]

@@ -1,7 +1,7 @@
 [gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://MIDI.gd" type="Script" id=1]
-[ext_resource path="res://ui/responseCurve/ResponseCurve.tscn" type="PackedScene" id=2]
+[ext_resource path="res://CPUMon.cs" type="Script" id=3]
 [ext_resource path="res://Test2.cs" type="Script" id=4]
 [ext_resource path="res://ui/EGPanel.tscn" type="PackedScene" id=5]
 [ext_resource path="res://ui/wiringGrid/WiringGrid.tscn" type="PackedScene" id=6]
@@ -169,8 +169,16 @@ operator = 5
 margin_top = 336.0
 margin_bottom = 356.0
 
-[node name="ResponseCurve" parent="." instance=ExtResource( 2 )]
-margin_left = 336.0
-margin_top = 288.0
-margin_right = 648.0
-margin_bottom = 592.0
+[node name="CPUMon" type="Label" parent="."]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 8.0
+margin_top = -40.0
+margin_right = 68.0
+margin_bottom = -9.0
+text = "CPU:  0%
+Mem:  0k"
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}

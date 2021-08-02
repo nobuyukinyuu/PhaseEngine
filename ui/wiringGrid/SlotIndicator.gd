@@ -208,8 +208,8 @@ func request_move(source, dest):
 	if getGridID(source) == getGridID(dest):  return
 	
 	#If anything goes wrong with the operation, restore the grid to the original state.
-	var backup_grid = _grid.duplicate(true)
-	var backup_ops = ops.duplicate(true)
+	# var backup_grid = _grid.duplicate(true)
+	# var backup_ops = ops.duplicate(true)
 	
 	print ("Dropped from ", source, " into ", dest)
 	#Get source operator.

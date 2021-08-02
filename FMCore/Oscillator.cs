@@ -215,7 +215,7 @@ namespace gdsFM
 
                 // flip = Tools.BIT(seed, 15).ToBool();
                 
-                return (ushort)((seed>>1) | (seed & 0x8000));  
+                return (ushort)((seed>>1) | (seed & 0x8000));  //The OR (seed & 0x8000) bit preserves the sign.
             }
         }
 

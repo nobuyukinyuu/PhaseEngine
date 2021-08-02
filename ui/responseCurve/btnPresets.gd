@@ -50,10 +50,13 @@ func _ready():
 	p.add_submenu_item("RIGHT: Descending ", "Ease5")
 
 	p.add_separator()
-	p.add_icon_item(preload("res://gfx/ui/icon_reset.svg"), "Default")
+	p.add_icon_item(preload("res://gfx/ui/icon_reset.svg"), "Default", 0xFF)
 	p.set_item_accelerator(10, KEY_D)
 
 	p.rect_size.x += 32
+
+	p.connect("id_pressed", owner, "_on_btnPresets_id_pressed")
+
 
 #Activated when one of the ease menus is selected.
 func _on_EaseMenu_index_pressed(curveType, parent_index, descending):

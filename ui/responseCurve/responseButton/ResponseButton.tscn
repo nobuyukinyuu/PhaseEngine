@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://ui/FlatButton.theme" type="Theme" id=1]
+[ext_resource path="res://gfx/ui/16x16.png" type="Texture" id=2]
+[ext_resource path="res://ui/responseCurve/responseButton/ResponseButton.gd" type="Script" id=3]
+[ext_resource path="res://ui/responseCurve/ResponseCurve.tscn" type="PackedScene" id=4]
+
+[node name="ResponseButton" type="Button"]
+modulate = Color( 0.435294, 0.815686, 0.945098, 1 )
+margin_right = 44.0
+margin_bottom = 24.0
+theme = ExtResource( 1 )
+text = "KSR"
+icon = ExtResource( 2 )
+align = 2
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="P" type="Popup" parent="."]
+margin_left = 64.0
+margin_right = 104.0
+margin_bottom = 40.0
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Curve" parent="P" instance=ExtResource( 4 )]

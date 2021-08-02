@@ -36,8 +36,11 @@ public class Test2 : Label
 
         fromMidi = Owner.GetNode("MIDI Control");
 
-        fromMidi.Connect("note_on", this, "TryNoteOn");
-        fromMidi.Connect("note_off", this, "TryNoteOff");
+        // fromMidi.Connect("note_on", this, "TryNoteOn");
+        // fromMidi.Connect("note_off", this, "TryNoteOff");
+
+        fromMidi.Connect("note_on", this, "QueueNote");
+        fromMidi.Connect("note_off", this, "QueueNote", new Godot.Collections.Array( new int[1] ) );
 
     }
 
@@ -59,9 +62,28 @@ public class Test2 : Label
         c.NoteOff(lastID[midi_note]);  
     }
 
+    Dictionary<int, byte> notes_queued = new Dictionary<int, byte>();
+    public void QueueNote(int midi_note, int velocity)  //Set Velocity to 0 to trigger noteOff
+    {
+        notes_queued[midi_note] = (byte)velocity;
+    }
+
 
     public override void _Process(float delta)
     {
+        //Check for notes queued and ready to go
+        var queue = new Dictionary<int, byte>(notes_queued);  //Copy the queue so it's not modified while we're doing shit
+        notes_queued.Clear();
+        foreach (int note in queue.Keys)
+        {
+            if (queue[note] > 0) //NoteOn
+            {
+                TryNoteOn(note, queue[note]);
+            } else {
+                TryNoteOff(note);
+            }
+        }
+ 
         this.Text = c.channels[0].ToString();
         Update();
 
