@@ -62,7 +62,7 @@ public class Test2 : Label
         c.NoteOff(lastID[midi_note]);  
     }
 
-    Dictionary<int, byte> notes_queued = new Dictionary<int, byte>();
+    System.Collections.Concurrent.ConcurrentDictionary<int, byte> notes_queued = new System.Collections.Concurrent.ConcurrentDictionary<int, byte>();
     public void QueueNote(int midi_note, int velocity)  //Set Velocity to 0 to trigger noteOff
     {
         notes_queued[midi_note] = (byte)velocity;
@@ -72,7 +72,7 @@ public class Test2 : Label
     public override void _Process(float delta)
     {
         //Check for notes queued and ready to go
-        var queue = new Dictionary<int, byte>(notes_queued);  //Copy the queue so it's not modified while we're doing shit
+        var queue = new Dictionary<int, byte>(notes_queued);  //Copy the queue to our thread so it's not modified while we're doing shit
         notes_queued.Clear();
         foreach (int note in queue.Keys)
         {

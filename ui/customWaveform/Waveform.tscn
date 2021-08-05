@@ -1,0 +1,400 @@
+[gd_scene load_steps=23 format=2]
+
+[ext_resource path="res://ui/responseCurve/PresetMenu.theme" type="Theme" id=1]
+[ext_resource path="res://gfx/fonts/numerics_7seg.tres" type="BitmapFont" id=2]
+[ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=3]
+[ext_resource path="res://gfx/ui/godot_icons/icon_action_copy.svg" type="Texture" id=4]
+[ext_resource path="res://gfx/ui/godot_icons/icon_action_paste.svg" type="Texture" id=5]
+[ext_resource path="res://ui/customWaveform/DrawPreview.gd" type="Script" id=6]
+[ext_resource path="res://gfx/ui/vu/minmax_ruler_labels.png" type="Texture" id=7]
+[ext_resource path="res://gfx/ui/vu/ruler16.png" type="Texture" id=8]
+[ext_resource path="res://gfx/ui/vu/empty5.png" type="Texture" id=9]
+[ext_resource path="res://gfx/fonts/NoteFont.tres" type="BitmapFont" id=10]
+[ext_resource path="res://ui/customWaveform/CustomWaveform.gd" type="Script" id=11]
+[ext_resource path="res://gfx/fonts/numerics_5x8.tres" type="BitmapFont" id=12]
+[ext_resource path="res://gfx/ui/godot_icons/Add.svg" type="Texture" id=13]
+[ext_resource path="res://gfx/ui/godot_icons/Remove.svg" type="Texture" id=14]
+[ext_resource path="res://gfx/ui/godot_icons/Load.svg" type="Texture" id=15]
+[ext_resource path="res://gfx/ui/icon_reset.svg" type="Texture" id=16]
+
+[sub_resource type="StyleBoxFlat" id=1]
+content_margin_left = 8.0
+content_margin_right = 8.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+bg_color = Color( 0, 0, 0, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.231373, 0.231373, 0.231373, 1 )
+border_blend = true
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="AtlasTexture" id=2]
+atlas = ExtResource( 7 )
+region = Rect2( 0, 0, 16, 8 )
+
+[sub_resource type="AtlasTexture" id=3]
+atlas = ExtResource( 7 )
+region = Rect2( 10, 24, 5, 8 )
+
+[sub_resource type="AtlasTexture" id=4]
+atlas = ExtResource( 7 )
+region = Rect2( 0, 8, 16, 8 )
+
+[sub_resource type="StyleBoxFlat" id=5]
+bg_color = Color( 0, 0, 0, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.0627451, 0.254902, 0.356863, 1 )
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+expand_margin_left = 3.0
+expand_margin_right = 4.0
+expand_margin_top = 2.0
+expand_margin_bottom = 3.0
+
+[sub_resource type="ButtonGroup" id=6]
+
+[node name="CustomWaveform" type="Control"]
+margin_right = 344.0
+margin_bottom = 324.0
+script = ExtResource( 11 )
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Panel" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 36.0
+margin_right = -3.05176e-05
+margin_bottom = -3.05176e-05
+mouse_filter = 2
+custom_styles/panel = SubResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MinMax1" type="TextureRect" parent="Panel"]
+modulate = Color( 1, 1, 1, 0.584314 )
+margin_left = 2.0
+margin_top = 8.0
+margin_right = 18.0
+margin_bottom = 16.0
+texture = SubResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MinMax6" type="TextureRect" parent="Panel"]
+modulate = Color( 1, 1, 1, 0.627451 )
+margin_left = 3.0
+margin_top = 140.0
+margin_right = 8.0
+margin_bottom = 148.0
+texture = SubResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MinMax7" type="TextureRect" parent="Panel"]
+modulate = Color( 1, 1, 1, 0.584314 )
+margin_left = 2.0
+margin_top = 272.0
+margin_right = 18.0
+margin_bottom = 280.0
+texture = SubResource( 4 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Ruler" type="TextureRect" parent="Panel"]
+modulate = Color( 1, 1, 1, 0.752941 )
+margin_left = 8.0
+margin_top = 16.0
+margin_right = 18.0
+margin_bottom = 272.0
+texture = ExtResource( 8 )
+stretch_mode = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VU" type="TextureRect" parent="."]
+margin_left = 20.0
+margin_top = 52.0
+margin_right = 340.0
+margin_bottom = 308.0
+rect_clip_content = true
+hint_tooltip = "[Table not set]"
+mouse_filter = 0
+texture = ExtResource( 9 )
+stretch_mode = 2
+script = ExtResource( 6 )
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="VU"]
+margin_left = 214.0
+margin_top = 320.0
+margin_right = 254.0
+margin_bottom = 334.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ToolTipProto" type="Label" parent="VU"]
+visible = false
+margin_left = -21.0
+margin_top = -4.0
+margin_right = 45.0
+margin_bottom = 18.0
+custom_styles/normal = SubResource( 5 )
+custom_fonts/font = ExtResource( 2 )
+custom_colors/font_color = Color( 0.352941, 0.878431, 0.878431, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 2
+custom_constants/shadow_offset_y = 2
+text = "28.0"
+valign = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CPMenu" type="PopupMenu" parent="."]
+margin_left = 392.0
+margin_top = 192.0
+margin_right = 512.0
+margin_bottom = 250.0
+theme = ExtResource( 1 )
+items = [ "Copy", ExtResource( 4 ), 0, false, false, 0, 0, null, "", false, "", null, 0, false, false, 2, 0, null, "", true, "Paste", ExtResource( 5 ), 0, false, false, 2, 0, null, "", false ]
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ReferenceRect" type="ReferenceRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+border_color = Color( 0.0509804, 0.352941, 0.411765, 1 )
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="WaveImport" type="ConfirmationDialog" parent="."]
+visible = true
+margin_left = 352.0
+margin_right = 600.0
+margin_bottom = 320.0
+popup_exclusive = true
+window_title = "Import Waveform..."
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Margin" type="MarginContainer" parent="WaveImport"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 8.0
+margin_top = 8.0
+margin_right = -8.0
+margin_bottom = -36.0
+custom_constants/margin_right = 16
+custom_constants/margin_top = 16
+custom_constants/margin_left = 16
+custom_constants/margin_bottom = 48
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="V" type="VBoxContainer" parent="WaveImport/Margin"]
+margin_left = 16.0
+margin_top = 16.0
+margin_right = 624.0
+margin_bottom = 344.0
+custom_constants/separation = 8
+
+[node name="Header" type="Label" parent="WaveImport/Margin/V"]
+margin_right = 608.0
+margin_bottom = 65.0
+text = "Format:  RIFF Wave
+Size:  0 bytes
+Channels: 1
+Sample Rate:  44100 Hz, 16-bit"
+
+[node name="Separator" type="Panel" parent="WaveImport/Margin/V"]
+margin_top = 73.0
+margin_right = 608.0
+margin_bottom = 74.0
+rect_min_size = Vector2( 0, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="chkSigned" type="CheckButton" parent="WaveImport/Margin/V"]
+margin_top = 82.0
+margin_right = 608.0
+margin_bottom = 122.0
+pressed = true
+text = "Unsigned / Signed"
+
+[node name="chkBits" type="CheckButton" parent="WaveImport/Margin/V"]
+margin_top = 130.0
+margin_right = 608.0
+margin_bottom = 170.0
+text = "8-bit / 16-bit"
+
+[node name="chkStereo" type="CheckButton" parent="WaveImport/Margin/V"]
+margin_top = 178.0
+margin_right = 608.0
+margin_bottom = 218.0
+text = "Stereo"
+
+[node name="Separator2" type="Panel" parent="WaveImport/Margin/V"]
+margin_top = 226.0
+margin_right = 608.0
+margin_bottom = 227.0
+rect_min_size = Vector2( 0, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Spacer" type="Control" parent="WaveImport/Margin/V"]
+margin_top = 235.0
+margin_right = 608.0
+margin_bottom = 243.0
+rect_min_size = Vector2( 0, 8 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer" type="HBoxContainer" parent="WaveImport/Margin/V"]
+margin_top = 251.0
+margin_right = 608.0
+margin_bottom = 275.0
+
+[node name="Label" type="Label" parent="WaveImport/Margin/V/HBoxContainer"]
+margin_top = 5.0
+margin_right = 45.0
+margin_bottom = 19.0
+text = "Stride: "
+
+[node name="txtStride" type="LineEdit" parent="WaveImport/Margin/V/HBoxContainer"]
+margin_left = 49.0
+margin_right = 576.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+align = 2
+placeholder_text = "(in bytes)"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="btnStride" type="Button" parent="WaveImport/Margin/V/HBoxContainer"]
+visible = false
+margin_left = 49.0
+margin_right = 135.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+custom_constants/hseparation = 8
+group = SubResource( 6 )
+text = "Stride"
+
+[node name="btnSquish" type="Button" parent="WaveImport/Margin/V/HBoxContainer"]
+margin_left = 580.0
+margin_right = 608.0
+margin_bottom = 24.0
+hint_tooltip = "Automatically set the sampling 
+stride based on the chunk size."
+custom_constants/hseparation = 8
+group = SubResource( 6 )
+icon = ExtResource( 16 )
+
+[node name="Dialog" type="FileDialog" parent="WaveImport"]
+visible = true
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 648.0
+margin_bottom = 400.0
+rect_min_size = Vector2( 640, 392 )
+popup_exclusive = true
+window_title = "Open a File"
+mode = 0
+access = 2
+filters = PoolStringArray( "*.wav; Wave File", "*.raw; Raw data" )
+current_dir = "/Projects/godot/Code/gdsFM"
+current_path = "/Projects/godot/Code/gdsFM/"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="H" type="HBoxContainer" parent="."]
+margin_left = 8.0
+margin_right = 344.0
+margin_bottom = 32.0
+custom_constants/separation = 4
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="lblBank" type="Label" parent="H"]
+margin_top = 12.0
+margin_right = 205.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+custom_fonts/font = ExtResource( 3 )
+text = "Waveform Bank:"
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Banks" type="OptionButton" parent="H"]
+margin_left = 209.0
+margin_right = 305.0
+margin_bottom = 32.0
+rect_min_size = Vector2( 96, 0 )
+custom_fonts/font = ExtResource( 10 )
+text = "0"
+align = 2
+items = [ "0", null, false, 0, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MenuButton" type="MenuButton" parent="H"]
+margin_left = 309.0
+margin_right = 336.0
+margin_bottom = 32.0
+custom_fonts/font = ExtResource( 12 )
+custom_colors/font_color = Color( 1, 1, 1, 0.513726 )
+custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
+custom_colors/font_color_pressed = Color( 0, 0.789855, 1, 1 )
+text = ":::"
+align = 2
+items = [ "Add", ExtResource( 13 ), 0, false, false, 0, 0, null, "", false, "", null, 0, false, false, 1, 0, null, "", true, "Delete", ExtResource( 14 ), 0, false, false, 5, 0, null, "", false, "", null, 0, false, true, 3, 0, null, "", true, "import...", ExtResource( 15 ), 0, false, false, 4, 0, null, "", false ]
+__meta__ = {
+"_edit_use_anchors_": false
+}
+[connection signal="index_pressed" from="CPMenu" to="." method="_on_CPMenu_index_pressed"]
+[connection signal="about_to_show" from="WaveImport" to="." method="_on_WaveImport_about_to_show"]
+[connection signal="confirmed" from="WaveImport" to="." method="_on_WaveImport_confirmed"]
+[connection signal="popup_hide" from="WaveImport" to="." method="_on_WaveImport_popup_hide"]
+[connection signal="pressed" from="WaveImport/Margin/V/HBoxContainer/btnSquish" to="." method="_on_btnSquish_pressed"]
+[connection signal="file_selected" from="WaveImport/Dialog" to="." method="_on_Dialog_file_selected"]
+[connection signal="item_selected" from="H/Banks" to="." method="_on_Banks_item_selected"]
