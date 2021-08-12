@@ -664,6 +664,9 @@ namespace GdsFMJson{
                 case TypeCode.Boolean:
                     for(int i=0; i<value.Length;  i++){    v.AddPrim( (bool) Convert.ChangeType(value[i], typeof(bool)) ); }
                     break;
+                case TypeCode.Byte:
+                case TypeCode.Int16:
+                case TypeCode.UInt16:
                 case TypeCode.Int32:
                     for(int i=0; i<value.Length;  i++){    v.AddPrim( (int) Convert.ChangeType(value[i], typeof(int)) ); }
                     break;
@@ -676,7 +679,7 @@ namespace GdsFMJson{
                     break;
                 default:
                     // throw new NotSupportedException(String.Format("Arrays of type {0} not supported", typeof(T).ToString()));
-                    Debug.Print(String.Format("Arrays of type {0} not supported", typeof(T).ToString()));
+                    Debug.Print(String.Format("Arrays of type {0} not supported. Target: {1}", typeof(T).ToString(), name));
                     return;
             }
             values[name] = v;

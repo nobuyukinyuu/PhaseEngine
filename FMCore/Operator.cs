@@ -12,7 +12,6 @@ namespace gdsFM
         public ulong noteIncrement;  //Frequency multiplier for note base hz.
 
 
-
         //Parameters specific to Operator
         public short[] fbBuf = new short[2];  //feedback buffer
 

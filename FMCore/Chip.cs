@@ -102,17 +102,17 @@ namespace gdsFM
 
 
         /// Flips on the specified channel and returns the event ID.
-        public long NoteOn(Channel ch, byte midi_note)
+        public long NoteOn(Channel ch, byte midi_note, byte velocity=127)
         {
             if (ch == null) return NO_CHANNEL_FOUND;
-            ch.NoteOn(midi_note);
+            ch.NoteOn(midi_note, velocity);
             return ch.eventID;
         }
         /// Finds the best candidate for a channel and returns its event ID.
-        public long NoteOn(byte midi_note)
+        public long NoteOn(byte midi_note, byte velocity=127)
         {
             Channel ch = RequestChannel(midi_note);
-            return NoteOn(ch, midi_note);
+            return NoteOn(ch, midi_note, velocity);
         }
 
         /// Turns off the specified channel.  Returns false if the channel is invalid.

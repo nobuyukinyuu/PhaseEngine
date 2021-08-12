@@ -51,13 +51,13 @@ public class Test2 : Label
 
     public void TryNoteOn(int midi_note, int velocity)
     {
-        lastID[midi_note] = c.NoteOn((byte)midi_note);
-        GD.Print("On?  ", midi_note, " ", velocity, ";  id=", lastID[midi_note]);
+        lastID[midi_note] = c.NoteOn((byte)midi_note, (byte) velocity);
+        GD.Print("On?  ", midi_note, " at ", velocity, ";  id=", lastID[midi_note]);
     }
 
     public void TryNoteOff(int midi_note)
     {
-        GD.Print("Off?  ", midi_note, ";  id=", lastID[midi_note]);
+        // GD.Print("Off?  ", midi_note, ";  id=", lastID[midi_note]);
         // c.NoteOff((byte)midi_note);  //Inefficient!! Consider NoteOff to the last event only.
         c.NoteOff(lastID[midi_note]);  
     }
@@ -140,6 +140,28 @@ public class Test2 : Label
     public void SetMute(int opTarget, bool val) {c.Voice.egs[opTarget].mute = val;}
 
 
+    ///summary:  Updates a single column in an rTable.
+    public void UpdateTable(int opNum, int column, int value, RTableIntent intent)
+    {
+        IResponseTable tbl = c.Voice.egs[opNum].GetTable(intent);
+        tbl.UpdateValue((byte) column, (byte) value);
+
+    }
+    ///summary:  Updates an rTable.
+    public void SetTable(int opNum, Godot.Collections.Array input, RTableIntent intent)
+    {
+        IResponseTable tbl = c.Voice.egs[opNum].GetTable(intent);
+
+        for(int i=0; i<input.Count; i++)
+        {
+            tbl.UpdateValue((byte) i, Convert.ToByte(input[i]));
+        }
+
+    }
+
+
+
+
     void fill_buffer()
     {
         var frames= buf.GetFramesAvailable();
@@ -180,6 +202,9 @@ public class Test2 : Label
         base._PhysicsProcess(delta);
 
     }
+
+
+
 
     // Vector2[] pts=new Vector2[scopeLen];
     Queue<float> pts=new Queue<float>(scopeLen);

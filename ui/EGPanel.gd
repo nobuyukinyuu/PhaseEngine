@@ -3,6 +3,7 @@ extends Tabs
 export (NodePath) var chip_loc  #Location of PhaseEngine instance in code
 export(int,0,8) var operator = 0
 
+onready var rTables = [$KSR, $Velocity, $KSL]
 
 
 func _ready():
@@ -27,13 +28,18 @@ func _ready():
 		o.connect("value_changed", self, "update_env", [o])
 
 	$WavePanel/Wave.connect("value_changed", self, "setWaveform")
-#	$Tweak/Feedback.connect("value_changed", self, "setFeedback")
-#	$Tweak/Duty.connect("value_changed", self, "setDuty")
+
+
+	#Connect the rTables.
+	for o in rTables:
+		o.connect("table_updated", self, "update_table")
+		
+		
 
 	if !chip_loc.is_empty():
 		set_from_op(operator)
 
-
+#Used as a helper for the KanbanScroll control element.
 onready var limiter:SceneTreeTimer = get_tree().create_timer(0)
 func _gui_input(_event):
 	if limiter.time_left > 0:  return
@@ -44,7 +50,7 @@ func _gui_input(_event):
 	$"..".ownerColumn.reset_drop_preview()
 	limiter = get_tree().create_timer(0.2)
 
-
+#Bus operator values from the C# Chip handler.  
 func set_from_op(op:int):
 	var eg = get_node(chip_loc)
 	var d = eg.GetOpValues(0, op)
@@ -153,3 +159,15 @@ func _on_Mute_toggled(button_pressed, bypass:bool):
 		get_node(chip_loc).SetBypass(operator, button_pressed)
 	else:
 		get_node(chip_loc).SetMute(operator, button_pressed)
+
+
+#Updates an rTable for this operator.
+func update_table(column:int, value:int, intent):
+	var c = get_node(chip_loc)
+	var curve = rTables[intent]
+	
+	if column >= 0:
+		get_node(chip_loc).UpdateTable(operator, column, value, intent)
+	else:
+		#Update the entire table.
+		get_node(chip_loc).SetTable(operator, curve.get_node("P/Curve/VU").tbl, intent)

@@ -18,6 +18,8 @@ export (int, 0, 128) var split=128
 
 var changing=-1
 
+signal table_updated
+
 func _ready():
 	for i in 4:
 		var p = AtlasTexture.new()
@@ -45,6 +47,7 @@ func _gui_input(event):
 		if pos >= 128:  return
 		for i in 4:
 			tbl[pos+i] = ROW_MAX-mpos.y/2
+			emit_signal("table_updated", pos+i, tbl[pos+i])
 			
 		changing = ROW_MAX-mpos.y/2
 		update()

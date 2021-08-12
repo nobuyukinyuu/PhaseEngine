@@ -36,13 +36,45 @@ namespace gdsFM
         public byte feedback = 0;
         public ushort duty=32767;
 
+
+       //Response tables.  These are references from the canonical Voice.
+        public RateTable ksr = new RateTable();
+        public LevelTable ksl = new LevelTable();
+        public VelocityTable velocity = new VelocityTable();
+
+        public IResponseTable GetTable(RTableIntent intent)
+        {
+            switch(intent)
+            {
+                case RTableIntent.RATES:
+                    return ksr;
+                case RTableIntent.LEVELS:
+                    return ksl;
+                case RTableIntent.VELOCITY:
+                    return velocity;
+                default:
+                    return null;
+            }
+        }
+
+
         public Envelope() { Reset(); }
 
         //Copy constructor
         public Envelope(Envelope prototype) 
         { 
             var data = prototype.ToJSONString();
-            if(this.FromString(data))  RecalcLevelRisings();
+            if(this.FromString(data))  
+            {
+                    RecalcLevelRisings();
+                    //Grab response table references from the prototype.  
+                    //We don't need to copy the actual response tables as we want to share them between all channels.
+                    //TODO:  Consider moving this to Voice.  This would require keeping track of the tables separately there,
+                    //       possibly complicating serialization.
+                    ksr = prototype.ksr;
+                    ksl = prototype.ksl;
+                    velocity = prototype.velocity;
+            }
             else Reset(); //Attempt copy.  If failure, reinit envelope.
         }
 

@@ -59,6 +59,7 @@ __meta__ = {
 
 [node name="Player" type="AudioStreamPlayer" parent="Test"]
 stream = SubResource( 1 )
+volume_db = -3.0
 
 [node name="ChInfo" type="Label" parent="Test"]
 margin_left = -16.0

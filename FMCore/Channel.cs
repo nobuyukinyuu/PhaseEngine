@@ -69,7 +69,7 @@ namespace gdsFM
         }
 
 
-        public void NoteOn(byte midi_note=Global.NO_NOTE_SPECIFIED)
+        public void NoteOn(byte midi_note=Global.NO_NOTE_SPECIFIED, byte velocity=127)
         {
             eventID = Global.NewEventID();
             if (midi_note < 0x80)  this.midi_note = midi_note;
@@ -79,6 +79,12 @@ namespace gdsFM
             {
                 var op=ops[i];
                 // op.eg = voice.egs[i];  //Resetting the reference dumps the old ones if the algo changed.  FIXME:  Copy the values over instead
+                op.eg = new Envelope(voice.egs[i]);  //Make copies of the old EG values so they can be altered on a per-note basis.
+                //TODO:  Adjust the EG based on values from the RTables
+
+                if (midi_note < 0x80) op.eg.velocity.Apply(velocity, ref op.eg.levels[4]);
+
+
                 op.pg = voice.pgs[i];  //Set Increments to the last Voice increments value (ByVal copy)
                 op.SetOperatorType((byte)voice.opType[i]);  //Set the wave function to what the voice says it should be
 
