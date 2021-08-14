@@ -80,9 +80,23 @@ namespace gdsFM
                 var op=ops[i];
                 // op.eg = voice.egs[i];  //Resetting the reference dumps the old ones if the algo changed.  FIXME:  Copy the values over instead
                 op.eg = new Envelope(voice.egs[i]);  //Make copies of the old EG values so they can be altered on a per-note basis.
-                //TODO:  Adjust the EG based on values from the RTables
 
-                if (midi_note < 0x80) op.eg.velocity.Apply(velocity, ref op.eg.levels[4]);
+                // Adjust the EG based on values from the RTables.
+                if (midi_note < 0x80) 
+                {
+                    op.eg.ksl.Apply(midi_note, ref op.eg.levels[4]);
+
+                    for (int j=0; j<op.eg.rates.Length-1; j++)
+                    {
+                        //Rate scaling is applied double to everything except the release rate. (r = 2r + ksr)
+                        var rate = (byte)(op.eg.rates[j] * 2);  
+                        op.eg.ksr.Apply(midi_note, ref rate);
+                        op.eg.rates[j] = rate;
+                    }
+                    op.eg.ksr.Apply(midi_note, ref op.eg.rates[op.eg.rates.Length-1]);
+                }
+                op.eg.velocity.Apply(velocity, ref op.eg.levels[4]);
+
 
 
                 op.pg = voice.pgs[i];  //Set Increments to the last Voice increments value (ByVal copy)

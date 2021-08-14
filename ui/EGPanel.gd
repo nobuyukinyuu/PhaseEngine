@@ -33,6 +33,7 @@ func _ready():
 	#Connect the rTables.
 	for o in rTables:
 		o.connect("table_updated", self, "update_table")
+		o.connect("minmax_changed", self, "update_table_minmax")
 		
 		
 
@@ -171,3 +172,10 @@ func update_table(column:int, value:int, intent):
 	else:
 		#Update the entire table.
 		get_node(chip_loc).SetTable(operator, curve.get_node("P/Curve/VU").tbl, intent)
+
+
+func update_table_minmax(value, isMax:bool, intent):
+	var c = get_node(chip_loc)
+	get_node(chip_loc).SetTableMinMax(operator, value, isMax, intent)
+
+

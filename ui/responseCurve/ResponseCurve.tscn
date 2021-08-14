@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=2]
+[gd_scene load_steps=35 format=2]
 
 [ext_resource path="res://ui/responseCurve/bg.gd" type="Script" id=1]
 [ext_resource path="res://gfx/ui/vu/ruler16.png" type="Texture" id=2]
@@ -97,6 +97,56 @@ expand_margin_right = 3.0
 bg_color = Color( 0.0705882, 0.117647, 0.192157, 0.498039 )
 expand_margin_left = 1.0
 expand_margin_right = 3.0
+
+[sub_resource type="Shader" id=9]
+resource_local_to_scene = true
+code = "shader_type canvas_item;
+
+uniform int disabled : hint_range(0,4) = 0;
+
+vec4 colorize(vec4 c, float t)
+{	
+	vec4 output = c;
+	output.r *= 2.5;
+	output.rg *= 1.25;
+	output.g *= 0.25;
+
+	output.rgb = mix(output.rgb, c.rgb, t*0.75);
+
+	return output;
+}
+
+void fragment()
+{
+	float t = (sin(TIME*4.0)+1.0) * 0.5;
+	vec4 c = textureLod(SCREEN_TEXTURE, SCREEN_UV, 0);
+
+	if (disabled==1)  //Draw left
+		{if(UV.x<0.5) c = colorize(c,t);}
+	else if (disabled==2) //Draw right
+		{
+			if(UV.x>0.5 && UV.y <0.95) c = colorize(c,t);
+			if(UV.y>0.95 && UV.x>0.45) c = colorize(c,t);
+		}
+	else if (disabled==3) //Draw both
+		{c = colorize(c,t);}
+	else if (disabled ==4) //Draw a different overlay
+	{
+		vec4 a = c;
+		a.r *= 2.25;
+		a.gb = vec2(0);
+		c = mix(c,a,t+1.0);
+		
+	}
+	
+
+	COLOR=c;
+}"
+
+[sub_resource type="ShaderMaterial" id=10]
+resource_local_to_scene = true
+shader = SubResource( 9 )
+shader_param/disabled = 4
 
 [node name="ResponseCurve" type="Panel"]
 margin_right = 320.0
@@ -303,7 +353,7 @@ margin_right = 29.0
 margin_bottom = -2.0
 custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0.188235, 0.631373, 0.752941, 1 )
-text = "[]/[]"
+text = "[]/00"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -350,6 +400,15 @@ custom_styles/grabber_area_highlight = SubResource( 7 )
 custom_styles/grabber_area = SubResource( 8 )
 value = 100.0
 tick_count = 11
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Colorizer" type="Panel" parent="MinMax"]
+material = SubResource( 10 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }

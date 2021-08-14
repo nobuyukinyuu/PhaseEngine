@@ -104,7 +104,7 @@ func _on_EaseMenu_index_pressed(curveType, parent_index, descending):
 	
 
 	owner.get_node("VU").update()
-#	owner.updatePreviewTable()
+	owner.get_node("VU").emit_signal("table_updated", -1, -1)
 
 	#  12th ROOT OF 2 CURVE is implemented as 1 / Pow(2, x/12) for descending,
 	#  Pow(2, (x-127) / 12) for ascending

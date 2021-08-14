@@ -48,7 +48,12 @@ func _on_Remove_pressed():
 	if $SlotIndicator.total_ops > 2:
 		$SlotIndicator.total_ops -=1
 		_on_slot_moved()
-		
+
+
+func _on_Preset_pressed():
+	$Popup.popup(Rect2(get_global_mouse_position(), $Popup.rect_size))
+
+
 
 #Describes the wiring grid in terms of a 32-bit integer.  Only works when MAX_OPS <= 8,
 #Otherwise a 64-bit integer will be necessary if bussing to C#.
@@ -94,3 +99,5 @@ func _draw():
 #	for op in $SlotIndicator.ops:
 #		var s = "%s:  %s" % [op.id, op.gridPos]
 #		draw_string(fnt, Vector2(256, 24* op.id + 320), s)
+
+

@@ -7,7 +7,7 @@ enum ranges {rates, velocity, levels}
 export (ranges) var intent = ranges.rates
 
 signal table_updated
-
+signal minmax_changed
 
 func _ready():
 	$P/Curve.set_intent(intent)
@@ -48,11 +48,16 @@ func _draw():
 	var previous_ln=Vector2.ZERO
 	var enabled=false
 
-		#Check for empty table.
-	for i in $P/Curve/VU.tbl.size():
-		if $P/Curve/VU.tbl[i] == 0:  continue
-		enabled = true
-		break;
+	#Check to see if we should draw the graph preview.
+	if $P/Curve/MinMax/sldMax.value != 0:  enabled = true
+
+	if enabled:  #Check for empty table.  We should still show OFF if empty.
+		enabled = false
+		for i in $P/Curve/VU.tbl.size():
+			if $P/Curve/VU.tbl[i] == 0:  continue
+			#Whoops, we reached a nonzero value.  Curve's enabled.
+			enabled = true
+			break;
 	
 	if !enabled:
 		draw_texture(no_preview, icon_offset)
@@ -88,3 +93,7 @@ func _draw():
 #		var pos2 = Vector2(offset.x, offset.y - ease((16-x)/16.0, 2)*16 )
 #		draw_line(offset, pos2, Color(1,1,1, 0.25), 1.0, false)
 #		draw_line(pos2, Vector2(pos2.x-1, pos2.y), Color(1,1,1), 1, true)
+
+
+func _on_Curve_minmax_changed(value, isMax:bool=false):
+	emit_signal("minmax_changed", value, isMax, intent)

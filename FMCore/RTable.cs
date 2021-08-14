@@ -7,6 +7,7 @@ namespace gdsFM
     {
         // void Apply(byte index, ref object target);
         void UpdateValue(byte index, byte value);
+        void SetScale(float floor, float ceiling);
     }
 
     public abstract class RTable<T> : IResponseTable
@@ -37,6 +38,19 @@ namespace gdsFM
             return val;
         }
 
+        public void SetScale(float floor, float ceiling)
+        {
+            //Set defaults if -1 is detected for any value.
+            if (floor < 0)  floor = this.floor;
+            if (ceiling < 0)  ceiling = this.ceiling;
+
+            if (ceiling >= floor)
+            {
+                this.ceiling = ceiling;
+                this.floor = floor;
+            }
+        }
+
         public abstract void Apply(byte index, ref T target);   
 
         public void UpdateValue(byte index, byte value)
@@ -47,12 +61,24 @@ namespace gdsFM
 
     public class RateTable : RTable<byte>
     {
-        public RateTable()  { intent = RTableIntent.RATES; }
+        public RateTable()  { intent = RTableIntent.RATES; Init(); }
+
+
+        void Init()
+        {
+            for(byte i=0; i<values.Length; i++)
+            {
+                values[i] = (byte)(127-i);
+            }
+
+            ceiling = 0;  //Disable rate scaling by default.
+        }
+
 
         public override void Apply(byte index, ref byte target)
         {   // Rates add the scaled value to the target rate.
             var val = (byte) target;
-            target = (byte) Math.Clamp(val + ScaledValue(index), 0, Envelope.R_MAX);
+            target = (byte) Math.Clamp(val + ScaledValue(index) * 0.5, 0, Envelope.R_MAX);
         }
     }
 
@@ -76,7 +102,7 @@ namespace gdsFM
                 values[i] = (ushort)(127-i);
             }
 
-            // ceiling = 0;  //Disable velocity by default.
+            ceiling = 0;  //Disable velocity by default.
         }
     }
 

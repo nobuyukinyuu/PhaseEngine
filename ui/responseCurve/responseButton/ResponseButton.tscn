@@ -29,3 +29,4 @@ __meta__ = {
 
 [node name="Curve" parent="P" instance=ExtResource( 4 )]
 [connection signal="popup_hide" from="P" to="." method="_on_P_popup_hide"]
+[connection signal="minmax_changed" from="P/Curve" to="." method="_on_Curve_minmax_changed"]

@@ -1,11 +1,30 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://ui/wiringGrid/SlotProto.tscn" type="PackedScene" id=1]
 [ext_resource path="res://gfx/ui/godot_icons/Sub.svg" type="Texture" id=2]
 [ext_resource path="res://gfx/ui/godot_icons/Add.svg" type="Texture" id=3]
 [ext_resource path="res://gfx/ui/icon_preset.svg" type="Texture" id=4]
 [ext_resource path="res://ui/wiringGrid/SlotIndicator.gd" type="Script" id=5]
+[ext_resource path="res://ui/wiringGrid/PresetPopup.gd" type="Script" id=6]
 [ext_resource path="res://ui/wiringGrid/WiringGrid.gd" type="Script" id=7]
+[ext_resource path="res://gfx/fonts/numerics_8x10.tres" type="BitmapFont" id=8]
+[ext_resource path="res://gfx/ui/algorithm_presets.png" type="Texture" id=9]
+
+[sub_resource type="AtlasTexture" id=1]
+atlas = ExtResource( 9 )
+region = Rect2( 128, 0, 72, 16 )
+
+[sub_resource type="AtlasTexture" id=2]
+atlas = ExtResource( 9 )
+region = Rect2( 128, 16, 80, 16 )
+
+[sub_resource type="AtlasTexture" id=3]
+atlas = ExtResource( 9 )
+region = Rect2( 200, 32, 80, 16 )
+
+[sub_resource type="AtlasTexture" id=4]
+atlas = ExtResource( 9 )
+region = Rect2( 128, 48, 64, 16 )
 
 [node name="WiringGrid" type="Control"]
 margin_right = 256.0
@@ -279,7 +298,7 @@ anchor_right = 1.0
 margin_left = -28.0
 margin_top = 72.0
 margin_bottom = 100.0
-hint_tooltip = "Removes an operator from the wiring grid."
+hint_tooltip = "Sets the wiring grid to a preset algorithm."
 icon = ExtResource( 4 )
 align = 0
 __meta__ = {
@@ -296,6 +315,100 @@ __meta__ = {
 "_edit_lock_": true,
 "_edit_use_anchors_": false
 }
+
+[node name="Popup" type="PopupPanel" parent="."]
+visible = true
+margin_left = 312.0
+margin_top = 64.0
+margin_right = 640.0
+margin_bottom = 320.0
+script = ExtResource( 6 )
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="VBox" type="VBoxContainer" parent="Popup"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Scroll" type="ScrollContainer" parent="Popup/VBox"]
+margin_right = 328.0
+margin_bottom = 222.0
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ItemList" type="ItemList" parent="Popup/VBox/Scroll"]
+margin_right = 328.0
+margin_bottom = 222.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_fonts/font = ExtResource( 8 )
+auto_height = true
+max_columns = 4
+same_column_width = true
+icon_mode = 0
+
+[node name="Separator" type="Panel" parent="Popup/VBox"]
+modulate = Color( 0.509804, 0.509804, 0.509804, 0.509804 )
+margin_top = 226.0
+margin_right = 328.0
+margin_bottom = 228.0
+rect_min_size = Vector2( 0, 2 )
+
+[node name="HBox" type="HBoxContainer" parent="Popup/VBox"]
+margin_top = 232.0
+margin_right = 328.0
+margin_bottom = 256.0
+grow_vertical = 0
+rect_min_size = Vector2( 320, 24 )
+custom_constants/separation = 4
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Spacer" type="Control" parent="Popup/VBox/HBox"]
+margin_right = 2.0
+margin_bottom = 24.0
+rect_min_size = Vector2( 2, 0 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="0" type="TextureRect" parent="Popup/VBox/HBox"]
+margin_left = 6.0
+margin_right = 78.0
+margin_bottom = 24.0
+texture = SubResource( 1 )
+stretch_mode = 4
+
+[node name="1" type="TextureRect" parent="Popup/VBox/HBox"]
+margin_left = 82.0
+margin_right = 162.0
+margin_bottom = 24.0
+texture = SubResource( 2 )
+stretch_mode = 4
+
+[node name="2" type="TextureRect" parent="Popup/VBox/HBox"]
+margin_left = 166.0
+margin_right = 246.0
+margin_bottom = 24.0
+texture = SubResource( 3 )
+stretch_mode = 4
+
+[node name="3" type="TextureRect" parent="Popup/VBox/HBox"]
+margin_left = 250.0
+margin_right = 314.0
+margin_bottom = 24.0
+texture = SubResource( 4 )
+stretch_mode = 4
 [connection signal="pressed" from="Add" to="." method="_on_Add_pressed"]
 [connection signal="pressed" from="Remove" to="." method="_on_Remove_pressed"]
-[connection signal="pressed" from="Preset" to="." method="_on_Remove_pressed"]
+[connection signal="pressed" from="Preset" to="." method="_on_Preset_pressed"]
+[connection signal="about_to_show" from="Popup" to="Popup" method="_on_Popup_about_to_show"]
+[connection signal="popup_hide" from="Popup" to="Popup" method="_on_Popup_popup_hide"]
