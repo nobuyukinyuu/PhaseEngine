@@ -45,6 +45,13 @@ public class P_URand
 
         return _seed;
     }    
+
+    public int urand(ref int externalSeed)
+    {
+        _seed = externalSeed;
+        externalSeed = urand();
+        return externalSeed;
+    }    
 }
 
 

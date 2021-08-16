@@ -116,17 +116,38 @@ public class Test2 : Label
     public void SetPG(int opTarget, string property, float val)
     {
         c.Voice.SetPG(opTarget, property, val);
+
+        //For live feedback of changes in the PG value.  Inefficient;  DON'T use this in production!
+        for(int i=0; i<c.channels.Length; i++)
+        {
+            c.channels[i].ops[opTarget].pg.SetVal(property, val);
+            c.channels[i].ops[opTarget].pg.Recalc();
+        }
+
     }
     // Called from EG controls to bus to the appropriate envelope property.
     public void SetEG(int opTarget, string property, float val)
     {
         c.Voice.SetEG(opTarget, property, val);
+
+        //For live feedback of changes in the EG value.  Inefficient;  DON'T use this in production!
+        if (opTarget >= c.Voice.opCount) return;
+        for(int i=0; i<c.channels.Length; i++)
+            c.channels[i].ops[opTarget].eg.ChangeValue(property, val);
     }
 
     public void SetFixedFreq(int opTarget, bool isFixed) { c.Voice.pgs[opTarget].fixedFreq = isFixed; }
     public void SetFrequency(int opTarget, float freq)
     {
         c.Voice.pgs[opTarget].FreqSelect(freq);
+
+        //For live feedback of changes in the frequency value.  Inefficient;  DON'T use this in production!
+        for(int i=0; i<c.channels.Length; i++)
+        {
+            c.channels[i].ops[opTarget].pg.FreqSelect(freq);
+            c.channels[i].ops[opTarget].pg.Recalc();
+        }
+
     }
 
     public void SetWaveform(int opTarget, float val)

@@ -5,7 +5,7 @@ namespace gdsFM
 {
     public class Oscillator
     {
-        public delegate ushort waveFunc(ulong n, ushort duty, ref bool flip, int auxdata);
+        public delegate ushort waveFunc(ulong n, ushort duty, ref bool flip, TypedReference auxdata);
         waveFunc wf = Sine;
         short[] customWaveform = new short[128];
 
@@ -16,33 +16,35 @@ namespace gdsFM
 
         //TODO:  Set oscillator based on index for a list/dictionary of delegates, including particular delegates for whether duty cycle/etc is used
 
-        public ushort Generate(ulong n, ushort duty, ref bool flip, int auxdata)
+        public ushort Generate(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
             return wf(n, duty, ref flip, auxdata);
         }
 
 
-        public static ushort Pulse(ulong n, ushort duty, ref bool flip, int auxdata)
+        public static ushort Pulse(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
             const float scale_pt = 800; //frequency at which the pulse starts sloping off to reduce aliasing
             const float scale_range = scale_pt*4;
             // const float slope = 0.85f;  //Shape of the final waveform after exceeding the interpolation range.  0:  Pure square,  1:  Pure Sine
             const float slope = 0.786f;  //Shape of the final waveform after exceeding the interpolation range.  0:  Pure square,  1:  Pure Sine
 
-            if (auxdata <= scale_pt)
+            var auxdata2 = __refvalue(auxdata, double);  //Expecting pg.hz (double)
+
+            if (auxdata2 <= scale_pt)
             {
                 ushort phase = (ushort) unchecked((n<<6));
                 flip = phase >= duty;
                 return 0;
-            } else if (auxdata > scale_range) {
+            } else if (auxdata2 > scale_range) {
                 return (ushort) (Sine2(n,duty, ref flip, auxdata));
             } else {
                 var s = Sine2(n,duty, ref flip, auxdata);  //Flip is performed in this func
-                return (ushort) Tools.Lerp(0, s*slope, Math.Min( (auxdata - scale_pt) / (scale_range), 1));
+                return (ushort) Tools.Lerp(0, s*slope, Math.Min( (auxdata2 - scale_pt) / (scale_range), 1));
             }
         }
 
-        public static ushort Sine(ulong input, ushort duty, ref bool flip, int auxdata)
+        public static ushort Sine(ulong input, ushort duty, ref bool flip, TypedReference auxdata)
         {
             // return (short)Tables.sin[unchecked((ushort)n & Tables.SINE_TABLE_MASK)];
 
@@ -62,7 +64,7 @@ namespace gdsFM
         }
 
         //Sine wave that can be shaped by the duty cycle.  Log domain
-        public static ushort Sine2(ulong input, ushort duty, ref bool flip, int auxdata)
+        public static ushort Sine2(ulong input, ushort duty, ref bool flip, TypedReference auxdata)
         {
           unchecked {
             var phase = (ushort)(input<<6);
@@ -82,7 +84,7 @@ namespace gdsFM
         }
 
         //Debug;  linear domain sine used to test duty cycle shaping algorithms
-        public static ushort Sine3(ulong input, ushort duty, ref bool flip, int auxdata)
+        public static ushort Sine3(ulong input, ushort duty, ref bool flip, TypedReference auxdata)
         {
             ushort phase = (ushort) unchecked((input<<6));
             double phaseMult=1;
@@ -115,7 +117,7 @@ namespace gdsFM
 
         //Uses arbitrary (default 10) bit lookup table to produce higher quality waveforms.  Disabled by default.
         //May need to be paired with a deeper exp table to work properly!!  This would mean it might need a separate operator mode...
-        public static ushort SineHQ(ulong input, ushort duty, ref bool flip, int auxdata)
+        public static ushort SineHQ(ulong input, ushort duty, ref bool flip, TypedReference auxdata)
         {
             input <<= Tables.SINE_RATIO;
             flip = Tools.BIT(input, Tables.SINE_SIGN_BIT).ToBool();
@@ -130,7 +132,8 @@ namespace gdsFM
             return Tables.sin[(input) & Tables.SINE_TABLE_MASK];
         }
 
-        public static ushort Absine(ulong input, ushort duty, ref bool flip, int auxdata)
+        //Depreciated in favor of Sine2, which can create absine waveforms when the duty cycle is at min/max
+        public static ushort Absine(ulong input, ushort duty, ref bool flip, TypedReference auxdata)
         {
             input = (ulong) (input >> 1);
             if ( Tools.BIT(input, 8).ToBool() )
@@ -142,7 +145,7 @@ namespace gdsFM
         }
 
 
-        public static ushort Saw(ulong n, ushort duty, ref bool flip, int auxdata)
+        public static ushort Saw(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
         //    flip = Tools.BIT(n, 9).ToBool();
             flip=false;
@@ -156,7 +159,7 @@ namespace gdsFM
             return (ushort)output;
         }
 
-        public static ushort Tri(ulong n, ushort duty, ref bool flip, int auxdata)
+        public static ushort Tri(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
             flip = Tools.BIT(n, 9).ToBool();
 
@@ -169,30 +172,27 @@ namespace gdsFM
             // return Tables.logVol[Tables.tri[unchecked(n>>10 & Tables.TRI_TABLE_MASK)] + Tables.SIGNED_TO_INDEX];
         }
 
-        // public static ushort CrushedSine(ulong n, ushort bitsLost)
-        // {
-        //     return Tables.sin[unchecked((((ushort)n >> bitsLost) << bitsLost) & Tables.SINE_TABLE_MASK)];
-        // }
-
 
         //White noise generator, but uses duty cycle to oscillate between on and off state
-        static ushort seed=1;
-        public static ushort White(ulong n, ushort duty, ref bool flip, int auxdata)
+        // static ushort seed=1;
+        public static ushort White(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
             unchecked
             {
                 var phase = unchecked((ushort) n);
+                var seed = __refvalue(auxdata, int);
 
                 if (phase > duty) return 0;  // Comment this out if you don't want the "buzzing" duty behavior and instead would rather use the counter
 
-                // if (phase % ((byte)(duty)+1)==0)  //Using duty cycle to specify randomize interval.  FIXME:  Consider a 3rd variable so more info can be suppllied
                 {
                     seed ^= (ushort)(seed << 7);
                     seed ^= (ushort)(seed >> 9);
                     seed ^= (ushort)(seed << 8);
+                    __refvalue(auxdata, int) = seed;
                 }
 
                 // flip = Tools.BIT(seed, 15).ToBool();
+
                 
                 return (ushort)((seed>>1) | (seed & 0x8000));  
                 // return (ushort)(Tables.logVol[seed & 0xFF]); 
@@ -200,17 +200,19 @@ namespace gdsFM
         }
 
         //Essentially the same generator as the white noise generator but only clocks based on the duty cycle rather than only outputs noise on the duty cycle
-        public static ushort Noise1(ulong n, ushort duty, ref bool flip, int auxdata)
+        public static ushort Noise1(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
             unchecked
             {
                 var phase = unchecked((ushort) n);
+                var seed = __refvalue(auxdata, int);
 
-                if (phase % ((byte)(duty)+1)==0)  //Using duty cycle to specify randomize interval.  FIXME:  Consider a 3rd variable so more info can be suppllied
+                if (phase % ((byte)(duty)+1)==0)  
                 {
                     seed ^= (ushort)(seed << 7);
                     seed ^= (ushort)(seed >> 9);
                     seed ^= (ushort)(seed << 8);
+                    __refvalue(auxdata, int) = seed;
                 }
 
                 // flip = Tools.BIT(seed, 15).ToBool();
@@ -221,7 +223,7 @@ namespace gdsFM
 
 
         static PinkNoise pgen = new PinkNoise();
-        public static ushort Pink(ulong n, ushort duty, ref bool flip, int auxdata)
+        public static ushort Pink(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
             short v = pgen.Next();
 
@@ -231,7 +233,7 @@ namespace gdsFM
 
         static P_URand bgen = new P_URand();
         static int bval = 0x1A500;
-        public static ushort Brown(ulong n, ushort duty, ref bool flip, int auxdata)
+        public static ushort Brown(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
             bval +=  ( (ushort)bgen.urand() ) >> 5 ;
             bval = (int) (bval * 0.99);
@@ -240,7 +242,7 @@ namespace gdsFM
         }
 
         public static APU_Noise gen2 = new APU_Noise();
-        public static ushort Noise2(ulong n, ushort duty, ref bool flip, int auxdata)
+        public static ushort Noise2(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
             gen2.ModeBit = unchecked((byte)(duty >>12));  //Sets the mode to a value 0-15 from high 4 bits.
             gen2.pLen = (ushort)(((duty<<2) & 0x7F) +((duty>>5) & 0x7F) );  //Sets counter len to to bits 0-4 * 4, plus bits 5-11.

@@ -78,7 +78,6 @@ namespace gdsFM
             for(byte i=0; i<opsToProcess; i++)
             {
                 var op=ops[i];
-                // op.eg = voice.egs[i];  //Resetting the reference dumps the old ones if the algo changed.  FIXME:  Copy the values over instead
                 op.eg = new Envelope(voice.egs[i]);  //Make copies of the old EG values so they can be altered on a per-note basis.
 
                 // Adjust the EG based on values from the RTables.

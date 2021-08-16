@@ -12,13 +12,22 @@ namespace gdsFM
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Lerp(float value1, float value2, float amount) { return value1 + (value2 - value1) * amount; }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Lerp(double value1, double value2, double amount) { return value1 + (value2 - value1) * amount; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float InverseLerp(float first, float last, float value) { return (value - first) / (last - first); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double InverseLerp(double first, double last, double value) { return (value - first) / (last - first); }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double Log2(double n){ return Math.Log(n) / Math.Log(2); }
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double Log10(double n){ return Math.Log(n) / Math.Log(10); }
+
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Remap(double value, double inFrom, double inTo, double outFrom, double outTo)
+        { return Lerp(outFrom, outTo, InverseLerp(inFrom, inTo, value)); }
 
 
 

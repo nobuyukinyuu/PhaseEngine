@@ -174,6 +174,22 @@ namespace gdsFM
         }
         #endif 
 
+        public void ChangeValue(string property, float val)
+        {
+            try
+            {
+                this.SetVal(property, unchecked((int) val));
+                // GD.Print(String.Format("Set op{0}.eg.{1} to {2}.", opTarget, property, val));
+            } catch(NullReferenceException) {
+                #if GODOT
+                    Godot.GD.PrintErr(String.Format("No property handler for eg.{0}.", property));
+                #else
+                    System.Diagnostics.Debug.Print(String.Format("No property handler for eg.{0}.", property));
+                #endif
+            }            
+        }
+
+
     }
 
     public enum EGStatus
