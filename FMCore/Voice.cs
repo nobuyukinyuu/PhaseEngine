@@ -76,7 +76,7 @@ namespace gdsFM
             {
                 // FIXME:  Don't set opCount here.  Use a separate function to change the op count.....
                 // TODO:  Consider replacing this function with one which converts d to json and just call FromJSON()
-                alg.wiringGrid =  Convert.ToUInt32(d["grid"]);
+                alg.wiringGrid = (byte[]) Convert.ChangeType(d["grid"], typeof(byte[]));
 
                 var order = d["processOrder"] as Godot.Collections.Array;
                 var c = d["connections"] as Godot.Collections.Array;
@@ -184,7 +184,7 @@ namespace gdsFM
             try
             {
                 opCount = (byte) data.GetItem("opCount", opCount);
-                alg.wiringGrid = (uint) data.GetItem("grid", 0);
+                alg.wiringGrid = data.GetItem<byte>("grid", Algorithm.DefaultWiringGrid(opCount) );
                 var order = data.GetItem<byte>("processOrder", Algorithm.DefaultProcessOrder(opCount) );
 
                 var c = data.GetItem<byte>("connections", null);

@@ -20,12 +20,69 @@ func _ready():
 #	reinit_grid(total_ops)
 	isReady = true
 	yield(set_ops(total_ops), "completed")
-#	yield (get_tree(), "idle_frame")
-#	yield (get_tree(), "idle_frame")
+
 	reset_default_op_positions(total_ops)
 	
 	update()
 
+
+func load_from_description(d:Dictionary):
+	if !d.has_all(["connections", "opCount"]):  
+		print("SlotIndicator.gd:  Load from description failed.")
+		return
+	
+	yield(set_ops(d["opCount"]), "completed")
+
+	#Process in connections.
+	var connections = get_connections_from_description(d["connections"])
+
+	#Clear connections first.
+	for i in total_ops:
+		ops[i].connections = []
+		ops[i].manual_connections = []
+
+
+	#Start making connections.  Start by assuming all are manual (fragile) connections.
+	var carriers=[]  #We save this for later in case the description is missing a grid.
+	for i in connections.size():
+		var connecting_from = ops[i]
+		
+		if connections[i].empty():  carriers.append(i)  
+		for j in connections[i]:
+			var connecting_to = ops[j]
+			connecting_from.manual_connections.append(connecting_to)
+
+	#Take the first manual connection from the connections list and turn it into one of our "bottom up" connections.
+	#This is the "strong" connection for that operator (the one that won't break when moving)
+	for i in total_ops:
+		var op = ops[i]
+		if !op.manual_connections.empty():
+			var connection = op.manual_connections.pop_front()
+			connection.connections.append(op)
+
+
+	clearGridIDs()
+	if d.has("grid"):
+		for i in ops.size():
+			var p = d["grid"][i]  #Expecting format 0bYYYY_XXXX
+			var pos = Vector2(p & 0b1111, p >> 4)
+			ops[i].gridPos = pos
+			setGridID(pos, i)
+	else:  #Oh no!  No grid found.  Probably a preset.  Find a place for every connection.
+
+		#Go through our carriers and find spots for them.
+		for i in carriers:
+			var op = ops[i]
+			op.gridPos = Vector2(op.id, total_ops-1)
+			find_free_slots(op, op.gridPos.y, op.gridPos.x)
+
+
+	restore_grid()
+	redraw_grid()
+
+#Finds a position on the grid for an orphaned operator.
+func find_home():
+	pass
 
 
 func reset_focus(val):
@@ -56,9 +113,9 @@ func set_ops(val):  #Set the number of operators in the grid.  Property setter.
 	
 	visible = false
 	if val < oldsz:  
-#		yield(reinit_connections(), "completed")  #Grid's smaller.  Can't guarantee connection tree is valid.
+		#Grid's smaller.  Can't guarantee connection tree is valid.
 
-	  #Gotta move the remaining ops left back to carrier positions.
+		#Gotta move the remaining ops left back to carrier positions.
 		yield(reset_default_op_positions(val), "completed")
 		yield(reinit_grid(val), "completed")
 
@@ -76,7 +133,7 @@ func set_ops(val):  #Set the number of operators in the grid.  Property setter.
 
 
 func resize_op_array(newsz):  #Deals with re-initializing new opNodes in a larger array.
-	var oldsz = ops.size()	
+	var oldsz = ops.size()
 	ops.resize(newsz)
 	
 	if newsz > oldsz:
@@ -142,7 +199,6 @@ func reset_default_op_positions(sz:int):
 
 	yield(get_tree(), "idle_frame")
 
-#	yield(get_tree().create_timer(0), "timeout")
 
 func clearGridIDs():  #Fills grid with nulls.
 	resize_grid(total_ops)
@@ -329,31 +385,6 @@ func break_all_connections_to(source_op):
 		var idx = op.connections.find(source_op)
 		if idx >= 0: op.connections.remove(idx)
 
-#func break_manual_connections_in(source_op, recursive=true):
-#	while not source_op.manual_connections.empty():
-#		var lower_op = source_op.manual_connections.pop_back()
-##		print ("breaking connection from %s to %s..." % [source_op.id+1, lower_op.id+1])
-#		global.arr_remove_all(lower_op.connections, source_op)
-#
-#	if !recursive:  return
-#	for connection in source_op.connections:
-#		break_manual_connections_in(connection)
-#
-#func break_bad_connections(source_op):
-#	var bad_connections = []
-#	for dest_op in source_op.manual_connections:
-#		if source_op.gridPos.y >= dest_op.gridPos.y:
-#			#Uh oh.  Bad connection.  Mark it.
-#			bad_connections.append(dest_op)
-#
-#	for o in bad_connections:
-#		print ("Breaking bad connection from %s to %s" % [source_op.id+1, o.id+1])
-#		global.arr_remove_all(source_op.manual_connections, o)
-#		global.arr_remove_all(o.connections, source_op)
-#
-#	#Recursively check
-#	for connection in source_op.connections:
-#		break_bad_connections(connection)
 
 #Checks manual connections for anything that breaks the rules.
 func break_bad_connections():
@@ -371,7 +402,7 @@ func break_bad_connections():
 		for j in flagged_indices:
 #			op.manual_connections.remove(j)
 			global.arr_remove_all(op.manual_connections, j)
-	update()			
+	update()
 
 #Removes an entire operator tree off the grid.
 func remove_tree_at(gridPos):
@@ -561,6 +592,20 @@ func get_connection_descriptions():
 		#however, op.manual_connections propagate _downwards_ from the source id.
 		for dest in op.manual_connections:
 			output[op.id] |= 1 << (dest.id)
+	
+	return output
+
+#Returns an array of connections from a set of bitmasked connection descriptions. DOES NOT distinguish manual connections.
+func get_connections_from_description(input):
+	var output = []
+	for connection in input:
+		
+		var c = []
+		for i in input.size():
+			if (connection>>i) & 1 == 1:
+				c.append(i)
+			
+		output.append(c)
 	
 	return output
 

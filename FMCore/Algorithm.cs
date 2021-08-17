@@ -13,7 +13,7 @@ namespace gdsFM
 
         public static readonly byte[] DEFAULT_PROCESS_ORDER = {0,1,2,3,4,5,6,7};
 
-        public uint wiringGrid;  //32-bit value which contains 64 nibbles describing the contents of the grid visually.
+        public byte[] wiringGrid;  //Description of where each operator goes on a wiring grid, in format [x1, y1 ... xn, yn] where n==opCount
         
 
         public Algorithm()    {Reset();}
@@ -22,7 +22,7 @@ namespace gdsFM
         {
             processOrder = DefaultProcessOrder(opCount);
             connections = new byte[opCount];
-            wiringGrid = 0;  //FIXME:  Determine default wiring grid for the number of operators
+            wiringGrid = DefaultWiringGrid(opCount);  //FIXME:  Determine default wiring grid for the number of operators
         }
         public void SetOpCount(byte opTarget)
         {
@@ -49,6 +49,13 @@ namespace gdsFM
         {
             var output = new byte[opCount];
             Array.Copy(DEFAULT_PROCESS_ORDER, output, opCount);
+            return output;
+        }
+
+        public static byte[] DefaultWiringGrid(byte opCount)
+        {
+            var output = new byte[opCount];
+            for (byte i=0; i<opCount; i++)   output[i] = g2b(i, (byte)(opCount -1));
             return output;
         }
 
@@ -109,5 +116,7 @@ namespace gdsFM
             }
             return output;
         }
+
+        static byte g2b(byte x, byte y) { return (byte)((y << 4) | x); }  //Converts a 4-bit x and y grid position (0-F) to an 8 bit value.
     }
 }

@@ -21,21 +21,35 @@ func _physics_process(delta):
 	pass
 
 
-func _on_slot_moved(delay=false):
+#Executed every time a slot moves.  Sets the algorithm in the chip.
+func _on_slot_moved(delay=0):
 	if chip_loc.is_empty():  
 		printerr("_on_slot_moved():  Wiring grid isn't connected to a chip bus!")
 		return
-	
+
+	if delay:  yield(get_tree().create_timer(delay), "timeout")
+
 	var d = {}  #Bussing dict
+	d = get_algorithm_description()
+	get_node(chip_loc).SetAlgorithm(d)
 	
-	if delay:  yield(get_tree(), "idle_frame")
+	#Check to see if presets are available.
+	match $SlotIndicator.total_ops:
+		4,6:
+			$Preset.disabled = false
+			$Popup.intent = $SlotIndicator.total_ops
+			pass
+		_:
+			$Preset.disabled = true
+
+func get_algorithm_description() -> Dictionary:
+	var d= {}
 	d["opCount"] = $SlotIndicator.total_ops
 	d["grid"] = get_grid_description()
 	
 	d["processOrder"] = get_process_order()
 	d["connections"] = $SlotIndicator.get_connection_descriptions()
-
-	get_node(chip_loc).SetAlgorithm(d)
+	return d
 
 
 func _on_Add_pressed():
@@ -55,17 +69,16 @@ func _on_Preset_pressed():
 
 
 
-#Describes the wiring grid in terms of a 32-bit integer.  Only works when MAX_OPS <= 8,
-#Otherwise a 64-bit integer will be necessary if bussing to C#.
+#Describes the wiring grid in terms of an array of bytes.  Only works when MAX_OPS <= 8.
+#Each position in the output array describes an ID's location, with maxValue being 0b 0111_0111.
+#The 4 MSBs describe Ypos, and 4LSBs describe Xpos.
 func get_grid_description():
-	var output:int = 0
-	
-	for o in $SlotIndicator.get_children():
-		#Every ID number is described from index 1, with index 0 being "unused slot".
-		#1 nibble per slot.
-		output <<=4
-		output |= (o.id+1) 
-		
+	var output:PoolByteArray
+	for o in $SlotIndicator.ops:
+#		output.append(o.gridPos.x)
+#		output.append(o.gridPos.y)
+		output.append( ( int(o.gridPos.y) << 4) | int(o.gridPos.x)  )
+
 	return output
 	
 #Describes the wiring grid in terms of the height of each operator on the stack.
@@ -81,7 +94,7 @@ func get_process_order():
 	
 
 func _draw():
-	draw_string(fnt, Vector2(0, 256), str(get_grid_description()))
+	draw_string(fnt, Vector2(0, 256), var2str(get_grid_description()))
 
 	draw_string(fnt, Vector2(0, 272), str( $SlotIndicator.get_connection_descriptions()))
 	draw_string(fnt, Vector2(0, 288), str(get_process_order()) )
@@ -99,5 +112,16 @@ func _draw():
 #	for op in $SlotIndicator.ops:
 #		var s = "%s:  %s" % [op.id, op.gridPos]
 #		draw_string(fnt, Vector2(256, 24* op.id + 320), s)
+
+
+
+
+func _on_Copy_pressed():
+	OS.clipboard = var2str(get_algorithm_description())
+
+
+func _on_Paste_pressed():
+	$SlotIndicator.load_from_description( str2var(OS.clipboard) )
+	_on_slot_moved(0.05)
 
 

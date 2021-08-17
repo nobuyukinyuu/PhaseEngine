@@ -155,7 +155,7 @@ public class Test2 : Label
         c.Voice.SetWaveform(opTarget, (int)val);
     }
 
-    public void SetAlgorithm(Godot.Collections.Dictionary d){   c.SetAlgorithm(d); GD.Print("Setting algo...");    }
+    public void SetAlgorithm(Godot.Collections.Dictionary d){   c.SetAlgorithm(d); /*GD.Print("Setting algo...");*/    }
 
     public void SetBypass(int opTarget, bool val) {c.Voice.egs[opTarget].bypass = val;}
     public void SetMute(int opTarget, bool val) {c.Voice.egs[opTarget].mute = val;}

@@ -2,11 +2,12 @@ extends PopupPanel
 var presets = preload("res://gfx/ui/algorithm_presets.png")
 var TILE_SIZE = Vector2.ONE * 64
 
-enum AlgType {FOUR_OP, SIX_OP}
+enum AlgType {FOUR_OP=4, SIX_OP=6}
 export(AlgType) var intent=AlgType.SIX_OP
 
 func _ready():
-	create_context()
+#	create_context()
+	pass
 	
 	
 
