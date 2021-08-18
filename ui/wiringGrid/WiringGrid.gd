@@ -125,3 +125,15 @@ func _on_Paste_pressed():
 	_on_slot_moved(0.05)
 
 
+func _on_Preset_item_activated(index):
+	if chip_loc.is_empty():  
+		printerr("_on_Preset_item_activated():  Wiring grid isn't connected to a chip bus!")
+		return
+	
+	var chip = get_node(chip_loc)
+	var preset_description = chip.SetPreset(index, true if $Popup.intent==6 else false)
+	#The grid description here is the default.  Remove it.  load_from_description() will make a new one.
+	preset_description.erase("grid")  
+	$SlotIndicator.load_from_description( preset_description )
+	_on_slot_moved(0.05)
+	

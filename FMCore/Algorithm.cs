@@ -76,7 +76,7 @@ namespace gdsFM
         //Processing order is always done from the first operator to the last.  Connections to 0 are assumed to be connected to output.
         public static readonly byte[][] reface_presets = {
             Preset(2,3,4,0),    Preset(3,3,4,0),    Preset(2,4,4,0),    Preset(Multi(2,3), 4, 4, 0),
-            Preset(4,4,4,0),    Preset(2,3,0,0),    Preset(2, Multi(3,4), 0, 0),    Preset(3,0,4,0),
+            Preset(4,4,4,0),    Preset(2,3,0,0),    Preset(2, Multi(3,4), 0, 0),    Preset(3,4,0,0),
             Preset(Multi(2,3,4), 0,0,0),    Preset(Multi(3,4), 0,0,0),    Preset(4,0,0,0),    Preset(0,0,0,0),
         };
 
@@ -95,7 +95,7 @@ namespace gdsFM
         static short Multi(params byte[] input) {
             int output = 0;
             for(int i=0; i<input.Length; i++)
-                output |= (1<<input[i]);
+                output |= ( 1 << (input[i]-1) );
 
             return (short) -output;
         }

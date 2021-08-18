@@ -444,3 +444,4 @@ stretch_mode = 4
 [connection signal="pressed" from="Paste" to="." method="_on_Paste_pressed"]
 [connection signal="about_to_show" from="Popup" to="Popup" method="_on_Popup_about_to_show"]
 [connection signal="popup_hide" from="Popup" to="Popup" method="_on_Popup_popup_hide"]
+[connection signal="item_activated" from="Popup/VBox/Scroll/ItemList" to="." method="_on_Preset_item_activated"]

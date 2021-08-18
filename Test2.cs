@@ -157,6 +157,24 @@ public class Test2 : Label
 
     public void SetAlgorithm(Godot.Collections.Dictionary d){   c.SetAlgorithm(d); /*GD.Print("Setting algo...");*/    }
 
+    public Godot.Collections.Dictionary SetPreset(int preset, bool useSix)
+    {
+        c.Voice.SetOpCount(useSix? (byte)6 : (byte)4);
+        c.Voice.alg = Algorithm.FromPreset((byte)preset, useSix);
+
+
+        //DEBUG:  REMOVE ME
+        var presets = useSix?  Algorithm.dx_presets : Algorithm.reface_presets;
+        System.Diagnostics.Debug.Print(presets[preset].ToString());
+        GD.Print(presets[preset].ToString());
+
+        // var output = new Godot.Collections.Dictionary();
+        // output = c.Voice.GetAlgorithm();
+        return c.Voice.GetAlgorithm();
+
+    }
+
+
     public void SetBypass(int opTarget, bool val) {c.Voice.egs[opTarget].bypass = val;}
     public void SetMute(int opTarget, bool val) {c.Voice.egs[opTarget].mute = val;}
 
