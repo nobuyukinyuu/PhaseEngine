@@ -200,8 +200,12 @@ public class Test2 : Label
         IResponseTable tbl = c.Voice.egs[opNum].GetTable(intent);
         tbl.SetScale(isMax? -1:value, isMax? value:-1);
     }
-
-
+    public string GetTable(int opNum, RTableIntent intent)
+    {
+        opNum = (opNum < c.Voice.opCount)?  opNum: 0;
+        IResponseTable tbl = c.Voice.egs[opNum].GetTable(intent);
+        return tbl.ToJSONString();
+    }
 
 
     void fill_buffer()

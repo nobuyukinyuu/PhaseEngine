@@ -62,9 +62,22 @@ func set_table_default(_intent):
 	set_minmax_default(_intent)
 	$VU.update()
 
+
+func set_from_placeholder(p):
+	#Expecting a dictionary with all the stuff we need and the tbl already converted from base64.
+	$MinMax/sldMin.value = p["floor"]
+	$MinMax/sldMax.value = p["ceiling"]
+	for i in $VU.tbl.size():
+		$VU.tbl[i] = p["tbl"][i]
+	
+	$VU.update()
+
+
+
+
 func _on_btnPresets_id_pressed(id):
 	match id:
-		0xFF:
+		0xFF:  #Reset button hit.  Set a default table
 			set_table_default(intent)
 
 		_:
@@ -72,7 +85,7 @@ func _on_btnPresets_id_pressed(id):
 
 
 #Update MinMax labels
-func _on_sldMinMax_value_changed(value, isMax:bool):	
+func _on_sldMinMax_value_changed(value, isMax:bool):
 	update_minmax()
 	emit_signal("minmax_changed", value, isMax)
 

@@ -51,11 +51,12 @@ func _gui_input(_event):
 	$"..".ownerColumn.reset_drop_preview()
 	limiter = get_tree().create_timer(0.2)
 
+
 #Bus operator values from the C# Chip handler.  
 func set_from_op(op:int):
 	var eg = get_node(chip_loc)
-	var d = eg.GetOpValues(0, op)
-	var d2 = eg.GetOpValues(1, op)
+	var d = eg.GetOpValues(0, op)  #EG dictionary
+	var d2 = eg.GetOpValues(1, op) #PG dictionary
 	var type = clamp(eg.GetOpType(op), 0, $WavePanel/Wave.max_value)
 	$WavePanel/Wave.value = type
 	
@@ -64,7 +65,20 @@ func set_from_op(op:int):
 	$Tune/Fine.value = d2["fine"]
 	$Tune/Detune.value = d2["detune"]
 
-	#TODO:  Set FIXED TUNING HZ ETC
+	$Frequency/H/Detune.value = d2["detune"]
+	$FixedRatio.pressed = !d2["fixedFreq"]
+	_on_FixedRatio_toggled(!d2["fixedFreq"], false)
+	$Frequency/Frequency.value = d2["base_hz"]
+	
+	#Get dictionary of rTable values and populate the tbl_placeholder in ResponseButtons
+	for btn in rTables:
+		var intent = btn.intent
+		var data = eg.GetTable(op, intent)
+		var err = validate_json(data)
+		if err:
+			print("EGPanel:  Error parsing RTable; ", err)
+			continue
+		btn.init_table(parse_json(data))
 	
 	var rates = d["rates"]
 	$"Rates/Attack".value = rates[0]
@@ -131,6 +145,10 @@ func update_env(value, sender:EGSlider):
 func setEG(value, property):
 	get_node(chip_loc).SetEG(operator, property, value)
 func setPG(value, property):
+	#Keep the two detune properties in sync...
+	if property=="detune":  
+		$Frequency/H/Detune.value = value
+		$Tune/Detune.value = value
 	get_node(chip_loc).SetPG(operator, property, value)
 
 func setWaveform(value):
@@ -144,12 +162,12 @@ func setDuty(value):
 	
 
 onready var ab = [$Tune, $Frequency]
-func _on_FixedRatio_toggled(button_pressed):
+func _on_FixedRatio_toggled(button_pressed, update_chip=true):
 	var i = int(button_pressed)
 	ab[1-i].visible = true
 	ab[i].visible = false
 	
-	if !chip_loc.is_empty():
+	if !chip_loc.is_empty() and update_chip:
 		get_node(chip_loc).SetFixedFreq(operator, !button_pressed)
 func setFreq(value):
 	get_node(chip_loc).SetFrequency(operator, value)
@@ -171,6 +189,7 @@ func update_table(column:int, value:int, intent):
 		get_node(chip_loc).UpdateTable(operator, column, value, intent)
 	else:
 		#Update the entire table.
+		#FIXME:  Don't reference this if instance is placeholder.  Probably shouldn't ever happen, but?
 		get_node(chip_loc).SetTable(operator, curve.get_node("P/Curve/VU").tbl, intent)
 
 

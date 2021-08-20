@@ -1,9 +1,8 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://ui/FlatButton.theme" type="Theme" id=1]
 [ext_resource path="res://gfx/ui/16x16.png" type="Texture" id=2]
 [ext_resource path="res://ui/responseCurve/responseButton/ResponseButton.gd" type="Script" id=3]
-[ext_resource path="res://ui/responseCurve/ResponseCurve.tscn" type="PackedScene" id=4]
 
 [node name="ResponseButton" type="Button"]
 modulate = Color( 0.435294, 0.815686, 0.945098, 1 )
@@ -27,6 +26,5 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Curve" parent="P" instance=ExtResource( 4 )]
+[node name="Curve" parent="P" instance_placeholder="res://ui/responseCurve/ResponseCurve.tscn"]
 [connection signal="popup_hide" from="P" to="." method="_on_P_popup_hide"]
-[connection signal="minmax_changed" from="P/Curve" to="." method="_on_Curve_minmax_changed"]

@@ -1,5 +1,6 @@
 using System;
 using gdsFM;
+using GdsFMJson;
 
 namespace gdsFM 
 {
@@ -8,6 +9,7 @@ namespace gdsFM
         // void Apply(byte index, ref object target);
         void UpdateValue(byte index, byte value);
         void SetScale(float floor, float ceiling);
+        public string ToJSONString();
     }
 
     public abstract class RTable<T> : IResponseTable
@@ -49,6 +51,29 @@ namespace gdsFM
                 this.ceiling = ceiling;
                 this.floor = floor;
             }
+        }
+
+        public string ToJSONString()
+        {
+            JSONObject j = new JSONObject();
+
+            j.AddPrim("intent", intent.ToString());
+            j.AddPrim("floor", floor);
+            j.AddPrim("ceiling", ceiling);
+            
+            j.AddPrim( "tbl", Convert.ToBase64String(TableAsBytes()) );
+
+            return j.ToJSONString();
+        }
+
+
+        public byte[] TableAsBytes()   //WARNING:  Must override if your table values exceed 1-byte!! (Not an issue for default implementation)
+        {
+            var output = new byte[values.Length];
+            for(int i=0; i<values.Length; i++)
+                output[i] = (byte) Convert.ChangeType(values[i], typeof(byte));
+
+            return output;
         }
 
         public abstract void Apply(byte index, ref T target);   

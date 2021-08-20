@@ -73,7 +73,7 @@ func _on_Preset_pressed():
 #Each position in the output array describes an ID's location, with maxValue being 0b 0111_0111.
 #The 4 MSBs describe Ypos, and 4LSBs describe Xpos.
 func get_grid_description():
-	var output:PoolByteArray
+	var output = [] #:PoolByteArray
 	for o in $SlotIndicator.ops:
 #		output.append(o.gridPos.x)
 #		output.append(o.gridPos.y)
@@ -117,11 +117,15 @@ func _draw():
 
 
 func _on_Copy_pressed():
-	OS.clipboard = var2str(get_algorithm_description())
+	OS.clipboard = to_json(get_algorithm_description())
 
 
 func _on_Paste_pressed():
-	$SlotIndicator.load_from_description( str2var(OS.clipboard) )
+	var err = validate_json(OS.clipboard)
+	if err:  
+		print("WiringGrid:  Clipboard data failed to pass JSON validation... Error at ", err)
+		return
+	$SlotIndicator.load_from_description( parse_json(OS.clipboard) )
 	_on_slot_moved(0.05)
 
 

@@ -64,7 +64,7 @@ func load_from_description(d:Dictionary):
 	clearGridIDs()
 	if d.has("grid"):
 		for i in ops.size():
-			var p = d["grid"][i]  #Expecting format 0bYYYY_XXXX
+			var p:int = d["grid"][i]  #Expecting format 0bYYYY_XXXX
 			var pos = Vector2(p & 0b1111, p >> 4)
 			ops[i].gridPos = pos
 			setGridID(pos, i)
@@ -150,7 +150,7 @@ func reinit_connections():  #Clears all opNode connections by making new opNodes
 		p.id = i
 		ops.append(p)
 
-func reinit_grid(gridSize):  #Completely nuke the controls and rebuild the slot indicator grid.
+func reinit_grid(gridSize:int):  #Completely nuke the controls and rebuild the slot indicator grid.
 	last_slot_focused = -1
 	for o in get_children():
 		if o.is_connected("dropped", self, "request_move"):
@@ -596,7 +596,7 @@ func get_connection_descriptions():
 	return output
 
 #Returns an array of connections from a set of bitmasked connection descriptions. DOES NOT distinguish manual connections.
-func get_connections_from_description(input):
+func get_connections_from_description(input:PoolByteArray):
 	var output = []
 	for connection in input:
 		
