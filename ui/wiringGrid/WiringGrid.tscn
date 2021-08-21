@@ -348,10 +348,9 @@ __meta__ = {
 
 [node name="Popup" type="PopupPanel" parent="."]
 visible = true
-margin_left = 312.0
-margin_top = 64.0
-margin_right = 640.0
-margin_bottom = 320.0
+margin_left = -344.0
+margin_right = -16.0
+margin_bottom = 256.0
 script = ExtResource( 6 )
 __meta__ = {
 "_edit_group_": true,

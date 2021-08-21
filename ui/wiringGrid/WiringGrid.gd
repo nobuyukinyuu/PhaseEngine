@@ -12,8 +12,16 @@ func _ready():
 	yield(get_tree(),"idle_frame")
 	yield(get_tree(),"idle_frame")
 	yield(get_tree(),"idle_frame")
-	if !chip_loc.is_empty():
-		$SlotIndicator.total_ops = get_node(chip_loc).GetOpCount()
+
+	#Set the operators to whatever the chip_loc (or parent's) says.
+	var chip = get_node(chip_loc)
+	if chip:
+		$SlotIndicator.total_ops = chip.GetOpCount()
+	else:
+		chip_loc = owner.chip_loc
+		chip = get_node(chip_loc)
+		if chip:
+			$SlotIndicator.total_ops = chip.GetOpCount()
 
 
 func _physics_process(delta):
@@ -68,7 +76,6 @@ func _on_Preset_pressed():
 	$Popup.popup(Rect2(get_global_mouse_position(), $Popup.rect_size))
 
 
-
 #Describes the wiring grid in terms of an array of bytes.  Only works when MAX_OPS <= 8.
 #Each position in the output array describes an ID's location, with maxValue being 0b 0111_0111.
 #The 4 MSBs describe Ypos, and 4LSBs describe Xpos.
@@ -93,11 +100,11 @@ func get_process_order():
 
 	
 
-func _draw():
-	draw_string(fnt, Vector2(0, 256), var2str(get_grid_description()))
-
-	draw_string(fnt, Vector2(0, 272), str( $SlotIndicator.get_connection_descriptions()))
-	draw_string(fnt, Vector2(0, 288), str(get_process_order()) )
+#func _draw():
+#	draw_string(fnt, Vector2(0, 256), var2str(get_grid_description()))
+#
+#	draw_string(fnt, Vector2(0, 272), str( $SlotIndicator.get_connection_descriptions()))
+#	draw_string(fnt, Vector2(0, 288), str(get_process_order()) )
 
 
 

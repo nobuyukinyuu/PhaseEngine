@@ -4,10 +4,40 @@ var drop_preview:Rect2 = Rect2(Vector2.ZERO, Vector2.ZERO)  #Rect box of the dra
 var dirty = false
 
 
+
 func _ready():
 	cleanup()
 
 	global.connect("tab_dropped", self, "check_if_dirty")
+	
+	prints(owner.name, owner.chip_loc.is_empty())
+
+#Populate this column with new tabs representing the specified operators.
+func populate(to_add, to_remove):
+	var rem = []
+	if to_remove is int and to_remove==-1:  #Remove all children.
+		for tab in $V.get_children():
+			if !tab is TabContainer:  continue
+			for t in tab.get_children():
+				rem.append(t)
+	elif to_remove is PoolByteArray:  #Remove selected in to_remove
+		for item in to_remove:
+			rem.append($V.find_node("Op" + str(item)))
+			
+	#Remove the nodes we found.
+	if !rem.empty():
+		for node in rem:
+			node.queue_free()
+	#Wait for a bit to make sure the nodes are removed.
+#	yield(get_tree(), "idle_frame")
+
+	cleanup()
+
+	if to_add==null:  return
+	#Start adding new tabs to the first TabGroup.
+	var t = $V.get_child(0)  #Should be TabGroup0
+	for op in to_add:
+		make_tab(t, op)
 
 #Called by global.tab_dropped by any control that wants to trigger us
 func check_if_dirty(source=null):
@@ -40,13 +70,31 @@ func cleanup():
 		if !o is TabContainer:  continue
 		o.name = "TabGroup" + str(i)
 
-	#Add prototype empty tab.
+	#Add prototype empty tab group.
+	add_tab_group()
+	
+	dirty = false
+
+
+
+func add_tab_group():
+	#Add prototype empty tab group.
 	var p = preload("res://ui/kanbanScroll/TabGroup.tscn").instance()
 	$V.add_child(p)
 	p.owner = owner
 	p.name = "TabGroup" + str($V.get_child_count()-1)
-	
-	dirty = false
+
+#TODO:  support different types of panels!!
+func make_tab(group_loc:TabContainer, opNum:int):
+	var p = preload("res://ui/EGPanel.tscn").instance()
+	p.name = "Op" + str(opNum+1)
+	group_loc.add_child(p)
+	p.chip_loc = owner.chip_loc
+	p.operator = opNum
+	p.owner = owner
+	p.set_from_op(opNum)
+	print(p.owner.name)
+
 
 
 func can_drop_data(position, data):
@@ -91,6 +139,8 @@ func drop_data(position, data):
 				
 		src.remove_child(tab)
 		target.add_child(tab)
+		
+		print (target.owner.get_path())
 		
 		target.current_tab = target.get_tab_count()-1
 #		target.emit_signal("tab_changed", target.current_tab)  #Forces cleanup check.  Is this done automatically?

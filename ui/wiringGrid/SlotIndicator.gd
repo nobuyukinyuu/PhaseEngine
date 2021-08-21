@@ -105,6 +105,7 @@ func reset_focus(val):
 func set_ops(val):  #Set the number of operators in the grid.  Property setter.
 #	print ("SetOps: ", val, "total_ops: ", total_ops)
 	
+	
 	var oldsz = total_ops
 	total_ops = val
 	if not isReady:  return
@@ -129,7 +130,7 @@ func set_ops(val):  #Set the number of operators in the grid.  Property setter.
 	yield(get_tree(), "idle_frame")
 	redraw_grid()
 	visible = true
-	emit_signal("op_size_changed")
+	emit_signal("op_size_changed", total_ops, oldsz)
 
 
 func resize_op_array(newsz):  #Deals with re-initializing new opNodes in a larger array.
