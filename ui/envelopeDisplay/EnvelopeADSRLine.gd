@@ -58,4 +58,7 @@ func _draw():
 #		  draw_colored_polygon(pts, Color(color.r, color.g, color.b, 0.3))
 		  draw_colored_polygon(pts, Color(0.08, 0.14, 0.27, 0.5))
 
-
+	if note_off_indicator:
+		var xOffset = 2 if p2 > 0.25 else 14
+		draw_texture(preload("res://gfx/ui/note_off.png"), Vector2(rect_size.x+xOffset, 2), 
+				Color(1,1,1,LINE_OPACITY[int(note_off_indicator)]))

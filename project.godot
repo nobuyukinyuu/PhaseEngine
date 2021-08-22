@@ -54,6 +54,10 @@ mix_rate=48000
 
 global="*res://!globals.gd"
 
+[debug]
+
+gdscript/warnings/return_value_discarded=false
+
 [display]
 
 window/vsync/use_vsync=false

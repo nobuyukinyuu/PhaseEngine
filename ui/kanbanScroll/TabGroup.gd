@@ -3,22 +3,29 @@ extends TabContainer
 var dragPreview = preload("res://ui/kanbanScroll/DragTabPreview.tscn")
 onready var ownerColumn = $"../.."
 
+var drop_preview:Rect2
+var dropZone = Rect2(Vector2.ZERO, Vector2(rect_size.x, 16))
+
 func _ready():
 	set_tabs_rearrange_group(global.OPERATOR_TAB_GROUP)
-	connect("tab_changed", self, "_on_tab_changed")
+	connect("tab_changed", self, "_on_tab_changed")	
+	connect("mouse_exited", self, "set_drop_preview", [false])
+	hint_tooltip = "-"
+
 
 func _on_tab_changed(idx):
 #	print("%s: tab changed? to %s" % [name, idx])
 #	if get_tab_count() == 0:  print("uh oh, empty.  Time to go away...")
 	if ownerColumn.dirty:  ownerColumn.cleanup()
+	set_drop_preview(false)
 
 func _gui_input(event):
 
 	#This check overrides the drag preview, since we can't override TabContainers' get_drag_data().
 	var vp = get_viewport()
 	if event is InputEventMouseButton and event.button_index == BUTTON_LEFT:
+		
 		#This delays the function long enough to catch a drag even if we hovered off the control.
-#		if !vp.gui_is_dragging():
 		yield(get_tree().create_timer(0.15), "timeout")
 
 	#Wake up, capture the drag.
@@ -32,17 +39,37 @@ func _gui_input(event):
 		if get_node(data["from_path"]) == self:
 			#We can get data["tabc_element"] to determine the tab number here
 			if not ownerColumn.dirty:  #No custom override has been set yet.  Set it to us.
-				set_preview( get_child(data["tabc_element"]) )
+				__set_drag_preview( get_child(data["tabc_element"]) )
 
+		#Also set the drop preview
+		set_drop_preview(true)
 
 #Called by the tab group -and- child tabs at times when dragging.
-func set_preview(var tab):
+func __set_drag_preview(var tab):
 	var p = dragPreview.instance()
 	p.get_node("Tab/Lbl").text = tab.name
 	set_drag_preview(p)
 
 	ownerColumn.dirty = true
-	
+
+func set_drop_preview(dragging:bool):
+	var can_drop = dragging and dropZone.has_point(get_local_mouse_position()) 
+
+	if can_drop:  
+		drop_preview = Rect2(Vector2.ZERO, rect_size)
+	else:
+		drop_preview = Rect2(Vector2.ZERO, Vector2.ZERO)
+
+	update()
+
+func _draw():
+#	draw_string(preload("res://gfx/fonts/spelunkid_font.tres"), Vector2(32, 32), str(rect_position.y), ColorN("red"))
+	draw_rect(drop_preview, ColorN("cyan", 0.2))
 
 
-
+func _make_custom_tooltip(for_text):
+	var o = Label.new()
+	o.text = name
+	o.rect_position = get_local_mouse_position()
+	print("tooltip from ", name)
+	return o

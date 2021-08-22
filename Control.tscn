@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://MIDI.gd" type="Script" id=1]
 [ext_resource path="res://ui/VoiceMain.gd" type="Script" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://Test2.cs" type="Script" id=4]
 [ext_resource path="res://ui/kanbanScroll/Column.tscn" type="PackedScene" id=5]
 [ext_resource path="res://ui/wiringGrid/WiringGrid.tscn" type="PackedScene" id=6]
+[ext_resource path="res://ui/kanbanScroll/Kanban.gd" type="Script" id=7]
 
 [sub_resource type="AudioStreamGenerator" id=1]
 mix_rate = 48000.0
@@ -56,22 +57,20 @@ margin_bottom = 224.0
 chip_loc = NodePath("../Channels")
 
 [node name="Kanban" type="HBoxContainer" parent="."]
-anchor_left = 1.0
-anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = -372.0
-margin_right = -8.0
+margin_left = 280.0
+margin_right = 644.0
 rect_min_size = Vector2( 364, 0 )
 size_flags_vertical = 3
+custom_constants/separation = 0
+script = ExtResource( 7 )
 __meta__ = {
 "_edit_group_": true,
 "_edit_use_anchors_": false
 }
 
 [node name="Column0" parent="Kanban" instance=ExtResource( 5 )]
-
-[node name="Op2" parent="Kanban/Column0/V/TabGroup0" index="1"]
-chip_loc = NodePath("../../../../../Channels")
+rect_min_size = Vector2( 360, 0 )
 
 [node name="CPUMon" type="Label" parent="."]
 anchor_top = 1.0

@@ -8,10 +8,23 @@ func _ready():
 	#Convert the chip location to an absolute location!!
 	#Otherwise, the value specified in the editor will only be valid for us and none of our children.
 	chip_loc = get_node(chip_loc).get_path()  
+	
+	
+	#Expand the kanban scroller to fill the window.
+	get_tree().connect("screen_resized", self, "resized")
+	
+	#Populate EGPanels in column 0.
+	_on_op_size_changed(get_node(chip_loc).GetOpCount(), 0)
+
+	resized()
+	
+
+func resized():
+	$Kanban.populate_columns(rect_size.x - $Kanban.rect_position.x)
 
 
 func _on_op_size_changed(opNum:int, oldSz):
-	if !is_inside_tree():  return
+#	if !is_inside_tree():  return
 
 	#Repopulate kanbans.
 	var col = $Kanban/Column0

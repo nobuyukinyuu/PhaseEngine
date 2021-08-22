@@ -7,12 +7,12 @@ var dirty = false
 
 func _ready():
 	cleanup()
+	global.connect("tab_dropped", self, "check_if_dirty")	
+	connect("mouse_exited", self, "reset_drop_preview")
 
-	global.connect("tab_dropped", self, "check_if_dirty")
-	
-	prints(owner.name, owner.chip_loc.is_empty())
 
-#Populate this column with new tabs representing the specified operators.
+
+#Populate this column with NEW tabs representing the specified operators.
 func populate(to_add, to_remove):
 	var rem = []
 	if to_remove is int and to_remove==-1:  #Remove all children.
@@ -42,10 +42,10 @@ func populate(to_add, to_remove):
 #Called by global.tab_dropped by any control that wants to trigger us
 func check_if_dirty(source=null):
 #	print("Dirty trigger check!")
-	if source == null:  
+#	if source == null:  
 		if dirty:  cleanup()
-		return
-	elif source == self and dirty:  cleanup()
+#		return
+#	elif source == self and dirty:  cleanup()
 
 
 func cleanup():
@@ -93,7 +93,6 @@ func make_tab(group_loc:TabContainer, opNum:int):
 	p.operator = opNum
 	p.owner = owner
 	p.set_from_op(opNum)
-	print(p.owner.name)
 
 
 
@@ -106,7 +105,6 @@ func update_preview_rect(position):
 	var last_child = $V.get_child($V.get_child_count()-1)
 	var lastPos = last_child.rect_position.y + $V.rect_position.y #- last_child.rect_size.y
 
-#	var data_tab_sz = Vector2(288,320) #Debug.  Pack into the data!!
 
 #	print("%s > %s, %s ?" % [position.y + scroll_vertical, last_child.name, lastPos])
 	if position.y + scroll_vertical > lastPos:
@@ -134,17 +132,18 @@ func drop_data(position, data):
 	if data["type"] == "tabc_element":  #We have a tab to move!
 		var src = get_node(data["from_path"])
 		var tab = src.get_tab_control(data["tabc_element"])
-		var target = $V.get_child($V.get_child_count()-1)
+		var target = $V.get_child($V.get_child_count()-1)  #Target TabContainer
 				
 				
 		src.remove_child(tab)
 		target.add_child(tab)
 		
-		print (target.owner.get_path())
+		
 		
 		target.current_tab = target.get_tab_count()-1
-#		target.emit_signal("tab_changed", target.current_tab)  #Forces cleanup check.  Is this done automatically?
-#		if dirty:  cleanup()
+		src.ownerColumn.dirty=true  #Flag src column as dirty.
+		dirty = true  #Flag self as dirty.
+		target.emit_signal("tab_changed", target.current_tab)  #Forces cleanup check.  Is this done automatically?
 	
 	
 func reset_drop_preview():

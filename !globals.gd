@@ -13,6 +13,7 @@ const OPERATOR_TAB_GROUP = 8
 var periods = []  #Size 128 +1
 
 signal tab_dropped  #Emitted by a tab drop preview to signal columns to check their dirty state
+signal window_resized
 
 func _ready():
 	# Generate the period frequencies of every note based on center tuning (A-4) at 440hz

@@ -49,7 +49,10 @@ func _gui_input(_event):
 	#Since we're detecting a drag, might as well update the owner column's preview rect...
 #	$"..".ownerColumn.update_preview_rect($"..".ownerColumn.get_local_mouse_position())
 	$"..".ownerColumn.reset_drop_preview()
+	$"..".set_drop_preview(false)
 	limiter = get_tree().create_timer(0.2)
+
+	
 
 
 #Bus operator values from the C# Chip handler.  
