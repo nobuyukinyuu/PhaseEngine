@@ -1,0 +1,122 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://ui/envelopeDisplay/EnvelopeDisplay.tscn" type="PackedScene" id=1]
+[ext_resource path="res://gfx/wave/0.png" type="Texture" id=2]
+[ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=3]
+[ext_resource path="res://gfx/fonts/numerics_5x8.tres" type="BitmapFont" id=4]
+[ext_resource path="res://gfx/fonts/numerics_8x10.tres" type="BitmapFont" id=5]
+[ext_resource path="res://ui/EGTooltip.gd" type="Script" id=6]
+
+[sub_resource type="StyleBoxFlat" id=1]
+content_margin_left = 0.0
+content_margin_top = 4.0
+content_margin_bottom = 4.0
+bg_color = Color( 0.0313726, 0.0313726, 0.0627451, 1 )
+border_width_left = 12
+border_width_top = 12
+border_width_right = 12
+border_width_bottom = 12
+border_color = Color( 0, 0, 0, 1 )
+border_blend = true
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0, 0, 0, 1 )
+expand_margin_left = 2.0
+expand_margin_right = 4.0
+expand_margin_top = 2.0
+expand_margin_bottom = 4.0
+shadow_color = Color( 0, 0, 0, 0.627451 )
+shadow_size = 16
+shadow_offset = Vector2( 2, 2 )
+anti_aliasing_size = 4
+
+[node name="EGTooltip" type="PanelContainer"]
+margin_right = 160.0
+margin_bottom = 112.0
+rect_min_size = Vector2( 160, 112 )
+script = ExtResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="V" type="VBoxContainer" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 153.0
+margin_bottom = 105.0
+
+[node name="H" type="HBoxContainer" parent="V"]
+margin_right = 146.0
+margin_bottom = 10.0
+
+[node name="Op" type="RichTextLabel" parent="V/H"]
+margin_right = 32.0
+margin_bottom = 10.0
+rect_min_size = Vector2( 32, 0 )
+custom_fonts/italics_font = ExtResource( 4 )
+custom_fonts/bold_font = ExtResource( 3 )
+custom_fonts/normal_font = ExtResource( 3 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+bbcode_enabled = true
+bbcode_text = "0p[i].[/i][color=#ffff00][b]3[/b][/color]"
+text = "0p.3"
+
+[node name="Level" type="Label" parent="V/H"]
+margin_left = 36.0
+margin_right = 102.0
+margin_bottom = 10.0
+size_flags_horizontal = 3
+custom_fonts/font = ExtResource( 5 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+text = "100.0%"
+align = 1
+
+[node name="Hz" type="Label" parent="V/H"]
+margin_left = 106.0
+margin_top = 1.0
+margin_right = 146.0
+margin_bottom = 9.0
+custom_fonts/font = ExtResource( 3 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+text = "7.50x"
+
+[node name="EnvelopeDisplay" parent="V" instance=ExtResource( 1 )]
+margin_top = 14.0
+margin_right = 146.0
+margin_bottom = 98.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_styles/panel = SubResource( 1 )
+tl = 0.268
+sl = 0.031
+Delay = 0
+Attack = 30
+Sustain = 12
+Release = 39
+db_moves = false
+
+[node name="Wave" type="TextureRect" parent="V/EnvelopeDisplay"]
+self_modulate = Color( 1, 1, 1, 0.501961 )
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -37.0
+margin_top = 5.0
+margin_right = -5.0
+margin_bottom = 29.0
+texture = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Shadow" type="Panel" parent="."]
+show_behind_parent = true
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 153.0
+margin_bottom = 105.0
+mouse_filter = 2
+custom_styles/panel = SubResource( 2 )

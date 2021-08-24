@@ -1,21 +1,17 @@
 extends Panel
 
-var waves=[0,2,1,3,5,6,7, "8a", 8, 9]  #Make sure this matches the waveFuncs list in Oscillator.cs
-var wave_img = []
 
 func _ready():
 	
-	for i in waves.size():
-		wave_img.append(load("res://gfx/wave/%s.png" % waves[i]))
-		$Preview.texture = wave_img[0]
-	
+	for i in global.waves.size():
 		$Popup/G.get_child(i).connect("pressed", self, "_on_Popup_button_pressed", [i])
 	
+	$Preview.texture = global.wave_img[0]
 	$Popup.rect_size = $Popup/G.rect_size
 
 
 func _on_Wave_value_changed(value):
-	$Preview.texture = wave_img[value]
+	$Preview.texture = global.wave_img[value]
 
 
 func _on_Preview_gui_input(event):

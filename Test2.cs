@@ -15,7 +15,7 @@ public class Test2 : Label
     const int scopeHeight = 128;
 
 
-    Chip c = new Chip(6,3);
+    Chip c = new Chip(6,4);
     long[] lastID = new long[128];  //Keeps track of the last ID pressed on a specified note, to turn it off when a noteOff event is detected.
 
     Node fromMidi;
@@ -116,6 +116,7 @@ public class Test2 : Label
     public void SetPG(int opTarget, string property, float val)
     {
         c.Voice.SetPG(opTarget, property, val);
+        c.Voice.pgs[opTarget].Recalc();  //This isn't normally done by Voice but we need it for the UI tooltip mult preview, so we do it.
 
         //For live feedback of changes in the PG value.  Inefficient;  DON'T use this in production!
         for(int i=0; i<c.channels.Length; i++)

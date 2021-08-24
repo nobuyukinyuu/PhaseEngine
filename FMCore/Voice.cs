@@ -144,7 +144,7 @@ namespace gdsFM
             try
             {
                 pgs[opTarget].SetVal(property, val);
-                // pg.Recalc();  // In Voice we don't need to recalc since note selection occurs at NoteOn only
+                // pgs[opTarget].Recalc();  // In Voice we don't need to recalc since note selection occurs at NoteOn only, but it's useful for previewing frequencies...
 
                 // GD.Print(String.Format("Set op{0}.eg.{1} to {2}.", opTarget, property, val));
             } catch(NullReferenceException) {
@@ -209,7 +209,8 @@ namespace gdsFM
                     }
 
 
-                //TODO:  Phase generator processing, metadata, etc
+                //TODO:  Phase generator processing, metadata, opType (should serialize to a name maybe?), etc
+
                 }
 
 

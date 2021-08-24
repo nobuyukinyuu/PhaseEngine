@@ -50,7 +50,7 @@ namespace gdsFM
         {
             var o = new Increments();
             o.mult = 1;  
-            o.base_hz=o.hz=Global.BASE_HZ;
+            o.base_hz=o.tuned_hz=o.hz=Global.BASE_HZ;
             o.increment = o.tunedIncrement = o.noteIncrement = IncOfFreq(o.hz);
             // o.fixedFreq = true;
             return o;
@@ -78,7 +78,7 @@ namespace gdsFM
 
                 var t = Tables.transpose[Tools.Abs(transpose)];  
                 if (transpose < 0)  t = 1/t;  //Negative transpose values are equal to the reciprocal of the positive transpose ratio
-                this.hz=this.tuned_hz = base_hz * mult * t; //Add any modifiers to the frequency here if necessary and split into 2 lines
+                this.hz=this.tuned_hz = base_hz * mult * t; //TODO: Add any modifiers to the frequency here if necessary and split into 2 lines
             }
 
             tunedIncrement = IncOfFreq(this.tuned_hz) + detune;

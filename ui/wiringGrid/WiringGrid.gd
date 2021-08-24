@@ -23,6 +23,7 @@ func _ready():
 		if chip:
 			$SlotIndicator.total_ops = chip.GetOpCount()
 
+	check_if_presets()
 
 func _physics_process(delta):
 	update()
@@ -41,14 +42,7 @@ func _on_slot_moved(delay=0):
 	d = get_algorithm_description()
 	get_node(chip_loc).SetAlgorithm(d)
 	
-	#Check to see if presets are available.
-	match $SlotIndicator.total_ops:
-		4,6:
-			$Preset.disabled = false
-			$Popup.intent = $SlotIndicator.total_ops
-			pass
-		_:
-			$Preset.disabled = true
+	check_if_presets()
 
 func get_algorithm_description() -> Dictionary:
 	var d= {}
@@ -132,7 +126,13 @@ func _on_Paste_pressed():
 	if err:  
 		print("WiringGrid:  Clipboard data failed to pass JSON validation... Error at ", err)
 		return
-	$SlotIndicator.load_from_description( parse_json(OS.clipboard) )
+
+	#For some reason, CSVs pass JSON validation without enclosing brackets. So, we need to make sure
+	#that parsing only produces a Dictionary!  CSV's inexplicably return float
+	var desc = parse_json(OS.clipboard)
+	if not desc is Dictionary:  return  
+	
+	$SlotIndicator.load_from_description( desc )
 	_on_slot_moved(0.05)
 
 
@@ -147,4 +147,16 @@ func _on_Preset_item_activated(index):
 	preset_description.erase("grid")  
 	$SlotIndicator.load_from_description( preset_description )
 	_on_slot_moved(0.05)
-	
+
+func check_if_presets():
+	#Check to see if presets are available.
+	match $SlotIndicator.total_ops:
+		4,6:
+			$Preset.disabled = false
+			$Popup.intent = $SlotIndicator.total_ops
+			pass
+		_:
+			$Preset.disabled = true
+
+
+

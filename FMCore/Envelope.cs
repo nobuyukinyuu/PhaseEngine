@@ -11,7 +11,7 @@ namespace gdsFM
         public bool mute;
         public bool bypass;
 
-        public const ushort TL_MAX = 1919; //Max total attenuation level
+        public const ushort TL_MAX = 1919; //Max total attenuation level.  Should really be 2048 for -48dB, but non-clamped/unchecked rollover can create noise
         public const ushort L_MAX = 1023; //Max attenuation level
         public const byte R_MAX = 63;  //Max rate
 

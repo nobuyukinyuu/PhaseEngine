@@ -10,6 +10,7 @@ namespace gdsFM
         short[] customWaveform = new short[128];
 
         public static readonly waveFunc[] waveFuncs = {Sine2, Tri, Saw, Pulse, White, Pink, Brown, Noise1, Noise2};
+        public enum TypeNames {Sine, Tri, Saw, Pulse, White, Pink, Brown, Noise1, Noise2 };  //Used to serialize waveFuncs
 
         public Oscillator(waveFunc wave)    {wf=wave;}
         public void SetWaveform(waveFunc wave) {wf=wave;}

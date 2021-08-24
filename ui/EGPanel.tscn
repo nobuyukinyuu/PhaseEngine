@@ -177,8 +177,8 @@ corner_radius_bottom_left = 12
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -682.0
-margin_bottom = -296.0
-rect_min_size = Vector2( 342, 300 )
+margin_bottom = -280.0
+rect_min_size = Vector2( 342, 320 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -641,7 +641,7 @@ __meta__ = {
 [node name="EnvelopeDisplay" parent="." instance=ExtResource( 6 )]
 margin_top = 256.0
 margin_right = 340.0
-margin_bottom = 296.0
+margin_bottom = 320.0
 custom_styles/panel = SubResource( 11 )
 sl = 1.0
 Delay = 0

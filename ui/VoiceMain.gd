@@ -9,14 +9,15 @@ func _ready():
 	#Otherwise, the value specified in the editor will only be valid for us and none of our children.
 	chip_loc = get_node(chip_loc).get_path()  
 	
+	global.connect("op_tooltip_needs_data", self, "_on_op_tooltip_needs_data")
 	
 	#Expand the kanban scroller to fill the window.
 	get_tree().connect("screen_resized", self, "resized")
+	resized()  #Populate kanban columns.
 	
 	#Populate EGPanels in column 0.
 	_on_op_size_changed(get_node(chip_loc).GetOpCount(), 0)
 
-	resized()
 	
 
 func resized():
@@ -50,4 +51,19 @@ func _on_op_size_changed(opNum:int, oldSz):
 			to_add.append(i)
 		
 		col.populate(to_add, null)
-	
+
+#Handler for tooltips that need data from a chip.
+func _on_op_tooltip_needs_data(sender, tooltip):
+	if sender is TabContainer and tooltip is EGTooltip:
+		var idx = sender.get_tab_idx_at_point(sender.get_local_mouse_position())
+		if idx==-1:
+#			print("Couldn't find tab at %s!" % sender.get_local_mouse_position())
+			yield(get_tree(), "idle_frame")
+			tooltip.visible = false
+			return
+
+		var tab = sender.get_tab_control(idx)
+		tooltip.setup(chip_loc, tab.operator)
+
+
+

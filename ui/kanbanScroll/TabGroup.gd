@@ -6,6 +6,7 @@ onready var ownerColumn = $"../.."
 var drop_preview:Rect2
 var dropZone = Rect2(Vector2.ZERO, Vector2(rect_size.x, 16))
 
+
 func _ready():
 	set_tabs_rearrange_group(global.OPERATOR_TAB_GROUP)
 	connect("tab_changed", self, "_on_tab_changed")	
@@ -68,8 +69,36 @@ func _draw():
 
 
 func _make_custom_tooltip(for_text):
-	var o = Label.new()
-	o.text = name
-	o.rect_position = get_local_mouse_position()
-	print("tooltip from ", name)
-	return o
+	var p = preload("res://ui/EGTooltip.tscn").instance()
+	p.rect_position = get_local_mouse_position()  #Adjust this position when too close to the window border, check later!
+
+	#Probably need to emit a signal here telling a parent that an EGTooltip appeared and to set its values correctly.
+	global.emit_signal("op_tooltip_needs_data", self, p)
+	return p
+
+
+#Base tab width is 32 (1 char); active is 40.
+enum Widths {base=24, active=+8, chr=+8}
+func get_tab_idx_at_point(pos=get_local_mouse_position()):
+	#NOTE:  This method does not exist in GDScript prior to Godot 3.4, and this is a crappy stopgap implementation
+	#		Which DOES NOT WORK if the tabs spill past the control width (there's no way to get the scroll position),
+	#		therefore this method will always return -1 if tabs spill over.
+	#		You should be able to safely comment this func out if you're running Godot 3.4 or later.
+
+		var x = pos.x
+		var running_x = 0
+		var probable_idx = -1
+		for i in get_child_count():
+			var tab = get_child(i)
+			var width = Widths.base + len(tab.name)*Widths.chr
+			if tab == get_current_tab_control():  width += Widths.active
+			
+			if x >= running_x and x < running_x + width:  probable_idx=i
+			running_x += width
+			
+		if running_x >= rect_size.x:  return -1  #No scroll support!!
+		if x < 0 or x > rect_size.x:  return -1
+
+		return probable_idx
+
+

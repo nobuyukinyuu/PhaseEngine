@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=2]
+[gd_scene load_steps=28 format=2]
 
 [ext_resource path="res://gfx/fonts/numerics_7seg.tres" type="BitmapFont" id=1]
 [ext_resource path="res://ui/responseCurve/PresetMenu.theme" type="Theme" id=2]
@@ -16,10 +16,8 @@
 [ext_resource path="res://gfx/ui/godot_icons/icon_curve_out.svg" type="Texture" id=14]
 [ext_resource path="res://gfx/ui/godot_icons/icon_curve_out_in.svg" type="Texture" id=15]
 [ext_resource path="res://ui/wiringGrid/slot.stylebox" type="StyleBox" id=16]
-[ext_resource path="res://ui/envelopeDisplay/EnvelopeDisplay.tscn" type="PackedScene" id=17]
+[ext_resource path="res://ui/EGTooltip.tscn" type="PackedScene" id=17]
 [ext_resource path="res://icon.png" type="Texture" id=18]
-[ext_resource path="res://gfx/wave/0.png" type="Texture" id=19]
-[ext_resource path="res://gfx/fonts/numerics_8x10.tres" type="BitmapFont" id=20]
 
 [sub_resource type="StyleBoxFlat" id=1]
 draw_center = false
@@ -321,55 +319,4 @@ position = Vector2( 384, 536 )
 scale = Vector2( 2, 0.765625 )
 texture = ExtResource( 18 )
 
-[node name="Panel" type="PanelContainer" parent="."]
-margin_left = 576.0
-margin_top = 128.0
-margin_right = 736.0
-margin_bottom = 240.0
-rect_min_size = Vector2( 160, 112 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
-margin_left = 7.0
-margin_top = 7.0
-margin_right = 153.0
-margin_bottom = 105.0
-
-[node name="Label" type="Label" parent="Panel/VBoxContainer"]
-margin_right = 146.0
-margin_bottom = 10.0
-custom_fonts/font = ExtResource( 20 )
-custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
-text = "0/4:100%  fx:2.48"
-align = 1
-
-[node name="EnvelopeDisplay" parent="Panel/VBoxContainer" instance=ExtResource( 17 )]
-margin_top = 14.0
-margin_right = 146.0
-margin_bottom = 98.0
-size_flags_horizontal = 3
-size_flags_vertical = 3
-thickness = 1.0
-tl = 0.785
-al = 0.417
-dl = 0.035
-sl = 0.283
-Delay = 0
-Attack = 63
-Decay = 45
-Sustain = 1
-
-[node name="Preview" type="TextureRect" parent="Panel/VBoxContainer/EnvelopeDisplay"]
-self_modulate = Color( 1, 1, 1, 0.501961 )
-anchor_left = 1.0
-anchor_right = 1.0
-margin_left = -37.0
-margin_top = 5.0
-margin_right = -5.0
-margin_bottom = 29.0
-texture = ExtResource( 19 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="EGTooltip" parent="." instance=ExtResource( 17 )]

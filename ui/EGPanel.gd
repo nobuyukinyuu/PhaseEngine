@@ -120,10 +120,10 @@ func refresh_envelope_preview():
 	$EnvelopeDisplay.Delay = d["delay"]
 	$EnvelopeDisplay.Hold = d["hold"]
 	
-	$EnvelopeDisplay.tl = levels[4] / 1920.0
-	$EnvelopeDisplay.al = levels[0] / 1024.0
-	$EnvelopeDisplay.dl = levels[1] / 1024.0
-	$EnvelopeDisplay.sl = levels[2] / 1024.0
+	$EnvelopeDisplay.tl = levels[4] / global.TL_MAX
+	$EnvelopeDisplay.al = levels[0] / global.L_MAX
+	$EnvelopeDisplay.dl = levels[1] / global.L_MAX
+	$EnvelopeDisplay.sl = levels[2] / global.L_MAX
 
 #Updates a single part of the envelope preview.
 const env_map = {"ar":"Attack", "dr":"Decay", "sr":"Sustain", "rr":"Release"}
@@ -138,9 +138,9 @@ func update_env(value, sender:EGSlider):
 #		$EnvelopeDisplay.set(env_map[prop], sender.value)
 	
 	if prop == "tl":
-		$EnvelopeDisplay.call("update_" + prop, value/1920.0)
+		$EnvelopeDisplay.call("update_" + prop, value/global.TL_MAX)
 	elif prop.ends_with("l"):
-		$EnvelopeDisplay.call("update_" + prop, value/1024.0)
+		$EnvelopeDisplay.call("update_" + prop, value/global.L_MAX)
 	else:
 		$EnvelopeDisplay.call("update_" + prop, value)
 

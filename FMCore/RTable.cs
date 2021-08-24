@@ -93,7 +93,7 @@ namespace gdsFM
         {
             for(byte i=0; i<values.Length; i++)
             {
-                values[i] = (byte)(127-i);
+                values[i] = (byte)(i);
             }
 
             ceiling = 0;  //Disable rate scaling by default.
