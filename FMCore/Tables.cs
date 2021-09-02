@@ -16,6 +16,12 @@ namespace gdsFM
         public static readonly float[] short2float = new float[ushort.MaxValue+1];  //Representation in float of all values of ushort
         public const ushort SIGNED_TO_INDEX = short.MaxValue+1;  //Add this value to an output of the oscillator to get an index for a 16-bit table.
 
+        //16kb tables
+        public static readonly float[] vol2pitchDown = new float[8192];  //Converts an LFO's oscillator output to float mapping from 1-0.5
+        public static readonly float[] vol2pitchUp = new float[8192];  //Converts an LFO's oscillator output to float mapping from 1-2
+
+
+
 
         //HQ Sine table  (probably unused)
         public const int SINE_TABLE_BITS = 12;  //We bit-shift right by the bit width of the phase counter minus this value to check the table.
@@ -87,11 +93,32 @@ namespace gdsFM
                 saw[i] = (ushort) ( (float) Math.Round(-Tools.Log2(inc*2) * 256));
             }
 
+            //LFOs, 16kb tables etc
+            for (int i=1; i<8192; i++)
+            {
+                vol2pitchDown[i] = Tools.Lerp(1, 0.5f, i/8192.0f);
+                vol2pitchUp[i]   = Tools.Lerp(1, 2, i/8192.0f);
+            }
+
             // System.Diagnostics.Debug.Print("Shornlf");
 
         }
 
 
+        //  Reface DX compatible LFO speed values 0-127 as measured by Martin Tarenskeen.  Used by PhaseEngine as the default LFO range.
+        //  Source:  https://www.yamahasynth.com/ask-a-question/generating-specific-lfo-frequencies-on-dx
+        //  Most other YM chips have their own LFO specs which aren't very compatible with each other. We may be able to specify them elsewhere.
+        public static readonly double[] LFOSpeed= 
+        {
+            0.026,	0.042,	0.084,	0.126,	0.168,	0.210,	0.252,	0.294,	0.336,	0.372,	0.412,	0.456,	0.505,	0.542,	0.583,	0.626,	
+            0.673,	0.711,	0.752,	0.795,	0.841,	0.880,	0.921,	0.964,	1.009,	1.049,	1.090,	1.133,	1.178,	1.218,	1.259,	1.301,	
+            1.345,	1.386,	1.427,	1.470,	1.514,	1.554,	1.596,	1.638,	1.681,	1.722,	1.764,	1.807,	1.851,	1.891,	1.932,	1.975,	
+            2.018,	2.059,	2.101,	2.143,	2.187,	2.227,	2.269,	2.311,	2.354,	2.395,	2.437,	2.480,	2.523,	2.564,	2.606,	2.648,	
+            2.691,	2.772,	2.854,	2.940,	3.028,	3.108,	3.191,	3.275,	3.362,	3.444,	3.528,	3.613,	3.701,	3.858,	4.023,	4.194,	
+            4.372,	4.532,	4.698,	4.870,	5.048,	5.206,	5.369,	5.537,	5.711,	6.024,	6.353,	6.701,	7.067,	7.381,	7.709,	8.051,	
+            8.409,	8.727,	9.057,	9.400,	9.756,	10.291,	10.855,	11.450,	12.077,	12.710,	13.376,	14.077,	14.815,	15.440,	16.249,	17.100,	
+            17.476,	18.538,	19.663,	20.857,	22.124,	23.338,	24.620,	25.971,	27.397,	28.902,	30.303,	31.646,	33.003,	34.364,	37.037,	39.682,	 
+        };
 
         public static readonly ushort[] s_sin_table =
         {
@@ -119,7 +146,7 @@ namespace gdsFM
         // the values are left-shifted by 2 so that a simple right shift is all that
         // is needed; also the order is reversed to save a NOT on the input        
         static ushort P(ushort a) => (ushort)((a|0x400) << 2);
-        static readonly ushort[] s_power_table =
+        public static readonly ushort[] s_power_table =
         {
             P(0x3fa),P(0x3f5),P(0x3ef),P(0x3ea),P(0x3e4),P(0x3df),P(0x3da),P(0x3d4),
             P(0x3cf),P(0x3c9),P(0x3c4),P(0x3bf),P(0x3b9),P(0x3b4),P(0x3ae),P(0x3a9),
@@ -156,19 +183,15 @@ namespace gdsFM
         };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ushort attenuation_to_volume(ushort input)
+        public static ushort attenuation_to_volume(ushort input)  //FIXME: Values exceeding 14-bit maxvalue (0x1FFF, 8191) wrap around producing incorrect output
         {
             unchecked
             {
                 // look up the fractional part, then shift by the whole
                 // return (ushort)(((s_power_table[~input & 0xff] | (ushort)0x400) << 2) >> (input >> 8));
-                return (ushort)(s_power_table[input & 0xff] >> (input >> 8));
+                return (ushort)( s_power_table[input & 0xff] >> (input >> 8) );
             }
         }
-
-
-
-
 
         static readonly uint[] s_increment_table =           //Envelope increment table
         {

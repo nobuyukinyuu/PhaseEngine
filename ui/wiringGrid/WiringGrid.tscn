@@ -360,21 +360,25 @@ __meta__ = {
 [node name="VBox" type="VBoxContainer" parent="Popup"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 4.0
+margin_right = -4.0
+margin_bottom = -4.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Scroll" type="ScrollContainer" parent="Popup/VBox"]
-margin_right = 328.0
-margin_bottom = 222.0
+margin_right = 320.0
+margin_bottom = 214.0
 size_flags_vertical = 3
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ItemList" type="ItemList" parent="Popup/VBox/Scroll"]
-margin_right = 328.0
-margin_bottom = 222.0
+margin_right = 320.0
+margin_bottom = 214.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_fonts/font = ExtResource( 8 )
@@ -385,15 +389,15 @@ icon_mode = 0
 
 [node name="Separator" type="Panel" parent="Popup/VBox"]
 modulate = Color( 0.509804, 0.509804, 0.509804, 0.509804 )
-margin_top = 226.0
-margin_right = 328.0
-margin_bottom = 228.0
+margin_top = 218.0
+margin_right = 320.0
+margin_bottom = 220.0
 rect_min_size = Vector2( 0, 2 )
 
 [node name="HBox" type="HBoxContainer" parent="Popup/VBox"]
-margin_top = 232.0
-margin_right = 328.0
-margin_bottom = 256.0
+margin_top = 224.0
+margin_right = 320.0
+margin_bottom = 248.0
 grow_vertical = 0
 rect_min_size = Vector2( 320, 24 )
 custom_constants/separation = 4

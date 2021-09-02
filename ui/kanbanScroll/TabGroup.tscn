@@ -1,15 +1,17 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=1]
 [ext_resource path="res://ui/EGTabBG.stylebox" type="StyleBox" id=2]
 [ext_resource path="res://ui/kanbanScroll/TabGroup.gd" type="Script" id=3]
 [ext_resource path="res://ui/TabContainerStyle.tres" type="StyleBox" id=4]
+[ext_resource path="res://ui/TabContainer.theme" type="Theme" id=5]
 
 [node name="TabGroup0" type="TabContainer"]
 margin_top = 316.0
 margin_right = 344.0
 margin_bottom = 336.0
 rect_min_size = Vector2( 344, 0 )
+theme = ExtResource( 5 )
 custom_styles/tab_bg = ExtResource( 2 )
 custom_styles/panel = ExtResource( 4 )
 custom_fonts/font = ExtResource( 1 )

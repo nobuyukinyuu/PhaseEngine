@@ -16,6 +16,8 @@ namespace gdsFM
 
         public short lastSample;
 
+        public static ushort am_offset=0;  //Set by the chip when clocking to pass down when requesting samples from our operators.
+
         public Channel(byte opCount)
         {
             ops = new Operator[opCount];
@@ -83,7 +85,7 @@ namespace gdsFM
                 // Adjust the EG based on values from the RTables.
                 if (midi_note < 0x80) 
                 {
-                    op.eg.ksl.Apply(midi_note, ref op.eg.levels[4]);
+                    op.eg.ksl.Apply(midi_note, ref op.eg.levels[4]);  //Apply KSL to total level
 
                     for (int j=0; j<op.eg.rates.Length-1; j++)
                     {
@@ -94,12 +96,12 @@ namespace gdsFM
                     }
                     op.eg.ksr.Apply(midi_note, ref op.eg.rates[op.eg.rates.Length-1]);
                 }
-                op.eg.velocity.Apply(velocity, ref op.eg.levels[4]);
+                op.eg.velocity.Apply(velocity, ref op.eg.levels[4]);  //Apply velocity to total level
 
 
 
                 op.pg = voice.pgs[i];  //Set Increments to the last Voice increments value (ByVal copy)
-                op.SetOperatorType((byte)voice.opType[i]);  //Set the wave function to what the voice says it should be
+                op.SetOscillatorType((byte)voice.opType[i]);  //Set the wave function to what the voice says it should be
 
                 //Prepare the note's increment based on calculated pitch
                 if (!op.pg.fixedFreq)
@@ -159,7 +161,7 @@ namespace gdsFM
 
                 //First, convert the source op's accumulated phase up to this point into its sample result value.
                 //For termini (top of an op stack), the phase accumulated in the cache will always be 0.
-                var modulation = ops[src_op].RequestSample( (ushort)cache[src_op] );
+                var modulation = ops[src_op].RequestSample( (ushort)cache[src_op], am_offset );
 
                 if (c==0)  //Source op isn't connected to anything, so we assume it's connected to output.
                 {

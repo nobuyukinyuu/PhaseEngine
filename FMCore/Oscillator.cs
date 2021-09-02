@@ -148,7 +148,6 @@ namespace gdsFM
 
         public static ushort Saw(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
-        //    flip = Tools.BIT(n, 9).ToBool();
             flip=false;
             if ( Tools.BIT(n, 9).ToBool() )
             {

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=31 format=2]
 
 [ext_resource path="res://MIDI.gd" type="Script" id=1]
 [ext_resource path="res://ui/VoiceMain.gd" type="Script" id=2]
@@ -7,12 +7,118 @@
 [ext_resource path="res://ui/kanbanScroll/Column.tscn" type="PackedScene" id=5]
 [ext_resource path="res://ui/wiringGrid/WiringGrid.tscn" type="PackedScene" id=6]
 [ext_resource path="res://ui/kanbanScroll/Kanban.gd" type="Script" id=7]
+[ext_resource path="res://ui/TabContainer.theme" type="Theme" id=8]
+[ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=9]
+[ext_resource path="res://gfx/wave/0.png" type="Texture" id=10]
+[ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=11]
+[ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=12]
+[ext_resource path="res://gfx/wave/3.png" type="Texture" id=13]
+[ext_resource path="res://ui/LFOPanel.gd" type="Script" id=14]
+[ext_resource path="res://gfx/wave/7.png" type="Texture" id=15]
+[ext_resource path="res://gfx/wave/2.png" type="Texture" id=16]
+[ext_resource path="res://gfx/wave/8a.png" type="Texture" id=17]
+[ext_resource path="res://gfx/wave/8.png" type="Texture" id=18]
+[ext_resource path="res://gfx/wave/9.png" type="Texture" id=19]
+[ext_resource path="res://gfx/wave/1.png" type="Texture" id=20]
+[ext_resource path="res://gfx/wave/5.png" type="Texture" id=21]
+[ext_resource path="res://gfx/wave/6.png" type="Texture" id=22]
 
 [sub_resource type="AudioStreamGenerator" id=1]
 mix_rate = 48000.0
 buffer_length = 0.05
 
-[node name="Control" type="Control"]
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0, 0, 0, 0.376471 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.8, 0.8, 0.8, 0.337255 )
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0.058, 0.102967, 0.2, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+expand_margin_left = 2.0
+expand_margin_bottom = 1.0
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=4]
+bg_color = Color( 0, 0, 0, 0.498039 )
+border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=5]
+bg_color = Color( 0, 0, 0, 0.305882 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.8, 0.8, 0.8, 0.180392 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+expand_margin_left = 2.0
+expand_margin_right = 2.0
+expand_margin_top = 2.0
+expand_margin_bottom = 2.0
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=6]
+bg_color = Color( 0, 0, 0, 0.941176 )
+border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+expand_margin_left = 12.0
+expand_margin_right = 12.0
+expand_margin_top = 16.0
+expand_margin_bottom = 12.0
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=7]
+content_margin_left = 2.0
+content_margin_right = 2.0
+content_margin_top = 2.0
+content_margin_bottom = 2.0
+bg_color = Color( 0.278431, 0.388235, 0.564706, 0.737255 )
+border_width_left = 1
+border_width_top = 1
+border_color = Color( 0.8, 0.8, 0.8, 0.380392 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=8]
+content_margin_left = 2.0
+content_margin_right = 2.0
+content_margin_top = 2.0
+content_margin_bottom = 2.0
+bg_color = Color( 0.0784314, 0.0862745, 0.14902, 0.737255 )
+border_width_left = 1
+border_width_top = 1
+border_color = Color( 0.8, 0.8, 0.8, 0.380392 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[node name="VoiceTab" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 2 )
@@ -20,7 +126,7 @@ __meta__ = {
 "_edit_lock_": true,
 "_edit_use_anchors_": false
 }
-chip_loc = NodePath("Channels")
+chip_loc = NodePath("../VoiceTab/Channels")
 
 [node name="MIDI Control" type="Node" parent="."]
 script = ExtResource( 1 )
@@ -42,20 +148,18 @@ stream = SubResource( 1 )
 volume_db = -3.0
 
 [node name="ChInfo" type="Label" parent="Channels"]
-margin_top = 240.0
-margin_right = 64.0
-margin_bottom = 312.0
+modulate = Color( 1, 1, 1, 0.552941 )
+margin_left = 916.0
+margin_top = 272.0
+margin_right = 980.0
+margin_bottom = 344.0
+grow_horizontal = 0
 grow_vertical = 0
+align = 2
+valign = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
-
-[node name="WiringGrid" parent="." instance=ExtResource( 6 )]
-margin_left = 16.0
-margin_top = 16.0
-margin_right = 272.0
-margin_bottom = 224.0
-chip_loc = NodePath("../Channels")
 
 [node name="Kanban" type="HBoxContainer" parent="."]
 anchor_bottom = 1.0
@@ -73,6 +177,13 @@ __meta__ = {
 [node name="Column0" parent="Kanban" instance=ExtResource( 5 )]
 rect_min_size = Vector2( 360, 0 )
 
+[node name="WiringGrid" parent="." instance=ExtResource( 6 )]
+margin_left = 16.0
+margin_top = 16.0
+margin_right = 272.0
+margin_bottom = 224.0
+chip_loc = NodePath("../../VoiceTab/Channels")
+
 [node name="CPUMon" type="Label" parent="."]
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -86,5 +197,275 @@ script = ExtResource( 3 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="LTab" type="TabContainer" parent="."]
+margin_left = 8.0
+margin_top = 368.0
+margin_right = 272.0
+margin_bottom = 536.0
+rect_min_size = Vector2( 264, 0 )
+theme = ExtResource( 8 )
+custom_styles/panel = SubResource( 2 )
+tab_align = 0
+script = ExtResource( 14 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LFO" type="Control" parent="LTab"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 1.0
+margin_top = 19.0
+margin_right = -1.0
+margin_bottom = -1.0
+rect_min_size = Vector2( 256, 0 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="+Delay" parent="LTab/LFO" instance=ExtResource( 9 )]
+margin_left = 7.0
+margin_top = 45.0
+margin_right = 255.0
+margin_bottom = 65.0
+rect_min_size = Vector2( 112, 20 )
+max_value = 32767.0
+exp_edit = true
+associated_property = "Delay"
+useHoldTime = 2
+
+[node name="Speed" parent="LTab/LFO" instance=ExtResource( 9 )]
+margin_left = 7.0
+margin_top = 77.0
+margin_right = 255.0
+margin_bottom = 97.0
+rect_min_size = Vector2( 64, 20 )
+max_value = 127.0
+associated_property = "Speed"
+useHoldTime = 3
+
+[node name="Sync" type="OptionButton" parent="LTab/LFO"]
+margin_left = 8.0
+margin_top = 117.0
+margin_right = 127.0
+margin_bottom = 131.0
+custom_styles/hover = SubResource( 3 )
+custom_styles/pressed = SubResource( 3 )
+custom_styles/focus = SubResource( 3 )
+custom_styles/normal = SubResource( 3 )
+custom_fonts/font = ExtResource( 11 )
+text = "None"
+items = [ "None", null, false, 0, null, "Oscillator", null, false, 1, null, "End of Delay", null, false, 2, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="LTab/LFO/Sync"]
+margin_top = -11.0
+margin_right = 119.0
+custom_fonts/font = ExtResource( 12 )
+text = "Sync"
+align = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Pitch Depth" parent="LTab/LFO" instance=ExtResource( 9 )]
+margin_left = 135.0
+margin_top = 109.0
+margin_right = 255.0
+margin_bottom = 129.0
+rect_min_size = Vector2( 112, 20 )
+max_value = 1.0
+step = 0.001
+associated_property = "pmd"
+useHoldTime = false
+
+[node name="WavePanel" type="Panel" parent="LTab/LFO"]
+margin_left = 2.0
+margin_top = 5.0
+margin_right = 260.0
+margin_bottom = 37.0
+custom_styles/panel = SubResource( 4 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Wave" parent="LTab/LFO/WavePanel" instance=ExtResource( 9 )]
+visible = false
+margin_left = -104.0
+margin_top = 8.0
+margin_right = -48.0
+margin_bottom = 28.0
+rect_min_size = Vector2( 56, 20 )
+max_value = 1023.0
+useHoldTime = false
+
+[node name="Duty" parent="LTab/LFO/WavePanel" instance=ExtResource( 9 )]
+margin_left = 69.0
+margin_top = 4.0
+margin_right = 205.0
+margin_bottom = 24.0
+rect_min_size = Vector2( 64, 20 )
+max_value = 65535.0
+value = 32767.0
+associated_property = "duty"
+useHoldTime = false
+
+[node name="Preview" type="TextureRect" parent="LTab/LFO/WavePanel"]
+margin_left = 219.0
+margin_top = 4.0
+margin_right = 251.0
+margin_bottom = 28.0
+texture = ExtResource( 10 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Panel" type="Panel" parent="LTab/LFO/WavePanel/Preview"]
+show_behind_parent = true
+margin_right = 32.0
+margin_bottom = 24.0
+custom_styles/panel = SubResource( 5 )
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Invert" type="CheckBox" parent="LTab/LFO/WavePanel"]
+margin_left = 5.0
+margin_top = 8.0
+margin_right = 59.0
+margin_bottom = 26.0
+custom_styles/hover = SubResource( 5 )
+custom_styles/pressed = SubResource( 5 )
+custom_styles/focus = SubResource( 5 )
+custom_styles/hover_pressed = SubResource( 5 )
+custom_styles/normal = SubResource( 5 )
+custom_fonts/font = ExtResource( 11 )
+text = "Flip"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Popup" type="PopupDialog" parent="LTab/LFO/WavePanel"]
+margin_left = 210.0
+margin_right = 210.0
+margin_bottom = 20.0
+rect_min_size = Vector2( 72, 144 )
+custom_styles/panel = SubResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="LTab/LFO/WavePanel/Popup"]
+anchor_right = 1.0
+margin_top = -12.0
+margin_right = 8.0
+margin_bottom = -4.0
+custom_fonts/font = ExtResource( 12 )
+custom_colors/font_color = Color( 0.384314, 0.717647, 0.831373, 0.639216 )
+text = "Waveform="
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="G" type="GridContainer" parent="LTab/LFO/WavePanel/Popup"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/vseparation = 2
+custom_constants/hseparation = 2
+columns = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Wave0" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
+margin_right = 36.0
+margin_bottom = 28.0
+custom_styles/hover = SubResource( 7 )
+custom_styles/normal = SubResource( 8 )
+icon = ExtResource( 10 )
+
+[node name="Wave1" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
+margin_left = 38.0
+margin_right = 74.0
+margin_bottom = 28.0
+custom_styles/hover = SubResource( 7 )
+custom_styles/normal = SubResource( 8 )
+icon = ExtResource( 16 )
+
+[node name="Wave2" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
+margin_top = 30.0
+margin_right = 36.0
+margin_bottom = 58.0
+custom_styles/hover = SubResource( 7 )
+custom_styles/normal = SubResource( 8 )
+icon = ExtResource( 20 )
+
+[node name="Wave3" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
+margin_left = 38.0
+margin_top = 30.0
+margin_right = 74.0
+margin_bottom = 58.0
+custom_styles/hover = SubResource( 7 )
+custom_styles/normal = SubResource( 8 )
+icon = ExtResource( 13 )
+
+[node name="Wave4" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
+margin_top = 60.0
+margin_right = 36.0
+margin_bottom = 88.0
+custom_styles/hover = SubResource( 7 )
+custom_styles/normal = SubResource( 8 )
+icon = ExtResource( 21 )
+
+[node name="Wave5" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
+margin_left = 38.0
+margin_top = 60.0
+margin_right = 74.0
+margin_bottom = 88.0
+custom_styles/hover = SubResource( 7 )
+custom_styles/normal = SubResource( 8 )
+icon = ExtResource( 22 )
+
+[node name="Wave6" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
+margin_top = 90.0
+margin_right = 36.0
+margin_bottom = 118.0
+custom_styles/hover = SubResource( 7 )
+custom_styles/normal = SubResource( 8 )
+icon = ExtResource( 15 )
+
+[node name="Wave7" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
+margin_left = 38.0
+margin_top = 90.0
+margin_right = 74.0
+margin_bottom = 118.0
+custom_styles/hover = SubResource( 7 )
+custom_styles/normal = SubResource( 8 )
+icon = ExtResource( 17 )
+
+[node name="Wave8" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
+margin_top = 120.0
+margin_right = 36.0
+margin_bottom = 148.0
+custom_styles/hover = SubResource( 7 )
+custom_styles/normal = SubResource( 8 )
+icon = ExtResource( 18 )
+
+[node name="Wave9" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
+margin_left = 38.0
+margin_top = 120.0
+margin_right = 74.0
+margin_bottom = 148.0
+custom_styles/hover = SubResource( 7 )
+custom_styles/normal = SubResource( 8 )
+icon = ExtResource( 19 )
+[connection signal="item_selected" from="LTab/LFO/Sync" to="LTab" method="_on_Sync_item_selected"]
+[connection signal="gui_input" from="LTab/LFO/WavePanel/Preview/Panel" to="LTab" method="_on_Preview_gui_input"]
 
 [editable path="Kanban/Column0"]

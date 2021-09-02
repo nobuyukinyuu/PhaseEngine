@@ -14,6 +14,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://ui/kanbanScroll/DragTabPreview.gd"
 }, {
+"base": "Control",
+"class": "EGPanel",
+"language": "GDScript",
+"path": "res://ui/EGPanel.gd"
+}, {
 "base": "HSlider",
 "class": "EGSlider",
 "language": "GDScript",
@@ -36,6 +41,7 @@ _global_script_classes=[ {
 } ]
 _global_script_class_icons={
 "DragTabPreview": "",
+"EGPanel": "",
 "EGSlider": "",
 "EGTooltip": "",
 "EnvelopeDisplay": "",

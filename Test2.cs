@@ -42,11 +42,21 @@ public class Test2 : Label
         fromMidi.Connect("note_on", this, "QueueNote");
         fromMidi.Connect("note_off", this, "QueueNote", new Godot.Collections.Array( new int[1] ) );
 
-    }
-
-    public void NoteLow(bool on)
-    {
-        if(on) c.NoteOn(12); else c.NoteOff(12);
+        System.Text.StringBuilder s = new System.Text.StringBuilder();
+        // for(ushort k=8; k<11; k++)
+            for (ushort j=0; j<16; j++)
+            {
+                for (ushort i=0; i<16; i++)
+                {
+                    // s.Append( Tables.attenuation_to_volume((ushort)(k*256+j*16+i)) );
+                    s.Append((Tables.s_power_table[j*16+i] & 0x3FF));
+                    s.Append(", ");
+                }
+                s.Append("\n");
+            }
+        // System.Diagnostics.Debug.Print(s.ToString());
+        System.Diagnostics.Debug.Print("");
+        OS.Clipboard = s.ToString();
     }
 
     public void TryNoteOn(int midi_note, int velocity)
@@ -112,6 +122,11 @@ public class Test2 : Label
     public int GetOpCount() { return c.opCount; }
 
 
+    public void SetLFO(string property, float val)
+    {
+        c.Voice.lfo.SetVal(property, val);
+    }
+
     // Called from EG controls to bus to the appropriate tuning properties.
     public void SetPG(int opTarget, string property, float val)
     {
@@ -153,6 +168,11 @@ public class Test2 : Label
 
     public void SetWaveform(int opTarget, float val)
     {
+        if (opTarget==-1) //LFO
+        {
+            c.Voice.lfo.SetOscillatorType((byte)val);
+            return;
+        }
         c.Voice.SetWaveform(opTarget, (int)val);
     }
 

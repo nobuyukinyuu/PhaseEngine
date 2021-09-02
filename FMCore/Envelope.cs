@@ -36,6 +36,8 @@ namespace gdsFM
         public byte feedback = 0;
         public ushort duty=32767;
 
+        public byte ams;  //Amplitude modulation sensitivity (used to determine how much LFO to mix in)
+        public bool osc_sync;  //Oscillator sync.  Oscillator phase will reset on NoteOn if true.
 
        //Response tables.  These are references from the canonical Voice.
         public RateTable ksr = new RateTable();
@@ -126,6 +128,8 @@ namespace gdsFM
                 j.Assign("hold", ref hold);
                 j.Assign("feedback", ref feedback);
                 j.Assign("duty", ref duty);
+                j.Assign("ams", ref ams);
+                j.Assign("osc_sync", ref osc_sync);
 
                 j.Assign("mute", ref mute);
                 j.Assign("bypass", ref bypass);
@@ -147,6 +151,8 @@ namespace gdsFM
             o.AddPrim("hold", hold);
             o.AddPrim("feedback", feedback);
             o.AddPrim("duty", duty);
+            o.AddPrim("ams", ams);
+            o.AddPrim("osc_sync", osc_sync);
 
             o.AddPrim("mute", mute);
             o.AddPrim("bypass", bypass);
@@ -161,12 +167,14 @@ namespace gdsFM
             o.Add("rates", rates);
             int[] lv = {al,dl,sl,rl,tl}; //Bussing ushort[] returns null
             o.Add("levels", lv);
+            o.Add("ams", ams);
             // o.Add("rising", rising);
 
             o.Add("delay", delay);
             o.Add("hold", hold);
             o.Add("feedback", feedback);
             o.Add("duty", duty);
+            o.Add("osc_sync", osc_sync);
 
             o.Add("mute", mute);
             o.Add("bypass", bypass);

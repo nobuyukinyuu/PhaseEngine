@@ -1,4 +1,5 @@
-extends Tabs
+extends Control
+class_name EGPanel
 
 export (NodePath) var chip_loc  #Location of PhaseEngine instance in code
 export(int,0,8) var operator = 0
@@ -26,6 +27,8 @@ func _ready():
 		if !o is Slider:  continue
 		o.connect("value_changed", self, "setEG", [o.associated_property])
 		o.connect("value_changed", self, "update_env", [o])
+
+	$AMS.connect("value_changed", self, "setEG", [$AMS.associated_property])
 
 	$WavePanel/Wave.connect("value_changed", self, "setWaveform")
 
@@ -98,6 +101,8 @@ func set_from_op(op:int):
 	$"Levels/Attack Level".value = levels[0]
 	$"Levels/Decay Level".value = levels[1]
 	$"Levels/Sustain Level".value = levels[2]
+	
+	$AMS.value = d["ams"]
 	
 	$Tweak/Feedback.value = d["feedback"]
 	$Tweak/Duty.value = d["duty"]

@@ -55,10 +55,17 @@ namespace gdsFM
 
         public void Clock()
         {
+            Channel.am_offset = voice.lfo.RequestAM();
             for (int i=0; i<channels.Length;  i++)
             {
                 channels[i].Clock();
+                
+                //Apply LFO pitch changes.
+                for(int j=0; j<opCount; j++)
+                    voice.lfo.ApplyPM(ref channels[i].ops[j].pg);
             }
+
+            voice.lfo.Clock();
         }
 
         public short RequestSample()
@@ -106,6 +113,7 @@ namespace gdsFM
         {
             if (ch == null) return NO_CHANNEL_FOUND;
             ch.NoteOn(midi_note, velocity);
+            voice.lfo.NoteOn();
             return ch.eventID;
         }
         /// Finds the best candidate for a channel and returns its event ID.

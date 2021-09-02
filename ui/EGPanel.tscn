@@ -173,16 +173,13 @@ corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
-[node name="EGPanel" type="Tabs"]
+[node name="EGPanel" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -682.0
 margin_bottom = -280.0
 rect_min_size = Vector2( 342, 320 )
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Frequency" type="GridContainer" parent="."]
 visible = false
@@ -204,6 +201,7 @@ size_flags_horizontal = 3
 max_value = 18000.0
 value = 440.0
 exp_edit = true
+useHoldTime = false
 
 [node name="H" type="HBoxContainer" parent="Frequency"]
 margin_top = 28.0
@@ -236,6 +234,7 @@ max_value = 32767.0
 tick_count = 9
 ticks_on_borders = false
 associated_property = "detune"
+useHoldTime = false
 
 [node name="Tune" type="GridContainer" parent="."]
 margin_left = 8.0
@@ -260,6 +259,7 @@ value = 1.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "mult"
+useHoldTime = false
 
 [node name="Coarse" parent="Tune" instance=ExtResource( 3 )]
 margin_left = 148.0
@@ -271,6 +271,7 @@ max_value = 12.0
 tick_count = 9
 ticks_on_borders = false
 associated_property = "coarse"
+useHoldTime = false
 
 [node name="Fine" parent="Tune" instance=ExtResource( 3 )]
 margin_top = 28.0
@@ -283,6 +284,7 @@ max_value = 100.0
 tick_count = 9
 ticks_on_borders = false
 associated_property = "fine"
+useHoldTime = false
 
 [node name="Detune" parent="Tune" instance=ExtResource( 3 )]
 margin_left = 148.0
@@ -296,6 +298,7 @@ max_value = 32767.0
 tick_count = 9
 ticks_on_borders = false
 associated_property = "detune"
+useHoldTime = false
 
 [node name="Levels" type="GridContainer" parent="."]
 margin_left = 8.0
@@ -318,6 +321,7 @@ tick_count = 0
 ticks_on_borders = false
 associated_property = "tl"
 useExpTicks = true
+useHoldTime = false
 
 [node name="Attack Level" parent="Levels" instance=ExtResource( 3 )]
 margin_left = 168.0
@@ -329,6 +333,7 @@ tick_count = 0
 ticks_on_borders = false
 associated_property = "al"
 useExpTicks = true
+useHoldTime = false
 
 [node name="Decay Level" parent="Levels" instance=ExtResource( 3 )]
 margin_top = 28.0
@@ -341,6 +346,7 @@ tick_count = 0
 ticks_on_borders = false
 associated_property = "dl"
 useExpTicks = true
+useHoldTime = false
 
 [node name="Sustain Level" parent="Levels" instance=ExtResource( 3 )]
 margin_left = 168.0
@@ -355,6 +361,7 @@ tick_count = 0
 ticks_on_borders = false
 associated_property = "sl"
 useExpTicks = true
+useHoldTime = false
 
 [node name="Rates" type="GridContainer" parent="."]
 margin_left = 8.0
@@ -378,7 +385,7 @@ exp_edit = true
 tick_count = 5
 ticks_on_borders = false
 associated_property = "delay"
-useHoldTime = true
+useHoldTime = 1
 
 [node name="Attack" parent="Rates" instance=ExtResource( 3 )]
 margin_left = 112.0
@@ -390,6 +397,7 @@ value = 63.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "ar"
+useHoldTime = false
 
 [node name="+Hold" parent="Rates" instance=ExtResource( 3 )]
 margin_left = 224.0
@@ -401,7 +409,7 @@ exp_edit = true
 tick_count = 5
 ticks_on_borders = false
 associated_property = "hold"
-useHoldTime = true
+useHoldTime = 1
 
 [node name="Decay" parent="Rates" instance=ExtResource( 3 )]
 margin_top = 28.0
@@ -414,6 +422,7 @@ value = 63.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "dr"
+useHoldTime = false
 
 [node name="Sustain" parent="Rates" instance=ExtResource( 3 )]
 margin_left = 112.0
@@ -426,6 +435,7 @@ max_value = 63.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "sr"
+useHoldTime = false
 
 [node name="Release" parent="Rates" instance=ExtResource( 3 )]
 margin_left = 224.0
@@ -439,6 +449,7 @@ value = 48.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "rr"
+useHoldTime = false
 
 [node name="Tweak" type="GridContainer" parent="."]
 margin_left = 8.0
@@ -459,6 +470,7 @@ size_flags_horizontal = 3
 max_value = 10.0
 tick_count = 0
 associated_property = "feedback"
+useHoldTime = false
 text_offset = 7
 
 [node name="Duty" parent="Tweak" instance=ExtResource( 3 )]
@@ -467,6 +479,7 @@ margin_right = 208.0
 size_flags_horizontal = 3
 max_value = 65535.0
 associated_property = "duty"
+useHoldTime = false
 
 [node name="WavePanel" type="Panel" parent="."]
 margin_left = 216.0
@@ -489,6 +502,7 @@ margin_bottom = 28.0
 rect_min_size = Vector2( 48, 20 )
 max_value = 9.0
 tick_count = 0
+useHoldTime = false
 
 [node name="Preview" type="TextureRect" parent="WavePanel"]
 margin_left = 80.0
@@ -501,11 +515,11 @@ __meta__ = {
 }
 
 [node name="Popup" type="PopupDialog" parent="WavePanel"]
-visible = true
 margin_left = 128.0
 margin_top = 32.0
 margin_right = 200.0
 margin_bottom = 176.0
+rect_min_size = Vector2( 72, 144 )
 custom_styles/panel = SubResource( 4 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -712,6 +726,19 @@ margin_right = 204.0
 margin_bottom = 32.0
 text = "Velocity"
 intent = 1
+
+[node name="AMS" parent="." instance=ExtResource( 3 )]
+margin_left = 232.0
+margin_top = 288.0
+margin_right = 328.0
+margin_bottom = 308.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+max_value = 10.0
+tick_count = 5
+ticks_on_borders = false
+associated_property = "ams"
+useHoldTime = false
 [connection signal="value_changed" from="Frequency/Frequency" to="." method="setFreq"]
 [connection signal="item_selected" from="Frequency/H/Presets" to="Frequency" method="_on_Presets_item_selected"]
 [connection signal="pressed" from="Frequency/H/Presets" to="Frequency" method="_on_Presets_pressed"]

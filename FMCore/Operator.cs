@@ -3,13 +3,33 @@ using gdsFM;
 
 namespace gdsFM 
 {
-    public class Operator
+    public abstract class OpBase  //Base for operator, LFO and filter classes
     {
-        public long phase;  //Phase accumulator
-        bool flip=false;  // Used by the oscillator to flip the waveform's values.  TODO:  User-specified waveform inversion
+        public Oscillator oscillator = new Oscillator(Oscillator.Sine2);
+        public delegate short sampleOutputFunc(ushort modulation = 0, ushort am_offset=0); //Primary function of the oscillator
+        public sampleOutputFunc operatorOutputSample;
+
+        protected long phase;  //Phase accumulator
+        protected bool flip=false;  // Used by the oscillator to flip the waveform's values.  TODO:  User-specified waveform inversion
+        protected int seed=1;  //LFSR state sent ByRef to oscillators which produce noise
+        public Increments pg = Increments.Prototype();
+ 
+        public abstract void SetOscillatorType(Oscillator.waveFunc waveFunc);
+        public abstract void SetOscillatorType(byte waveform_index);
+        // public abstract short RequestSample(ushort modulation = 0);
+        public abstract void Clock();
+
+    }
+
+
+
+
+    public class Operator : OpBase
+    {
+        // public long phase;  //Phase accumulator
+        // bool flip=false;  // Used by the oscillator to flip the waveform's values.  TODO:  User-specified waveform inversion
         public uint env_counter;  //Envelope counter
         public uint env_hold_counter=0;  //Counter during the hold phase of an envelope
-        public ulong noteIncrement;  //Frequency multiplier for note base hz.
 
 
         //Parameters specific to Operator
@@ -20,23 +40,26 @@ namespace gdsFM
         public EGStatus egStatus = EGStatus.INACTIVE;
         public ushort egAttenuation = Envelope.L_MAX;  //5-bit value
 
-        public Increments pg = Increments.Prototype();
 
-        public Oscillator oscillator = new Oscillator(Oscillator.Sine);
+        // public Oscillator oscillator = new Oscillator(Oscillator.Sine);
 
-        public delegate short sampleOutputFunc(ushort modulation); //Primary function of the operator
-        public sampleOutputFunc operatorOutputSample;
+        // public delegate short sampleOutputFunc(ushort modulation); //Primary function of the operator
+        // public sampleOutputFunc operatorOutputSample;
 
-        int seed=1;  //LFSR state sent ByRef to oscillators which produce noise
+        // int seed=1;  //LFSR state sent ByRef to oscillators which produce noise
 
 
-        public Operator(){ operatorOutputSample=OperatorType_ComputeLogOuput; }
+        public Operator(){operatorOutputSample=OperatorType_ComputeLogOuput;}
+        // public Operator(){ operatorOutputSample=OperatorType_ComputeLogOuput; }
 
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)] 
+            void ResetPhase() {if (eg.osc_sync) phase=0;}
 
         public void NoteOn(Increments increments){ pg = increments;  NoteOn(); }
         public void NoteOn()
         {
-            phase=0;
+            ResetPhase();
             env_counter = 0;
             env_hold_counter = 0;
 
@@ -48,7 +71,7 @@ namespace gdsFM
             egStatus = EGStatus.RELEASED;
         }
 
-        public void Clock()
+        public override void Clock()
         {
             phase += pg.increment;  
 
@@ -64,9 +87,9 @@ namespace gdsFM
                 // EGClock(env_counter);
         }
 
-        public short RequestSample(ushort modulation = 0)
+        public short RequestSample(ushort modulation = 0, ushort am_offset = 0)
         {
-            return operatorOutputSample(modulation);
+            return operatorOutputSample(modulation, am_offset);
             // return oscillator.Generate(unchecked(phase >> Global.FRAC_PRECISION_BITS), duty, ref flip);
         }
 
@@ -76,7 +99,7 @@ namespace gdsFM
 
 
         //Sets up the operator to act as an oscillator for FM output.
-        public void SetOperatorType(Oscillator.waveFunc waveFunc)
+        public override void SetOscillatorType(Oscillator.waveFunc waveFunc)
         {
             oscillator.SetWaveform(waveFunc);
             switch(waveFunc.Method.Name)
@@ -98,10 +121,10 @@ namespace gdsFM
             operatorOutputSample = OperatorType_ComputeLogOuput;
         }  //TODO:  Operator types for filters and sample-based outputs
 
-        public void SetOperatorType(byte waveform_index)
+        public override void SetOscillatorType(byte waveform_index)
         {
             try{
-                SetOperatorType(Oscillator.waveFuncs[waveform_index]);
+                SetOscillatorType(Oscillator.waveFuncs[waveform_index]);
             } catch(IndexOutOfRangeException e) {
                 System.Diagnostics.Debug.Print(String.Format("Waveform {0} not implemented: {1}", waveform_index, e.ToString()));
             }
@@ -109,16 +132,16 @@ namespace gdsFM
 
 
         //Oscillator output types.  Either standard waveform (log domain), noise, or sample.
-        public short OperatorType_ComputeLogOuput(ushort modulation)
-        {return ComputeFeedback(modulation);}
+        public short OperatorType_ComputeLogOuput(ushort modulation, ushort am_offset)
+        {return ComputeFeedback(modulation, am_offset);}
 
 
         //Noise generators produce asymmetrical data.  Values must be translated to/from the log domain.
-        public short OperatorType_Noise(ushort modulation)
+        public short OperatorType_Noise(ushort modulation, ushort am_offset)
         {
             ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + modulation);
             var samp = (short) oscillator.Generate(phase, eg.duty, ref flip, __makeref(this.seed));
-            ushort env_attenuation = (ushort) (envelope_attenuation() << 2);
+            ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);
 
             const float SCALE = 1.0f / 8192;
 
@@ -145,7 +168,7 @@ namespace gdsFM
             ushort sin_attenuation = oscillator.Generate(phase, eg.duty, ref flip, __makeref(pg.hz));
 
             // get the attenuation from the evelope generator as a 4.6 value, shifted up to 4.8
-            ushort env_attenuation = (ushort) (envelope_attenuation() << 2);
+            ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);
             // ushort env_attenuation = envelope_attenuation(am_offset) << 2;
 
             // combine into a 5.8 value, then convert from attenuation to 13-bit linear volume
@@ -159,18 +182,18 @@ namespace gdsFM
 
 
         /// Summary:  Calculates the self feedback of the given input with the given modulation amount.
-        public short lBuf;
-        public short ComputeFeedback(ushort modulation)
+        public short lBuf;  //Linear buffer?  FIXME / DEBUG
+        public short ComputeFeedback(ushort modulation, ushort am_offset)
         {
             if (eg.feedback == 0) 
             {
                 // return (ComputeVolume(modulation, 0));
                 //Linear interpolation buffer;  Is this worth it?
-                lBuf = (short)((ComputeVolume(modulation, 0) + lBuf) >> 1);
+                lBuf = (short)((ComputeVolume(modulation, am_offset) + lBuf) >> 1);
                 return lBuf;
             }
             var avg = (fbBuf[0] + fbBuf[1]) >> (10 - eg.feedback);
-            var output = ComputeVolume(unchecked((ushort)(avg+modulation)),0);
+            var output = ComputeVolume(unchecked((ushort)(avg+modulation)), am_offset);
             fbBuf[1] = fbBuf[0];
             fbBuf[0] = output;
 
@@ -190,7 +213,7 @@ namespace gdsFM
             case EGStatus.DELAY:
                 if (env_counter >> 2 < eg.delay) return;
                 //Why return here?  Other cases set the target level.  Consider setting it here too.  FIXME
-                else {egStatus = EGStatus.ATTACK;  phase=0; return;}  
+                else {egStatus = EGStatus.ATTACK;  ResetPhase(); return;}  
 
             case EGStatus.ATTACK:
                 target = eg.levels[(int)EGStatus.ATTACK];
@@ -284,16 +307,21 @@ namespace gdsFM
         //  attenuation of the envelope
         //-------------------------------------------------
 
-        ushort envelope_attenuation()//byte am_offset)
+        ushort envelope_attenuation(ushort am_offset)
         {
             ushort result = egAttenuation;
 
             // // add in LFO AM modulation
             // if (m_regs.lfo_am_enabled())
-            // 	result += am_offset;
+            //     result += am_offset;
+        	// result += pg.lastClockedAttenuation;
 
             // // add in total level
             // result += m_regs.total_level() << 3;
+
+            if (eg.ams > 0)
+                result += LFO.ApplyAMS(am_offset, eg.ams);
+
 
             // clamp to max and return
             return (result < 0x400) ? result : (ushort)0x3ff;

@@ -22,7 +22,7 @@ namespace gdsFM
 
         //Consider making all Channels use references to these vars, and process them properly whenever IO comes in.
         public Algorithm alg = new Algorithm();
-        // string wiringGrid;
+        public LFO lfo = new LFO();
 
         //TODO:  Voice description / meta probably goes here too....
         public Voice() {InitVoice(this.opCount);}
