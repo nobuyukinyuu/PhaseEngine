@@ -12,12 +12,7 @@ namespace gdsFM
         byte cycle_counter;
         long delay_counter;
 
-        int divider_max_count=1; //How often the LFO clocks.  The clock counter counts up to this number before recalculating the increment.
-
-        int divider; //To make the increment easier to calc, the divider must be a power of 2.
-
-        public int DivideAmt { get => divider; set {divider = value;  divider_max_count = 1<<divider;} }  
-
+        const int divider_max_count=2; //How often the LFO clocks.  The clock counter counts up to this number before recalculating the increment.
         
         ushort lastClockedAttenuation = Envelope.L_MAX;
 
@@ -51,9 +46,6 @@ namespace gdsFM
         public void SetSpeed(byte speed)
         {
             pg = Increments.FromFreq(Tables.LFOSpeed[speed]);  
-
-            //Speed up the increment frequency by the divider amount to compensate for the lower clock rate.
-            pg.increment <<= divider;
             pg.Recalc(); 
         }
 
@@ -95,6 +87,8 @@ namespace gdsFM
 
             output = (short)ScaleProcess(lastClockedAttenuation);  //Up to 0x1FE8 (8168), volume output
             if (flip) output = (short)-output;
+            output = Filter(output);  //Apply lowpass filter to the output to stop pops and clicks.  FIXME:  This operation is done every frame regardless of divider!!
+
             output += 0x1FFF;  //Waveform must always be above 0.
             // output = Tools.Abs(output);
             if (invert) output = (short)(0x3FFF - output);
@@ -158,8 +152,19 @@ namespace gdsFM
             ScaleProcess = PMScaleLog;
         }
 
+ 
+        //From "Musical Applications of Microprocessors" by Hal Chamberlin, page 438:
+        //Reference:  https://stackoverflow.com/questions/38918530/simple-low-pass-filter-in-fixed-point/38927630#38927630
+        public int lBuf;  //Low pass filter buffer
+        short Filter(int input)  //Filters input based on the status of our filter buffer.
+        {
+            const byte k = 4;
+            var ou = lBuf >> k;
+            lBuf = lBuf - ou + input;
+            return (short)ou;
+        }
 
-        int PMScaleLog(int input) {return Tables.attenuation_to_volume((ushort) input);}
+        int PMScaleLog(int input) { return Tables.attenuation_to_volume((ushort) input); }
         int PMScaleNoise(int input) 
         {
             var output=Tables.attenuation_to_volume((ushort) (input>>3));  //Scale the input from 0-8192 like a normal osc before feeding in.
