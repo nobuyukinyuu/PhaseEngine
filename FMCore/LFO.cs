@@ -12,9 +12,10 @@ namespace gdsFM
         byte cycle_counter;
         long delay_counter;
 
-        const int divider_max_count=2; //How often the LFO clocks.  The clock counter counts up to this number before recalculating the increment.
+        const int divider_max_count=4; //How often the LFO clocks.  The clock counter counts up to this number before recalculating the increment.
         
-        ushort lastClockedAttenuation = Envelope.L_MAX;
+        short lastClockedVolume = 0;
+        public ushort lastAMVolume = 0;
 
 
         //User set values.
@@ -23,6 +24,7 @@ namespace gdsFM
         byte speed = 0;  //Used for serialization and reference when loading an LFO
         public bool invert;  //User-specified flipping of the waveform.
         public float pmd;  //User specified pitch modulation depth.
+        short amd;  public short AMD {get => (short)(Envelope.L_MAX-amd); set => amd=(short)(Envelope.L_MAX-value);}  //User specified amplitude modulation depth.
         public bool osc_sync;  //Resets the phase of the LFO when NoteOn occurs.
         public bool delay_sync;  //Resets the phase of the LFO after the delay elapses.
 
@@ -55,6 +57,7 @@ namespace gdsFM
             if (osc_sync) phase = 0;
         }
 
+        public bool ClockOK {get=> cycle_counter == 0;} //Returns true if the clock event just fired last tick.
         public override void Clock()
         {
             if (delay_sync && delay_counter == delay)  phase = 0;  //Reset phase on delay ending
@@ -75,28 +78,42 @@ namespace gdsFM
                 //      Map the output of the LFO osc to the channel's hz range between half the input increment and double.
             }
         }
-        public void UpdateOscillator()  { lastClockedAttenuation = (ushort)operatorOutputSample(); } //Updates the status of the oscillator output.
-        public bool ClockOK {get=> cycle_counter == 0;} //Returns true if the clock event just fired last tick.
+        public void UpdateOscillator()  //Updates the status of the oscillator output.
+            { lastClockedVolume = (short)ScaleProcess(operatorOutputSample()); lastAMVolume = RequestAM();} 
 
+
+
+ 
+        //From "Musical Applications of Microprocessors" by Hal Chamberlin, page 438:
+        //Reference:  https://stackoverflow.com/questions/38918530/simple-low-pass-filter-in-fixed-point/38927630#38927630
+        int lBuf;  //Low pass filter buffer
+        short Filter(int input)  //Filters input based on the status of our filter buffer.
+        {
+            const byte k = 5;  //Amount of lowpass
+            var ou = lBuf >> k;
+            lBuf = lBuf - ou + input;
+            return (short)ou;
+        }
 
         public ushort RequestAM()  //Returns an attenuation value from 0-TL.
         {
+            if (amd==Envelope.L_MAX) return 0;
             if (delay_counter < delay) return 0;
+            if (cycle_counter !=0) return lastAMVolume;
  
-            short output;
+            short output = lastClockedVolume;  //Up to 0x1FE8 (8168), volume output
 
-            output = (short)ScaleProcess(lastClockedAttenuation);  //Up to 0x1FE8 (8168), volume output
             if (flip) output = (short)-output;
-            output = Filter(output);  //Apply lowpass filter to the output to stop pops and clicks.  FIXME:  This operation is done every frame regardless of divider!!
+            output = Filter(output);  //Apply lowpass filter to the output to stop pops and clicks.  
 
-            output += 0x1FFF;  //Waveform must always be above 0.
-            // output = Tools.Abs(output);
-            if (invert) output = (short)(0x3FFF - output);
+            output += 0x1FFF;  //Waveform must always be above 0. Scale the result up to be between 0-0x3FFF.
+            if (invert) output = (short)(0x3FFF - output);  //Apply inverted waveform if specified.
 
-            output = (short)Tools.Clamp(output>>4, 0, Envelope.TL_MAX);  //TODO:  Figure out if this can be made more efficient
+            output >>= 4;  //Scale down to 0-1023.
+            output -= amd; //The AM depth is a value between 1023-0 (inverted from the UI). We subtract from the output so the highest volume never changes.
+
+            output = (short)Tools.Clamp(output, 0, Envelope.TL_MAX);  //TODO:  Figure out if this can be made more efficient
             
-            // output >>= 10-ams;  //output never exceeds a 10-bit value;  at max AMS the attenuation is not culled. Lower AMS values cull output more.
-
             return (ushort) output; 
         }
 
@@ -115,7 +132,7 @@ namespace gdsFM
             //      Figure out where to apply this so end users can still modify hz themselves and not clobber the LFO state.
 
             //Grab a sample volume from the oscillator, then grab the float from the float table.  This value can be 0 to 8192 (technically 8168 from exp table).
-            int volume = ScaleProcess(lastClockedAttenuation); 
+            int volume = lastClockedVolume; 
             var ratio = flip ^ invert?  Tables.vol2pitchUp[volume] : Tables.vol2pitchDown[volume];
 
             //Apply ratio to the input.
@@ -150,18 +167,6 @@ namespace gdsFM
 
             operatorOutputSample = OperatorType_LogOutput;
             ScaleProcess = PMScaleLog;
-        }
-
- 
-        //From "Musical Applications of Microprocessors" by Hal Chamberlin, page 438:
-        //Reference:  https://stackoverflow.com/questions/38918530/simple-low-pass-filter-in-fixed-point/38927630#38927630
-        public int lBuf;  //Low pass filter buffer
-        short Filter(int input)  //Filters input based on the status of our filter buffer.
-        {
-            const byte k = 4;
-            var ou = lBuf >> k;
-            lBuf = lBuf - ou + input;
-            return (short)ou;
         }
 
         int PMScaleLog(int input) { return Tables.attenuation_to_volume((ushort) input); }

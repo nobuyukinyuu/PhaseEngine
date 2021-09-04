@@ -39,20 +39,6 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxFlat" id=3]
-bg_color = Color( 0.058, 0.102967, 0.2, 1 )
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-corner_radius_top_left = 5
-corner_radius_bottom_right = 5
-expand_margin_left = 2.0
-expand_margin_bottom = 1.0
-shadow_size = 1
-shadow_offset = Vector2( 1, 1 )
-anti_aliasing = false
-
 [sub_resource type="StyleBoxFlat" id=4]
 bg_color = Color( 0, 0, 0, 0.498039 )
 border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
@@ -114,6 +100,20 @@ border_width_top = 1
 border_color = Color( 0.8, 0.8, 0.8, 0.380392 )
 corner_radius_top_left = 5
 corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0.058, 0.102967, 0.2, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+expand_margin_left = 2.0
+expand_margin_bottom = 1.0
 shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
@@ -188,9 +188,9 @@ chip_loc = NodePath("../../VoiceTab/Channels")
 anchor_top = 1.0
 anchor_bottom = 1.0
 margin_left = 8.0
-margin_top = -40.0
+margin_top = -32.0
 margin_right = 68.0
-margin_bottom = -9.0
+margin_bottom = -1.0
 text = "CPU:  0%
 Mem:  0k"
 script = ExtResource( 3 )
@@ -202,7 +202,7 @@ __meta__ = {
 margin_left = 8.0
 margin_top = 368.0
 margin_right = 272.0
-margin_bottom = 536.0
+margin_bottom = 560.0
 rect_min_size = Vector2( 264, 0 )
 theme = ExtResource( 8 )
 custom_styles/panel = SubResource( 2 )
@@ -223,65 +223,6 @@ rect_min_size = Vector2( 256, 0 )
 __meta__ = {
 "_edit_lock_": true
 }
-
-[node name="+Delay" parent="LTab/LFO" instance=ExtResource( 9 )]
-margin_left = 7.0
-margin_top = 45.0
-margin_right = 255.0
-margin_bottom = 65.0
-rect_min_size = Vector2( 112, 20 )
-max_value = 32767.0
-exp_edit = true
-associated_property = "Delay"
-useHoldTime = 2
-
-[node name="Speed" parent="LTab/LFO" instance=ExtResource( 9 )]
-margin_left = 7.0
-margin_top = 77.0
-margin_right = 255.0
-margin_bottom = 97.0
-rect_min_size = Vector2( 64, 20 )
-max_value = 127.0
-associated_property = "Speed"
-useHoldTime = 3
-
-[node name="Sync" type="OptionButton" parent="LTab/LFO"]
-margin_left = 8.0
-margin_top = 117.0
-margin_right = 127.0
-margin_bottom = 131.0
-custom_styles/hover = SubResource( 3 )
-custom_styles/pressed = SubResource( 3 )
-custom_styles/focus = SubResource( 3 )
-custom_styles/normal = SubResource( 3 )
-custom_fonts/font = ExtResource( 11 )
-text = "None"
-items = [ "None", null, false, 0, null, "Oscillator", null, false, 1, null, "End of Delay", null, false, 2, null ]
-selected = 0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Label" type="Label" parent="LTab/LFO/Sync"]
-margin_top = -11.0
-margin_right = 119.0
-custom_fonts/font = ExtResource( 12 )
-text = "Sync"
-align = 2
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Pitch Depth" parent="LTab/LFO" instance=ExtResource( 9 )]
-margin_left = 135.0
-margin_top = 109.0
-margin_right = 255.0
-margin_bottom = 129.0
-rect_min_size = Vector2( 112, 20 )
-max_value = 1.0
-step = 0.001
-associated_property = "pmd"
-useHoldTime = false
 
 [node name="WavePanel" type="Panel" parent="LTab/LFO"]
 margin_left = 2.0
@@ -465,7 +406,77 @@ margin_bottom = 148.0
 custom_styles/hover = SubResource( 7 )
 custom_styles/normal = SubResource( 8 )
 icon = ExtResource( 19 )
-[connection signal="item_selected" from="LTab/LFO/Sync" to="LTab" method="_on_Sync_item_selected"]
+
+[node name="+Delay" parent="LTab/LFO" instance=ExtResource( 9 )]
+margin_left = 7.0
+margin_top = 45.0
+margin_right = 255.0
+margin_bottom = 65.0
+rect_min_size = Vector2( 112, 20 )
+max_value = 32767.0
+exp_edit = true
+associated_property = "Delay"
+useHoldTime = 2
+
+[node name="Speed" parent="LTab/LFO" instance=ExtResource( 9 )]
+margin_left = 7.0
+margin_top = 77.0
+margin_right = 255.0
+margin_bottom = 97.0
+rect_min_size = Vector2( 64, 20 )
+max_value = 127.0
+associated_property = "Speed"
+useHoldTime = 3
+
+[node name="Sync" type="OptionButton" parent="LTab/LFO"]
+margin_left = 8.0
+margin_top = 149.0
+margin_right = 127.0
+margin_bottom = 163.0
+custom_styles/hover = SubResource( 3 )
+custom_styles/pressed = SubResource( 3 )
+custom_styles/focus = SubResource( 3 )
+custom_styles/normal = SubResource( 3 )
+custom_fonts/font = ExtResource( 11 )
+text = "None"
+items = [ "None", null, false, 0, null, "Oscillator", null, false, 1, null, "End of Delay", null, false, 2, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="LTab/LFO/Sync"]
+margin_top = -11.0
+margin_right = 119.0
+custom_fonts/font = ExtResource( 12 )
+text = "Sync"
+align = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Pitch Depth" parent="LTab/LFO" instance=ExtResource( 9 )]
+margin_left = 135.0
+margin_top = 141.0
+margin_right = 255.0
+margin_bottom = 161.0
+rect_min_size = Vector2( 112, 20 )
+max_value = 1.0
+step = 0.001
+associated_property = "pmd"
+useHoldTime = false
+
+[node name="Amplitude Depth" parent="LTab/LFO" instance=ExtResource( 9 )]
+margin_left = 7.0
+margin_top = 109.0
+margin_right = 255.0
+margin_bottom = 129.0
+rect_min_size = Vector2( 64, 20 )
+max_value = 1023.0
+value = 1023.0
+exp_edit = true
+associated_property = "AMD"
 [connection signal="gui_input" from="LTab/LFO/WavePanel/Preview/Panel" to="LTab" method="_on_Preview_gui_input"]
+[connection signal="item_selected" from="LTab/LFO/Sync" to="LTab" method="_on_Sync_item_selected"]
 
 [editable path="Kanban/Column0"]
