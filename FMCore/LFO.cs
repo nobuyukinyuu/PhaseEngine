@@ -12,7 +12,7 @@ namespace gdsFM
         byte cycle_counter;
         long delay_counter;
 
-        const int divider_max_count=4; //How often the LFO clocks.  The clock counter counts up to this number before recalculating the increment.
+        const int divider_max_count=6; //How often the LFO clocks.  The clock counter counts up to this number before recalculating the increment.
         
         short lastClockedVolume = 0;
         public ushort lastAMVolume = 0;
@@ -102,17 +102,23 @@ namespace gdsFM
             if (cycle_counter !=0) return lastAMVolume;
  
             short output = lastClockedVolume;  //Up to 0x1FE8 (8168), volume output
-
-            if (flip) output = (short)-output;
+            if (flip^invert) output = (short)-output;
+            
             output = Filter(output);  //Apply lowpass filter to the output to stop pops and clicks.  
 
-            output += 0x1FFF;  //Waveform must always be above 0. Scale the result up to be between 0-0x3FFF.
-            if (invert) output = (short)(0x3FFF - output);  //Apply inverted waveform if specified.
+            var ratio = AMD/1023.0f;
+            short pushupValue = (short)(0x1FFF*(ratio));
+
+            output = (short)(output*ratio);  //Grab the 0-1 value from the reciprocal table and apply it to the output to scale it down.
+            output += pushupValue;  //Waveform must always be above 0. Scale the result up to be between 0-0x3FFF.
 
             output >>= 4;  //Scale down to 0-1023.
-            output -= amd; //The AM depth is a value between 1023-0 (inverted from the UI). We subtract from the output so the highest volume never changes.
 
-            output = (short)Tools.Clamp(output, 0, Envelope.TL_MAX);  //TODO:  Figure out if this can be made more efficient
+            //FIXME:  The next line is really clippy with some waveforms (sine particularly).  Figure out a cheap way to scale the value nicer
+            // output -= amd; //The AM depth is a value between 1023-0 (inverted from the UI). We subtract from the output so the highest volume never changes.
+
+
+            // output = (short)Tools.Clamp(output, 0, Envelope.TL_MAX);  //TODO:  Figure out if this can be made more efficient
             
             return (ushort) output; 
         }

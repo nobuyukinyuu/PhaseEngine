@@ -50,6 +50,9 @@ namespace gdsFM
         //Duty cycle increment ratio table
         public static readonly float[] dutyRatio = new float[ushort.MaxValue+1];  //256kb
 
+        //Amplitude modulation depth scaling ratio table
+        public static readonly float[,] amdRatio = new float[1024,2];  //4kb
+
         static Tables()
         {
             for(int i=0; i<short2float.Length; i++)
@@ -98,6 +101,12 @@ namespace gdsFM
             {
                 vol2pitchDown[i] = Tools.Lerp(1, 0.5f, i/8192.0f);
                 vol2pitchUp[i]   = Tools.Lerp(1, 2, i/8192.0f);
+            }
+
+            for (int i=0; i<amdRatio.GetLength(0); i++)
+            {
+                amdRatio[i, 0] = 1.0f - i / (float)Envelope.L_MAX;  // Value from 1.0f-0 representing how much to scale volume by from the raw AMD value
+                amdRatio[i, 1] = 0x1FFF * amdRatio[i,0]; //The amount to "push up" the result of multiplying the above with a volume output so it always remains positive.
             }
 
             // System.Diagnostics.Debug.Print("Shornlf");
