@@ -425,6 +425,7 @@ margin_right = 255.0
 margin_bottom = 97.0
 rect_min_size = Vector2( 64, 20 )
 max_value = 127.0
+value = 19.0
 associated_property = "Speed"
 useHoldTime = 3
 

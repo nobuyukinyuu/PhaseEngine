@@ -51,7 +51,8 @@ namespace gdsFM
         public static readonly float[] dutyRatio = new float[ushort.MaxValue+1];  //256kb
 
         //Amplitude modulation depth scaling ratio table
-        public static readonly float[,] amdRatio = new float[1024,2];  //4kb
+        public static readonly float[] amdScaleRatio = new float[1024];  //4kb.  Scale used to multiply against an oscillator to produce a given amplitude depth.
+        public static readonly short[] amdPushupRatio = new short[1024];  //Amount used to push a value scaled by the above table to a positive range.
 
         static Tables()
         {
@@ -103,10 +104,10 @@ namespace gdsFM
                 vol2pitchUp[i]   = Tools.Lerp(1, 2, i/8192.0f);
             }
 
-            for (int i=0; i<amdRatio.GetLength(0); i++)
+            for (int i=0; i<amdScaleRatio.Length; i++)
             {
-                amdRatio[i, 0] = 1.0f - i / (float)Envelope.L_MAX;  // Value from 1.0f-0 representing how much to scale volume by from the raw AMD value
-                amdRatio[i, 1] = 0x1FFF * amdRatio[i,0]; //The amount to "push up" the result of multiplying the above with a volume output so it always remains positive.
+                amdScaleRatio[i] = 1.0f - i / (float)Envelope.L_MAX;  // Value from 1.0f-0 representing how much to scale volume by from the raw AMD value
+                amdPushupRatio[i] = (short)(0x1FFF * amdScaleRatio[i]); 
             }
 
             // System.Diagnostics.Debug.Print("Shornlf");
