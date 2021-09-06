@@ -50,8 +50,12 @@ func _ready():
 	p.add_submenu_item("RIGHT: Descending ", "Ease5")
 
 	p.add_separator()
+	p.add_item("Custom...", 0x40)
+	p.set_item_accelerator(10, KEY_KP_ADD)  #Be sure to update this if Default moves
+
+	p.add_separator()
 	p.add_icon_item(preload("res://gfx/ui/icon_reset.svg"), "Default", 0xFF)
-	p.set_item_accelerator(10, KEY_D)
+	p.set_item_accelerator(12, KEY_D)  #Be sure to update this if Default moves
 
 	p.rect_size.x += 32
 
@@ -81,30 +85,36 @@ func _on_EaseMenu_index_pressed(curveType, parent_index, descending):
 	match curveType:
 		LINEAR:
 			for i in range(startpos, endpos):
-				var val = lerp(0, 128, i/(startpos+size))
+				var val = lerp(0, global.RTABLE_SIZE, i/(startpos+size))
 				var pos = startpos+endpos-i-1 if descending else i
 				tbl[pos] = val
 
 		IN, OUT, IN_OUT, OUT_IN:
 			for i in range(startpos, endpos):
-				var val = ease(i/(startpos+size), CURVEMAP[curveType]) * 128
+				var val = ease(i/(startpos+size), CURVEMAP[curveType]) * global.RTABLE_SIZE
 				var pos = startpos+endpos-i-1 if descending else i
 				tbl[pos] = val
 
 		TWELFTH_ROOT_OF_2:
 			if descending:
 				for i in range(startpos, endpos):
-					var pos = range_lerp((i-startpos), 0, endpos-startpos, 0, 128) 
-					tbl[i] = 1 / pow(2, (pos)/12.0) * 100
+#					var pos = range_lerp((i-startpos), 0, endpos-startpos, 0, 128) 
+#					tbl[i] = 1 / pow(2, (pos)/12.0) * global.RTABLE_SIZE
+
+					var pos = range_lerp((i-startpos), 0, endpos-startpos, 0, 1) 
+
+					
+					tbl[i] = global.RTABLE_SIZE * pos;
+
 			else:  #Ascending
 				for i in range(startpos, endpos):
 					var j = range_lerp((i-startpos), 0, size, 0, 128)
 #					print (j)
-					tbl[i] = pow(2, (j-127)/12.0) * 128
+					tbl[i] = pow(2, (j-127)/12.0) * global.RTABLE_SIZE
 	
 
 	owner.get_node("VU").update()
 	owner.get_node("VU").emit_signal("table_updated", -1, -1)
 
 	#  12th ROOT OF 2 CURVE is implemented as 1 / Pow(2, x/12) for descending,
-	#  Pow(2, (x-127) / 12) for ascending
+	#  Pow(2, (x-global.RT_MINUS_ONE) / 12) for ascending

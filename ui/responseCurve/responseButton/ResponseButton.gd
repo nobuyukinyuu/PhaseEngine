@@ -40,7 +40,14 @@ func _on_Pressed():
 func init_table(tbl):  
 	placeholder_tbl = tbl 
 	#Convert the base64 table data to proper data.
-	placeholder_tbl["tbl"] = Marshalls.base64_to_raw(placeholder_tbl["tbl"])
+	if placeholder_tbl["intent"] == "RATES":
+		var raw = Marshalls.base64_to_raw(placeholder_tbl["tbl"])
+		var t = []
+		for i in raw.size(): t.append(raw[i] << 4)
+		placeholder_tbl["tbl"] = t
+	else:	
+		placeholder_tbl["tbl"] = global.base64_to_table(placeholder_tbl["tbl"])  #2-byte conversion
+
 
 func table(pos:int):  #Returns the response curve table if it exists (and no placeholder exists)
 	if not $P/Curve is InstancePlaceholder or placeholder_tbl==null:
@@ -87,8 +94,8 @@ func _draw():
 		for i in range(16):
 			var offset = Vector2(icon_offset.x + i, 0)
 			
-			var val = table( min(127, i * 8) )
-			offset.y = (val / 8.0)
+			var val = table( min(global.RT_MINUS_ONE, i * 8) )
+			offset.y = (val / 64.0)
 			if val > 0:  
 				enabled=true
 	#			print (name, ": ", "index ", i, ";  ", offset.y, ".  Tbl: ", val)

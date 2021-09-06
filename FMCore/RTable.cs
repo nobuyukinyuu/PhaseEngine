@@ -7,13 +7,14 @@ namespace gdsFM
     public interface IResponseTable
     {
         // void Apply(byte index, ref object target);
-        void UpdateValue(byte index, byte value);
+        void UpdateValue(byte index, ushort value);
         void SetScale(float floor, float ceiling);
         public string ToJSONString();
     }
 
     public abstract class RTable<T> : IResponseTable
     {
+        protected const short RTABLE_MAX = 1024;
         public RTableIntent intent = RTableIntent.DEFAULT;
         public float floor=0, ceiling=100;
         public T[] values = new T[128];
@@ -66,45 +67,70 @@ namespace gdsFM
             return j.ToJSONString();
         }
 
-
-        public byte[] TableAsBytes()   //WARNING:  Must override if your table values exceed 1-byte!! (Not an issue for default implementation)
+        public virtual byte[] TableAsBytes()  //Returns a table 2x the size of the normal table, every even index being a low byte and odd index a high byte.
         {
-            var output = new byte[values.Length];
+            var output = new byte[values.Length * 2]; 
             for(int i=0; i<values.Length; i++)
-                output[i] = (byte) Convert.ChangeType(values[i], typeof(byte));
-
+            {
+                // output[i] = (byte) Convert.ChangeType(values[i], typeof(byte));
+                output[i*2] =  (byte)((ushort)Convert.ChangeType(values[i], typeof(ushort)) & 0xFF);  //Low byte
+                output[i*2+1] =  (byte)((ushort)Convert.ChangeType(values[i], typeof(ushort)) >> 8);
+            }
             return output;
         }
 
         public abstract void Apply(byte index, ref T target);   
 
-        public void UpdateValue(byte index, byte value)
-        {
-            values[index] = (T) Convert.ChangeType(value, typeof(T));
-        }
+        public virtual void UpdateValue(byte index, ushort value)
+            { values[index] = (T) Convert.ChangeType(value, typeof(T)); }
     }
 
-    public class RateTable : RTable<byte>
+    public class RateTable : RTable<ushort>
     {
         public RateTable()  { intent = RTableIntent.RATES; Init(); }
 
 
         void Init()
         {
-            for(byte i=0; i<values.Length; i++)
+            for(ushort i=0; i<values.Length; i++)
             {
-                values[i] = (byte)(i);
+                
+                values[i] = (ushort)(i / 4.0);
             }
 
             ceiling = 0;  //Disable rate scaling by default.
         }
+        public override void UpdateValue(byte index, ushort value)
+            { 
+                if (value >= 0x400) value = 0x3FF;
+                values[index] = (byte) Convert.ChangeType(value >> 4, typeof(byte)); //Scale value from 0-63.
+            }
 
-
-        public override void Apply(byte index, ref byte target)
-        {   // Rates add the scaled value to the target rate.
-            var val = (byte) target;
-            target = (byte) Math.Clamp(val + ScaledValue(index) * 0.5, 0, Envelope.R_MAX);
+        public void Apply (byte index, ref byte target)
+        {
+            ushort marshal = target;
+            Apply(index, ref marshal);
+            target = (byte) marshal;
         }
+
+        public override void Apply(byte index, ref ushort target)  //Satisfy the abstract method
+        {   // Rates add the scaled value to the target rate.
+            var val = target;
+            target = (byte) Math.Clamp(val + ScaledValue(index), 0, Envelope.R_MAX);
+        }
+
+        public override byte[] TableAsBytes()
+        {
+            var output = new byte[values.Length]; 
+            for(int i=0; i<values.Length; i++)
+            {
+                output[i] = (byte) Convert.ChangeType(values[i], typeof(byte));
+                // output[i*2] =  (byte)((ushort)Convert.ChangeType(values[i], typeof(ushort)) & 0xFF);  //Low byte
+                // output[i*2+1] =  (byte)((ushort)Convert.ChangeType(values[i], typeof(ushort)) >> 8);
+            }
+            return output;
+        }
+
     }
 
     public class LevelTable : RTable<ushort>
@@ -112,9 +138,10 @@ namespace gdsFM
         public LevelTable()  { intent = RTableIntent.LEVELS; }
         public override void Apply(byte index, ref ushort tl)
         {   // Velocity takes the total level of the input and attenuates it by the given amount. 
-            tl = (ushort) Math.Clamp(tl + ScaledValue(index) * 8, 0, Envelope.TL_MAX);
+            tl = (ushort) Math.Clamp(tl + ScaledValue(index) , 0, Envelope.L_MAX);
         }
     }
+
 
     public class VelocityTable : LevelTable
     {
@@ -122,9 +149,19 @@ namespace gdsFM
 
         void Init()
         {
-            for(byte i=0; i<values.Length; i++)
+            for(ushort i=0; i<64; i++)
             {
-                values[i] = (ushort)(127-i);
+                // const int SCALE = RTABLE_MAX / 128;
+                // values[i] = (ushort)(RTABLE_MAX-SCALE -i*SCALE);  //Linear
+
+                values[i] = (ushort)(RTABLE_MAX * Math.Pow((127-i)/127.0, 3) * 0.75);  //Cubic
+
+                // values[i] = (ushort)(RTABLE_MAX * Math.Abs(testVel[(int)Math.Round(i/127.0 * 99)] / 12.0f ));
+            }
+
+            for(int i=64; i<values.Length; i++)
+            {
+                values[i] = (ushort)(RTABLE_MAX * (127-i)/127.0 * 0.1875);
             }
 
             ceiling = 0;  //Disable velocity by default.

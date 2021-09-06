@@ -39,7 +39,7 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxFlat" id=4]
+[sub_resource type="StyleBoxFlat" id=3]
 bg_color = Color( 0, 0, 0, 0.498039 )
 border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
 corner_radius_top_left = 5
@@ -48,7 +48,7 @@ expand_margin_top = 1.0
 expand_margin_bottom = 1.0
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=5]
+[sub_resource type="StyleBoxFlat" id=4]
 bg_color = Color( 0, 0, 0, 0.305882 )
 border_width_left = 1
 border_width_top = 1
@@ -63,7 +63,7 @@ expand_margin_top = 2.0
 expand_margin_bottom = 2.0
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=6]
+[sub_resource type="StyleBoxFlat" id=5]
 bg_color = Color( 0, 0, 0, 0.941176 )
 border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
 corner_radius_top_left = 5
@@ -74,7 +74,7 @@ expand_margin_top = 16.0
 expand_margin_bottom = 12.0
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=7]
+[sub_resource type="StyleBoxFlat" id=6]
 content_margin_left = 2.0
 content_margin_right = 2.0
 content_margin_top = 2.0
@@ -89,7 +89,7 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=8]
+[sub_resource type="StyleBoxFlat" id=7]
 content_margin_left = 2.0
 content_margin_right = 2.0
 content_margin_top = 2.0
@@ -104,7 +104,7 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=3]
+[sub_resource type="StyleBoxFlat" id=8]
 bg_color = Color( 0.058, 0.102967, 0.2, 1 )
 border_width_left = 1
 border_width_top = 1
@@ -229,7 +229,7 @@ margin_left = 2.0
 margin_top = 5.0
 margin_right = 260.0
 margin_bottom = 37.0
-custom_styles/panel = SubResource( 4 )
+custom_styles/panel = SubResource( 3 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -242,7 +242,10 @@ margin_right = -48.0
 margin_bottom = 28.0
 rect_min_size = Vector2( 56, 20 )
 max_value = 1023.0
+associated_property = ""
+useExpTicks = false
 useHoldTime = false
+text_offset = 0
 
 [node name="Duty" parent="LTab/LFO/WavePanel" instance=ExtResource( 9 )]
 margin_left = 69.0
@@ -253,7 +256,9 @@ rect_min_size = Vector2( 64, 20 )
 max_value = 65535.0
 value = 32767.0
 associated_property = "duty"
+useExpTicks = false
 useHoldTime = false
+text_offset = 0
 
 [node name="Preview" type="TextureRect" parent="LTab/LFO/WavePanel"]
 margin_left = 219.0
@@ -269,7 +274,7 @@ __meta__ = {
 show_behind_parent = true
 margin_right = 32.0
 margin_bottom = 24.0
-custom_styles/panel = SubResource( 5 )
+custom_styles/panel = SubResource( 4 )
 __meta__ = {
 "_edit_lock_": true,
 "_edit_use_anchors_": false
@@ -280,11 +285,11 @@ margin_left = 5.0
 margin_top = 8.0
 margin_right = 59.0
 margin_bottom = 26.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/pressed = SubResource( 5 )
-custom_styles/focus = SubResource( 5 )
-custom_styles/hover_pressed = SubResource( 5 )
-custom_styles/normal = SubResource( 5 )
+custom_styles/hover = SubResource( 4 )
+custom_styles/pressed = SubResource( 4 )
+custom_styles/focus = SubResource( 4 )
+custom_styles/hover_pressed = SubResource( 4 )
+custom_styles/normal = SubResource( 4 )
 custom_fonts/font = ExtResource( 11 )
 text = "Flip"
 __meta__ = {
@@ -296,7 +301,7 @@ margin_left = 210.0
 margin_right = 210.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 72, 144 )
-custom_styles/panel = SubResource( 6 )
+custom_styles/panel = SubResource( 5 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -327,24 +332,24 @@ __meta__ = {
 [node name="Wave0" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
 margin_right = 36.0
 margin_bottom = 28.0
-custom_styles/hover = SubResource( 7 )
-custom_styles/normal = SubResource( 8 )
+custom_styles/hover = SubResource( 6 )
+custom_styles/normal = SubResource( 7 )
 icon = ExtResource( 10 )
 
 [node name="Wave1" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
 margin_left = 38.0
 margin_right = 74.0
 margin_bottom = 28.0
-custom_styles/hover = SubResource( 7 )
-custom_styles/normal = SubResource( 8 )
+custom_styles/hover = SubResource( 6 )
+custom_styles/normal = SubResource( 7 )
 icon = ExtResource( 16 )
 
 [node name="Wave2" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
 margin_top = 30.0
 margin_right = 36.0
 margin_bottom = 58.0
-custom_styles/hover = SubResource( 7 )
-custom_styles/normal = SubResource( 8 )
+custom_styles/hover = SubResource( 6 )
+custom_styles/normal = SubResource( 7 )
 icon = ExtResource( 20 )
 
 [node name="Wave3" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
@@ -352,16 +357,16 @@ margin_left = 38.0
 margin_top = 30.0
 margin_right = 74.0
 margin_bottom = 58.0
-custom_styles/hover = SubResource( 7 )
-custom_styles/normal = SubResource( 8 )
+custom_styles/hover = SubResource( 6 )
+custom_styles/normal = SubResource( 7 )
 icon = ExtResource( 13 )
 
 [node name="Wave4" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
 margin_top = 60.0
 margin_right = 36.0
 margin_bottom = 88.0
-custom_styles/hover = SubResource( 7 )
-custom_styles/normal = SubResource( 8 )
+custom_styles/hover = SubResource( 6 )
+custom_styles/normal = SubResource( 7 )
 icon = ExtResource( 21 )
 
 [node name="Wave5" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
@@ -369,16 +374,16 @@ margin_left = 38.0
 margin_top = 60.0
 margin_right = 74.0
 margin_bottom = 88.0
-custom_styles/hover = SubResource( 7 )
-custom_styles/normal = SubResource( 8 )
+custom_styles/hover = SubResource( 6 )
+custom_styles/normal = SubResource( 7 )
 icon = ExtResource( 22 )
 
 [node name="Wave6" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
 margin_top = 90.0
 margin_right = 36.0
 margin_bottom = 118.0
-custom_styles/hover = SubResource( 7 )
-custom_styles/normal = SubResource( 8 )
+custom_styles/hover = SubResource( 6 )
+custom_styles/normal = SubResource( 7 )
 icon = ExtResource( 15 )
 
 [node name="Wave7" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
@@ -386,16 +391,16 @@ margin_left = 38.0
 margin_top = 90.0
 margin_right = 74.0
 margin_bottom = 118.0
-custom_styles/hover = SubResource( 7 )
-custom_styles/normal = SubResource( 8 )
+custom_styles/hover = SubResource( 6 )
+custom_styles/normal = SubResource( 7 )
 icon = ExtResource( 17 )
 
 [node name="Wave8" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
 margin_top = 120.0
 margin_right = 36.0
 margin_bottom = 148.0
-custom_styles/hover = SubResource( 7 )
-custom_styles/normal = SubResource( 8 )
+custom_styles/hover = SubResource( 6 )
+custom_styles/normal = SubResource( 7 )
 icon = ExtResource( 18 )
 
 [node name="Wave9" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
@@ -403,8 +408,8 @@ margin_left = 38.0
 margin_top = 120.0
 margin_right = 74.0
 margin_bottom = 148.0
-custom_styles/hover = SubResource( 7 )
-custom_styles/normal = SubResource( 8 )
+custom_styles/hover = SubResource( 6 )
+custom_styles/normal = SubResource( 7 )
 icon = ExtResource( 19 )
 
 [node name="+Delay" parent="LTab/LFO" instance=ExtResource( 9 )]
@@ -416,7 +421,9 @@ rect_min_size = Vector2( 112, 20 )
 max_value = 32767.0
 exp_edit = true
 associated_property = "Delay"
+useExpTicks = false
 useHoldTime = 2
+text_offset = 0
 
 [node name="Speed" parent="LTab/LFO" instance=ExtResource( 9 )]
 margin_left = 7.0
@@ -427,17 +434,19 @@ rect_min_size = Vector2( 64, 20 )
 max_value = 127.0
 value = 19.0
 associated_property = "Speed"
+useExpTicks = false
 useHoldTime = 3
+text_offset = 0
 
 [node name="Sync" type="OptionButton" parent="LTab/LFO"]
 margin_left = 8.0
 margin_top = 149.0
 margin_right = 127.0
 margin_bottom = 163.0
-custom_styles/hover = SubResource( 3 )
-custom_styles/pressed = SubResource( 3 )
-custom_styles/focus = SubResource( 3 )
-custom_styles/normal = SubResource( 3 )
+custom_styles/hover = SubResource( 8 )
+custom_styles/pressed = SubResource( 8 )
+custom_styles/focus = SubResource( 8 )
+custom_styles/normal = SubResource( 8 )
 custom_fonts/font = ExtResource( 11 )
 text = "None"
 items = [ "None", null, false, 0, null, "Oscillator", null, false, 1, null, "End of Delay", null, false, 2, null ]
@@ -465,7 +474,9 @@ rect_min_size = Vector2( 112, 20 )
 max_value = 1.0
 step = 0.001
 associated_property = "pmd"
+useExpTicks = false
 useHoldTime = false
+text_offset = 0
 
 [node name="Amplitude Depth" parent="LTab/LFO" instance=ExtResource( 9 )]
 margin_left = 7.0
@@ -477,6 +488,9 @@ max_value = 1023.0
 value = 1023.0
 exp_edit = true
 associated_property = "AMD"
+useExpTicks = false
+useHoldTime = 0
+text_offset = 0
 [connection signal="gui_input" from="LTab/LFO/WavePanel/Preview/Panel" to="LTab" method="_on_Preview_gui_input"]
 [connection signal="item_selected" from="LTab/LFO/Sync" to="LTab" method="_on_Sync_item_selected"]
 

@@ -204,7 +204,7 @@ public class Test2 : Label
     public void UpdateTable(int opNum, int column, int value, RTableIntent intent)
     {
         IResponseTable tbl = c.Voice.egs[opNum].GetTable(intent);
-        tbl.UpdateValue((byte) column, (byte) value);
+        tbl.UpdateValue((byte) column, (ushort) value);
     }
     ///summary:  Updates an rTable.
     public void SetTable(int opNum, Godot.Collections.Array input, RTableIntent intent)
@@ -213,7 +213,7 @@ public class Test2 : Label
 
         for(int i=0; i<input.Count; i++)
         {
-            tbl.UpdateValue((byte) i, Convert.ToByte(input[i]));
+            tbl.UpdateValue((byte) i, Convert.ToUInt16(input[i]));
         }
     }
     public void SetTableMinMax(int opNum, int value, bool isMax, RTableIntent intent)

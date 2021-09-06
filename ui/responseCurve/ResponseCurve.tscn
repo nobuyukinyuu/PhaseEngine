@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=2]
+[gd_scene load_steps=36 format=2]
 
 [ext_resource path="res://ui/responseCurve/bg.gd" type="Script" id=1]
 [ext_resource path="res://gfx/ui/vu/ruler16.png" type="Texture" id=2]
@@ -24,6 +24,7 @@
 [ext_resource path="res://gfx/ui/vu/minmax_slider_label.png" type="Texture" id=22]
 [ext_resource path="res://ui/responseCurve/btnPresets.gd" type="Script" id=23]
 [ext_resource path="res://gfx/fonts/numerics_7seg.tres" type="BitmapFont" id=24]
+[ext_resource path="res://ui/responseCurve/CustomCurvePopup.tscn" type="PackedScene" id=25]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0, 0, 0, 0.878431 )
@@ -146,7 +147,7 @@ void fragment()
 [sub_resource type="ShaderMaterial" id=10]
 resource_local_to_scene = true
 shader = SubResource( 9 )
-shader_param/disabled = 4
+shader_param/disabled = 2
 
 [node name="ResponseCurve" type="Panel"]
 margin_right = 320.0
@@ -256,6 +257,7 @@ text = "63
 8
 
 
+
 "
 align = 2
 __meta__ = {
@@ -294,7 +296,7 @@ margin_right = 80.0
 margin_bottom = 302.0
 mouse_filter = 0
 custom_fonts/font = ExtResource( 7 )
-custom_colors/font_color = Color( 0.15, 0.5025, 0.6, 1 )
+custom_colors/font_color = Color( 0.14902, 0.501961, 0.6, 1 )
 text = "Octave"
 valign = 1
 script = ExtResource( 10 )
@@ -353,7 +355,7 @@ margin_right = 29.0
 margin_bottom = -2.0
 custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0.188235, 0.631373, 0.752941, 1 )
-text = "[]/00"
+text = "00/00"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -380,7 +382,6 @@ custom_icons/grabber = ExtResource( 18 )
 custom_styles/slider = SubResource( 6 )
 custom_styles/grabber_area_highlight = SubResource( 7 )
 custom_styles/grabber_area = SubResource( 8 )
-value = 100.0
 tick_count = 11
 __meta__ = {
 "_edit_use_anchors_": false
@@ -398,7 +399,6 @@ custom_icons/grabber = ExtResource( 18 )
 custom_styles/slider = SubResource( 6 )
 custom_styles/grabber_area_highlight = SubResource( 7 )
 custom_styles/grabber_area = SubResource( 8 )
-value = 100.0
 tick_count = 11
 __meta__ = {
 "_edit_use_anchors_": false
@@ -412,5 +412,11 @@ mouse_filter = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="CustomCurvePopup" parent="." instance=ExtResource( 25 )]
+margin_left = 360.0
+margin_top = 96.0
+margin_right = 528.0
+margin_bottom = 264.0
 [connection signal="value_changed" from="MinMax/sldMin" to="." method="_on_sldMinMax_value_changed" binds= [ false ]]
 [connection signal="value_changed" from="MinMax/sldMax" to="." method="_on_sldMinMax_value_changed" binds= [ true ]]

@@ -1,4 +1,4 @@
-#tool
+tool
 extends Panel
 
 enum ranges {rates, velocity, levels}
@@ -37,6 +37,8 @@ func set_intent(val):
 
 func _ready():
 	set_intent(intent)
+	
+	$CustomCurvePopup.connect("changed", self, "set_custom_curve_preset")
 
 
 func set_minmax_default(_intent):
@@ -51,10 +53,18 @@ func set_minmax_default(_intent):
 
 
 func set_table_default(_intent):
+	var SCALE = global.RTABLE_SIZE / 128.0
 	match _intent:
-		ranges.velocity, ranges.rates:
+		ranges.velocity:
 			for i in 128:
-				$VU.tbl[i] = 127-i
+#				$VU.tbl[i] = global.RTABLE_SIZE -SCALE -i*SCALE
+#				$VU.tbl[i] = global.RTABLE_SIZE * ease((127-i)/127.0, 3)
+				$VU.tbl[i] = global.RTABLE_SIZE * pow((127-i)/127.0, 3)
+		ranges.rates:
+			for i in 128:
+				$VU.tbl[i] = i*SCALE
+
+
 		_:
 			for i in 128:
 				$VU.tbl[i] = 0
@@ -80,6 +90,10 @@ func _on_btnPresets_id_pressed(id):
 		0xFF:  #Reset button hit.  Set a default table
 			set_table_default(intent)
 
+		0x40:  #Custom button hit.  Popup custom curve.
+			var r = Rect2(get_global_mouse_position(), $CustomCurvePopup.rect_size)
+			$CustomCurvePopup.popup(r)
+
 		_:
 			print ("Preset menu pressed, unknown value.  Intent: ", intent, "; ID: ", id)
 
@@ -104,4 +118,8 @@ func update_minmax():
 		amt |= 2 if b == "0" else 0
 		$MinMax/Colorizer.material.set_shader_param("disabled", amt)
 		
-		
+
+func set_custom_curve_preset(table):
+	$VU.tbl = table
+	$VU.update()
+	$VU.emit_signal("table_updated", -1, -1, intent)  #-1 tells EGPanel to blast the update all message to the chip.

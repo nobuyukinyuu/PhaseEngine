@@ -1,0 +1,59 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=1]
+[ext_resource path="res://ui/responseCurve/CustomCurvePopup.gd" type="Script" id=2]
+[ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=3]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0, 0, 0, 0.878431 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 8
+border_color = Color( 0.435294, 0.815686, 0.945098, 1 )
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 6.0
+expand_margin_right = 4.0
+expand_margin_top = 6.0
+expand_margin_bottom = 6.0
+
+[node name="CustomCurvePopup" type="PopupDialog"]
+margin_left = 32.0
+margin_top = 24.0
+margin_right = 200.0
+margin_bottom = 192.0
+custom_styles/panel = SubResource( 1 )
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="."]
+visible = false
+margin_left = 1.0
+margin_right = 167.0
+margin_bottom = 167.0
+custom_fonts/font = ExtResource( 3 )
+custom_colors/font_color = Color( 0.266667, 0.843137, 0.976471, 1 )
+text = "Custom Curve..."
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Curve" parent="." instance=ExtResource( 1 )]
+margin_left = 1.0
+margin_top = 140.0
+margin_right = 167.0
+margin_bottom = 160.0
+min_value = 0.01
+max_value = 10.0
+step = 0.01
+value = 1.0
+exp_edit = true
+associated_property = ""
+useExpTicks = false
+useHoldTime = 0
+text_offset = 0

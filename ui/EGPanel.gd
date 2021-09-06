@@ -125,7 +125,7 @@ func refresh_envelope_preview():
 	$EnvelopeDisplay.Delay = d["delay"]
 	$EnvelopeDisplay.Hold = d["hold"]
 	
-	$EnvelopeDisplay.tl = levels[4] / global.TL_MAX
+	$EnvelopeDisplay.tl = levels[4] / global.L_MAX
 	$EnvelopeDisplay.al = levels[0] / global.L_MAX
 	$EnvelopeDisplay.dl = levels[1] / global.L_MAX
 	$EnvelopeDisplay.sl = levels[2] / global.L_MAX
@@ -142,9 +142,7 @@ func update_env(value, sender:EGSlider):
 #	if prop.ends_with("r") and len(prop) == 2:  #Rate
 #		$EnvelopeDisplay.set(env_map[prop], sender.value)
 	
-	if prop == "tl":
-		$EnvelopeDisplay.call("update_" + prop, value/global.TL_MAX)
-	elif prop.ends_with("l"):
+	if prop.ends_with("l"):
 		$EnvelopeDisplay.call("update_" + prop, value/global.L_MAX)
 	else:
 		$EnvelopeDisplay.call("update_" + prop, value)

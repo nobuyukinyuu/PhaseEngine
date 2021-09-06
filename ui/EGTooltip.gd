@@ -55,7 +55,7 @@ func set_from_op(op:int):
 	$V/EnvelopeDisplay.Delay = d["delay"]
 	$V/EnvelopeDisplay.Hold = d["hold"]
 	
-	$V/EnvelopeDisplay.tl = levels[4] / global.TL_MAX
+	$V/EnvelopeDisplay.tl = levels[4] / global.L_MAX
 	$V/EnvelopeDisplay.al = levels[0] / global.L_MAX
 	$V/EnvelopeDisplay.dl = levels[1] / global.L_MAX
 	$V/EnvelopeDisplay.sl = levels[2] / global.L_MAX

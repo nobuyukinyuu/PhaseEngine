@@ -145,7 +145,7 @@ namespace gdsFM
 
             const float SCALE = 1.0f / 8192;
 
-            ushort logScale = (ushort)(Tables.attenuation_to_volume((ushort)(env_attenuation + eg.tl)));
+            ushort logScale = (ushort)(Tables.attenuation_to_volume((ushort)(env_attenuation)));
 
             // var tl = 1 - (eg.tl*ONE_PER_THOU);
             // short result = (short) (samp * (logScale * SCALE) * tl);
@@ -172,7 +172,7 @@ namespace gdsFM
             // ushort env_attenuation = envelope_attenuation(am_offset) << 2;
 
             // combine into a 5.8 value, then convert from attenuation to 13-bit linear volume
-            int result = Tables.attenuation_to_volume((ushort)(sin_attenuation + env_attenuation + eg.tl));
+            int result = Tables.attenuation_to_volume((ushort)(sin_attenuation + env_attenuation));
 
             // result = (int)(result * (1 - (eg.tl*Global.ONE_PER_THOU)));  //Floating point conversion.... expensive?
 
@@ -318,6 +318,7 @@ namespace gdsFM
 
             // // add in total level
             // result += m_regs.total_level() << 3;
+            result += eg.tl;
 
             if (eg.ams > 0)
                 result += LFO.ApplyAMS(am_offset, eg.ams);

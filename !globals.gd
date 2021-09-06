@@ -16,10 +16,13 @@ var waves=[0,2,1,3,5,6,7, "8a", 8, 9]  #Make sure this matches the waveFuncs lis
 var wave_img = []
 
 #Consts for defining TL->Decibel calcs and the like
-const TL_MAX=2048.0  #Is actually 1920 in the engine but values over this cause unclamped rollover noise
+#const TL_MAX=1024.0  #Is actually 1920 in the engine but values over this cause unclamped rollover noise
 const L_MAX=1024.0
 const R_MAX=64.0
 const DB_MAX=48.0
+
+const RTABLE_SIZE = 1024
+const RT_MINUS_ONE = 1023
 
 signal tab_dropped  #Emitted by a tab drop preview to signal columns to check their dirty state
 signal window_resized
@@ -62,9 +65,22 @@ func note_name(midi_note:int):
 	return note + str(octave)
 
 
+#Converts a base64 string first to a raw table of bytes, and then converts every 2 bytes to a short.
+func base64_to_table(s:String):
+	var bytes = Marshalls.base64_to_raw(s)
+	var output = []
+	
+	for i in range(0, bytes.size(), 2):
+		var lo = bytes[i]  #Low byte
+		var hi = bytes[i+1] #High byte
+		output.append( (hi << 8) | lo )
+		
+	return output
+
+
 func tl_to_db(tl:int):
 	#Converts the total level of an OP to decibels of attenuation.
-	return range_lerp(tl, 0, TL_MAX, 0, DB_MAX)
+	return range_lerp(tl, 0, L_MAX, 0, DB_MAX)
 
 
 
@@ -81,5 +97,4 @@ const LFO_SPEED = [
 
 func lfo_speed_to_secs(val):
 	return 1.0 / LFO_SPEED[val]
-	pass
 

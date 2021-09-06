@@ -316,7 +316,7 @@ __meta__ = {
 [node name="Total Level" parent="Levels" instance=ExtResource( 3 )]
 margin_right = 152.0
 size_flags_horizontal = 3
-max_value = 1919.0
+max_value = 1023.0
 tick_count = 0
 ticks_on_borders = false
 associated_property = "tl"

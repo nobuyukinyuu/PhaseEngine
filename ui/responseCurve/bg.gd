@@ -11,6 +11,7 @@ var rMax = {ranges.rates: 63, ranges.velocity: 1023, ranges.levels: 1023}
 
 const COL_MAX=32
 const ROW_MAX=128
+const VAL_MAX=1023
 const tick_size = Vector2(6,2)
 
 var tbl = []
@@ -46,10 +47,10 @@ func _gui_input(event):
 		var pos = stepify(mpos.x/2, 4)
 		if pos >= 128:  return
 		for i in 4:
-			tbl[pos+i] = ROW_MAX-mpos.y/2
+			tbl[pos+i] = (256-mpos.y)*4
 			emit_signal("table_updated", pos+i, tbl[pos+i])
 			
-		changing = ROW_MAX-mpos.y/2
+		changing = (256-mpos.y)*4
 		update()
 
 	if event is InputEventMouseButton and !event.pressed:
@@ -64,13 +65,13 @@ func _draw():
 		for row in ROW_MAX:
 			var pos = Vector2(column*(tick_size.x+2), row*tick_size.y)
 			
-			if row > ROW_MAX - tbl[column * 4]:
+			if row > (VAL_MAX - tbl[column * 4]) / 8:
 				draw_texture(bar[BAR_FULL], pos)
 #				draw_texture(bar[BAR_FULL if row%2!=0 else BAR_EMPTY], pos)
 			else:
 				if row%2==0: draw_texture(bar[BAR_NONE if row%16==0 else BAR_EMPTY], pos)
 				
-		var val = stepify(ROW_MAX-tbl[column*4], 2)
+		var val = stepify( ROW_MAX-tbl[column*4]/8.0 , 2)
 		var pos2 = Vector2(column*(tick_size.x+2), val*tick_size.y)
 		draw_texture(bar[BAR_PEAK], pos2)
 
@@ -86,7 +87,7 @@ func _draw():
 
 	#Draw changing indicator.  Be sure to scale to proper
 	if changing>=0:
-		var scaleVal = round((rMax[owner.intent] / 127.0) * changing)
+		var scaleVal = round((rMax[owner.intent] / global.RT_MINUS_ONE) * changing)
 		draw_string(font2, get_local_mouse_position() + Vector2(16, 18), str(scaleVal), ColorN("black"))
 		draw_string(font2, get_local_mouse_position() + Vector2(14, 16), str(scaleVal))
 			
@@ -115,7 +116,7 @@ func _make_custom_tooltip(_for_text):
 
 
 #FIXME:   Alternative intents
-	yValue *= rMax[owner.intent]/127.0
+	yValue *= rMax[owner.intent] / float(global.RT_MINUS_ONE)
 	match owner.intent:
 		ranges.rates:
 			pass
