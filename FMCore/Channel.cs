@@ -128,7 +128,6 @@ namespace gdsFM
         }
 
         /// Main algorithm processor.
-        //  TODO:  Pass down LFO status from the chip. 
         public short RequestSample()
         {
             return lastSample;

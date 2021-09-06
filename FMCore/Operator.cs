@@ -49,7 +49,7 @@ namespace gdsFM
         // int seed=1;  //LFSR state sent ByRef to oscillators which produce noise
 
 
-        public Operator(){operatorOutputSample=OperatorType_ComputeLogOuput;}
+        public Operator(){operatorOutputSample=ComputeVolume;}
         // public Operator(){ operatorOutputSample=OperatorType_ComputeLogOuput; }
 
 
@@ -118,7 +118,8 @@ namespace gdsFM
                 }
             }
 
-            operatorOutputSample = OperatorType_ComputeLogOuput;
+            //Feedback causes amplitude oscillation issues when applied to sounds, so we don't use this function if the feedback's off.
+            if (eg.feedback>0) operatorOutputSample = ComputeFeedback; else operatorOutputSample = ComputeVolume;
         }  //TODO:  Operator types for filters and sample-based outputs
 
         public override void SetOscillatorType(byte waveform_index)
@@ -133,7 +134,7 @@ namespace gdsFM
 
         //Oscillator output types.  Either standard waveform (log domain), noise, or sample.
         public short OperatorType_ComputeLogOuput(ushort modulation, ushort am_offset)
-        {return ComputeFeedback(modulation, am_offset);}
+        {return ComputeVolume(modulation, am_offset);}
 
 
         //Noise generators produce asymmetrical data.  Values must be translated to/from the log domain.
@@ -185,13 +186,13 @@ namespace gdsFM
         public short lBuf;  //Linear buffer?  FIXME / DEBUG
         public short ComputeFeedback(ushort modulation, ushort am_offset)
         {
-            if (eg.feedback == 0) 
-            {
-                // return (ComputeVolume(modulation, 0));
-                //Linear interpolation buffer;  Is this worth it?
-                lBuf = (short)((ComputeVolume(modulation, am_offset) + lBuf) >> 1);
-                return lBuf;
-            }
+            // if (eg.feedback == 0) 
+            // {
+            //     // return (ComputeVolume(modulation, am_offset));
+            //     //Linear interpolation buffer;  Is this worth it?
+            //     lBuf = (short)((ComputeVolume(modulation, am_offset) + lBuf) >> 1);
+            //     return lBuf;
+            // }
             var avg = (fbBuf[0] + fbBuf[1]) >> (10 - eg.feedback);
             var output = ComputeVolume(unchecked((ushort)(avg+modulation)), am_offset);
             fbBuf[1] = fbBuf[0];

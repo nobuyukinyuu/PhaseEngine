@@ -166,6 +166,16 @@ public class Test2 : Label
 
     }
 
+    public void SetFeedback(int opTarget, int val) 
+    {
+        SetEG(opTarget, "feedback", val);
+
+        //Force a re-check of the oscillator type, which will set the feedback functionality on or off depending on the current value.
+        //This is inefficient and not necessary for non-live input as the function is checked on NoteOn() anyway. But this changes it live.
+        for(int i=0; i<c.channels.Length; i++)
+            c.channels[i].ops[opTarget].SetOscillatorType(Oscillator.waveFuncs[GetOpType(opTarget)]);
+    }
+
     public void SetWaveform(int opTarget, float val)
     {
         if (opTarget==-1) //LFO

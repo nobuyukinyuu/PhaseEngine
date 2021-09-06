@@ -19,7 +19,7 @@ var wave_img = []
 #const TL_MAX=1024.0  #Is actually 1920 in the engine but values over this cause unclamped rollover noise
 const L_MAX=1024.0
 const R_MAX=64.0
-const DB_MAX=48.0
+const DB_MAX=96.0   #Measured:  every 64 values results in -6dB volume, so -48dB actually occurs at half L_MAX
 
 const RTABLE_SIZE = 1024
 const RT_MINUS_ONE = 1023

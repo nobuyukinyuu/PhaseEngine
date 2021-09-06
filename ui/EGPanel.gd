@@ -18,9 +18,11 @@ func _ready():
 		o.connect("value_changed", self, "setEG", [o.associated_property])
 		o.connect("value_changed", self, "update_env", [o])
 
-	for o in $Tweak.get_children():
-		if !o is Slider:  continue
-		o.connect("value_changed", self, "setEG", [o.associated_property])
+#	for o in $Tweak.get_children():
+#		if !o is Slider:  continue
+#		o.connect("value_changed", self, "setEG", [o.associated_property])
+	$Tweak/Feedback.connect("value_changed", self, "setFeedback") #Done manually to trigger the oscillator function check
+	$Tweak/Duty.connect("value_changed", self, "setEG", ["duty"])
 
 
 	for o in $Levels.get_children():

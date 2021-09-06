@@ -105,7 +105,7 @@ func update_rr(val):
 func update_env():
 	if !self.is_inside_tree():  return
 	for i in 5:
-		$ADSR.get_node(str(i)).tl = tl
+		$ADSR.get_node(str(i)).tl = pow(tl, 0.5)
 	
 	
 	var al2 = pow(al,0.5)
@@ -253,15 +253,15 @@ func _draw():
 #			"%s, %s" % [R.p1, R.p2])
 
 	if tl > 0:  #Draw the TL decibel meter
-		var h=rect_size.y * tl
+		var h=rect_size.y * pow(tl, 0.5)
 		var color = Color(1,1,1,0.5)
-		var text = str(tl * -48).pad_decimals(2) + "db"
+		var text = str(tl * -global.DB_MAX).pad_decimals(2) + "db"
 		var sz = font.get_string_size(text)
 		var x = rect_size.x-$ADSR/Spacer.rect_size.x  #Init to end of RR
 
 
 		#Draw the TL arrow.  First, find the furthest it can point without intersecting the envelope.
-		if db_moves and tl > 0.2 and tl < 0.96:
+		if db_moves and tl > 0.03 and tl < 0.96:
 			if rr != 1:  
 				x-= $"ADSR/4".rect_size.x - 8
 				if al < dl: #Some typical decay phase happens.
