@@ -93,11 +93,9 @@ namespace gdsFM
                         var rate = (byte)(op.eg.rates[j] * 2);  
                         op.eg.ksr.Apply(midi_note, ref rate);
                         op.eg.rates[j] = (byte)rate;
-                        // op.eg.rates[j] = op.eg.ksr.Rate(midi_note, rate);
 
                     }
                     op.eg.ksr.Apply(midi_note, ref op.eg.rates[op.eg.rates.Length-1]); //Release rate
-                    // op.eg.rates[op.eg.rates.Length-1] = (byte)op.eg.ksr.Rate(midi_note, op.eg.rates[op.eg.rates.Length-1]);
 
                 }
                 op.eg.velocity.Apply(velocity, ref op.eg.levels[4]);  //Apply velocity to total level

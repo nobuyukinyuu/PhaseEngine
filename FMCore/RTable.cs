@@ -72,7 +72,6 @@ namespace gdsFM
             var output = new byte[values.Length * 2]; 
             for(int i=0; i<values.Length; i++)
             {
-                // output[i] = (byte) Convert.ChangeType(values[i], typeof(byte));
                 output[i*2] =  (byte)((ushort)Convert.ChangeType(values[i], typeof(ushort)) & 0xFF);  //Low byte
                 output[i*2+1] =  (byte)((ushort)Convert.ChangeType(values[i], typeof(ushort)) >> 8);
             }
@@ -119,15 +118,11 @@ namespace gdsFM
             target = (byte) Math.Clamp(val + ScaledValue(index), 0, Envelope.R_MAX);
         }
 
-        public override byte[] TableAsBytes()
+        public override byte[] TableAsBytes() //Single byte table since all values are already 1 byte
         {
             var output = new byte[values.Length]; 
             for(int i=0; i<values.Length; i++)
-            {
                 output[i] = (byte) Convert.ChangeType(values[i], typeof(byte));
-                // output[i*2] =  (byte)((ushort)Convert.ChangeType(values[i], typeof(ushort)) & 0xFF);  //Low byte
-                // output[i*2+1] =  (byte)((ushort)Convert.ChangeType(values[i], typeof(ushort)) >> 8);
-            }
             return output;
         }
 
@@ -161,7 +156,7 @@ namespace gdsFM
 
             for(int i=64; i<values.Length; i++)
             {
-                values[i] = (ushort)(RTABLE_MAX * (127-i)/127.0 * 0.1875);
+                values[i] = (ushort)(RTABLE_MAX * (127-i)/127.0 * 0.1875);  //Linear
             }
 
             ceiling = 0;  //Disable velocity by default.
