@@ -5,7 +5,7 @@ const font = preload("res://gfx/fonts/spelunkid_font_bold.tres")
 const font2 = preload("res://gfx/fonts/numerics_7seg.tres")
 
 var bar = []
-enum {BAR_NONE, BAR_EMPTY, BAR_FULL, BAR_PEAK}
+enum {BAR_NONE, BAR_EMPTY, BAR_FULL, BAR_PEAK, BAR_MIN, BAR_MAX}
 enum ranges {rates, velocity, levels}
 var rMax = {ranges.rates: 63, ranges.velocity: 1023, ranges.levels: 1023}
 
@@ -13,6 +13,10 @@ const COL_MAX=32
 const ROW_MAX=128
 const VAL_MAX=1023
 const tick_size = Vector2(6,2)
+
+var can_draw_minmax=false
+var lastmin=0
+var lastmax=0
 
 var tbl = []
 export (int, 0, 128) var split=128
@@ -22,7 +26,7 @@ var changing=-1
 signal table_updated
 
 func _ready():
-	for i in 4:
+	for i in 6:
 		var p = AtlasTexture.new()
 		p.atlas = indicators
 		
@@ -65,14 +69,24 @@ func _draw():
 		for row in ROW_MAX:
 			var pos = Vector2(column*(tick_size.x+2), row*tick_size.y)
 			
-			if row > (VAL_MAX - tbl[column * 4]) / 8:
+			if row >= stepify((VAL_MAX - tbl[column * 4]+1) / 8.0, 2):
 				draw_texture(bar[BAR_FULL], pos)
 #				draw_texture(bar[BAR_FULL if row%2!=0 else BAR_EMPTY], pos)
 			else:
-				if row%2==0: draw_texture(bar[BAR_NONE if row%16==0 else BAR_EMPTY], pos)
+				if row%2==0: draw_texture(bar[BAR_NONE if row%16==0 else BAR_EMPTY], pos, Color(1,1,1,0.7))
+				
+			if can_draw_minmax: #and row%2==0:
+				if lastmax == row:
+					draw_texture(bar[BAR_MAX], pos)
+				elif lastmax>row:
+					draw_texture(bar[BAR_MAX], pos, Color(1,1,1,0.05))
+				if lastmin == row:
+					draw_texture(bar[BAR_MIN], pos, Color(1,1,1,0.65))
+				elif lastmin<row:
+					draw_texture(bar[BAR_MIN], pos, Color(1,1,1,0.1))
 				
 		var val = stepify( ROW_MAX-tbl[column*4]/8.0 , 2)
-		var pos2 = Vector2(column*(tick_size.x+2), val*tick_size.y)
+		var pos2 = Vector2(column*(tick_size.x+2), (val)*tick_size.y)
 		draw_texture(bar[BAR_PEAK], pos2)
 
 	if split < 128:
@@ -87,7 +101,7 @@ func _draw():
 
 	#Draw changing indicator.  Be sure to scale to proper
 	if changing>=0:
-		var scaleVal = round((rMax[owner.intent] / global.RT_MINUS_ONE) * changing)
+		var scaleVal = round((rMax[owner.intent] / float(global.RT_MINUS_ONE)) * changing)
 		draw_string(font2, get_local_mouse_position() + Vector2(16, 18), str(scaleVal), ColorN("black"))
 		draw_string(font2, get_local_mouse_position() + Vector2(14, 16), str(scaleVal))
 			

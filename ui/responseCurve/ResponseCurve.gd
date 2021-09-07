@@ -42,28 +42,36 @@ func _ready():
 
 
 func set_minmax_default(_intent):
-	match _intent:
-		ranges.velocity, ranges.rates:
+#	match _intent:
+#		ranges.velocity, ranges.rates:
 			$MinMax/sldMin.value = 0
 			$MinMax/sldMax.value = 0
-		_:
-			$MinMax/sldMin.value = 0
-			$MinMax/sldMax.value = 100
-	update_minmax()
+			update_minmax()
+#		_:
+#			$MinMax/sldMin.value = 0
+#			$MinMax/sldMax.value = 100
+
+#	update_minmax()
 
 
 func set_table_default(_intent):
 	var SCALE = global.RTABLE_SIZE / 128.0
 	match _intent:
 		ranges.velocity:
-			for i in 128:
+			for i in 64:
 #				$VU.tbl[i] = global.RTABLE_SIZE -SCALE -i*SCALE
 #				$VU.tbl[i] = global.RTABLE_SIZE * ease((127-i)/127.0, 3)
-				$VU.tbl[i] = global.RTABLE_SIZE * pow((127-i)/127.0, 3)
+				$VU.tbl[i] = global.RTABLE_SIZE * pow((127-i)/127.0, 3) * 0.75
+				$VU.tbl[i+64] = global.RTABLE_SIZE * (127-i)/127.0 * 0.1875
 		ranges.rates:
 			for i in 128:
-				$VU.tbl[i] = i*SCALE
+				$VU.tbl[i] = i*SCALE / 2
 
+		ranges.levels:
+			var RATIO = 64/12.0 #64 units of attenuation == 6dB per octave
+			var START_NOTE=24  #Probably 8 actually to produce -60dB at highest octave
+			for i in 128:
+				$VU.tbl[i] = max(0, round((i-START_NOTE) * RATIO))
 
 		_:
 			for i in 128:
@@ -105,19 +113,25 @@ func _on_sldMinMax_value_changed(value, isMax:bool):
 
 
 func update_minmax():
+	#Update the labels and colorizers.
 	var a = str($MinMax/sldMin.value)
 	var b = str($MinMax/sldMax.value)
 
 	$MinMax/lblMinMax.text = "%s/%s" % ["[]" if a=="100" else a.pad_zeros(2), "[]" if b=="100" else b.pad_zeros(2)]
 	
 	if int(a)>int(b):
-		$MinMax/Colorizer.material.set_shader_param("disabled", 4)
+		$MinMax/Colorizer.material.set_shader_param("disabled", 4)  #RED on both
+		$VU.can_draw_minmax = false
 	else:
 		var amt = 0
 		amt |= 1 if a == "100" else 0
 		amt |= 2 if b == "0" else 0
-		$MinMax/Colorizer.material.set_shader_param("disabled", amt)
-		
+		$MinMax/Colorizer.material.set_shader_param("disabled", amt)  #Sets L or R disabled
+		$VU.can_draw_minmax = true if amt==0 else false
+
+	$VU.lastmax = stepify((100-int(b)) * 1.28, 2.0)
+	$VU.lastmin = stepify((100-int(a)) * 1.28, 2.0)
+	$VU.update()
 
 func set_custom_curve_preset(table):
 	$VU.tbl = table

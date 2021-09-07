@@ -47,6 +47,7 @@ namespace gdsFM
 
         public void SetSpeed(byte speed)
         {
+            this.speed = speed;
             pg = Increments.FromFreq(Tables.LFOSpeed[speed]);  
             pg.Recalc(); 
         }

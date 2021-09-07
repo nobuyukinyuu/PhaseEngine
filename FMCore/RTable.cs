@@ -130,7 +130,19 @@ namespace gdsFM
 
     public class LevelTable : RTable<ushort>
     {
-        public LevelTable()  { intent = RTableIntent.LEVELS; }
+        public LevelTable()  { intent = RTableIntent.LEVELS; Init();}
+
+        void Init()
+        {
+			const double RATIO = 64/12.0; //64 units of attenuation == 6dB per octave
+			const int START_NOTE=24;  //Probably 8 actually to produce -60dB at highest octave
+            for(ushort i=0; i<values.Length; i++)
+                values[i] = (ushort)Math.Max(0, Math.Round((i-START_NOTE) * RATIO));
+
+            ceiling = 0;  //Disable rate scaling by default.
+        }
+
+
         public override void Apply(byte index, ref ushort tl)
         {   // Velocity takes the total level of the input and attenuates it by the given amount. 
             tl = (ushort) Math.Clamp(tl + ScaledValue(index) , 0, Envelope.L_MAX);

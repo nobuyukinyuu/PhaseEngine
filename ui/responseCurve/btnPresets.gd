@@ -98,13 +98,9 @@ func _on_EaseMenu_index_pressed(curveType, parent_index, descending):
 		TWELFTH_ROOT_OF_2:
 			if descending:
 				for i in range(startpos, endpos):
-#					var pos = range_lerp((i-startpos), 0, endpos-startpos, 0, 128) 
-#					tbl[i] = 1 / pow(2, (pos)/12.0) * global.RTABLE_SIZE
+					var pos = range_lerp((i-startpos), 0, endpos-startpos, 0, 128) 
+					tbl[i] = 1 / pow(2, (pos)/12.0) * global.RTABLE_SIZE
 
-					var pos = range_lerp((i-startpos), 0, endpos-startpos, 0, 1) 
-
-					
-					tbl[i] = global.RTABLE_SIZE * pos;
 
 			else:  #Ascending
 				for i in range(startpos, endpos):

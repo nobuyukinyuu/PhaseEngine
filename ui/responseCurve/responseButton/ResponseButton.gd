@@ -2,6 +2,7 @@ extends Button
 
 const icon_offset = Vector2(1, 4)
 const no_preview = preload("res://gfx/ui/none16.png")
+const font = preload("res://gfx/fonts/small_numerics_thin.tres")
 
 enum ranges {rates, velocity, levels}
 export (ranges) var intent = ranges.rates
@@ -10,6 +11,9 @@ var placeholder_tbl  #Table used when the ResponseCurve node is still a placehol
 
 signal table_updated
 signal minmax_changed
+
+var lastmin:int=0
+var lastmax:int=0
 
 func _ready():
 	connect("pressed", self, "_on_Pressed")
@@ -113,8 +117,21 @@ func _draw():
 			draw_line(offset, previous_ln, Color(1,1,1), 1.0, false)
 
 			previous_ln = offset
+		#Draw font
+		var s=str(lastmax)
+#		if lastmax > 0:  draw_string(font, icon_offset + Vector2(20-str_w(s),-4),s,Color(2,2,2, 0.8))
+		if lastmax > 0:  
+			draw_string(font, icon_offset + Vector2(16-str_w(s)/2,-4),s,Color(2,2,2, 0.8))
+			s = str(lastmin)
+			if lastmin > 0 and lastmin < lastmax:  
+				draw_string(font, icon_offset + Vector2(1-str_w(s)/2,12),s,Color(1.4,1.4,1.4, 0.7))
 
 
+func str_w(s:String):
+	return len(s) * 4
 
 func _on_Curve_minmax_changed(value, isMax:bool=false):
+	if isMax: lastmax = value 
+	else: lastmin = value
 	emit_signal("minmax_changed", value, isMax, intent)
+	update()
