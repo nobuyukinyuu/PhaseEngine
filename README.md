@@ -6,11 +6,11 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 # Features and differences to gdsFM
 ## New
 * Fixed-point phase accumulator (utilizing 12.20 precision by default)
-* More modular, delegate-based oscillator and operator functionality (Operators can behave like filters or DSP instead of FM)
+* More modular, delegate-based oscillator and operator functionality (Operators can behave like filters or DSP in addition to FM)
 * Envelopes with target audio levels for each phase, more like DX-style synths
 * Envelope hold phase after initial attack and before initial decay, similar to the initial delay phase in gdsFM.
 * All FM operators support Reface-style operator feedback.
-* More traditional noise generators, including an LFSR-based generator with selectable periodicity (create more buzzing effects
+* More traditional noise generators, including an LFSR-based generator with selectable periodicity (create more buzzing effects) similar to 2a03, etc.
 
 
 ## Different
@@ -24,17 +24,16 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
   * Monotimbrality and fixed polyphony help simplify the design, allowing multiple instances to be specified and put on independent audio buses
 * Fixed internal clock rate of 48 KHz
 * Operator parameter specification is separated from its implementation, allowing more tracker-like control over individual notes (temporarily override params)
+* More traditional LFO
 
 ## To be implemented
 * Chip clocking to match various audio output rates, perhaps with optional sample interpolation
-* Key scaling options, similar to gdsFM's RTables
 * PCM Sample playback + Wavetable-based oscillators
 * Filter and DSP operators
-* LFOs
 * Voice format specification
 
 ## May or may not be implemented or come back
 * Pitch generator
-* Arbitrary parameter envelopes
+* Arbitrary parameter envelopes  (Routing an envelope to a specific parameter)
 * Wider range of sampling options
 * Multitimbral operation (for now, multiple chip instances syncing their clocks should suffice)
