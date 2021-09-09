@@ -37,3 +37,8 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 * Arbitrary parameter envelopes  (Routing an envelope to a specific parameter)
 * Wider range of sampling options
 * Multitimbral operation (for now, multiple chip instances syncing their clocks should suffice)
+
+# Screenshots
+![Main View](https://user-images.githubusercontent.com/1023003/132632266-234ceb1e-1409-4792-bd2b-51457e80102d.png)
+![rTables](https://user-images.githubusercontent.com/1023003/132632455-aa52c44c-e76a-4805-a894-27921c8169da.png)![Wiring Grid and 6op Presets](https://user-images.githubusercontent.com/1023003/132633883-80a5c551-074c-42b8-b50a-892c93ccae4a.png)
+
