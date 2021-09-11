@@ -52,20 +52,24 @@ namespace gdsFM
             bool setFree = true;
             for(int i=0; i<ops.Length; i++)
             {
+                if (voice.alg.connections[i] != 0)  continue;  //Skip over connections not connected to output.
                 var op=ops[i];
                 if (busy==BusyState.BUSY ||
                    (busy==BusyState.RELEASED &&  op.egStatus != EGStatus.INACTIVE) )
                         setFree = false;
 
-                score += (int)ops[i].egStatus <<4;
+                //Status of the envelope is such that the further along in the envelope it is, the higher the score.
+                //Lsh ensures that the value is always positive -- Delay is considered same priority as Decay, Hold the same as Sustained
+                score += (int)ops[i].egStatus <<4;  
+                score >>= 1;  //Compensate for multiple operators connected to output.
             }
             if (setFree) busy = BusyState.FREE;
             score += (int)busy;   //512 points if BusyState.Released;  1024 if free.
 
 
             return (short)score;
-            //TODO:  Some sorta thing which enumerates the operators for their envelope status and attenuation.  The higher the score, the higher the priority.
-            //      Near-silent and near-finished voices should give the lowest scores.  Use processOrder in reverse, checking connections to output only.
+            //TODO:  Some sorta thing which enumerates the operators for their envelope status and attenuation.  The LOWER the score, the higher the priority.
+            //      Near-silent and near-finished voices should give the HIGEST scores.  Use processOrder in reverse, checking connections to output only.
             //      Stop and return the score once we hit the first operator with connections, since these don't factor into the final output level.
           }
         }

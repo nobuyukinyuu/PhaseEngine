@@ -9,12 +9,19 @@ namespace gdsFM
 
         Voice voice; //= new Voice();  //Description of the timbre.
         public Voice Voice { get => voice; set => SetVoice(value); }
+        public bool disableLFO;  //Used by processes that wish to calculate voices without the LFO, such as the offline preview.
 
 
         public byte opCount = 6;  //Probably should be moved to a voice class, then the chip given a unitimbral description of the voice. Realloc on major change
         public byte polyphony = 6;
         public Channel[] channels;
 
+        public bool ChannelsAreFree {
+            get{for(byte i=0; i<channels.Length; i++)
+                    if(channels[i].busy != BusyState.FREE) return false;
+                return true;
+            }
+        }
 
         #region Constructors
         public Chip()
@@ -55,17 +62,18 @@ namespace gdsFM
 
         public void Clock()
         {
-            Channel.am_offset = voice.lfo.RequestAM();
+            if (!disableLFO) Channel.am_offset = voice.lfo.RequestAM();
             for (int i=0; i<channels.Length;  i++)
             {
                 channels[i].Clock();
                 
                 //Apply LFO pitch changes.
-                for(int j=0; j<opCount; j++)
-                    voice.lfo.ApplyPM(ref channels[i].ops[j].pg);
+                if (!disableLFO)
+                    for(int j=0; j<opCount; j++)
+                        voice.lfo.ApplyPM(ref channels[i].ops[j].pg);
             }
 
-            voice.lfo.Clock();
+            if (!disableLFO) voice.lfo.Clock();
         }
 
         public short RequestSample()
@@ -89,7 +97,6 @@ namespace gdsFM
             return (short) (output>>downscaleMagnitude).Clamp(short.MinValue, short.MaxValue);
         }
 
-        #if GODOT
         /// Returns a floating point value useful for a godot AudioStreamGenerator. Values may exceed 1.0; clamp or alter the gain yourself!
         public float RequestSampleF()
         {
@@ -100,7 +107,6 @@ namespace gdsFM
             }
             return output;
         }
-        #endif
 
 
         //TODO:  NoteOn func that can grab an unbusy note.  Should also return a handle to the channel the note was assigned.

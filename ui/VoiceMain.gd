@@ -18,7 +18,6 @@ func _ready():
 	#Populate EGPanels in column 0.
 	_on_op_size_changed(get_node(chip_loc).GetOpCount(), 0)
 
-	
 
 func resized():
 	$Kanban.populate_columns(rect_size.x - $Kanban.rect_position.x)
@@ -51,6 +50,9 @@ func _on_op_size_changed(opNum:int, oldSz):
 			to_add.append(i)
 		
 		col.populate(to_add, null)
+		
+	#Update FM preview.
+	$FMPreview.recalc()
 
 #Handler for tooltips that need data from a chip.
 func _on_op_tooltip_needs_data(sender, tooltip):
@@ -64,6 +66,3 @@ func _on_op_tooltip_needs_data(sender, tooltip):
 
 		var tab = sender.get_tab_control(idx)
 		tooltip.setup(chip_loc, tab.operator)
-
-
-

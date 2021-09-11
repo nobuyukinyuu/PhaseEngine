@@ -43,6 +43,8 @@ func _on_slot_moved(delay=0):
 	get_node(chip_loc).SetAlgorithm(d)
 	
 	check_if_presets()
+	
+	global.emit_signal("algorithm_changed")
 
 func get_algorithm_description() -> Dictionary:
 	var d= {}

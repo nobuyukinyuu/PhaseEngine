@@ -27,6 +27,8 @@ const RT_MINUS_ONE = 1023
 signal tab_dropped  #Emitted by a tab drop preview to signal columns to check their dirty state
 signal window_resized
 signal op_tooltip_needs_data
+signal op_tab_value_changed
+signal algorithm_changed
 
 func _ready():
 	# Generate the period frequencies of every note based on center tuning (A-4) at 440hz

@@ -4,6 +4,7 @@ using System;
 using gdsFM;
 using System.Runtime.CompilerServices;
 using System.Numerics;
+using System.Collections.Generic;
 
 namespace gdsFM 
 {
@@ -51,6 +52,16 @@ namespace gdsFM
 
             return whole+frac;
         }
+
+       public static double FromFixedPoint(ulong n, byte decimalBitPrecision=Global.FRAC_PRECISION_BITS)
+        {
+            uint fracSize = (1u << decimalBitPrecision) - 1u;
+            var whole = n >> decimalBitPrecision;
+            double frac = (n & fracSize) / (double) fracSize;
+
+            return whole+frac;
+        }
+
 
         // Clamp for c# 7.2
         public static T Clamp<T>(this T val, T min, T max) where T : IComparable<T>
@@ -217,6 +228,50 @@ namespace gdsFM
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static short Abs(short n) {int o=n; int s=(n>>31); o^=s; o-=s; return (short)(o);}
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static int Abs(int n) {int s=(n>>31); n^=s; n-=s; return n;}
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static long Abs(long n) {long s=(n>>31); n^=s; n-=s; return n;}
+
+
+
+        //Returns the least common multiple of the arguments.
+        public static ulong LCM(long[] args)
+        {
+            switch(args.Length)
+            {
+                case 0: case 1:
+                    throw new ArgumentOutOfRangeException("args", "Collection must have 2 or more elements.");
+                case 2:
+                    return LCM((ulong)args[0], (ulong) args[1]);
+            }
+            
+            ulong runningTotal = LCM((ulong)args[0], (ulong) args[1]);
+            for (int i=2; i<args.Length; i++)
+                runningTotal = LCM(runningTotal, (ulong) args[i]);
+            
+            return runningTotal;
+        }
+
+        static ulong LCM(ulong a, ulong b)
+        {
+            if(a>b)
+                return (a/GCD(a,b))*b;
+            else
+                return (b/GCD(a,b))*a;   
+        }          
+            //  return a / GCD(a,b) * b; }
+
+
+        //Returns the greatest common divisor between 2 arguments.
+        static ulong GCD(ulong a, ulong b)
+        {
+
+            while (a != 0 && b != 0)
+            {
+                if (a > b)
+                    a %= b;
+                else
+                    b %= a;
+            }
+            return a | b;
+        }
 
     }
 }

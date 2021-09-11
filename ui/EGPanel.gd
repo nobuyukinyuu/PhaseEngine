@@ -6,6 +6,7 @@ export(int,0,8) var operator = 0
 
 onready var rTables = [$KSR, $Velocity, $KSL]
 
+signal changed
 
 func _ready():
 	for o in $Tune.get_children():
@@ -152,21 +153,26 @@ func update_env(value, sender:EGSlider):
 
 func setEG(value, property):
 	get_node(chip_loc).SetEG(operator, property, value)
+	global.emit_signal("op_tab_value_changed")
 func setPG(value, property):
 	#Keep the two detune properties in sync...
 	if property=="detune":  
 		$Frequency/H/Detune.value = value
 		$Tune/Detune.value = value
 	get_node(chip_loc).SetPG(operator, property, value)
+	global.emit_signal("op_tab_value_changed")
 
 func setWaveform(value):
 	get_node(chip_loc).SetWaveform(operator, value)
+	global.emit_signal("op_tab_value_changed")
 
 func setFeedback(value):
 	get_node(chip_loc).SetFeedback(operator, value)
+	global.emit_signal("op_tab_value_changed")
 
 func setDuty(value):
 	get_node(chip_loc).SetDuty(operator, value)
+	global.emit_signal("op_tab_value_changed")
 	
 
 onready var ab = [$Tune, $Frequency]
@@ -179,6 +185,7 @@ func _on_FixedRatio_toggled(button_pressed, update_chip=true):
 		get_node(chip_loc).SetFixedFreq(operator, !button_pressed)
 func setFreq(value):
 	get_node(chip_loc).SetFrequency(operator, value)
+	global.emit_signal("op_tab_value_changed")
 
 
 func _on_Mute_toggled(button_pressed, bypass:bool):
@@ -186,6 +193,7 @@ func _on_Mute_toggled(button_pressed, bypass:bool):
 		get_node(chip_loc).SetBypass(operator, button_pressed)
 	else:
 		get_node(chip_loc).SetMute(operator, button_pressed)
+	global.emit_signal("op_tab_value_changed")
 
 
 #Updates an rTable for this operator.
