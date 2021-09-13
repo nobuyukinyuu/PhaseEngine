@@ -24,6 +24,8 @@ namespace gdsFM
         public Algorithm alg = new Algorithm();
         public LFO lfo = new LFO();
 
+        public Channel preview;
+
         //TODO:  Voice description / meta probably goes here too....
         public Voice() {InitVoice(this.opCount);}
         public Voice(byte opCount) {InitVoice(opCount);}
@@ -47,6 +49,10 @@ namespace gdsFM
                  egs[i] = new Envelope();
                  pgs[i] = Increments.Prototype();
              }
+  
+            preview = new Channel(opCount);
+            preview.SetVoice(this);
+  
         }
 
         public bool SetPresetAlgorithm(byte preset)
@@ -140,9 +146,9 @@ namespace gdsFM
             var output = new float[size];  var oc=0;
             var stride = (period/(double)size);
             var strideCount = stride;
-            var c = new Chip(1, opCount);
-            c.SetVoice(this);
-            c.disableLFO = disableLFO;
+            var c = preview;  //Reduce memory thrash by using our own Channel instance
+            // c.SetVoice(this);
+            // c.disableLFO = disableLFO;
 
             c.NoteOn(0, NOTE_A4);
             for (int i=0; oc<size && i<period; i++)
@@ -150,7 +156,7 @@ namespace gdsFM
                 if (strideCount<1)  // Hit a point where we need to fill up output
                 {
                     strideCount += stride;
-                    output[oc] = c.RequestSampleF();  oc++;
+                    output[oc] = Tables.short2float[c.RequestSample()+Tables.SIGNED_TO_INDEX];  oc++;
                 }
                 strideCount--;
                 c.Clock();

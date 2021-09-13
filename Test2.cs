@@ -152,8 +152,20 @@ public class Test2 : Label
 
         //For live feedback of changes in the EG value.  Inefficient;  DON'T use this in production!
         if (opTarget >= c.Voice.opCount) return;
-        for(int i=0; i<c.channels.Length; i++)
-            c.channels[i].ops[opTarget].eg.ChangeValue(property, val);
+
+        if (property=="tl")  //Recalc level from rTables if necessary.
+            for(int i=0; i<c.channels.Length; i++)
+            {
+                var newEG = new Envelope(c.Voice.egs[opTarget]);
+                var note = c.channels[i].midi_note;
+                var velocity = c.channels[i].lastVelocity;
+                ushort tl = (ushort) (val + newEG.ksl[note] + newEG.velocity[velocity]);  //This incurs a 'hidden' recalc cost from rTable thru the indexer
+                newEG.tl = tl;
+                c.channels[i].ops[opTarget].eg = newEG; 
+            }
+        else
+            for(int i=0; i<c.channels.Length; i++)
+                c.channels[i].ops[opTarget].eg.ChangeValue(property, val);
     }
 
     public void SetFixedFreq(int opTarget, bool isFixed) { c.Voice.pgs[opTarget].fixedFreq = isFixed; }

@@ -27,6 +27,10 @@ namespace gdsFM
         public ushort delay, hold;
         
         // ushort tl, al, dl, sl;  // Attenuation target levels
+
+        //TODO:  Consider adding a 6th level for the total scaled attenuation from the ksl and velocity tables. Since EG is copied to channel's ops on new note...
+        //       This would allow users to change the TL after a note's been generated on a channel and still retain the original scaled level.
+        //       OTOH, perhaps only supporting TL "slides" for potential tracker-related envelope tweaking would be preferable...
         public ushort tl{get=> levels[4]; set=>levels[4] = value;}
         public ushort al{get=> levels[0]; set=>RecalcLevel(0, value);}
         public ushort dl{get=> levels[1]; set=>RecalcLevel(1, value);}
@@ -37,7 +41,7 @@ namespace gdsFM
         public ushort duty=32767;
 
         public byte ams;  //Amplitude modulation sensitivity (used to determine how much LFO to mix in)
-        public bool osc_sync;  //Oscillator sync.  Oscillator phase will reset on NoteOn if true.
+        public bool osc_sync=true;  //Oscillator sync.  Oscillator phase will reset on NoteOn if true.
 
        //Response tables.  These are references from the canonical Voice.
         public RateTable ksr = new RateTable();
@@ -182,6 +186,7 @@ namespace gdsFM
         }
         #endif 
 
+        //Convenience function for setting any property or field by specifying its name.  Not efficient for realtime use!
         public void ChangeValue(string property, float val)
         {
             try

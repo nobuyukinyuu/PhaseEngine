@@ -62,18 +62,17 @@ namespace gdsFM
 
         public void Clock()
         {
-            if (!disableLFO) Channel.am_offset = voice.lfo.RequestAM();
+            Channel.am_offset = voice.lfo.RequestAM();
             for (int i=0; i<channels.Length;  i++)
             {
                 channels[i].Clock();
                 
                 //Apply LFO pitch changes.
-                if (!disableLFO)
-                    for(int j=0; j<opCount; j++)
-                        voice.lfo.ApplyPM(ref channels[i].ops[j].pg);
+                for(int j=0; j<opCount; j++)
+                    voice.lfo.ApplyPM(ref channels[i].ops[j].pg);
             }
 
-            if (!disableLFO) voice.lfo.Clock();
+            voice.lfo.Clock();
         }
 
         public short RequestSample()
@@ -107,11 +106,6 @@ namespace gdsFM
             }
             return output;
         }
-
-
-        //TODO:  NoteOn func that can grab an unbusy note.  Should also return a handle to the channel the note was assigned.
-        //      Consider returning false/-1 instead of stealing a channel to simplify NoteOff calls if a channel was already reappropriated due to polyphony limit.
-        //      or, have an out variable for the channel and return true or false if note was stolen.  NoteOffs shouldn't do anything for "free" channels.
 
 
         /// Flips on the specified channel and returns the event ID.

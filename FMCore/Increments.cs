@@ -22,10 +22,12 @@ namespace gdsFM
         public long tunedIncrement;  //increment of tuned_hz
         public long increment;  // Calculated from the base frequency, multiplier, detune and pitch modifiers.
 
-
+        //Multiplier values etc
         public bool fixedFreq;
         public float mult,  lfoMult;  //lfoMult is set externally from an LFO object.
         public int coarse, fine, detune;
+
+        const int NOTE_A4=69;
 
         #if GODOT
             public Godot.Collections.Dictionary GetDictionary()
@@ -106,7 +108,6 @@ namespace gdsFM
         /// summary:  Given a MIDI note value 0-127,  produce an increment appropriate to oscillate at the tone of the note.
         public void NoteSelect(byte n)
         {
-            const int NOTE_A4=69;
             base_hz = Global.BASE_HZ * Math.Pow(2, (n-NOTE_A4)/12.0);
             hz = base_hz;
             var whole = IncOfFreqD(hz);

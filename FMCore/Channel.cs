@@ -15,6 +15,7 @@ namespace gdsFM
         public byte midi_note;  //Assigned when the channel is requested and used when enumerating channels to help call early NoteOffs for duplicate notes.
 
         public short lastSample;
+        public byte lastVelocity;
 
         public static ushort am_offset=0;  //Set by the chip when clocking to pass down when requesting samples from our operators.
 
@@ -78,7 +79,9 @@ namespace gdsFM
         public void NoteOn(byte midi_note=Global.NO_NOTE_SPECIFIED, byte velocity=127)
         {
             eventID = Global.NewEventID();
-            if (midi_note < 0x80)  this.midi_note = midi_note;
+            if (midi_note >= 0x80)  return;
+            this.midi_note = midi_note;
+            this.lastVelocity = velocity;
 
             var opsToProcess = (byte)Math.Min(voice.alg.opCount, ops.Length); //Prevents out of bounds if the voice changed while notes are still on.
             for(byte i=0; i<opsToProcess; i++)
