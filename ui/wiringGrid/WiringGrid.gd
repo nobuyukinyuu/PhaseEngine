@@ -63,7 +63,7 @@ func _on_Add_pressed():
 
 
 func _on_Remove_pressed():
-	if $SlotIndicator.total_ops > 2:
+	if $SlotIndicator.total_ops > 1:
 		$SlotIndicator.total_ops -=1
 		_on_slot_moved()
 

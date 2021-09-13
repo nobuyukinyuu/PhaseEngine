@@ -23,7 +23,9 @@ func _ready():
 #		if !o is Slider:  continue
 #		o.connect("value_changed", self, "setEG", [o.associated_property])
 	$Tweak/Feedback.connect("value_changed", self, "setFeedback") #Done manually to trigger the oscillator function check
-	$Tweak/Duty.connect("value_changed", self, "setEG", ["duty"])
+	$Tweak/AMS.connect("value_changed", self, "setEG", [$Tweak/AMS.associated_property])
+	$Duty.connect("value_changed", self, "setEG", ["duty"])
+	$OscSync.connect("toggled", self, "setEG", ["osc_sync"])
 
 
 	for o in $Levels.get_children():
@@ -31,7 +33,6 @@ func _ready():
 		o.connect("value_changed", self, "setEG", [o.associated_property])
 		o.connect("value_changed", self, "update_env", [o])
 
-	$AMS.connect("value_changed", self, "setEG", [$AMS.associated_property])
 
 	$WavePanel/Wave.connect("value_changed", self, "setWaveform")
 
@@ -105,10 +106,11 @@ func set_from_op(op:int):
 	$"Levels/Decay Level".value = levels[1]
 	$"Levels/Sustain Level".value = levels[2]
 	
-	$AMS.value = d["ams"]
+	$Tweak/AMS.value = d["ams"]
 	
 	$Tweak/Feedback.value = d["feedback"]
-	$Tweak/Duty.value = d["duty"]
+	$Duty.value = d["duty"]
+	$OscSync.pressed = d["osc_sync"]
 	
 	$Mute.pressed = d["mute"]
 	$Bypass.pressed = d["bypass"]

@@ -37,7 +37,8 @@ namespace gdsFM
         {
             float val = Convert.ToInt32(values[index]);
             val = val * (ceiling/100.0f);  //Apply ceiling.
-            val = (floor/100.0f) +  val * (1.0f-(floor/100.0f));  //Apply floor.
+            // val = (floor/100.0f) +  val * (1.0f-(floor/100.0f));  //Apply floor.
+            val = (floor/100.0f * RTABLE_MAX) +  val * (1.0f-(floor/100.0f));  //Apply floor.
             return val;
         }
 
@@ -107,6 +108,7 @@ namespace gdsFM
 
         public void Apply (byte index, ref byte target)
         {
+            if (target==0) return;  //Rate set to infinity.  Don't mess with it
             ushort marshal = target;
             Apply(index, ref marshal);
             target = (byte) marshal;

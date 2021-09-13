@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=2]
+[gd_scene load_steps=37 format=2]
 
 [ext_resource path="res://ui/EGPanel.gd" type="Script" id=1]
 [ext_resource path="res://ui/EGWavePanel.gd" type="Script" id=2]
@@ -11,6 +11,7 @@
 [ext_resource path="res://gfx/fonts/NoteFont.tres" type="BitmapFont" id=9]
 [ext_resource path="res://gfx/wave/3.png" type="Texture" id=10]
 [ext_resource path="res://ui/responseCurve/responseButton/ResponseButton.tscn" type="PackedScene" id=11]
+[ext_resource path="res://ui/EGCheckBox.tres" type="Theme" id=12]
 [ext_resource path="res://gfx/wave/2.png" type="Texture" id=13]
 [ext_resource path="res://gfx/wave/7.png" type="Texture" id=14]
 [ext_resource path="res://gfx/wave/8a.png" type="Texture" id=15]
@@ -177,8 +178,8 @@ corner_radius_bottom_left = 12
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -682.0
-margin_bottom = -280.0
-rect_min_size = Vector2( 342, 320 )
+margin_bottom = -224.0
+rect_min_size = Vector2( 342, 376 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -497,7 +498,7 @@ __meta__ = {
 }
 
 [node name="Feedback" parent="Tweak" instance=ExtResource( 3 )]
-margin_right = 64.0
+margin_right = 96.0
 rect_min_size = Vector2( 48, 20 )
 size_flags_horizontal = 3
 max_value = 10.0
@@ -507,12 +508,15 @@ useExpTicks = false
 useHoldTime = false
 text_offset = 7
 
-[node name="Duty" parent="Tweak" instance=ExtResource( 3 )]
-margin_left = 80.0
+[node name="AMS" parent="Tweak" instance=ExtResource( 3 )]
+margin_left = 112.0
 margin_right = 208.0
+rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
-max_value = 65535.0
-associated_property = "duty"
+max_value = 10.0
+tick_count = 5
+ticks_on_borders = false
+associated_property = "ams"
 useExpTicks = false
 useHoldTime = false
 text_offset = 0
@@ -692,9 +696,9 @@ __meta__ = {
 }
 
 [node name="EnvelopeDisplay" parent="." instance=ExtResource( 6 )]
-margin_top = 256.0
+margin_top = 296.0
 margin_right = 340.0
-margin_bottom = 320.0
+margin_bottom = 376.0
 custom_styles/panel = SubResource( 11 )
 sl = 1.0
 Delay = 0
@@ -731,19 +735,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Disabled" type="Label" parent="."]
-visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_filter = 0
-custom_styles/normal = SubResource( 15 )
-text = "Unavailable"
-align = 1
-valign = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="KSR" parent="." instance=ExtResource( 11 )]
 margin_left = 8.0
 margin_top = 8.0
@@ -766,20 +757,44 @@ margin_bottom = 32.0
 text = "Velocity"
 intent = 1
 
-[node name="AMS" parent="." instance=ExtResource( 3 )]
-margin_left = 192.0
-margin_top = 288.0
-margin_right = 288.0
-margin_bottom = 308.0
-rect_min_size = Vector2( 96, 20 )
+[node name="Duty" parent="." instance=ExtResource( 3 )]
+margin_left = 80.0
+margin_top = 264.0
+margin_right = 328.0
+margin_bottom = 284.0
 size_flags_horizontal = 3
-max_value = 10.0
-tick_count = 5
-ticks_on_borders = false
-associated_property = "ams"
+max_value = 65535.0
+associated_property = "duty"
 useExpTicks = false
 useHoldTime = false
 text_offset = 0
+
+[node name="OscSync" type="CheckBox" parent="."]
+anchor_top = 0.0106383
+anchor_bottom = 0.0106383
+margin_left = 8.0
+margin_top = 264.0
+margin_right = 70.0
+margin_bottom = 282.0
+theme = ExtResource( 12 )
+text = "~Sync"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Disabled" type="Label" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 0
+custom_styles/normal = SubResource( 15 )
+text = "Unavailable"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
 [connection signal="value_changed" from="Frequency/Frequency" to="." method="setFreq"]
 [connection signal="item_selected" from="Frequency/H/Presets" to="Frequency" method="_on_Presets_item_selected"]
 [connection signal="pressed" from="Frequency/H/Presets" to="Frequency" method="_on_Presets_pressed"]
