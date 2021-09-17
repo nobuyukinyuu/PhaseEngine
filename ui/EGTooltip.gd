@@ -4,6 +4,7 @@ const OPTEXT = "0p[i].[/i][color=#ffff00][b]%s[/b][/color]"
 class_name EGTooltip
 
 func _ready():
+	#Tweak position if the bounds are offscreen.
 	var edge = rect_global_position + rect_size
 	var vp = get_viewport_rect()
 	if edge.x > vp.size.x:  
@@ -38,6 +39,15 @@ func set_from_op(op:int):
 
 	var d = eg.GetOpValues(0, op)  #EG dictionary
 	var d2 = eg.GetOpValues(1, op) #PG dictionary
+	
+	for i in 3:
+		var intent = i
+		var data = eg.GetTable(op, intent)
+		var err = validate_json(data)
+		if err:
+			print("EGTooltip:  Error parsing RTable %s; " % i, err)
+			continue
+		$V/KS.init_table(parse_json(data), intent)
 	
 
 	#Set the envelope.

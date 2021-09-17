@@ -46,6 +46,8 @@ namespace gdsFM
         public const byte FIXED_NOTE_SPECIFIED = 0xFE;
 
 
+        public const float NORMALIZED_EPSILON = Single.Epsilon * 0x800000;  //The smallest number that represents a non-subnormal float value.
+
 
         //Global Event ID counter
         static long eventID=0;

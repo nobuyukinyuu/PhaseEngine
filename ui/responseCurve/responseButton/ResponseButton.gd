@@ -119,7 +119,6 @@ func _draw():
 			previous_ln = offset
 		#Draw font
 		var s=str(lastmax)
-#		if lastmax > 0:  draw_string(font, icon_offset + Vector2(20-str_w(s),-4),s,Color(2,2,2, 0.8))
 		if lastmax > 0:  
 			draw_string(font, icon_offset + Vector2(16-str_w(s)/2,-4),s,Color(2,2,2, 0.8))
 			s = str(lastmin)
