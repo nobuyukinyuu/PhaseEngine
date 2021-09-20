@@ -14,7 +14,7 @@ namespace gdsFM
         protected int seed=1;  //LFSR state sent ByRef to oscillators which produce noise
         public Increments pg = Increments.Prototype();
  
-        public abstract void SetOscillatorType(Oscillator.waveFunc waveFunc);
+        // public abstract void SetOscillatorType(Oscillator.waveFunc waveFunc);
         public abstract void SetOscillatorType(byte waveform_index);
         // public abstract short RequestSample(ushort modulation = 0);
         public abstract void Clock();
@@ -39,14 +39,6 @@ namespace gdsFM
         public Envelope eg = new Envelope();
         public EGStatus egStatus = EGStatus.INACTIVE;
         public ushort egAttenuation = Envelope.L_MAX;  //5-bit value
-
-
-        // public Oscillator oscillator = new Oscillator(Oscillator.Sine);
-
-        // public delegate short sampleOutputFunc(ushort modulation); //Primary function of the operator
-        // public sampleOutputFunc operatorOutputSample;
-
-        // int seed=1;  //LFSR state sent ByRef to oscillators which produce noise
 
 
         public Operator(){operatorOutputSample=ComputeVolume;}
@@ -99,7 +91,7 @@ namespace gdsFM
 
 
         //Sets up the operator to act as an oscillator for FM output.
-        public override void SetOscillatorType(Oscillator.waveFunc waveFunc)
+        public void SetOscillatorType(Oscillator.waveFunc waveFunc)
         {
             oscillator.SetWaveform(waveFunc);
             switch(waveFunc.Method.Name)
@@ -132,9 +124,7 @@ namespace gdsFM
         }
 
 
-        //Oscillator output types.  Either standard waveform (log domain), noise, or sample.
-        public short OperatorType_ComputeLogOuput(ushort modulation, ushort am_offset)
-        {return ComputeVolume(modulation, am_offset);}
+        //=============Oscillator output types.  Either standard waveform (log domain), noise, or sample.=========================
 
 
         //Noise generators produce asymmetrical data.  Values must be translated to/from the log domain.

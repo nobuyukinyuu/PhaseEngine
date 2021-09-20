@@ -63,6 +63,7 @@ func _draw():
 		
 
 func draw_response(intent:int, pos=Vector2.ZERO):
+	if refTable[0] is int:  return
 	var icon_offset = pos
 	var previous_ln=Vector2.ZERO
 	var enabled = !refTable[intent].empty()
@@ -101,7 +102,7 @@ func draw_response(intent:int, pos=Vector2.ZERO):
 		#Draw font
 		if lastmax > 0 and lastmin <= lastmax:  
 			var s = format_num(lastmax)
-			draw_string(font, icon_offset + Vector2(22,-2),s,Color(1,1,1, 0.75))
+			draw_string(font, icon_offset + Vector2(22,-1),s,Color(1,1,1, 0.75))
 
 			if lastmin > 0: 
 				s = str(lastmin)

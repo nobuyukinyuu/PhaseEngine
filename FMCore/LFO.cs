@@ -150,7 +150,7 @@ namespace gdsFM
         // ===========================================  Operator meta functions  =============================================================
 
         //Sets up the operator to act as an oscillator for FM output.
-        public override void SetOscillatorType(Oscillator.waveFunc waveFunc)
+        public void SetOscillatorType(Oscillator.waveFunc waveFunc)
         {
             oscillator.SetWaveform(waveFunc);
             switch(waveFunc.Method.Name)

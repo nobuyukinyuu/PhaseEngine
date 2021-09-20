@@ -122,7 +122,7 @@ public class Test2 : Label
         }
     }
 
-    public int GetOpType(int opTarget){ if(opTarget >= c.opCount) return 0; else return c.Voice.opType[opTarget]; }
+    public byte GetOpType(int opTarget){ if(opTarget >= c.opCount) return 0; else return c.Voice.opType[opTarget]; }
     public int GetOpCount() { return c.opCount; }
 
 
@@ -189,7 +189,7 @@ public class Test2 : Label
         //Force a re-check of the oscillator type, which will set the feedback functionality on or off depending on the current value.
         //This is inefficient and not necessary for non-live input as the function is checked on NoteOn() anyway. But this changes it live.
         for(int i=0; i<c.channels.Length; i++)
-            c.channels[i].ops[opTarget].SetOscillatorType(Oscillator.waveFuncs[GetOpType(opTarget)]);
+            c.channels[i].ops[opTarget].SetOscillatorType(GetOpType(opTarget));
     }
 
     public void SetWaveform(int opTarget, float val)

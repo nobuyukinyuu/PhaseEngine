@@ -32,7 +32,7 @@ namespace gdsFM
 
 
 
-        //summary:  Slow converstion from float to fixed point.
+        /// summary:  Slow converstion from float to fixed point.
         public static long ToFixedPoint(float n, byte decimalBitPrecision=Global.FRAC_PRECISION_BITS, bool preserveSignBit=false)
         {
             var whole = Math.Abs(Math.Truncate(n));
@@ -72,84 +72,63 @@ namespace gdsFM
         }
 
 
-            /// \defgroup bitutils Useful functions for bit shuffling
-            /// \{
+        /// \defgroup bitutils Useful functions for bit shuffling
+        /// \{
 
-            /// \brief Generate a right-aligned bit mask
-            ///
-            /// Generates a right aligned mask of the specified width.  Works with
-            /// signed and unsigned integer types.
-            /// \tparam T Desired output type.
-            /// \tparam U Type of the input (generally resolved by the compiler).
-            /// \param [in] n Width of the mask to generate in bits.
-            /// \return Right-aligned mask of the specified width.
+        /// \brief Generate a right-aligned bit mask
+        ///
+        /// Generates a right aligned mask of the specified width.  Works with
+        /// signed and unsigned integer types.
+        /// \tparam T Desired output type.
+        /// \tparam U Type of the input (generally resolved by the compiler).
+        /// \param [in] n Width of the mask to generate in bits.
+        /// \return Right-aligned mask of the specified width.
 
-            // TODO:  Consider rewriting these to not rely on rollover but instead return unsigned maxValue if width is exceeded and (1<<n)-1 otherwise...
-            public static uint make_bitmask(int n) { return (uint)((n < (32) ? ((1u) << n) : (0u)) - 1); }
-            public static ushort make_bitmask(short n) { return (ushort)((n < (16) ? ((1u) << n) : (0u)) - 1); }
-            public static ulong make_bitmask(long n) { return (ulong)((n < (64) ? ((1ul) << (int)n) : unchecked((ulong)-1))); }  // Uhhhhh.....
-
-
-
-
-            /// \brief Extract a single bit from an integer
-            ///
-            /// Extracts a single bit from an integer into the least significant bit
-            /// position.
-            ///
-            /// \param [in] x The integer to extract the bit from.
-            /// \param [in] n The bit to extract, where zero is the least
-            ///   significant bit of the input.
-            /// \return Zero if the specified bit is unset, or one if it is set.
-            /// \sa bitswap
-
-            // public static T BIT(T x, T n) { return (x >> n) & (T)1; }
-            public static short BIT(short x, byte n) { return (short)((x >> n) & 1); }
-            public static ushort BIT(ushort x, byte n) { return (ushort)((x >> n) & 1); }
-            public static int BIT(int x, byte n) { return (int)((x >> n) & 1); }
-            public static uint BIT(uint x, byte n) { return (uint)((x >> n) & 1); }
-            public static long BIT(long x, byte n) { return (long)((x >> n) & 1); }
-            public static ulong BIT(ulong x, byte n) { return (ulong)((x >> n) & 1); }
-
-
-            /// \brief Generate a right-aligned bit mask
-            ///
-            /// Generates a right aligned mask of the specified width.  Works with
-            /// signed and unsigned integer types.
-            /// \tparam T Desired output type.
-            /// \tparam U Type of the input (generally resolved by the compiler).
-            /// \param [in] n Width of the mask to generate in bits.
-            /// \return Right-aligned mask of the specified width.
-            public static byte BIT(byte x, byte n, byte w) { return (byte)((x >> n) & make_bitmask(w)); }
-            public static short BIT(short x, byte n, byte w) { return (short)((x >> n) & make_bitmask(w)); }
-            public static ushort BIT(ushort x, byte n, byte w) { return (ushort)((x >> n) & make_bitmask(w)); }
-            public static int BIT(int x, byte n, byte w) { return (int)((x >> n) & make_bitmask(w)); }
-            public static uint BIT(uint x, byte n, byte w) { return (uint)((x >> n) & make_bitmask(w)); }
-            public static long BIT(long x, byte n, byte w) { return (long)((x >> n) & make_bitmask(w)); }
-            public static ulong BIT(ulong x, byte n, byte w) { return (ulong)((x >> n) & make_bitmask(w)); }
+        // TODO:  Consider rewriting these to not rely on rollover but instead return unsigned maxValue if width is exceeded and (1<<n)-1 otherwise...
+        public static uint make_bitmask(int n) { return (uint)((n < (32) ? ((1u) << n) : (0u)) - 1); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ushort make_bitmask(short n) { return (ushort)((n < (16) ? ((1u) << n) : (0u)) - 1); }
+        public static ulong make_bitmask(long n) { return (ulong)((n < (64) ? ((1ul) << (int)n) : unchecked((ulong)-1))); }  // Uhhhhh.....
 
 
 
-            /// \brief Extract a bit field from an integer
-            /// \brief Extract bits in arbitrary order
-            ///
-            /// Extracts bits from an integer.  Specify the bits in the order they
-            /// should be arranged in the output, from most significant to least
-            /// significant.  The extracted bits will be packed into a right-aligned
-            /// field in the output.
-            ///
-            /// \param [in] val The integer to extract bits from.
-            /// \param [in] b The first bit to extract from the input
-            ///   extract, where zero is the least significant bit of the input.
-            ///   This bit will appear in the most significant position of the
-            ///   right-aligned output field.
-            /// \param [in] c The remaining bits to extract, where zero is the
-            ///   least significant bit of the input.
-            /// \return The extracted bits packed into a right-aligned field.
-            // template <typename T, typename U, typename... V> constexpr T bitswap(T val, U b, V... c) noexcept
-            // {
-            //     return (BIT(val, b) << sizeof...(c)) | bitswap(val, c...);
-            // }
+
+        /// \brief Extract a single bit from an integer
+        ///
+        /// Extracts a single bit from an integer into the least significant bit
+        /// position.
+        ///
+        /// \param [in] x The integer to extract the bit from.
+        /// \param [in] n The bit to extract, where zero is the least
+        ///   significant bit of the input.
+        /// \return Zero if the specified bit is unset, or one if it is set.
+        /// \sa bitswap
+
+        // public static T BIT(T x, T n) { return (x >> n) & (T)1; }
+        public static short BIT(short x, byte n) { return (short)((x >> n) & 1); }
+        public static ushort BIT(ushort x, byte n) { return (ushort)((x >> n) & 1); }
+        public static int BIT(int x, byte n) { return (int)((x >> n) & 1); }
+        public static uint BIT(uint x, byte n) { return (uint)((x >> n) & 1); }
+        public static long BIT(long x, byte n) { return (long)((x >> n) & 1); }
+        public static ulong BIT(ulong x, byte n) { return (ulong)((x >> n) & 1); }
+
+
+        /// \brief Generate a right-aligned bit mask
+        ///
+        /// Generates a right aligned mask of the specified width.  Works with
+        /// signed and unsigned integer types.
+        /// \tparam T Desired output type.
+        /// \tparam U Type of the input (generally resolved by the compiler).
+        /// \param [in] n Width of the mask to generate in bits.
+        /// \return Right-aligned mask of the specified width.
+        public static byte BIT(byte x, byte n, byte w) { return (byte)((x >> n) & make_bitmask(w)); }
+        public static short BIT(short x, byte n, byte w) { return (short)((x >> n) & make_bitmask(w)); }
+        public static ushort BIT(ushort x, byte n, byte w) { return (ushort)((x >> n) & make_bitmask(w)); }
+        public static int BIT(int x, byte n, byte w) { return (int)((x >> n) & make_bitmask(w)); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static uint BIT(uint x, byte n, byte w) { return (uint)((x >> n) & make_bitmask(w)); }
+        public static long BIT(long x, byte n, byte w) { return (long)((x >> n) & make_bitmask(w)); }
+        public static ulong BIT(ulong x, byte n, byte w) { return (ulong)((x >> n) & make_bitmask(w)); }
+
+
 
 
         //Boolean conversion extension methods
@@ -200,6 +179,7 @@ namespace gdsFM
         {
             return (value >> 3) << BIT(value, 0, 3);
         }
+
 
 
         /// summary:  Produces a string representing the bitmask of value n.
