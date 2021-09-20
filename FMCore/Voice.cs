@@ -137,6 +137,7 @@ namespace gdsFM
             alg.SetOpCount(opTarget);
 
             opCount = opTarget;
+            preview.SetVoice(this);
         }
 
         //Creates a Chip to generate a preview of what this voice would sound like.
