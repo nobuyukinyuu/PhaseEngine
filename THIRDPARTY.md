@@ -90,7 +90,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## monkey-json
-BSD-3-Clause License
+BSD-2-Clause License
 
 Copyright (c) 2011, Damian Sinclair
 
