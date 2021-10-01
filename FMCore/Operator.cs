@@ -3,11 +3,17 @@ using gdsFM;
 
 namespace gdsFM 
 {
+    
     public abstract class OpBase  //Base for operator, LFO and filter classes
     {
+        public enum Intents { DEFAULT, FM_OP, LFO, FILTER };  //Used to serialize waveFuncs
+        public Intents intent = Intents.DEFAULT;
+
+
         public Oscillator oscillator = new Oscillator(Oscillator.Sine2);
-        public delegate short sampleOutputFunc(ushort modulation = 0, ushort am_offset=0); //Primary function of the oscillator
-        public sampleOutputFunc operatorOutputSample;
+        public delegate short SampleOutputFunc(ushort modulation = 0, ushort am_offset=0); //Primary function of the oscillator
+        public SampleOutputFunc operatorOutputSample;
+
 
         protected long phase;  //Phase accumulator
         protected bool flip=false;  // Used by the oscillator to flip the waveform's values.  TODO:  User-specified waveform inversion
@@ -18,6 +24,8 @@ namespace gdsFM
         public abstract void SetOscillatorType(byte waveform_index);
         // public abstract short RequestSample(ushort modulation = 0);
         public abstract void Clock();
+
+        public abstract short RequestSample(ushort input, ushort am_offset);
 
     }
 
@@ -41,7 +49,7 @@ namespace gdsFM
         public ushort egAttenuation = Envelope.L_MAX;  //5-bit value
 
 
-        public Operator(){operatorOutputSample=ComputeVolume;}
+        public Operator(){operatorOutputSample=ComputeVolume; intent=Intents.FM_OP; }
         // public Operator(){ operatorOutputSample=OperatorType_ComputeLogOuput; }
 
 
@@ -79,7 +87,7 @@ namespace gdsFM
                 // EGClock(env_counter);
         }
 
-        public short RequestSample(ushort modulation = 0, ushort am_offset = 0)
+        public override short RequestSample(ushort modulation = 0, ushort am_offset = 0)
         {
             return operatorOutputSample(modulation, am_offset);
             // return oscillator.Generate(unchecked(phase >> Global.FRAC_PRECISION_BITS), duty, ref flip);

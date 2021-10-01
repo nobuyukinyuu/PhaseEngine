@@ -161,11 +161,16 @@ public class Test2 : Label
                 var velocity = c.channels[i].lastVelocity;
                 ushort tl = (ushort) (val + newEG.ksl[note] + newEG.velocity[velocity]);  //This incurs a 'hidden' recalc cost from rTable thru the indexer
                 newEG.tl = tl;
-                c.channels[i].ops[opTarget].eg = newEG; 
+
+                var op = c.channels[i].ops[opTarget] as Operator;
+                if (op !=null) op.eg = newEG; 
             }
         else
             for(int i=0; i<c.channels.Length; i++)
-                c.channels[i].ops[opTarget].eg.ChangeValue(property, val);
+            {
+                var op = c.channels[i].ops[opTarget] as Operator;
+                op?.eg.ChangeValue(property, val);
+            }
     }
 
     public void SetFixedFreq(int opTarget, bool isFixed) { c.Voice.pgs[opTarget].fixedFreq = isFixed; }

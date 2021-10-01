@@ -39,6 +39,7 @@ namespace gdsFM
 
         void Init(byte speed=19)  //Speed of LFO defaults to ~1.25s
         {
+            intent = Intents.LFO;
             ScaleProcess=PMScaleLog;
             operatorOutputSample = OperatorType_LogOutput;
             SetSpeed(speed);
@@ -83,7 +84,6 @@ namespace gdsFM
             { lastClockedVolume = (short)ScaleProcess(operatorOutputSample()); lastAMVolume = RequestAM();} 
 
 
-
  
         //From "Musical Applications of Microprocessors" by Hal Chamberlin, page 438:
         //Reference:  https://stackoverflow.com/questions/38918530/simple-low-pass-filter-in-fixed-point/38927630#38927630
@@ -96,6 +96,7 @@ namespace gdsFM
             return (short)ou;
         }
 
+        public override short RequestSample(ushort input, ushort am_offset){return (short)RequestAM();} //Not currently used
         public ushort RequestAM()  //Returns an attenuation value from 0-TL.
         {
             if (amd==Envelope.L_MAX) return 0;

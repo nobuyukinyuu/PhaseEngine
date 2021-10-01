@@ -7,7 +7,7 @@ namespace gdsFM
     {
         public long eventID;  //Unique value assigned during NoteOn event to identify it later during a NoteOff event.  Always > 0
         public BusyState busy=BusyState.FREE;
-        public Operator[] ops;
+        public OpBase[] ops;
 
         Voice voice;
         int[] cache;  //As each level of the stack gets processed, the sample cache for each operator is updated.
@@ -21,7 +21,7 @@ namespace gdsFM
 
         public Channel(byte opCount)
         {
-            ops = new Operator[opCount];
+            ops = new OpBase[opCount];
             // processOrder = new byte[opCount];
             // Array.Copy(Algorithm.DEFAULT_PROCESS_ORDER, processOrder, opCount);
             // connections = new byte[opCount];
@@ -54,14 +54,14 @@ namespace gdsFM
             for(int i=0; i<ops.Length; i++)
             {
                 if (voice.alg.connections[i] != 0)  continue;  //Skip over connections not connected to output.
-                var op=ops[i];
+                var op=ops[i] as Operator;
                 if (busy==BusyState.BUSY ||
-                   (busy==BusyState.RELEASED &&  op.egStatus != EGStatus.INACTIVE) )
+                   (busy==BusyState.RELEASED &&  op?.egStatus != EGStatus.INACTIVE) )
                         setFree = false;
 
                 //Status of the envelope is such that the further along in the envelope it is, the higher the score.
                 //Lsh ensures that the value is always positive -- Delay is considered same priority as Decay, Hold the same as Sustained
-                score += (int)ops[i].egStatus <<4;  
+                if (op!=null) score += (int)op.egStatus <<4;  
                 score >>= 1;  //Compensate for multiple operators connected to output.
             }
             if (setFree) busy = BusyState.FREE;
@@ -86,60 +86,64 @@ namespace gdsFM
             var opsToProcess = (byte)Math.Min(voice.alg.opCount, ops.Length); //Prevents out of bounds if the voice changed while notes are still on.
             for(byte i=0; i<opsToProcess; i++)
             {
-                var op=ops[i];
-                op.eg = new Envelope(voice.egs[i]);  //Make copies of the old EG values so they can be altered on a per-note basis.
+                var intent=ops[i].intent;
 
-                // Adjust the EG based on values from the RTables.
-                if (midi_note < 0x80) 
+
+                //NOTE:  This might be faster as a type-matching switch pattern, but this isn't supported in c# 7.2.  Consider changing it in the future if more efficient
+                switch(intent)
                 {
-                    op.eg.ksl.Apply(midi_note, ref op.eg.levels[4]);  //Apply KSL to total level
+                case OpBase.Intents.FM_OP:
+                    var op = ops[i] as Operator;
+                    op.eg = new Envelope(voice.egs[i]);  //Make copies of the old EG values so they can be altered on a per-note basis.
 
-                    for (int j=0; j<op.eg.rates.Length-1; j++)
+                    // Adjust the EG based on values from the RTables.
+                    if (midi_note < 0x80) 
                     {
-                        //Rate scaling is applied double to everything except the release rate. (r = 2r + ksr)
-                        var rate = (byte)(op.eg.rates[j] * 2);  
-                        op.eg.ksr.Apply(midi_note, ref rate);
-                        op.eg.rates[j] = (byte)rate;
+                        op.eg.ksl.Apply(midi_note, ref op.eg.levels[4]);  //Apply KSL to total level
+
+                        for (int j=0; j<op.eg.rates.Length-1; j++)
+                        {
+                            //Rate scaling is applied double to everything except the release rate. (r = 2r + ksr)
+                            var rate = (byte)(op.eg.rates[j] * 2);  
+                            op.eg.ksr.Apply(midi_note, ref rate);
+                            op.eg.rates[j] = (byte)rate;
+
+                        }
+                        op.eg.ksr.Apply(midi_note, ref op.eg.rates[op.eg.rates.Length-1]); //Release rate
 
                     }
-                    op.eg.ksr.Apply(midi_note, ref op.eg.rates[op.eg.rates.Length-1]); //Release rate
+                    op.eg.velocity.Apply(velocity, ref op.eg.levels[4]);  //Apply velocity to total level
+
+
+
+                    op.pg = voice.pgs[i];  //Set Increments to the last Voice increments value (ByVal copy)
+                    op.SetOscillatorType((byte)voice.opType[i]);  //Set the wave function to what the voice says it should be
+
+                    //Prepare the note's increment based on calculated pitch
+                    if (!op.pg.fixedFreq)
+                        op.pg.NoteSelect(this.midi_note);
+                    op.pg.Recalc();
+                    op.NoteOn();
+                    break;
 
                 }
-                op.eg.velocity.Apply(velocity, ref op.eg.levels[4]);  //Apply velocity to total level
-
-
-
-                op.pg = voice.pgs[i];  //Set Increments to the last Voice increments value (ByVal copy)
-                op.SetOscillatorType((byte)voice.opType[i]);  //Set the wave function to what the voice says it should be
-
-                //Prepare the note's increment based on calculated pitch
-                if (!op.pg.fixedFreq)
-                    op.pg.NoteSelect(this.midi_note);
-                op.pg.Recalc();
-                op.NoteOn();
-
-                busy = BusyState.BUSY;                
+                // if (intent == OpBase.Intents.FM_OP)
             }
+            busy = BusyState.BUSY;                
         }
-
-        // public void NoteOn(float hz)
-        // {
-        //     //TODO:  Fixed frequency note on?
-        // }
 
         public void NoteOff()
         {
             if(busy==BusyState.BUSY)  busy=BusyState.RELEASED;
             for(byte i=0; i<ops.Length; i++)
-                ops[i].NoteOff();
+            {
+                var op = ops[i] as Operator;
+                op?.NoteOff();
+            }
         }
 
-        /// Main algorithm processor.
-        public short RequestSample()
-        {
-            return lastSample;
-        }
-
+        /// Main algorithm processor. ///
+        public short RequestSample()    { return lastSample; }
         public void ProcessNextSample()
         {
             if (voice==null) return;
@@ -158,22 +162,22 @@ namespace gdsFM
             for (byte o=0; o < opsToProcess;  o++)
             {
                 var src_op = voice.alg.processOrder[o];  //Source op number.
-                if (ops[src_op].eg.mute)  
+                if (voice.egs[src_op].mute)  
                 {
                     cache[src_op] = 0;
                     continue;  //Exit early if muted.
                 }
 
-                int c = voice.alg.connections[ src_op ];  //Get Connections for the source operator.
-
+                // ApplyTechnique(src_op, ref output);
 
                 //First, convert the source op's accumulated phase up to this point into its sample result value.
                 //For termini (top of an op stack), the phase accumulated in the cache will always be 0.
-                var modulation = ops[src_op].RequestSample( (ushort)cache[src_op], am_offset );
+                var operatorResult = ops[src_op].RequestSample( (ushort)cache[src_op], am_offset );
 
+                int c = voice.alg.connections[ src_op ];  //Get Connections for the source operator.
                 if (c==0)  //Source op isn't connected to anything, so we assume it's connected to output.
                 {
-                    output += ops[src_op].eg.bypass? cache[src_op] : modulation;  //Accumulate total.
+                    output += voice.egs[src_op].bypass? cache[src_op] : operatorResult;  //Accumulate total.
                     continue;
                 }
 
@@ -183,8 +187,8 @@ namespace gdsFM
                     unchecked 
                     {
                         if ( (c & 1) == 1)  
-                        { //Flag is set. The destination op receives modulation from the source op and is added to the total output cache for that operator.
-                            if (!ops[src_op].eg.bypass)  cache[dest_op] += modulation;  else  cache[dest_op] = cache[src_op];
+                        { //Flag is set. The destination op receives the result from the source op and is added to the total processing cache for that operator.
+                            if (!voice.egs[src_op].bypass)  cache[dest_op] += operatorResult;  else  cache[dest_op] = cache[src_op];
                         }
                         c >>= 1; //Crunch down and process next position. Loop continues until the connection mask has no more connections.
                     }
@@ -193,6 +197,35 @@ namespace gdsFM
             }     
             lastSample = (short)output.Clamp(short.MinValue, short.MaxValue);            
         }
+
+    // void TechniqueFM(byte src_op, ref int output)
+    // {
+    //     //First, convert the source op's accumulated phase up to this point into its sample result value.
+    //     //For termini (top of an op stack), the phase accumulated in the cache will always be 0.
+    //     var modulation = ops[src_op].RequestSample( (ushort)cache[src_op], am_offset );
+
+    //     int c = voice.alg.connections[ src_op ];  //Get Connections for the source operator.
+    //     if (c==0)  //Source op isn't connected to anything, so we assume it's connected to output.
+    //     {
+    //         output += ops[src_op].eg.bypass? cache[src_op] : modulation;  //Accumulate total.
+    //         return;
+    //     }
+
+    //     //Source op has connections. Mix down the sample results to its connections.
+    //     for(byte dest_op=0; c>0; dest_op++)  //Crunch the connection bitmask down, one bit at a time, until there's no more connections.
+    //     {
+    //         unchecked 
+    //         {
+    //             if ( (c & 1) == 1)  
+    //             { //Flag is set. The destination op receives modulation from the source op and is added to the total output cache for that operator.
+    //                 if (!ops[src_op].eg.bypass)  cache[dest_op] += modulation;  else  cache[dest_op] = cache[src_op];
+    //             }
+    //             c >>= 1; //Crunch down and process next position. Loop continues until the connection mask has no more connections.
+    //         }
+    //     }
+    // }
+
+
 
         private void SetOpCount(byte opTarget)
         {
@@ -217,8 +250,10 @@ namespace gdsFM
             if(voice.opCount != ops.Length)  SetOpCount(voice.opCount);
             for (int i=0; i<voice.opCount;  i++)
             {
-                ops[i].eg = voice.egs[i];
-                ops[i].pg = voice.pgs[i];  //ByVal copy
+                var op = ops[i] as Operator;
+                if (op==null) continue;
+                op.eg = voice.egs[i];
+                op.pg = voice.pgs[i];  //ByVal copy
             }
 
             this.voice = voice;
@@ -243,8 +278,5 @@ namespace gdsFM
             }
             return sb.ToString();
         }
-
-
     }
-
 }
