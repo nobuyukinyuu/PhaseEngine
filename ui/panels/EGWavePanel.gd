@@ -3,7 +3,8 @@ extends Panel
 
 func _ready():
 	
-	for i in global.waves.size():
+#	for i in global.waves.size():
+	for i in $Popup/G.get_child_count():
 		$Popup/G.get_child(i).connect("pressed", self, "_on_Popup_button_pressed", [i])
 	
 	$Preview.texture = global.wave_img[0]

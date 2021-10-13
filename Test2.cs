@@ -122,9 +122,31 @@ public class Test2 : Label
         }
     }
 
-    public byte GetOpType(int opTarget){ if(opTarget >= c.opCount) return 0; else return c.Voice.opType[opTarget]; }
+    public byte GetOpIntent(int opTarget){ if(opTarget >= c.opCount) return 0; else return (byte)c.Voice.alg.intent[opTarget]; }
+    public byte GetOscType(int opTarget){ if(opTarget >= c.opCount) return 0; else return c.Voice.oscType[opTarget]; }
     public int GetOpCount() { return c.opCount; }
 
+
+
+        //FIXME:  This function is hacky and only sets the chip's channel ops to the processed value and has NO representation in the Voice outside of the preview!
+        //          Custom bitwise operation type and (in the future) other values unique to each sub-operator type should probably store these things in EG.
+        //          Then, EG should probably be moved to OpBase.....
+        public void SetOpProperty(byte opTarget, string property, int val)
+        {
+            foreach(Channel ch in c.channels)
+            {
+                var op = ch.ops[opTarget] as BitwiseOperator;
+                if (op==null) continue;
+                op.SetVal(property, (byte)val);
+            }
+        }
+
+    public bool SetOpIntent(int opTarget, int _intent)
+    {
+        var intent = (OpBase.Intents) _intent;
+        return c.UpdateIntent((byte)opTarget, (OpBase.Intents) _intent);
+
+    }
 
     public void SetLFO(string property, float val)
     {
@@ -194,7 +216,7 @@ public class Test2 : Label
         //Force a re-check of the oscillator type, which will set the feedback functionality on or off depending on the current value.
         //This is inefficient and not necessary for non-live input as the function is checked on NoteOn() anyway. But this changes it live.
         for(int i=0; i<c.channels.Length; i++)
-            c.channels[i].ops[opTarget].SetOscillatorType(GetOpType(opTarget));
+            c.channels[i].ops[opTarget].SetOscillatorType(GetOscType(opTarget));
     }
 
     public void SetWaveform(int opTarget, float val)
@@ -230,6 +252,7 @@ public class Test2 : Label
     public void SetMute(int opTarget, bool val) {c.Voice.egs[opTarget].mute = val;}
 
 
+    //////////////////////////////    rTABLE    ////////////////////////////////////
     ///summary:  Updates a single column in an rTable.
     public void UpdateTable(int opNum, int column, int value, RTableIntent intent)
     {
@@ -282,6 +305,8 @@ public class Test2 : Label
     public bool is_quiet() {return c.ChannelsAreFree;}
     public int connections_to_output() {return c.Voice.alg.NumberOfConnectionsToOutput;}
 
+
+    ///////////////////////////////////    BUFFER    /////////////////////////////////////
     void fill_buffer()
     {
         var frames= buf.GetFramesAvailable();

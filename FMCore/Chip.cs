@@ -230,6 +230,16 @@ namespace gdsFM
                 channels[i].SetVoice(v);
         }
 
+        //Sets the intents to the voice specified intent.
+        public bool UpdateIntent(byte opTarget, OpBase.Intents intent)
+        {
+            if (voice==null) return false;
+            voice.SetIntent(opTarget, intent);
+            for (int i=0; i<channels.Length; i++)   channels[i].SetIntents(opTarget, (byte)(opTarget+1), voice);
+            return true;
+        }
+
+
         #if GODOT
             /// Updates the voice's algorithm and informs the channels.
             public void SetAlgorithm(Godot.Collections.Dictionary d)

@@ -6,8 +6,8 @@ namespace gdsFM
     
     public abstract class OpBase  //Base for operator, LFO and filter classes
     {
-        public enum Intents { DEFAULT, FM_OP, LFO, FILTER };  //Used to serialize waveFuncs
-        public Intents intent = Intents.DEFAULT;
+        public enum Intents { LFO=-1, NONE, FM_OP, FILTER, BITWISE, WAVEFOLDER };
+        public Intents intent = Intents.NONE;
 
 
         public Oscillator oscillator = new Oscillator(Oscillator.Sine2);
@@ -154,7 +154,20 @@ namespace gdsFM
         }
 
 
+        public short ComputeVolume2(ushort modulation, ushort am_offset)
+        {
+            ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) /*+ modulation*/);
 
+            ushort sin_attenuation = oscillator.Generate(phase, eg.duty, ref flip, __makeref(pg.hz));
+
+            ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);
+
+            int result = Tables.attenuation_to_volume((ushort)(sin_attenuation + env_attenuation));
+            var output = flip?  (short)-result: (short)result;
+
+            output |= unchecked((short)modulation);
+            return output;
+        }
         public short ComputeVolume(ushort modulation, ushort am_offset)
         {
             // start with the upper 10 bits of the phase value plus modulation
@@ -306,7 +319,7 @@ namespace gdsFM
         //  attenuation of the envelope
         //-------------------------------------------------
 
-        ushort envelope_attenuation(ushort am_offset)
+        protected ushort envelope_attenuation(ushort am_offset)
         {
             ushort result = egAttenuation;
 
@@ -330,6 +343,40 @@ namespace gdsFM
 
     }
 
+    public class BitwiseOperator : Operator
+    {
+        public delegate short OpFunc(short modulation, short oscOutput); //Function of the operator.
+        OpFunc BitwiseOp;
+        public static readonly OpFunc[] operations = {OP_AND, OP_OR, OP_XOR};
+        public byte OpFuncType {get => _op_func_type;  set {BitwiseOp = operations[value]; _op_func_type=value;}}
+        private byte _op_func_type;
 
+        public BitwiseOperator() {intent=Intents.BITWISE; BitwiseOp=OP_OR;}
+
+        public override short RequestSample(ushort modulation = 0, ushort am_offset = 0)
+        {
+            return BitwiseOp(ComputeOsc(am_offset), (short)modulation);  //Modulation sent to us is the sample value of previous operator.
+        }
+
+        public short ComputeOsc(ushort am_offset)
+        {
+            ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) /*+ modulation*/);
+
+            ushort sin_attenuation = oscillator.Generate(phase, eg.duty, ref flip, __makeref(pg.hz));
+
+            ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);
+
+            int result = Tables.attenuation_to_volume((ushort)(sin_attenuation + env_attenuation));
+            var output = flip?  (short)-result: (short)result;
+
+            return output;
+        }
+
+        //Bitwise Funcs.   TODO:  Implement ROR/ROL?  
+        public static short OP_AND(short modulation, short input) {return (short)(input & modulation);}
+        public static short OP_OR(short modulation, short input) {return (short)(input | modulation);}
+        public static short OP_XOR(short modulation, short input) {return (short)(input ^ modulation);}
+
+    }
 
 }

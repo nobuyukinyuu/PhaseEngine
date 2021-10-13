@@ -51,7 +51,7 @@ func set_from_op(op:int):
 	
 
 	#Set the envelope.
-	var type = clamp(eg.GetOpType(op), 0, 9)   #Probably should be getting this from GetOpValues?
+	var type = clamp(eg.GetOscType(op), 0, 9)   #Probably should be getting this from GetOpValues?
 	$V/EnvelopeDisplay/Wave.texture = global.wave_img[type]
 
 	var rates = d["rates"]

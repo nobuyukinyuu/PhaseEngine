@@ -5,10 +5,20 @@ enum FilterType {NONE, LOWPASS, HIPASS, BANDPASS_CSG, BANDPASS_CZPG, NOTCH, ALLP
 const FilterNames = ["None", "Low Pass", "High Pass", "Bandpass (Skirt Gain)", "Bandpass (0dB Peak)", 
 						"Notch", "All-pass", "Peaking" , "Low Shelf", "High Shelf"]
 
+
+enum OpIntent { LFO=-1, NONE, FM_OP, FILTER, BITWISE, WAVEFOLDER };
+const OpIntentIcons = [
+			preload("res://gfx/ui/icon_invalid.svg"), 
+			preload("res://gfx/ui/icon_fm_symbol.svg"),
+			preload("res://gfx/ui/icon_filter_symbol.svg"),
+			preload("res://gfx/ui/icon_bitwise.svg"),
+			preload("res://gfx/ui/icon_wavefolder.svg"),
+]
+
 const mixRate = 48000.0  #Also set in Constants.cs for the c# backend.  This is used for UI calculations only
 const NOTE_A4 = 69
 const note_names = ["A-", "A#", "B-", "C-", "C#", "D-", "D#", "E-", "F-", "F#", "G-", "G#"]
-const OPERATOR_TAB_GROUP = 8
+const OPERATOR_TAB_GROUP = 8  #Possible future use for if we're listing LFOs and other non-op stuff in Voice kanbans
 
 var periods = []  #Size 128 +1
 
@@ -29,6 +39,7 @@ signal window_resized
 signal op_tooltip_needs_data
 signal op_tab_value_changed
 signal algorithm_changed
+signal op_intent_changed
 
 func _ready():
 	# Generate the period frequencies of every note based on center tuning (A-4) at 440hz

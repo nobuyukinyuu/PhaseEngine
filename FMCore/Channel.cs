@@ -22,14 +22,11 @@ namespace gdsFM
         public Channel(byte opCount)
         {
             ops = new OpBase[opCount];
-            // processOrder = new byte[opCount];
-            // Array.Copy(Algorithm.DEFAULT_PROCESS_ORDER, processOrder, opCount);
-            // connections = new byte[opCount];
             cache = new int[opCount];
 
             for(int i=0; i<opCount; i++)
             {
-                ops[i] = new Operator();
+                ops[i] = new Operator();  //Default intent is FM_OP when initializing a channel.
             }
         }
 
@@ -93,6 +90,7 @@ namespace gdsFM
                 switch(intent)
                 {
                 case OpBase.Intents.FM_OP:
+                case OpBase.Intents.BITWISE:
                     var op = ops[i] as Operator;
                     op.eg = new Envelope(voice.egs[i]);  //Make copies of the old EG values so they can be altered on a per-note basis.
 
@@ -117,7 +115,7 @@ namespace gdsFM
 
 
                     op.pg = voice.pgs[i];  //Set Increments to the last Voice increments value (ByVal copy)
-                    op.SetOscillatorType((byte)voice.opType[i]);  //Set the wave function to what the voice says it should be
+                    op.SetOscillatorType((byte)voice.oscType[i]);  //Set the wave function to what the voice says it should be
 
                     //Prepare the note's increment based on calculated pitch
                     if (!op.pg.fixedFreq)
@@ -234,29 +232,56 @@ namespace gdsFM
             Array.Resize(ref cache, opTarget);
 
             if (opTarget>opCount)
-            {
-                for (byte i=opCount; i<opTarget; i++)
-                {
-                    ops[i] = new Operator();
-
-                }
-            }
-
+                SetIntents(opCount, opTarget);
         }
 
         /// Sets this channel's voice to the specified voice.
         public void SetVoice(Voice voice)
         {
-            if(voice.opCount != ops.Length)  SetOpCount(voice.opCount);
-            for (int i=0; i<voice.opCount;  i++)
-            {
-                var op = ops[i] as Operator;
-                if (op==null) continue;
-                op.eg = voice.egs[i];
-                op.pg = voice.pgs[i];  //ByVal copy
-            }
-
             this.voice = voice;
+            if(voice.opCount != ops.Length)  SetOpCount(voice.opCount);
+            SetIntents(0, voice.opCount);
+            // for (int i=0; i<voice.opCount;  i++)
+            // {
+            //     //Initialize some values copied from the voice.  This only applies to FM_OPs currently.
+            //     //TODO:  Implement a switch statement if the values for Filter are different and need to be set
+            //     var op = ops[i] as Operator;
+            //     if (op==null) continue;
+            //     op.eg = voice.egs[i];
+            //     op.pg = voice.pgs[i];  //ByVal copy
+            // }
+
+        }
+
+        public void SetIntents(byte first, byte last, Voice voice=null)
+        {
+            voice??= this.voice;
+            for (int i=first; i<last; i++)
+            {
+                if (ops[i]==null || ops[i].intent != voice.alg.intent[i])
+                {
+                    switch((OpBase.Intents)voice.alg.intent[i])
+                    {
+                        case OpBase.Intents.FM_OP:
+                            var op = new Operator();
+                            ops[i] = op;
+                            op.eg = voice.egs[i];
+                            op.pg = voice.pgs[i];  //ByVal copy
+                            break;
+                        case OpBase.Intents.FILTER:
+                            ops[i] = new Filter();
+                            break;
+                        case OpBase.Intents.BITWISE:  //Extends FM_OP
+                            var op2 = new BitwiseOperator();
+                            ops[i] = op2;
+                            op2.eg = voice.egs[i];
+                            op2.pg = voice.pgs[i];  //ByVal copy
+                            break;
+                        default:
+                            throw new NotImplementedException("Channel:  Attempting to create a new operator with no/invalid intent...");
+                    }
+                }
+            }
         }
 
         public override string ToString()
@@ -265,8 +290,10 @@ namespace gdsFM
             string nl = Environment.NewLine;
 
             byte i=0;
-            foreach (Operator op in ops)
+            foreach (OpBase opBase in ops)
             {
+                var op = opBase as Operator;
+                if (op==null) continue;
                 string rising;
                 if (op.egStatus>=0 && (int)op.egStatus < op.eg.rising.Length)
                     rising = op.eg.rising[(int)op.egStatus] ? "Rising" : "Falling";

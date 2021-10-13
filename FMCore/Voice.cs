@@ -12,9 +12,8 @@ namespace gdsFM
     {
         public byte opCount = 6; 
 
-        //Keeps track of how to set the operator on a new note.  TODO: Consider an enum of all waveforms and filters for serialization purposes
-        public byte[] opType;   //Typically some kind of waveform value.
-
+        //Keeps track of how to set the operator on a new note.
+        public byte[] oscType;   //Typically some kind of waveform value.
 
         //Consider having an array of envelopes for ops to refer to when initializing their voices as the "canonical" voice, and a temporary copy made for alterables.
         public Envelope[] egs;  //Canonical EG data for each operator.
@@ -42,7 +41,7 @@ namespace gdsFM
              alg = new Algorithm(opCount);
              egs = new Envelope[opCount];
              pgs = new Increments[opCount];
-             opType = new byte[opCount];
+             oscType = new byte[opCount];
 
             //Chip should pass these down when pulling a channel
              for (int i=0; i<opCount; i++){
@@ -123,7 +122,7 @@ namespace gdsFM
         {
             Array.Resize(ref egs, opTarget);
             Array.Resize(ref pgs, opTarget);
-            Array.Resize(ref opType, opTarget);
+            Array.Resize(ref oscType, opTarget);
 
             if (opTarget>opCount)
             {
@@ -204,11 +203,20 @@ namespace gdsFM
             }            
         }
 
+        internal void SetIntent(byte opTarget, OpBase.Intents intent)
+        {
+            //Update the preview and the intent.
+            alg.SetIntent(opTarget, intent);
+            preview.SetIntents(opTarget, (byte)(opTarget + 1));
+        }
+
         /// Sets the canonical waveform to reference when setting an operator's waveFunc on NoteOn.
         public void SetWaveform(int opTarget, int val)
         {   // NOTE:  This does NOT actually set an operator's waveFunc!  This is done in NoteOn when referencing this value from Voice.
-            opType[opTarget] = (byte)val;
+            oscType[opTarget] = (byte)val;
         }    
+
+
 
 
         //TODO:  Front-end IO that de/serializes the wiring grid configuration from an array (user-friendly) to processOrder and connections (code-friendly)

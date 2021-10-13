@@ -156,6 +156,8 @@ func reinit_grid(gridSize:int):  #Completely nuke the controls and rebuild the s
 	for o in get_children():
 		if o.is_connected("dropped", self, "request_move"):
 			o.disconnect("dropped", self, "request_move")
+		if o.is_connected("mid_clicked", self, "_onSlotMidClicked"):
+			o.disconnect("mid_clicked", self, "_onSlotMidClicked")
 		if o.is_connected("right_clicked", self, "_onSlotRightClicked"):
 			o.disconnect("right_clicked", self, "_onSlotRightClicked")
 		o.queue_free()
@@ -174,6 +176,7 @@ func reinit_grid(gridSize:int):  #Completely nuke the controls and rebuild the s
 		p.editor_description = "Slot %s" % i
 		p.gridPos = Vector2( i % gridSize, i/gridSize )
 		p.connect("dropped", self, "request_move")
+		p.connect("mid_clicked", self, "_onSlotMidClicked")
 		p.connect("right_clicked", self, "_onSlotRightClicked")
 		p.set_slot(-1, 0)  #0=None
 		add_child(p)
@@ -230,7 +233,10 @@ func redraw_grid():
 	for op in ops:
 		if op.pos_valid():  #Get the slot and set it
 			var slot = slotNodeAt(op.gridPos)
-			var opType = 1 if op.gridPos.y == total_ops-1 else 2
+			var opType
+			opType = owner.get_node(owner.chip_loc).GetOpIntent(op.id)
+			if opType == global.OpIntent.FM_OP:  opType = 1 if op.gridPos.y == total_ops-1 else 2
+			elif opType > 0:  opType +=1
 			slot.set_slot(op.id, opType)
 		
 	update()
@@ -519,16 +525,22 @@ func draw_arrow(a, b, color=Color(1,1,1,1), width=1.0):
 
 
 #======================= GUI ROUTINES ================================
-func _onSlotRightClicked(pos, pressed):
+func _onSlotMidClicked(pos, pressed):
 	if pressed:
 		#Start a manual connection request.
 		print ("Starting manual connection at ", pos)
 		manual_src_pos = pos
 		update()
 
+func _onSlotRightClicked(gridPos, id):
+	print("Right click from ", id)
+	if id==-1:  return
+	get_parent().popup_intent_menu(id)
+	
+
 func _gui_input(event):
 	if event is InputEventMouseButton:
-		if event.button_index == BUTTON_RIGHT:
+		if event.button_index == BUTTON_MIDDLE:
 			if !event.pressed:
 				var tile_size = rect_size / total_ops
 				var dest = (get_local_mouse_position() / tile_size).floor()

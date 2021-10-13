@@ -13,7 +13,7 @@
 [ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=11]
 [ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=12]
 [ext_resource path="res://gfx/wave/3.png" type="Texture" id=13]
-[ext_resource path="res://ui/LFOPanel.gd" type="Script" id=14]
+[ext_resource path="res://ui/panels/LFOPanel.gd" type="Script" id=14]
 [ext_resource path="res://gfx/wave/7.png" type="Texture" id=15]
 [ext_resource path="res://gfx/wave/2.png" type="Texture" id=16]
 [ext_resource path="res://gfx/wave/8a.png" type="Texture" id=17]
@@ -293,10 +293,6 @@ margin_right = -48.0
 margin_bottom = 28.0
 rect_min_size = Vector2( 56, 20 )
 max_value = 1023.0
-associated_property = ""
-useExpTicks = false
-useHoldTime = false
-text_offset = 0
 
 [node name="Duty" parent="LTab/LFO/WavePanel" instance=ExtResource( 9 )]
 margin_left = 69.0
@@ -307,9 +303,6 @@ rect_min_size = Vector2( 64, 20 )
 max_value = 65535.0
 value = 32767.0
 associated_property = "duty"
-useExpTicks = false
-useHoldTime = false
-text_offset = 0
 
 [node name="Preview" type="TextureRect" parent="LTab/LFO/WavePanel"]
 margin_left = 219.0
@@ -468,9 +461,7 @@ rect_min_size = Vector2( 112, 20 )
 max_value = 32767.0
 exp_edit = true
 associated_property = "Delay"
-useExpTicks = false
-useHoldTime = 2
-text_offset = 0
+special_display = 2
 
 [node name="Speed" parent="LTab/LFO" instance=ExtResource( 9 )]
 margin_left = 7.0
@@ -481,9 +472,7 @@ rect_min_size = Vector2( 64, 20 )
 max_value = 127.0
 value = 19.0
 associated_property = "Speed"
-useExpTicks = false
-useHoldTime = 3
-text_offset = 0
+special_display = 3
 
 [node name="Sync" type="OptionButton" parent="LTab/LFO"]
 margin_left = 8.0
@@ -521,9 +510,6 @@ rect_min_size = Vector2( 112, 20 )
 max_value = 1.0
 step = 0.001
 associated_property = "pmd"
-useExpTicks = false
-useHoldTime = false
-text_offset = 0
 
 [node name="Amplitude Depth" parent="LTab/LFO" instance=ExtResource( 9 )]
 margin_left = 7.0
@@ -535,9 +521,6 @@ max_value = 1023.0
 value = 1023.0
 exp_edit = true
 associated_property = "AMD"
-useExpTicks = false
-useHoldTime = 0
-text_offset = 0
 [connection signal="timeout" from="FMPreview/Timer" to="FMPreview" method="_on_Timer_timeout"]
 [connection signal="gui_input" from="LTab/LFO/WavePanel/Preview/Panel" to="LTab" method="_on_Preview_gui_input"]
 [connection signal="item_selected" from="LTab/LFO/Sync" to="LTab" method="_on_Sync_item_selected"]

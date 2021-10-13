@@ -1,8 +1,8 @@
-extends Control
+extends VoicePanel
 class_name EGPanel
 
-export (NodePath) var chip_loc  #Location of PhaseEngine instance in code
-export(int,0,8) var operator = 0
+#export (NodePath) var chip_loc  #Location of PhaseEngine instance in code
+#export(int,0,8) var operator = 0
 
 onready var rTables = [$KSR, $Velocity, $KSL]
 
@@ -22,7 +22,11 @@ func _ready():
 #	for o in $Tweak.get_children():
 #		if !o is Slider:  continue
 #		o.connect("value_changed", self, "setEG", [o.associated_property])
-	$Tweak/Feedback.connect("value_changed", self, "setFeedback") #Done manually to trigger the oscillator function check
+
+	if $Tweak/Feedback:  #Done manually to trigger the oscillator function check
+		$Tweak/Feedback.connect("value_changed", self, "setFeedback") 
+	if $"Tweak/Func Type":
+		$"Tweak/Func Type".connect("value_changed", self, "setOpProperty", [$"Tweak/Func Type".associated_property])
 	$Tweak/AMS.connect("value_changed", self, "setEG", [$Tweak/AMS.associated_property])
 	$Duty.connect("value_changed", self, "setEG", ["duty"])
 	$OscSync.connect("toggled", self, "setEG", ["osc_sync"])
@@ -67,7 +71,7 @@ func set_from_op(op:int):
 	var eg = get_node(chip_loc)
 	var d = eg.GetOpValues(0, op)  #EG dictionary
 	var d2 = eg.GetOpValues(1, op) #PG dictionary
-	var type = clamp(eg.GetOpType(op), 0, $WavePanel/Wave.max_value)
+	var type = clamp(eg.GetOscType(op), 0, $WavePanel/Wave.max_value)
 	$WavePanel/Wave.value = type
 	
 	$Tune/Mult.value = d2["mult"]
@@ -108,7 +112,8 @@ func set_from_op(op:int):
 	
 	$Tweak/AMS.value = d["ams"]
 	
-	$Tweak/Feedback.value = d["feedback"]
+	if $Tweak/Feedback:  #Only set this if the control exists (it doesn't on a BitwiseOp)
+		$Tweak/Feedback.value = d["feedback"]
 	$Duty.value = d["duty"]
 	$OscSync.pressed = d["osc_sync"]
 	
@@ -151,6 +156,11 @@ func update_env(value, sender:EGSlider):
 		$EnvelopeDisplay.call("update_" + prop, value/global.L_MAX)
 	else:
 		$EnvelopeDisplay.call("update_" + prop, value)
+
+
+func setOpProperty(value, property):
+	get_node(chip_loc).SetOpProperty(operator, property, value)
+	global.emit_signal("op_tab_value_changed")
 
 
 func setEG(value, property):

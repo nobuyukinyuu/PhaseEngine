@@ -10,6 +10,7 @@ func _ready():
 	chip_loc = get_node(chip_loc).get_path()  
 	
 	global.connect("op_tooltip_needs_data", self, "_on_op_tooltip_needs_data")
+	global.connect("op_intent_changed", self, "_on_op_intent_changed")
 	
 	#Expand the kanban scroller to fill the window.
 	get_tree().connect("screen_resized", self, "resized")
@@ -53,6 +54,24 @@ func _on_op_size_changed(opNum:int, oldSz):
 		
 	#Update FM preview.
 	$FMPreview.recalc()
+
+func _on_op_intent_changed(opNum:int, intent, sender=null):  #Default sender:  WiringGrid.  Updated itself already.
+	#Update the kanbans to reflect the correct panel type.  First, find the location of the panel needing change.
+	var opName = "Op" + str(opNum+1)
+	var node_to_replace = $Kanban.find_node(opName, true, false)
+	if !node_to_replace:  
+		print("Can't find %s to change panels!" % opName)
+		return
+	
+	var tab_group = node_to_replace.get_parent()
+	var column =  tab_group.get_parent().get_parent()  #ScrollContainer <- VBox <- TabGroup
+	var pos = node_to_replace.get_position_in_parent()
+	
+	tab_group.remove_child(node_to_replace)
+	var p = column.make_tab(tab_group, opNum, intent)  #Make a new panel.
+	tab_group.move_child(p, pos)
+	
+
 
 #Handler for tooltips that need data from a chip.
 func _on_op_tooltip_needs_data(sender, tooltip):

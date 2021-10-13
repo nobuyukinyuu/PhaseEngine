@@ -69,6 +69,7 @@ func _draw():
 
 
 func _make_custom_tooltip(for_text):
+	#FIXME:  Support other panel types
 	var p = preload("res://ui/EGTooltip.tscn").instance()
 	p.rect_position = get_local_mouse_position()  #Adjust this position when too close to the window border, check later!
 
@@ -77,8 +78,8 @@ func _make_custom_tooltip(for_text):
 	return p
 
 
-#Base tab width is 32 (1 char); active is 40.
-enum Widths {base=24, active=+8, chr=+8}
+#Base tab width is 32+20 (1 char and icon); active is 40.  
+enum Widths {base=24+20, active=+8, chr=+8}
 func get_tab_idx_at_point(pos=get_local_mouse_position()):
 	#NOTE:  This method does not exist in GDScript prior to Godot 3.4, and this is a crappy stopgap implementation
 	#		Which DOES NOT WORK if the tabs spill past the control width (there's no way to get the scroll position),

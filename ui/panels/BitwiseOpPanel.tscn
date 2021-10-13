@@ -1,26 +1,20 @@
-[gd_scene load_steps=37 format=2]
+[gd_scene load_steps=31 format=2]
 
-[ext_resource path="res://ui/EGPanel.gd" type="Script" id=1]
-[ext_resource path="res://ui/EGWavePanel.gd" type="Script" id=2]
+[ext_resource path="res://ui/EGCheckBox.tres" type="Theme" id=1]
+[ext_resource path="res://ui/envelopeDisplay/EnvelopeDisplay.tscn" type="PackedScene" id=2]
 [ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=3]
-[ext_resource path="res://gfx/wave/0.png" type="Texture" id=4]
-[ext_resource path="res://gfx/ui/vCheck.png" type="Texture" id=5]
-[ext_resource path="res://ui/envelopeDisplay/EnvelopeDisplay.tscn" type="PackedScene" id=6]
-[ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=7]
-[ext_resource path="res://ui/FixedFrequency.gd" type="Script" id=8]
-[ext_resource path="res://gfx/fonts/NoteFont.tres" type="BitmapFont" id=9]
-[ext_resource path="res://gfx/wave/3.png" type="Texture" id=10]
-[ext_resource path="res://ui/responseCurve/responseButton/ResponseButton.tscn" type="PackedScene" id=11]
-[ext_resource path="res://ui/EGCheckBox.tres" type="Theme" id=12]
-[ext_resource path="res://gfx/wave/2.png" type="Texture" id=13]
-[ext_resource path="res://gfx/wave/7.png" type="Texture" id=14]
-[ext_resource path="res://gfx/wave/8a.png" type="Texture" id=15]
-[ext_resource path="res://gfx/wave/9.png" type="Texture" id=16]
+[ext_resource path="res://ui/responseCurve/responseButton/ResponseButton.tscn" type="PackedScene" id=4]
+[ext_resource path="res://gfx/wave/0.png" type="Texture" id=5]
+[ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=6]
+[ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=7]
+[ext_resource path="res://gfx/fonts/NoteFont.tres" type="BitmapFont" id=8]
+[ext_resource path="res://ui/panels/EGPanel.gd" type="Script" id=9]
+[ext_resource path="res://ui/panels/FixedFrequency.gd" type="Script" id=10]
+[ext_resource path="res://ui/panels/EGWavePanel.gd" type="Script" id=11]
+[ext_resource path="res://gfx/ui/vCheck.png" type="Texture" id=13]
 [ext_resource path="res://gfx/wave/1.png" type="Texture" id=17]
-[ext_resource path="res://gfx/wave/5.png" type="Texture" id=18]
-[ext_resource path="res://gfx/wave/6.png" type="Texture" id=19]
-[ext_resource path="res://gfx/wave/8.png" type="Texture" id=20]
-[ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=21]
+[ext_resource path="res://gfx/wave/3.png" type="Texture" id=18]
+[ext_resource path="res://gfx/wave/2.png" type="Texture" id=19]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.501961, 0.501961, 0.501961, 0.25098 )
@@ -97,11 +91,11 @@ shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
 [sub_resource type="AtlasTexture" id=7]
-atlas = ExtResource( 5 )
+atlas = ExtResource( 13 )
 region = Rect2( 32, 0, 32, 48 )
 
 [sub_resource type="AtlasTexture" id=8]
-atlas = ExtResource( 5 )
+atlas = ExtResource( 13 )
 region = Rect2( 0, 0, 32, 48 )
 
 [sub_resource type="StyleBoxFlat" id=9]
@@ -174,13 +168,13 @@ corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
-[node name="EGPanel" type="Control"]
+[node name="BitwisePanel" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -682.0
 margin_bottom = -224.0
 rect_min_size = Vector2( 342, 376 )
-script = ExtResource( 1 )
+script = ExtResource( 9 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -193,7 +187,7 @@ margin_right = 288.0
 margin_bottom = 124.0
 custom_constants/vseparation = 8
 custom_constants/hseparation = 16
-script = ExtResource( 8 )
+script = ExtResource( 10 )
 __meta__ = {
 "_edit_group_": true,
 "_edit_use_anchors_": false
@@ -205,10 +199,6 @@ size_flags_horizontal = 3
 max_value = 18000.0
 value = 440.0
 exp_edit = true
-associated_property = ""
-useExpTicks = false
-useHoldTime = false
-text_offset = 0
 
 [node name="H" type="HBoxContainer" parent="Frequency"]
 margin_top = 28.0
@@ -225,7 +215,7 @@ size_flags_vertical = 3
 custom_styles/hover = SubResource( 1 )
 custom_styles/pressed = SubResource( 2 )
 custom_styles/normal = SubResource( 2 )
-custom_fonts/font = ExtResource( 9 )
+custom_fonts/font = ExtResource( 8 )
 text = "A-4"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -241,9 +231,6 @@ max_value = 32767.0
 tick_count = 9
 ticks_on_borders = false
 associated_property = "detune"
-useExpTicks = false
-useHoldTime = false
-text_offset = 0
 
 [node name="Tune" type="GridContainer" parent="."]
 margin_left = 8.0
@@ -268,9 +255,6 @@ value = 1.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "mult"
-useExpTicks = false
-useHoldTime = false
-text_offset = 0
 
 [node name="Coarse" parent="Tune" instance=ExtResource( 3 )]
 margin_left = 148.0
@@ -282,9 +266,6 @@ max_value = 12.0
 tick_count = 9
 ticks_on_borders = false
 associated_property = "coarse"
-useExpTicks = false
-useHoldTime = false
-text_offset = 0
 
 [node name="Fine" parent="Tune" instance=ExtResource( 3 )]
 margin_top = 28.0
@@ -297,9 +278,6 @@ max_value = 100.0
 tick_count = 9
 ticks_on_borders = false
 associated_property = "fine"
-useExpTicks = false
-useHoldTime = false
-text_offset = 0
 
 [node name="Detune" parent="Tune" instance=ExtResource( 3 )]
 margin_left = 148.0
@@ -313,9 +291,6 @@ max_value = 8191.0
 tick_count = 9
 ticks_on_borders = false
 associated_property = "detune"
-useExpTicks = false
-useHoldTime = false
-text_offset = 0
 
 [node name="Levels" type="GridContainer" parent="."]
 margin_left = 8.0
@@ -339,8 +314,6 @@ tick_count = 0
 ticks_on_borders = false
 associated_property = "tl"
 useExpTicks = true
-useHoldTime = false
-text_offset = 0
 
 [node name="Attack Level" parent="Levels" instance=ExtResource( 3 )]
 margin_left = 168.0
@@ -352,8 +325,6 @@ tick_count = 0
 ticks_on_borders = false
 associated_property = "al"
 useExpTicks = true
-useHoldTime = false
-text_offset = 0
 
 [node name="Decay Level" parent="Levels" instance=ExtResource( 3 )]
 margin_top = 28.0
@@ -366,8 +337,6 @@ tick_count = 0
 ticks_on_borders = false
 associated_property = "dl"
 useExpTicks = true
-useHoldTime = false
-text_offset = 0
 
 [node name="Sustain Level" parent="Levels" instance=ExtResource( 3 )]
 margin_left = 168.0
@@ -382,8 +351,6 @@ tick_count = 0
 ticks_on_borders = false
 associated_property = "sl"
 useExpTicks = true
-useHoldTime = false
-text_offset = 0
 
 [node name="Rates" type="GridContainer" parent="."]
 margin_left = 8.0
@@ -407,9 +374,7 @@ exp_edit = true
 tick_count = 5
 ticks_on_borders = false
 associated_property = "delay"
-useExpTicks = false
-useHoldTime = 1
-text_offset = 0
+special_display = 1
 
 [node name="Attack" parent="Rates" instance=ExtResource( 3 )]
 margin_left = 112.0
@@ -421,9 +386,6 @@ value = 63.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "ar"
-useExpTicks = false
-useHoldTime = false
-text_offset = 0
 
 [node name="+Hold" parent="Rates" instance=ExtResource( 3 )]
 margin_left = 224.0
@@ -435,9 +397,7 @@ exp_edit = true
 tick_count = 5
 ticks_on_borders = false
 associated_property = "hold"
-useExpTicks = false
-useHoldTime = 1
-text_offset = 0
+special_display = 1
 
 [node name="Decay" parent="Rates" instance=ExtResource( 3 )]
 margin_top = 28.0
@@ -450,9 +410,6 @@ value = 63.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "dr"
-useExpTicks = false
-useHoldTime = false
-text_offset = 0
 
 [node name="Sustain" parent="Rates" instance=ExtResource( 3 )]
 margin_left = 112.0
@@ -465,9 +422,6 @@ max_value = 63.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "sr"
-useExpTicks = false
-useHoldTime = false
-text_offset = 0
 
 [node name="Release" parent="Rates" instance=ExtResource( 3 )]
 margin_left = 224.0
@@ -481,9 +435,6 @@ value = 48.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "rr"
-useExpTicks = false
-useHoldTime = false
-text_offset = 0
 
 [node name="Tweak" type="GridContainer" parent="."]
 margin_left = 8.0
@@ -497,16 +448,16 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Feedback" parent="Tweak" instance=ExtResource( 3 )]
+[node name="Func Type" parent="Tweak" instance=ExtResource( 3 )]
 margin_right = 96.0
 rect_min_size = Vector2( 48, 20 )
 size_flags_horizontal = 3
-max_value = 10.0
+max_value = 2.0
 tick_count = 0
-associated_property = "feedback"
-useExpTicks = false
-useHoldTime = false
-text_offset = 7
+associated_property = "OpFuncType"
+special_display = 255
+display_strings = PoolStringArray( "AND", "OR", "XOR" )
+text_offset = -8
 
 [node name="AMS" parent="Tweak" instance=ExtResource( 3 )]
 margin_left = 112.0
@@ -517,9 +468,6 @@ max_value = 10.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "ams"
-useExpTicks = false
-useHoldTime = false
-text_offset = 0
 
 [node name="WavePanel" type="Panel" parent="."]
 margin_left = 216.0
@@ -527,7 +475,7 @@ margin_top = 32.0
 margin_right = 336.0
 margin_bottom = 72.0
 custom_styles/panel = SubResource( 3 )
-script = ExtResource( 2 )
+script = ExtResource( 11 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -540,29 +488,26 @@ margin_top = 8.0
 margin_right = -48.0
 margin_bottom = 28.0
 rect_min_size = Vector2( 48, 20 )
-max_value = 9.0
+max_value = 3.0
 tick_count = 0
-associated_property = ""
-useExpTicks = false
-useHoldTime = false
-text_offset = 0
 
 [node name="Preview" type="TextureRect" parent="WavePanel"]
 margin_left = 80.0
 margin_top = 8.0
 margin_right = 112.0
 margin_bottom = 32.0
-texture = ExtResource( 4 )
+texture = ExtResource( 5 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Popup" type="PopupDialog" parent="WavePanel"]
+visible = true
 margin_left = 128.0
 margin_top = 32.0
 margin_right = 200.0
-margin_bottom = 176.0
-rect_min_size = Vector2( 72, 144 )
+margin_bottom = 96.0
+rect_min_size = Vector2( 72, 64 )
 custom_styles/panel = SubResource( 4 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -573,7 +518,7 @@ anchor_right = 1.0
 margin_top = -12.0
 margin_right = 8.0
 margin_bottom = -4.0
-custom_fonts/font = ExtResource( 21 )
+custom_fonts/font = ExtResource( 7 )
 custom_colors/font_color = Color( 0.384314, 0.717647, 0.831373, 0.639216 )
 text = "Waveform="
 valign = 1
@@ -584,6 +529,9 @@ __meta__ = {
 [node name="G" type="GridContainer" parent="WavePanel/Popup"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+margin_top = 4.0
+margin_right = 2.0
+margin_bottom = 4.0
 custom_constants/vseparation = 2
 custom_constants/hseparation = 2
 columns = 2
@@ -596,7 +544,7 @@ margin_right = 36.0
 margin_bottom = 28.0
 custom_styles/hover = SubResource( 5 )
 custom_styles/normal = SubResource( 6 )
-icon = ExtResource( 4 )
+icon = ExtResource( 5 )
 
 [node name="Wave1" type="Button" parent="WavePanel/Popup/G"]
 margin_left = 38.0
@@ -604,7 +552,7 @@ margin_right = 74.0
 margin_bottom = 28.0
 custom_styles/hover = SubResource( 5 )
 custom_styles/normal = SubResource( 6 )
-icon = ExtResource( 13 )
+icon = ExtResource( 19 )
 
 [node name="Wave2" type="Button" parent="WavePanel/Popup/G"]
 margin_top = 30.0
@@ -621,58 +569,7 @@ margin_right = 74.0
 margin_bottom = 58.0
 custom_styles/hover = SubResource( 5 )
 custom_styles/normal = SubResource( 6 )
-icon = ExtResource( 10 )
-
-[node name="Wave4" type="Button" parent="WavePanel/Popup/G"]
-margin_top = 60.0
-margin_right = 36.0
-margin_bottom = 88.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/normal = SubResource( 6 )
 icon = ExtResource( 18 )
-
-[node name="Wave5" type="Button" parent="WavePanel/Popup/G"]
-margin_left = 38.0
-margin_top = 60.0
-margin_right = 74.0
-margin_bottom = 88.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/normal = SubResource( 6 )
-icon = ExtResource( 19 )
-
-[node name="Wave6" type="Button" parent="WavePanel/Popup/G"]
-margin_top = 90.0
-margin_right = 36.0
-margin_bottom = 118.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/normal = SubResource( 6 )
-icon = ExtResource( 14 )
-
-[node name="Wave7" type="Button" parent="WavePanel/Popup/G"]
-margin_left = 38.0
-margin_top = 90.0
-margin_right = 74.0
-margin_bottom = 118.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/normal = SubResource( 6 )
-icon = ExtResource( 15 )
-
-[node name="Wave8" type="Button" parent="WavePanel/Popup/G"]
-margin_top = 120.0
-margin_right = 36.0
-margin_bottom = 148.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/normal = SubResource( 6 )
-icon = ExtResource( 20 )
-
-[node name="Wave9" type="Button" parent="WavePanel/Popup/G"]
-margin_left = 38.0
-margin_top = 120.0
-margin_right = 74.0
-margin_bottom = 148.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/normal = SubResource( 6 )
-icon = ExtResource( 16 )
 
 [node name="FixedRatio" type="CheckBox" parent="."]
 anchor_left = -0.000978474
@@ -695,7 +592,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="EnvelopeDisplay" parent="." instance=ExtResource( 6 )]
+[node name="EnvelopeDisplay" parent="." instance=ExtResource( 2 )]
 margin_top = 296.0
 margin_right = 340.0
 margin_bottom = 376.0
@@ -714,7 +611,7 @@ margin_right = 338.0
 margin_bottom = 24.0
 custom_styles/pressed = SubResource( 12 )
 custom_styles/normal = SubResource( 13 )
-custom_fonts/font = ExtResource( 7 )
+custom_fonts/font = ExtResource( 6 )
 toggle_mode = true
 text = "Mute"
 __meta__ = {
@@ -728,20 +625,20 @@ margin_right = 274.0
 margin_bottom = 24.0
 custom_styles/pressed = SubResource( 14 )
 custom_styles/normal = SubResource( 13 )
-custom_fonts/font = ExtResource( 7 )
+custom_fonts/font = ExtResource( 6 )
 toggle_mode = true
 text = "Bypass"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="KSR" parent="." instance=ExtResource( 11 )]
+[node name="KSR" parent="." instance=ExtResource( 4 )]
 margin_left = 8.0
 margin_top = 8.0
 margin_right = 52.0
 margin_bottom = 32.0
 
-[node name="KSL" parent="." instance=ExtResource( 11 )]
+[node name="KSL" parent="." instance=ExtResource( 4 )]
 margin_left = 64.0
 margin_top = 8.0
 margin_right = 108.0
@@ -749,7 +646,7 @@ margin_bottom = 32.0
 text = "KSL"
 intent = 2
 
-[node name="Velocity" parent="." instance=ExtResource( 11 )]
+[node name="Velocity" parent="." instance=ExtResource( 4 )]
 margin_left = 120.0
 margin_top = 8.0
 margin_right = 204.0
@@ -765,9 +662,6 @@ margin_bottom = 284.0
 size_flags_horizontal = 3
 max_value = 65535.0
 associated_property = "duty"
-useExpTicks = false
-useHoldTime = false
-text_offset = 0
 
 [node name="OscSync" type="CheckBox" parent="."]
 anchor_top = 0.0106383
@@ -776,7 +670,7 @@ margin_left = 8.0
 margin_top = 264.0
 margin_right = 70.0
 margin_bottom = 282.0
-theme = ExtResource( 12 )
+theme = ExtResource( 1 )
 text = "~Sync"
 align = 1
 __meta__ = {

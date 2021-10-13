@@ -8,6 +8,7 @@ namespace gdsFM
     {
         public byte opCount = 6;
 
+        public OpBase.Intents[] intent;  //What type of operator is this?  (See OpBase.Intents)
         public byte[] processOrder;  //The processing order of the operators.  This should be able to be fetched from wiring grid, or a convenience func in Voice...
         public byte[] connections;  //Connections for each operator.  Stored as a bitmask.  NOTE:  If we have more than 8 ops, this won't work....
         public byte NumberOfConnectionsToOutput { get {
@@ -26,6 +27,8 @@ namespace gdsFM
         public Algorithm(byte opCount)    {this.opCount = opCount;  Reset();}
         void Reset()
         {
+            Array.Resize(ref intent, opCount);
+            Array.Fill(intent, OpBase.Intents.FM_OP);
             processOrder = DefaultProcessOrder(opCount);
             connections = new byte[opCount];
             wiringGrid = DefaultWiringGrid(opCount);  //FIXME:  Determine default wiring grid for the number of operators
@@ -39,16 +42,21 @@ namespace gdsFM
                 opCount = opTarget;
                 Reset();
             } else {
+                Array.Resize(ref intent, opTarget);
                 Array.Resize(ref connections, opTarget);
                 Array.Resize(ref processOrder, opTarget);
                 for (byte i=opCount; i<opTarget; i++)
                 {
                     processOrder[i] = i;
+                    intent[i] = OpBase.Intents.FM_OP;
                 }
 
                 opCount = opTarget;
             }
         }
+
+        //Sets the intent of a specific operator.  DOES NOT update channels.  Do this from Chip.
+        public void SetIntent(byte opTarget, OpBase.Intents intent)  { this.intent[opTarget] = intent; }
 
         /// Returns an array of the default process order for a given size op count.
         public static byte[] DefaultProcessOrder(byte opCount)
@@ -73,10 +81,12 @@ namespace gdsFM
             
             for(byte i=0; i<length; i++)     output.processOrder[i] = i;            
             Array.Copy(presets[preset], output.connections, length);
+            Array.Fill(output.intent, OpBase.Intents.FM_OP);
 
             return output;
         }
 
+#region presets
         //Info on preset algorithms adapted from:  https://gist.github.com/bryc/e997954473940ad97a825da4e7a496fa
         //Operator 1 (the first operator to be processed) never has anything connected to it. If we specified 1 here, it would get processed as an infinite loop.
         //Processing order is always done from the first operator to the last.  Connections to 0 are assumed to be connected to output.
@@ -125,4 +135,5 @@ namespace gdsFM
 
         static byte g2b(byte x, byte y) { return (byte)((y << 4) | x); }  //Converts a 4-bit x and y grid position (0-F) to an 8 bit value.
     }
+#endregion
 }

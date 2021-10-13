@@ -2,7 +2,7 @@
 extends PanelContainer
 class_name WiringGridSlot
 
-enum opType {NONE, CARRIER, MODULATOR, FILTER}
+enum opType {NONE, CARRIER, MODULATOR, FILTER, BITWISE, WAVEFOLDER}
 export (opType) var slot_type setget set_slot_type
 
 var s_norm = preload("res://ui/wiringGrid/slot.stylebox")
@@ -16,6 +16,7 @@ var gridPos = Vector2.ZERO  #for height in modulation priority etc
 var dragTree = preload("res://ui/wiringGrid/DragTree.tscn")
 
 signal dropped
+signal mid_clicked
 signal right_clicked
 
 
@@ -31,6 +32,10 @@ func set_slot_type(val):
 			self_modulate = Color(1,0,0,1)
 		opType.FILTER:
 			self_modulate = Color(0,1,0.5,1)
+		opType.BITWISE:
+			self_modulate = Color(0.8,0.8,0.8,1)
+		opType.WAVEFOLDER:
+			self_modulate = Color(1,0.5,1,1)
 
 func _ready():
 	pass
@@ -56,12 +61,15 @@ func unfocus():
 
 func _on_gui_input(event):
 	if event is InputEventMouseButton and event.pressed:
-		if event.button_index == BUTTON_RIGHT:
-			emit_signal("right_clicked", gridPos, event.pressed)
+		match event.button_index:
+			BUTTON_MIDDLE:
+				emit_signal("mid_clicked", gridPos, event.pressed)
+			BUTTON_RIGHT:
+				emit_signal("right_clicked", gridPos, id)
 		if has_focus():  
 			change_stylebox(s_hilight)
 			$"..".last_slot_focused = int(name)
-			
+
 
 func change_stylebox(box):
 	add_stylebox_override("panel", box)

@@ -7,11 +7,32 @@ export (NodePath) var chip_loc  #Location of PhaseEngine instance in code
 
 
 func _ready():
+	#Populate the operator types popup menu.
+	var lbl=["Nothing", "FM (Default)", "Filter", "Bitwise Op", "Wave Folder"]
+	$OpType.add_separator("Operator X")
+#	$OpType.add_separator()
+	for i in range(1, global.OpIntentIcons.size()):
+		$OpType.add_icon_radio_check_item(global.OpIntentIcons[i], lbl[i], i)
+
+	var check = AtlasTexture.new()
+	var uncheck = AtlasTexture.new()
+	
+	check.atlas = preload("res://gfx/ui/radio_check.png")
+	uncheck.atlas = preload("res://gfx/ui/radio_check.png")
+	uncheck.region = Rect2(0,0,16,16)
+	check.region = Rect2(16,0,16,16)
+	
+	$OpType.add_icon_override("radio_unchecked", uncheck)
+	$OpType.add_icon_override("radio_checked", check)
+	
+
+	#Initialize the control grid
 	$SlotIndicator.connect("slot_moved", self, "_on_slot_moved")
 	
 	yield(get_tree(),"idle_frame")
 	yield(get_tree(),"idle_frame")
 	yield(get_tree(),"idle_frame")
+
 
 	#Set the operators to whatever the chip_loc (or parent's) says.
 	var chip = get_node(chip_loc)
@@ -161,4 +182,26 @@ func check_if_presets():
 			$Preset.disabled = true
 
 
+func popup_intent_menu(id):  #Spawns the popup to view/change the operator type.
+	#Determine the operator's intent and select the default item.
+	var intent = get_node(chip_loc).GetOpIntent(id)
+	if intent <=0:
+		printerr("WiringGrid.gd:  Invalid intent %s returned from operator %s..." % [intent, id])
+		return
 
+	for i in $OpType.get_item_count():
+		$OpType.set_item_checked(i, false)
+
+	$OpType.set_item_text(0, "Operator %s Type" % (id+1))
+	$OpType.set_item_checked($OpType.get_item_index(intent), true)
+	$OpType.popup(Rect2(get_global_mouse_position(), Vector2.ONE))
+	$OpType.set_meta("id", id)
+
+
+func _on_OpType_id_pressed(intent):
+	var opTarget = $OpType.get_meta("id")
+	print ("Setting Op%s to ID %s..." % [opTarget + 1, intent])
+	get_node(chip_loc).SetOpIntent(opTarget, intent)
+	
+	global.emit_signal("op_intent_changed", opTarget, intent)
+	$SlotIndicator.redraw_grid()

@@ -22,7 +22,7 @@ func populate(to_add, to_remove):
 				rem.append(t)
 	elif to_remove is PoolByteArray:  #Remove selected in to_remove
 		for item in to_remove:
-			rem.append($V.find_node("Op" + str(item)))
+			rem.append($V.find_node("Op" + str(item)))  #FIXME:  Find another way to find tab items!
 			
 	#Remove the nodes we found.
 	if !rem.empty():
@@ -35,9 +35,14 @@ func populate(to_add, to_remove):
 
 	if to_add==null:  return
 	#Start adding new tabs to the first TabGroup.
+	if owner.chip_loc.is_empty():  return
+	var c = get_node(owner.chip_loc)
 	var t = $V.get_child(0)  #Should be TabGroup0
 	for op in to_add:
-		make_tab(t, op)
+		make_tab(t, op, c.GetOpIntent(op))
+		
+#	t.set_tab_icon(0, preload("res://gfx/ui/icon_fm.svg"))
+#	print(var2str(t.get_child(0).get_meta_list()), "\n", t.get_child(0).get_meta("_tab_icon"))
 
 #Called by global.tab_dropped by any control that wants to trigger us
 func check_if_dirty(source=null):
@@ -84,16 +89,26 @@ func add_tab_group():
 	p.owner = owner
 	p.name = "TabGroup" + str($V.get_child_count()-1)
 
-#TODO:  support different types of panels!!
-func make_tab(group_loc:TabContainer, opNum:int):
-	var p = preload("res://ui/EGPanel.tscn").instance()
+#TODO/FIXME:  support different types of panels!!
+func make_tab(group_loc:TabContainer, opNum:int, intent):
+	var p
+	match intent:
+		global.OpIntent.FM_OP:
+			p = preload("res://ui/panels/EGPanel.tscn").instance()
+		global.OpIntent.BITWISE:
+			p = preload("res://ui/panels/BitwiseOpPanel.tscn").instance()
+		_:
+			printerr("ScrollContainer.make_tab():  Unknown intent %s!" % intent)
+
 	p.name = "Op" + str(opNum+1)
 	group_loc.add_child(p)
 	p.chip_loc = owner.chip_loc
 	p.operator = opNum
 	p.owner = owner
 	p.set_from_op(opNum)
+	p.set_meta("_tab_icon", global.OpIntentIcons[intent])
 
+	return p
 
 
 func can_drop_data(position, data):

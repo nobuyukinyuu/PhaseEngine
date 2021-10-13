@@ -14,10 +14,10 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://ui/kanbanScroll/DragTabPreview.gd"
 }, {
-"base": "Control",
+"base": "VoicePanel",
 "class": "EGPanel",
 "language": "GDScript",
-"path": "res://ui/EGPanel.gd"
+"path": "res://ui/panels/EGPanel.gd"
 }, {
 "base": "HSlider",
 "class": "EGSlider",
@@ -34,6 +34,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://ui/envelopeDisplay/EnvelopeDisplay.gd"
 }, {
+"base": "Control",
+"class": "VoicePanel",
+"language": "GDScript",
+"path": "res://ui/panels/BasePanel.gd"
+}, {
 "base": "PanelContainer",
 "class": "WiringGridSlot",
 "language": "GDScript",
@@ -45,6 +50,7 @@ _global_script_class_icons={
 "EGSlider": "",
 "EGTooltip": "",
 "EnvelopeDisplay": "",
+"VoicePanel": "",
 "WiringGridSlot": ""
 }
 

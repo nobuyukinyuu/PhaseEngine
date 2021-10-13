@@ -12,9 +12,9 @@ onready var lblPos2 = Vector2(rect_size.x/2 - (len(str(value))+1)*charw/2.0, rec
 export(String) var associated_property = ""  #Determines the envelope property this slider's supposed to modify.
 
 export(bool) var useExpTicks
-enum TimeDisplay {NONE, EG_HOLD, LFO_DELAY, LFO_SPEED}
-export(TimeDisplay) var useHoldTime 
-
+enum SpecialDisplay {NONE, EG_HOLD, LFO_DELAY, LFO_SPEED, CUSTOM=0xFF}
+export(SpecialDisplay) var special_display 
+export(PoolStringArray) var display_strings
 
 export(int,-32,32) var text_offset = 0 setget set_offset
 var needs_recalc=false
@@ -42,8 +42,9 @@ func _draw():
 	var val
 	var pos2:Vector2
 	var vStr
-	match useHoldTime:
-		TimeDisplay.EG_HOLD:
+	var drawFont = font2
+	match special_display:
+		SpecialDisplay.EG_HOLD:
 			val = global.delay_frames_to_time(value) if not Engine.editor_hint else 00
 
 			var s = "s"
@@ -53,7 +54,7 @@ func _draw():
 			vStr = str(val).pad_decimals(2)
 			pos2 = calc_pos2(vStr)
 			draw_string(font3, pos2 + Vector2((len(vStr))*charw*1.0 +2,2), s, col)
-		TimeDisplay.LFO_DELAY:
+		SpecialDisplay.LFO_DELAY:
 			val = value
 			
 			var s = "ms"
@@ -63,7 +64,7 @@ func _draw():
 			vStr = str(val).pad_decimals(2)
 			pos2 = calc_pos2(vStr)
 			draw_string(font3, pos2 + Vector2((len(vStr))*charw*1.0 +2,2), s, col)
-		TimeDisplay.LFO_SPEED:
+		SpecialDisplay.LFO_SPEED:
 			val = global.lfo_speed_to_secs(value) if not Engine.editor_hint else 00
 			var s = "s"
 			if val < 1:  
@@ -73,6 +74,11 @@ func _draw():
 			pos2 = calc_pos2(vStr)
 			draw_string(font3, pos2 + Vector2((len(vStr))*charw*1.0 +2,2), s, col)
 
+		SpecialDisplay.CUSTOM:
+			drawFont = font
+			val = value
+			vStr = display_strings[val] if val < display_strings.size() else "Setting %s" % val
+			pos2 = calc_pos2(vStr)
 			
 		_:
 			val = value
@@ -80,7 +86,7 @@ func _draw():
 			pos2 = calc_pos2(vStr)
 	
 	
-	draw_string(font2, pos2, vStr, col )
+	draw_string(drawFont, pos2, vStr, col )
 	
 
 
