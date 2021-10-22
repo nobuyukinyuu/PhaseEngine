@@ -1,0 +1,374 @@
+[gd_scene load_steps=21 format=2]
+
+[ext_resource path="res://ui/panels/FilterPanel.gd" type="Script" id=1]
+[ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=2]
+[ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=3]
+[ext_resource path="res://gfx/ui/filter/0.svg" type="Texture" id=4]
+[ext_resource path="res://gfx/ui/filter/2.svg" type="Texture" id=5]
+[ext_resource path="res://gfx/ui/filter/3.svg" type="Texture" id=6]
+[ext_resource path="res://gfx/ui/filter/7.svg" type="Texture" id=7]
+[ext_resource path="res://gfx/ui/filter/8.svg" type="Texture" id=8]
+[ext_resource path="res://gfx/ui/filter/5.svg" type="Texture" id=9]
+[ext_resource path="res://gfx/ui/filter/9.svg" type="Texture" id=10]
+[ext_resource path="res://gfx/ui/filter/4.svg" type="Texture" id=11]
+[ext_resource path="res://gfx/ui/filter/6.svg" type="Texture" id=12]
+[ext_resource path="res://gfx/ui/filter/1.svg" type="Texture" id=13]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.447059, 0.172549, 0.145098, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0.0784314, 0.141176, 0.27451, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0.145098, 0.447059, 0.176471, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=5]
+content_margin_left = 2.0
+content_margin_right = 2.0
+content_margin_top = 2.0
+content_margin_bottom = 2.0
+bg_color = Color( 0.278431, 0.388235, 0.564706, 0.737255 )
+border_width_left = 1
+border_width_top = 1
+border_color = Color( 0.8, 0.8, 0.8, 0.380392 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=7]
+content_margin_left = 2.0
+content_margin_right = 2.0
+content_margin_top = 2.0
+content_margin_bottom = 2.0
+bg_color = Color( 0.278431, 0.388235, 0.564706, 0.360784 )
+border_width_left = 1
+border_width_top = 1
+border_color = Color( 0.8, 0.8, 0.8, 0.380392 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=6]
+content_margin_left = 2.0
+content_margin_right = 2.0
+content_margin_top = 2.0
+content_margin_bottom = 2.0
+bg_color = Color( 0.0784314, 0.0862745, 0.14902, 0.737255 )
+border_width_left = 1
+border_width_top = 1
+border_color = Color( 0.8, 0.8, 0.8, 0.380392 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[sub_resource type="ButtonGroup" id=8]
+
+[node name="FilterPanel" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = -682.0
+margin_bottom = -376.0
+rect_min_size = Vector2( 342, 224 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="ReferenceRect" type="ReferenceRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Mute" type="Button" parent="."]
+margin_left = 280.0
+margin_top = 8.0
+margin_right = 338.0
+margin_bottom = 24.0
+custom_styles/pressed = SubResource( 1 )
+custom_styles/normal = SubResource( 2 )
+custom_fonts/font = ExtResource( 3 )
+toggle_mode = true
+text = "Mute"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Bypass" type="Button" parent="."]
+margin_left = 216.0
+margin_top = 8.0
+margin_right = 274.0
+margin_bottom = 24.0
+custom_styles/pressed = SubResource( 3 )
+custom_styles/normal = SubResource( 2 )
+custom_fonts/font = ExtResource( 3 )
+toggle_mode = true
+text = "Bypass"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="G" type="GridContainer" parent="."]
+margin_left = 8.0
+margin_top = 36.0
+margin_right = 336.0
+margin_bottom = 152.0
+custom_constants/vseparation = 4
+custom_constants/hseparation = 8
+columns = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Filter0" type="Button" parent="G"]
+margin_right = 160.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+custom_styles/hover = SubResource( 5 )
+custom_styles/pressed = SubResource( 7 )
+custom_styles/normal = SubResource( 6 )
+custom_fonts/font = ExtResource( 3 )
+toggle_mode = true
+group = SubResource( 8 )
+text = "None"
+icon = ExtResource( 4 )
+
+[node name="Filter1" type="Button" parent="G"]
+margin_left = 168.0
+margin_right = 328.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+custom_styles/hover = SubResource( 5 )
+custom_styles/pressed = SubResource( 7 )
+custom_styles/normal = SubResource( 6 )
+custom_fonts/font = ExtResource( 3 )
+toggle_mode = true
+group = SubResource( 8 )
+text = "Low Pass"
+icon = ExtResource( 13 )
+
+[node name="Filter2" type="Button" parent="G"]
+margin_top = 24.0
+margin_right = 160.0
+margin_bottom = 44.0
+size_flags_horizontal = 3
+custom_styles/hover = SubResource( 5 )
+custom_styles/pressed = SubResource( 7 )
+custom_styles/normal = SubResource( 6 )
+custom_fonts/font = ExtResource( 3 )
+toggle_mode = true
+group = SubResource( 8 )
+text = "High Pass"
+icon = ExtResource( 5 )
+
+[node name="Filter3" type="Button" parent="G"]
+margin_left = 168.0
+margin_top = 24.0
+margin_right = 328.0
+margin_bottom = 44.0
+size_flags_horizontal = 3
+custom_styles/hover = SubResource( 5 )
+custom_styles/pressed = SubResource( 7 )
+custom_styles/normal = SubResource( 6 )
+custom_fonts/font = ExtResource( 3 )
+toggle_mode = true
+group = SubResource( 8 )
+text = "Bandpass (Gain)"
+icon = ExtResource( 6 )
+
+[node name="Filter4" type="Button" parent="G"]
+margin_top = 48.0
+margin_right = 160.0
+margin_bottom = 68.0
+size_flags_horizontal = 3
+custom_styles/hover = SubResource( 5 )
+custom_styles/pressed = SubResource( 7 )
+custom_styles/normal = SubResource( 6 )
+custom_fonts/font = ExtResource( 3 )
+toggle_mode = true
+group = SubResource( 8 )
+text = "Bandpass (Peak)"
+icon = ExtResource( 11 )
+
+[node name="Filter5" type="Button" parent="G"]
+margin_left = 168.0
+margin_top = 48.0
+margin_right = 328.0
+margin_bottom = 68.0
+size_flags_horizontal = 3
+custom_styles/hover = SubResource( 5 )
+custom_styles/pressed = SubResource( 7 )
+custom_styles/normal = SubResource( 6 )
+custom_fonts/font = ExtResource( 3 )
+toggle_mode = true
+group = SubResource( 8 )
+text = "Notch"
+icon = ExtResource( 9 )
+
+[node name="Filter6" type="Button" parent="G"]
+margin_top = 72.0
+margin_right = 160.0
+margin_bottom = 92.0
+size_flags_horizontal = 3
+custom_styles/hover = SubResource( 5 )
+custom_styles/pressed = SubResource( 7 )
+custom_styles/normal = SubResource( 6 )
+custom_fonts/font = ExtResource( 3 )
+toggle_mode = true
+group = SubResource( 8 )
+text = "All-pass"
+icon = ExtResource( 12 )
+
+[node name="Filter7" type="Button" parent="G"]
+margin_left = 168.0
+margin_top = 72.0
+margin_right = 328.0
+margin_bottom = 92.0
+size_flags_horizontal = 3
+custom_styles/hover = SubResource( 5 )
+custom_styles/pressed = SubResource( 7 )
+custom_styles/normal = SubResource( 6 )
+custom_fonts/font = ExtResource( 3 )
+toggle_mode = true
+group = SubResource( 8 )
+text = "Peaking"
+icon = ExtResource( 7 )
+
+[node name="Filter8" type="Button" parent="G"]
+margin_top = 96.0
+margin_right = 160.0
+margin_bottom = 116.0
+size_flags_horizontal = 3
+custom_styles/hover = SubResource( 5 )
+custom_styles/pressed = SubResource( 7 )
+custom_styles/normal = SubResource( 6 )
+custom_fonts/font = ExtResource( 3 )
+toggle_mode = true
+group = SubResource( 8 )
+text = "Low Shelf"
+icon = ExtResource( 8 )
+
+[node name="Filter9" type="Button" parent="G"]
+margin_left = 168.0
+margin_top = 96.0
+margin_right = 328.0
+margin_bottom = 116.0
+size_flags_horizontal = 3
+custom_styles/hover = SubResource( 5 )
+custom_styles/pressed = SubResource( 7 )
+custom_styles/normal = SubResource( 6 )
+custom_fonts/font = ExtResource( 3 )
+toggle_mode = true
+group = SubResource( 8 )
+text = "High Shelf"
+icon = ExtResource( 10 )
+
+[node name="Filter" parent="." instance=ExtResource( 2 )]
+visible = false
+margin_left = 8.0
+margin_top = 40.0
+margin_right = 312.0
+margin_bottom = 60.0
+max_value = 9.0
+value = 1.0
+special_display = 255
+
+[node name="Icon" type="TextureRect" parent="Filter"]
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_left = 8.0
+margin_top = -2.0
+margin_right = 24.0
+margin_bottom = 14.0
+texture = ExtResource( 4 )
+stretch_mode = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Frequency" parent="." instance=ExtResource( 2 )]
+margin_left = 8.0
+margin_top = 160.0
+margin_right = 336.0
+margin_bottom = 180.0
+min_value = 10.0
+max_value = 22050.0
+value = 10.0
+exp_edit = true
+associated_property = "cutoff"
+
+[node name="Q [Resonance]" parent="." instance=ExtResource( 2 )]
+margin_left = 8.0
+margin_top = 192.0
+margin_right = 336.0
+margin_bottom = 212.0
+min_value = 1.0
+max_value = 10.0
+step = 0.01
+value = 1.0
+exp_edit = true
+associated_property = "resonance"
+
+[node name="Label" type="Label" parent="."]
+margin_left = -336.0
+margin_top = 104.0
+margin_right = -17.0
+margin_bottom = 152.0
+text = "TODO:  Sweep 
+            (stack of rate/level values + loop opts)"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="lblTitle" type="Label" parent="."]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 56.0
+margin_bottom = 16.0
+rect_scale = Vector2( 2, 2 )
+custom_fonts/font = ExtResource( 3 )
+text = "Filter"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+[connection signal="toggled" from="Mute" to="." method="_on_Mute_toggled" binds= [ false ]]
+[connection signal="toggled" from="Bypass" to="." method="_on_Mute_toggled" binds= [ true ]]
+[connection signal="value_changed" from="Filter" to="." method="_on_Filter_value_changed"]

@@ -40,8 +40,12 @@ namespace gdsFM
         public byte feedback = 0;
         public ushort duty=32767;
 
+        public double cutoff=Global.MixRate, resonance=1.0;
+
         public byte ams;  //Amplitude modulation sensitivity (used to determine how much LFO to mix in)
         public bool osc_sync=true;  //Oscillator sync.  Oscillator phase will reset on NoteOn if true.
+
+        public byte aux_func;  //ONLY used for bitwise function operators, filters etc as an additional value specifier.
 
        //Response tables.  These are references from the canonical Voice.
         public RateTable ksr = new RateTable();
@@ -134,9 +138,12 @@ namespace gdsFM
                 j.Assign("duty", ref duty);
                 j.Assign("ams", ref ams);
                 j.Assign("osc_sync", ref osc_sync);
+                j.Assign("cutoff", ref cutoff);
+                j.Assign("resonance", ref resonance);
 
                 j.Assign("mute", ref mute);
                 j.Assign("bypass", ref bypass);
+                j.Assign("aux_func", ref aux_func);
             } catch {
                 return false;
             }
@@ -157,9 +164,12 @@ namespace gdsFM
             o.AddPrim("duty", duty);
             o.AddPrim("ams", ams);
             o.AddPrim("osc_sync", osc_sync);
+            o.AddPrim("cutoff", cutoff);
+            o.AddPrim("resonance", resonance);
 
             o.AddPrim("mute", mute);
             o.AddPrim("bypass", bypass);
+            o.AddPrim("aux_func", aux_func);
 
             return o.ToJSONString();
         }
@@ -179,9 +189,12 @@ namespace gdsFM
             o.Add("feedback", feedback);
             o.Add("duty", duty);
             o.Add("osc_sync", osc_sync);
+            o.Add("cutoff", cutoff);
+            o.Add("resonance", resonance);
 
             o.Add("mute", mute);
             o.Add("bypass", bypass);
+            o.Add("aux_func", aux_func);
             return o;
         }
         #endif 

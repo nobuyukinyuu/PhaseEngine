@@ -23,10 +23,11 @@ func _ready():
 #		if !o is Slider:  continue
 #		o.connect("value_changed", self, "setEG", [o.associated_property])
 
-	if $Tweak/Feedback:  #Done manually to trigger the oscillator function check
+	if $Tweak.has_node("Feedback"):  #Done manually to trigger the oscillator function check
 		$Tweak/Feedback.connect("value_changed", self, "setFeedback") 
-	if $"Tweak/Func Type":
-		$"Tweak/Func Type".connect("value_changed", self, "setOpProperty", [$"Tweak/Func Type".associated_property])
+	if $Tweak.has_node("Func Type"):
+#		$"Tweak/Func Type".connect("value_changed", self, "setOpProperty", [$"Tweak/Func Type".associated_property])
+		$"Tweak/Func Type".connect("value_changed", self, "setBitwiseFunc")
 	$Tweak/AMS.connect("value_changed", self, "setEG", [$Tweak/AMS.associated_property])
 	$Duty.connect("value_changed", self, "setEG", ["duty"])
 	$OscSync.connect("toggled", self, "setEG", ["osc_sync"])
@@ -112,8 +113,10 @@ func set_from_op(op:int):
 	
 	$Tweak/AMS.value = d["ams"]
 	
-	if $Tweak/Feedback:  #Only set this if the control exists (it doesn't on a BitwiseOp)
+	if $Tweak.has_node("Feedback"):  #Only set this if the control exists (it doesn't on a BitwiseOp)
 		$Tweak/Feedback.value = d["feedback"]
+	if $Tweak.has_node("Func Type"):
+		$"Tweak/Func Type".value = d["aux_func"]
 	$Duty.value = d["duty"]
 	$OscSync.pressed = d["osc_sync"]
 	
@@ -160,6 +163,9 @@ func update_env(value, sender:EGSlider):
 
 func setOpProperty(value, property):
 	get_node(chip_loc).SetOpProperty(operator, property, value)
+	global.emit_signal("op_tab_value_changed")
+func setBitwiseFunc(value):
+	get_node(chip_loc).SetBitwiseFunc(operator, value)
 	global.emit_signal("op_tab_value_changed")
 
 

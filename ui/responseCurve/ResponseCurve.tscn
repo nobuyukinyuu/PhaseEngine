@@ -25,6 +25,7 @@
 [ext_resource path="res://ui/responseCurve/btnPresets.gd" type="Script" id=23]
 [ext_resource path="res://gfx/fonts/numerics_7seg.tres" type="BitmapFont" id=24]
 [ext_resource path="res://ui/responseCurve/CustomCurvePopup.tscn" type="PackedScene" id=25]
+[ext_resource path="res://ui/responseCurve/MinMaxColorizer.shader" type="Shader" id=26]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0, 0, 0, 0.878431 )
@@ -99,54 +100,9 @@ bg_color = Color( 0.0705882, 0.117647, 0.192157, 0.498039 )
 expand_margin_left = 1.0
 expand_margin_right = 3.0
 
-[sub_resource type="Shader" id=9]
+[sub_resource type="ShaderMaterial" id=9]
 resource_local_to_scene = true
-code = "shader_type canvas_item;
-
-uniform int disabled : hint_range(0,4) = 0;
-
-vec4 colorize(vec4 c, float t)
-{	
-	vec4 output = c;
-	output.r *= 2.5;
-	output.rg *= 1.25;
-	output.g *= 0.25;
-
-	output.rgb = mix(output.rgb, c.rgb, t*0.75);
-
-	return output;
-}
-
-void fragment()
-{
-	float t = (sin(TIME*4.0)+1.0) * 0.5;
-	vec4 c = textureLod(SCREEN_TEXTURE, SCREEN_UV, 0);
-
-	if (disabled==1)  //Draw left
-		{if(UV.x<0.5) c = colorize(c,t);}
-	else if (disabled==2) //Draw right
-		{
-			if(UV.x>0.5 && UV.y <0.95) c = colorize(c,t);
-			if(UV.y>0.95 && UV.x>0.45) c = colorize(c,t);
-		}
-	else if (disabled==3) //Draw both
-		{c = colorize(c,t);}
-	else if (disabled ==4) //Draw a different overlay
-	{
-		vec4 a = c;
-		a.r *= 2.25;
-		a.gb = vec2(0);
-		c = mix(c,a,t+1.0);
-		
-	}
-	
-
-	COLOR=c;
-}"
-
-[sub_resource type="ShaderMaterial" id=10]
-resource_local_to_scene = true
-shader = SubResource( 9 )
+shader = ExtResource( 26 )
 shader_param/disabled = 2
 
 [node name="ResponseCurve" type="Panel"]
@@ -405,7 +361,7 @@ __meta__ = {
 }
 
 [node name="Colorizer" type="Panel" parent="MinMax"]
-material = SubResource( 10 )
+material = SubResource( 9 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2

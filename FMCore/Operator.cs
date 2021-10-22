@@ -18,6 +18,8 @@ namespace gdsFM
         protected long phase;  //Phase accumulator
         protected bool flip=false;  // Used by the oscillator to flip the waveform's values.  TODO:  User-specified waveform inversion
         protected int seed=1;  //LFSR state sent ByRef to oscillators which produce noise
+
+        public Envelope eg = new Envelope();
         public Increments pg = Increments.Prototype();
  
         // public abstract void SetOscillatorType(Oscillator.waveFunc waveFunc);
@@ -43,8 +45,6 @@ namespace gdsFM
         //Parameters specific to Operator
         public short[] fbBuf = new short[2];  //feedback buffer
 
-
-        public Envelope eg = new Envelope();
         public EGStatus egStatus = EGStatus.INACTIVE;
         public ushort egAttenuation = Envelope.L_MAX;  //5-bit value
 
@@ -348,8 +348,7 @@ namespace gdsFM
         public delegate short OpFunc(short modulation, short oscOutput); //Function of the operator.
         OpFunc BitwiseOp;
         public static readonly OpFunc[] operations = {OP_AND, OP_OR, OP_XOR};
-        public byte OpFuncType {get => _op_func_type;  set {BitwiseOp = operations[value]; _op_func_type=value;}}
-        private byte _op_func_type;
+        public byte OpFuncType {get => eg.aux_func;  set { if (value<operations.Length)  {BitwiseOp = operations[value]; eg.aux_func=value;} }}
 
         public BitwiseOperator() {intent=Intents.BITWISE; BitwiseOp=OP_OR;}
 

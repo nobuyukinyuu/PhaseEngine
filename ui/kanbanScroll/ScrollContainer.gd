@@ -97,6 +97,8 @@ func make_tab(group_loc:TabContainer, opNum:int, intent):
 			p = preload("res://ui/panels/EGPanel.tscn").instance()
 		global.OpIntent.BITWISE:
 			p = preload("res://ui/panels/BitwiseOpPanel.tscn").instance()
+		global.OpIntent.FILTER:
+			p = preload("res://ui/panels/FilterPanel.tscn").instance()
 		_:
 			printerr("ScrollContainer.make_tab():  Unknown intent %s!" % intent)
 

@@ -1,0 +1,121 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=2]
+[ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=3]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.447059, 0.172549, 0.145098, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0.0784314, 0.141176, 0.27451, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0.145098, 0.447059, 0.176471, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[node name="WaveFoldPanel" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = -682.0
+margin_bottom = -472.0
+rect_min_size = Vector2( 342, 128 )
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="ReferenceRect" type="ReferenceRect" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_min_size = Vector2( 0, 128 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Mute" type="Button" parent="."]
+margin_left = 280.0
+margin_top = 8.0
+margin_right = 338.0
+margin_bottom = 24.0
+custom_styles/pressed = SubResource( 1 )
+custom_styles/normal = SubResource( 2 )
+custom_fonts/font = ExtResource( 3 )
+toggle_mode = true
+text = "Mute"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Bypass" type="Button" parent="."]
+margin_left = 216.0
+margin_top = 8.0
+margin_right = 274.0
+margin_bottom = 24.0
+custom_styles/pressed = SubResource( 3 )
+custom_styles/normal = SubResource( 2 )
+custom_fonts/font = ExtResource( 3 )
+toggle_mode = true
+text = "Bypass"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Technique" parent="." instance=ExtResource( 2 )]
+visible = false
+margin_left = 8.0
+margin_top = 40.0
+margin_right = 312.0
+margin_bottom = 60.0
+max_value = 9.0
+value = 1.0
+special_display = 255
+
+[node name="Gain" parent="." instance=ExtResource( 2 )]
+margin_left = 8.0
+margin_top = 40.0
+margin_right = 336.0
+margin_bottom = 60.0
+max_value = 800.0
+step = 1.0
+exp_edit = true
+associated_property = "cutoff"
+
+[node name="Bias" parent="." instance=ExtResource( 2 )]
+margin_left = 8.0
+margin_top = 72.0
+margin_right = 336.0
+margin_bottom = 92.0
+min_value = -32768.0
+max_value = 32767.0
+step = 1.0
+exp_edit = true
+associated_property = "bias"
+[connection signal="toggled" from="Mute" to="." method="_on_Mute_toggled" binds= [ false ]]
+[connection signal="toggled" from="Bypass" to="." method="_on_Mute_toggled" binds= [ true ]]

@@ -150,7 +150,10 @@ namespace gdsFM
             // c.SetVoice(this);
             // c.disableLFO = disableLFO;
 
-            c.NoteOn(0, NOTE_A4);
+            //If the channel contains filters, they need to be recalculated.
+            //FIXME:  Right now this is done in Test2.cs RecalcFilter().  We should go through each op and set 3 values from Voice.egs before recalc.
+
+            c.NoteOn(0, 64);
             for (int i=0; oc<size && i<period; i++)
             {
                 if (strideCount<1)  // Hit a point where we need to fill up output

@@ -53,7 +53,7 @@ namespace gdsFM
                 if (voice.alg.connections[i] != 0)  continue;  //Skip over connections not connected to output.
                 var op=ops[i] as Operator;
                 if (busy==BusyState.BUSY ||
-                   (busy==BusyState.RELEASED &&  op?.egStatus != EGStatus.INACTIVE) )
+                   (busy==BusyState.RELEASED &&  (op!=null && op.egStatus != EGStatus.INACTIVE)) )
                         setFree = false;
 
                 //Status of the envelope is such that the further along in the envelope it is, the higher the score.
