@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=2]
+[gd_scene load_steps=29 format=2]
 
 [ext_resource path="res://gfx/fonts/numerics_7seg.tres" type="BitmapFont" id=1]
 [ext_resource path="res://ui/responseCurve/PresetMenu.theme" type="Theme" id=2]
@@ -167,6 +167,39 @@ shader = SubResource( 7 )
 shader_param/xSkew = -1.0
 shader_param/ySkew = 1.0
 
+[sub_resource type="GDScript" id=10]
+script/source = "extends VBoxContainer
+onready var font = get_font(\"\")
+
+func _ready():
+
+	for o in get_children():
+		o.connect(\"value_changed\", self, \"changed\", [o])
+
+		
+
+func changed(value, sender):
+	update()
+	pass
+
+
+func _draw():
+	if !font:  return
+	for o in get_children():
+		pass
+		draw_string(font, o.rect_position - Vector2(0, 4), str(o.value))
+
+	draw_string(font, rect_size + Vector2(-128, 32), str(slerp16($A.value, $B.value, $C.value)))
+
+
+
+func lerp8(A,B,x):
+	return int(A*(255-x)+B*x+255) >> 8
+
+func slerp16(A,B,x):
+	return int(A*(65535-x)+B*x+65535) >> 16
+"
+
 [node name="Node2D" type="Node2D"]
 
 [node name="Ref" type="ReferenceRect" parent="."]
@@ -320,3 +353,47 @@ scale = Vector2( 2, 0.765625 )
 texture = ExtResource( 18 )
 
 [node name="EGTooltip" parent="." instance=ExtResource( 17 )]
+visible = false
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+margin_left = 606.0
+margin_top = 314.0
+margin_right = 938.0
+margin_bottom = 413.0
+custom_constants/separation = 30
+script = SubResource( 10 )
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="A" type="HSlider" parent="VBoxContainer"]
+margin_right = 332.0
+margin_bottom = 16.0
+min_value = -32768.0
+max_value = 32767.0
+tick_count = 9
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="B" type="HSlider" parent="VBoxContainer"]
+margin_top = 46.0
+margin_right = 332.0
+margin_bottom = 62.0
+min_value = -32768.0
+max_value = 32767.0
+tick_count = 9
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="C" type="HSlider" parent="VBoxContainer"]
+margin_top = 92.0
+margin_right = 332.0
+margin_bottom = 108.0
+max_value = 65535.0
+tick_count = 9
+__meta__ = {
+"_edit_use_anchors_": false
+}
