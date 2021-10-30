@@ -222,7 +222,7 @@ namespace gdsFM
 
             // get the absolute value of the sin, as attenuation, as a 4.8 fixed point value
             // ushort sin_attenuation = Tables.abs_sin_attenuation(phase);
-            ushort sin_attenuation = oscillator.Generate(phase, duty, ref flip, __makeref(pg.hz));
+            ushort sin_attenuation = oscillator.Generate(phase, duty, ref flip, __makeref(pg.increment));
 
             return (short)sin_attenuation;
 

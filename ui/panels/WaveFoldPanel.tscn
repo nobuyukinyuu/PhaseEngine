@@ -103,7 +103,6 @@ margin_top = 40.0
 margin_right = 336.0
 margin_bottom = 60.0
 max_value = 800.0
-step = 1.0
 exp_edit = true
 associated_property = "cutoff"
 
@@ -114,7 +113,6 @@ margin_right = 336.0
 margin_bottom = 92.0
 min_value = -32768.0
 max_value = 32767.0
-step = 1.0
 exp_edit = true
 associated_property = "bias"
 [connection signal="toggled" from="Mute" to="." method="_on_Mute_toggled" binds= [ false ]]

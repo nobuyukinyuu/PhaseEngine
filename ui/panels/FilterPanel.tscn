@@ -50,7 +50,7 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=5]
+[sub_resource type="StyleBoxFlat" id=4]
 content_margin_left = 2.0
 content_margin_right = 2.0
 content_margin_top = 2.0
@@ -65,7 +65,7 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=7]
+[sub_resource type="StyleBoxFlat" id=5]
 content_margin_left = 2.0
 content_margin_right = 2.0
 content_margin_top = 2.0
@@ -95,14 +95,14 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
-[sub_resource type="ButtonGroup" id=8]
+[sub_resource type="ButtonGroup" id=7]
 
 [node name="FilterPanel" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -682.0
 margin_bottom = -376.0
-rect_min_size = Vector2( 342, 256 )
+rect_min_size = Vector2( 342, 264 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_lock_": true,
@@ -110,6 +110,7 @@ __meta__ = {
 }
 
 [node name="ReferenceRect" type="ReferenceRect" parent="."]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 __meta__ = {
@@ -160,12 +161,12 @@ __meta__ = {
 margin_right = 160.0
 margin_bottom = 20.0
 size_flags_horizontal = 3
-custom_styles/hover = SubResource( 5 )
-custom_styles/pressed = SubResource( 7 )
+custom_styles/hover = SubResource( 4 )
+custom_styles/pressed = SubResource( 5 )
 custom_styles/normal = SubResource( 6 )
 custom_fonts/font = ExtResource( 3 )
 toggle_mode = true
-group = SubResource( 8 )
+group = SubResource( 7 )
 text = "None"
 icon = ExtResource( 4 )
 
@@ -174,12 +175,12 @@ margin_left = 168.0
 margin_right = 328.0
 margin_bottom = 20.0
 size_flags_horizontal = 3
-custom_styles/hover = SubResource( 5 )
-custom_styles/pressed = SubResource( 7 )
+custom_styles/hover = SubResource( 4 )
+custom_styles/pressed = SubResource( 5 )
 custom_styles/normal = SubResource( 6 )
 custom_fonts/font = ExtResource( 3 )
 toggle_mode = true
-group = SubResource( 8 )
+group = SubResource( 7 )
 text = "Low Pass"
 icon = ExtResource( 13 )
 
@@ -188,12 +189,12 @@ margin_top = 24.0
 margin_right = 160.0
 margin_bottom = 44.0
 size_flags_horizontal = 3
-custom_styles/hover = SubResource( 5 )
-custom_styles/pressed = SubResource( 7 )
+custom_styles/hover = SubResource( 4 )
+custom_styles/pressed = SubResource( 5 )
 custom_styles/normal = SubResource( 6 )
 custom_fonts/font = ExtResource( 3 )
 toggle_mode = true
-group = SubResource( 8 )
+group = SubResource( 7 )
 text = "High Pass"
 icon = ExtResource( 5 )
 
@@ -203,12 +204,12 @@ margin_top = 24.0
 margin_right = 328.0
 margin_bottom = 44.0
 size_flags_horizontal = 3
-custom_styles/hover = SubResource( 5 )
-custom_styles/pressed = SubResource( 7 )
+custom_styles/hover = SubResource( 4 )
+custom_styles/pressed = SubResource( 5 )
 custom_styles/normal = SubResource( 6 )
 custom_fonts/font = ExtResource( 3 )
 toggle_mode = true
-group = SubResource( 8 )
+group = SubResource( 7 )
 text = "Bandpass (Gain)"
 icon = ExtResource( 6 )
 
@@ -217,12 +218,12 @@ margin_top = 48.0
 margin_right = 160.0
 margin_bottom = 68.0
 size_flags_horizontal = 3
-custom_styles/hover = SubResource( 5 )
-custom_styles/pressed = SubResource( 7 )
+custom_styles/hover = SubResource( 4 )
+custom_styles/pressed = SubResource( 5 )
 custom_styles/normal = SubResource( 6 )
 custom_fonts/font = ExtResource( 3 )
 toggle_mode = true
-group = SubResource( 8 )
+group = SubResource( 7 )
 text = "Bandpass (Peak)"
 icon = ExtResource( 11 )
 
@@ -232,12 +233,12 @@ margin_top = 48.0
 margin_right = 328.0
 margin_bottom = 68.0
 size_flags_horizontal = 3
-custom_styles/hover = SubResource( 5 )
-custom_styles/pressed = SubResource( 7 )
+custom_styles/hover = SubResource( 4 )
+custom_styles/pressed = SubResource( 5 )
 custom_styles/normal = SubResource( 6 )
 custom_fonts/font = ExtResource( 3 )
 toggle_mode = true
-group = SubResource( 8 )
+group = SubResource( 7 )
 text = "Notch"
 icon = ExtResource( 9 )
 
@@ -246,12 +247,12 @@ margin_top = 72.0
 margin_right = 160.0
 margin_bottom = 92.0
 size_flags_horizontal = 3
-custom_styles/hover = SubResource( 5 )
-custom_styles/pressed = SubResource( 7 )
+custom_styles/hover = SubResource( 4 )
+custom_styles/pressed = SubResource( 5 )
 custom_styles/normal = SubResource( 6 )
 custom_fonts/font = ExtResource( 3 )
 toggle_mode = true
-group = SubResource( 8 )
+group = SubResource( 7 )
 text = "All-pass"
 icon = ExtResource( 12 )
 
@@ -261,12 +262,12 @@ margin_top = 72.0
 margin_right = 328.0
 margin_bottom = 92.0
 size_flags_horizontal = 3
-custom_styles/hover = SubResource( 5 )
-custom_styles/pressed = SubResource( 7 )
+custom_styles/hover = SubResource( 4 )
+custom_styles/pressed = SubResource( 5 )
 custom_styles/normal = SubResource( 6 )
 custom_fonts/font = ExtResource( 3 )
 toggle_mode = true
-group = SubResource( 8 )
+group = SubResource( 7 )
 text = "Peaking"
 icon = ExtResource( 7 )
 
@@ -275,12 +276,12 @@ margin_top = 96.0
 margin_right = 160.0
 margin_bottom = 116.0
 size_flags_horizontal = 3
-custom_styles/hover = SubResource( 5 )
-custom_styles/pressed = SubResource( 7 )
+custom_styles/hover = SubResource( 4 )
+custom_styles/pressed = SubResource( 5 )
 custom_styles/normal = SubResource( 6 )
 custom_fonts/font = ExtResource( 3 )
 toggle_mode = true
-group = SubResource( 8 )
+group = SubResource( 7 )
 text = "Low Shelf"
 icon = ExtResource( 8 )
 
@@ -290,12 +291,12 @@ margin_top = 96.0
 margin_right = 328.0
 margin_bottom = 116.0
 size_flags_horizontal = 3
-custom_styles/hover = SubResource( 5 )
-custom_styles/pressed = SubResource( 7 )
+custom_styles/hover = SubResource( 4 )
+custom_styles/pressed = SubResource( 5 )
 custom_styles/normal = SubResource( 6 )
 custom_fonts/font = ExtResource( 3 )
 toggle_mode = true
-group = SubResource( 8 )
+group = SubResource( 7 )
 text = "High Shelf"
 icon = ExtResource( 10 )
 

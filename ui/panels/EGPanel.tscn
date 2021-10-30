@@ -131,7 +131,7 @@ corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 
-[sub_resource type="StyleBoxFlat" id=16]
+[sub_resource type="StyleBoxFlat" id=12]
 bg_color = Color( 0.447059, 0.172549, 0.145098, 1 )
 border_width_left = 1
 border_width_top = 1
@@ -143,7 +143,7 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=17]
+[sub_resource type="StyleBoxFlat" id=13]
 bg_color = Color( 0.0784314, 0.141176, 0.27451, 1 )
 border_width_left = 1
 border_width_top = 1
@@ -155,7 +155,7 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=18]
+[sub_resource type="StyleBoxFlat" id=14]
 bg_color = Color( 0.145098, 0.447059, 0.176471, 1 )
 border_width_left = 1
 border_width_top = 1
@@ -179,7 +179,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -682.0
 margin_bottom = -224.0
-rect_min_size = Vector2( 342, 376 )
+rect_min_size = Vector2( 342, 384 )
 script = ExtResource( 9 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -659,8 +659,8 @@ margin_left = 280.0
 margin_top = 8.0
 margin_right = 338.0
 margin_bottom = 24.0
-custom_styles/pressed = SubResource( 16 )
-custom_styles/normal = SubResource( 17 )
+custom_styles/pressed = SubResource( 12 )
+custom_styles/normal = SubResource( 13 )
 custom_fonts/font = ExtResource( 6 )
 toggle_mode = true
 text = "Mute"
@@ -673,8 +673,8 @@ margin_left = 216.0
 margin_top = 8.0
 margin_right = 274.0
 margin_bottom = 24.0
-custom_styles/pressed = SubResource( 18 )
-custom_styles/normal = SubResource( 17 )
+custom_styles/pressed = SubResource( 14 )
+custom_styles/normal = SubResource( 13 )
 custom_fonts/font = ExtResource( 6 )
 toggle_mode = true
 text = "Bypass"

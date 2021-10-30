@@ -20,6 +20,10 @@ namespace gdsFM
         protected int seed=1;  //LFSR state sent ByRef to oscillators which produce noise
 
         public Envelope eg = new Envelope();
+        public EGStatus egStatus = EGStatus.INACTIVE;
+        public ushort egAttenuation = Envelope.L_MAX;  //5-bit value
+
+
         public Increments pg = Increments.Prototype();
  
         // public abstract void SetOscillatorType(Oscillator.waveFunc waveFunc);
@@ -44,9 +48,6 @@ namespace gdsFM
 
         //Parameters specific to Operator
         public short[] fbBuf = new short[2];  //feedback buffer
-
-        public EGStatus egStatus = EGStatus.INACTIVE;
-        public ushort egAttenuation = Envelope.L_MAX;  //5-bit value
 
 
         public Operator(){operatorOutputSample=ComputeVolume; intent=Intents.FM_OP; }
@@ -153,21 +154,6 @@ namespace gdsFM
             return result;
         }
 
-
-        public short ComputeVolume2(ushort modulation, ushort am_offset)
-        {
-            ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) /*+ modulation*/);
-
-            ushort sin_attenuation = oscillator.Generate(phase, eg.duty, ref flip, __makeref(pg.hz));
-
-            ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);
-
-            int result = Tables.attenuation_to_volume((ushort)(sin_attenuation + env_attenuation));
-            var output = flip?  (short)-result: (short)result;
-
-            output |= unchecked((short)modulation);
-            return output;
-        }
         public short ComputeVolume(ushort modulation, ushort am_offset)
         {
             // start with the upper 10 bits of the phase value plus modulation
@@ -176,10 +162,10 @@ namespace gdsFM
             ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + modulation);
 
             // get the absolute value of the sin, as attenuation, as a 4.8 fixed point value
-            // ushort sin_attenuation = Tables.abs_sin_attenuation(phase);
-            ushort sin_attenuation = oscillator.Generate(phase, eg.duty, ref flip, __makeref(pg.hz));
+            // ushort sin_attenuation = oscillator.Generate(phase, eg.duty, ref flip, __makeref(pg.hz));
+            ushort sin_attenuation = oscillator.Generate(phase, eg.duty, ref flip, __makeref(pg.increment));
 
-            // get the attenuation from the evelope generator as a 4.6 value, shifted up to 4.8
+            // get the attenuation from the envelope generator as a 4.6 value, shifted up to 4.8
             ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);
             // ushort env_attenuation = envelope_attenuation(am_offset) << 2;
 
@@ -361,7 +347,7 @@ namespace gdsFM
         {
             ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) /*+ modulation*/);
 
-            ushort sin_attenuation = oscillator.Generate(phase, eg.duty, ref flip, __makeref(pg.hz));
+            ushort sin_attenuation = oscillator.Generate(phase, eg.duty, ref flip, __makeref(pg.increment));
 
             ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);
 

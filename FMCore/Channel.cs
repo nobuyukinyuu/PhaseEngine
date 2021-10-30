@@ -290,16 +290,15 @@ namespace gdsFM
             string nl = Environment.NewLine;
 
             byte i=0;
-            foreach (OpBase opBase in ops)
+            foreach (OpBase op in ops)
             {
-                var op = opBase as Operator;
-                if (op==null) continue;
+                // if (op==null) continue;
                 string rising;
                 if (op.egStatus>=0 && (int)op.egStatus < op.eg.rising.Length)
                     rising = op.eg.rising[(int)op.egStatus] ? "Rising" : "Falling";
                 else rising= "Doing nothing";
                 sb.Append( String.Format("Op{0}: {1} and {2} ({3})",  i+1, op.egStatus.ToString(), rising, op.egAttenuation) );
-                // sb.Append(String.Format("Op{0}: {1}", i+1, ops[i].pg.increment));
+                // sb.Append(String.Format("\nOp{0}: {1}", i+1, ops[i].pg.increment));
                 sb.Append(nl);
                 i++;
             }

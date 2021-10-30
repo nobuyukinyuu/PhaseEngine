@@ -10,7 +10,6 @@ namespace gdsFM
 {
     public static class Tools
     {
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Lerp(float value1, float value2, float amount) { return value1 + (value2 - value1) * amount; }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -19,6 +18,15 @@ namespace gdsFM
         public static float InverseLerp(float first, float last, float value) { return (value - first) / (last - first); }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double InverseLerp(double first, double last, double value) { return (value - first) / (last - first); }
+
+
+        /// summary:  No-multiply / division linear interpolation in 8-bit and 16-bit integer forms. X must be a value spanning the range of the bit width.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte Lerp8(byte A,byte B, byte x)	{ return (byte) ((A*(255-x)+B*x+255) >> 8); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static short Lerp16(short A, short B, short x) { return (short)((A*(65535-x)+B*x+65535) >> 16); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ushort Lerp16(ushort A, ushort B, ushort x) { return (ushort)((A*(65535-x)+B*x+65535) >> 16); }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double Log2(double n){ return Math.Log(n) / Math.Log(2); }
@@ -204,11 +212,12 @@ namespace gdsFM
         }
 
 
-        //Branchless absolute value methods
+        //Branchless absolute value and sign methods
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static short Abs(short n) {int o=n; int s=(n>>31); o^=s; o-=s; return (short)(o);}
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static int Abs(int n) {int s=(n>>31); n^=s; n-=s; return n;}
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static long Abs(long n) {long s=(n>>31); n^=s; n-=s; return n;}
-
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static int Sign(int value) => (value >> 31) | (int)((uint)(-value) >> 31);
 
 
         //Returns the least common multiple of the arguments.

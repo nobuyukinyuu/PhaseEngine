@@ -97,6 +97,14 @@ public class Test2 : Label
         if(Visible)
         {
             this.Text = c.channels[0].ToString();
+            if (c.channels[0].ops[0].pg.increment > int.MaxValue) 
+                // this.AddColorOverride("font_color", new Color("ff0000")); 
+                this.SelfModulate = new Color("ff0000"); 
+            else
+                // this.AddColorOverride("font_color", new Color("ffffff"));
+                this.SelfModulate = new Color("ffffff"); 
+
+
             var info = GetNode<Label>("ChInfo");
             info.Text = c.ToString();
             // info.Text = FramesPerOscillation();
@@ -407,6 +415,7 @@ public class Test2 : Label
             {
                 DrawLine(drawCache[i], drawCache[i+1], Color.ColorN("cyan"), 0.5f, true);
             }
+
 
 
     }

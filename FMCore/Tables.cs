@@ -1,7 +1,8 @@
 using System;
 using gdsFM;
 using System.Runtime.CompilerServices;
-using Godot;  //FIXME:  This is really only here to make easier to debug using godot print statements.  Remove me
+using System.Diagnostics;
+// using Godot;  //FIXME:  This is really only here to make easier to debug using godot print statements.  Remove me
 
 namespace gdsFM 
 {
@@ -16,9 +17,11 @@ namespace gdsFM
         public static readonly float[] short2float = new float[ushort.MaxValue+1];  //Representation in float of all values of ushort
         public const ushort SIGNED_TO_INDEX = short.MaxValue+1;  //Add this value to an output of the oscillator to get an index for a 16-bit table.
 
+
         //16kb tables
         public static readonly float[] vol2pitchDown = new float[8192];  //Converts an LFO's oscillator output to float mapping from 1-0.5
         public static readonly float[] vol2pitchUp = new float[8192];  //Converts an LFO's oscillator output to float mapping from 1-2
+        public static readonly ushort[] vol2attenuation = new ushort[8192];  //Converts a 12-bit (positive) volume to an attenuation value.
 
 
 
@@ -40,7 +43,8 @@ namespace gdsFM
         public const byte TRI_TABLE_MASK = (1 << TRI_TABLE_BITS) - 1;
         public static readonly ushort[] tri = new ushort[TRI_TABLE_MASK+1];
         public static readonly ushort[] saw = new ushort[256];
- 
+
+
         public static readonly short[] defaultWavetable = new short[256];
  
 
@@ -109,6 +113,51 @@ namespace gdsFM
                 amdScaleRatio[i] = 1.0f - i / (float)Envelope.L_MAX;  // Value from 1.0f-0 representing how much to scale volume by from the raw AMD value
                 amdPushupRatio[i] = (short)(0x1FFF * amdScaleRatio[i]); 
             }
+
+
+            //Volume to attenuation table
+            var attVol = new ushort[2048];
+            for(ushort i=0; i<attVol.Length; i++)
+            {
+                attVol[i] = attenuation_to_volume(i);
+                vol2attenuation[attVol[i]] = i;
+            }
+            ushort lastVal = 2047;
+            int first_instance=0;
+            for(ushort i=0; i<vol2attenuation.Length; i++)
+            {
+                if(vol2attenuation[i] == 0) 
+                    vol2attenuation[i] = lastVal; 
+                else if (first_instance==0)
+                    {
+                        first_instance = i;
+                        lastVal = vol2attenuation[i];
+                    }
+                else
+                    lastVal = vol2attenuation[i];
+            }
+
+            for (ushort i=0; i<first_instance; i++)  //FIXME:  This block may not be necessary.  Check against very slow LFOs with saw waves.
+            {
+                vol2attenuation[i] = (ushort)Tools.Lerp(2047, vol2attenuation[first_instance], i/(first_instance-1));
+            }
+
+
+
+            // Stopwatch sw = new Stopwatch();
+            // bool flip=false;
+            // long inc2= (long)(Global.FRAC_SIZE << 2);
+            // double inc3 = (double)inc2;
+            // sw.Start();
+            // for (uint i=0; i<48000*24*6; i++)  
+            //     Oscillator.Saw(i, 32767, ref flip, __makeref(inc2));
+            // sw.Stop();
+            // Console.WriteLine("Saw1 Elapsed={0}ms",sw.Elapsed.Milliseconds);
+
+            // sw.Restart();
+            // for (uint i=0; i<48000*24*6; i++)  Oscillator.Saw2(i, 32768, ref flip, __makeref(inc3));
+            // sw.Stop();
+            // Console.WriteLine("Saw2 Elapsed={0}ms",sw.Elapsed.Milliseconds);
 
             // System.Diagnostics.Debug.Print("Shornlf");
 
