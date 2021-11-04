@@ -150,8 +150,23 @@ namespace gdsFM
             // c.SetVoice(this);
             // c.disableLFO = disableLFO;
 
-            //If the channel contains filters, they need to be recalculated.
-            //FIXME:  Right now this is done in Test2.cs RecalcFilter().  We should go through each op and set 3 values from Voice.egs before recalc.
+            //If the channel contains filters or bitwise funcs, they need to be recalculated.
+            for (int i=0; i<opCount; i++)
+            {
+                switch(alg.intent[i])
+                {
+                    case OpBase.Intents.BITWISE:
+                        var op = c.ops[i] as BitwiseOperator;
+                        op.OpFuncType = egs[i].aux_func;  //Property has hidden side effect of setting func
+                        break;
+
+                    case OpBase.Intents.FILTER:
+                        var f = c.ops[i] as Filter;
+                        f.SetOscillatorType(egs[i].aux_func);
+                        f.Recalc();
+                        break;
+                }
+            }
 
             c.NoteOn(0, 64);
             for (int i=0; oc<size && i<period; i++)

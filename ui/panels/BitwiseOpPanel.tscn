@@ -169,6 +169,7 @@ corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
 [node name="BitwisePanel" type="Control"]
+modulate = Color( 0.8, 1, 1.25, 1 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -682.0
@@ -597,16 +598,12 @@ margin_top = 296.0
 margin_right = 340.0
 margin_bottom = 376.0
 custom_styles/panel = SubResource( 11 )
-tl = 0.0
-al = 0.0
-dl = 0.0
 sl = 1.0
 Delay = 0
 Attack = 63
 Hold = 0
 Decay = 63
 Release = 48
-db_moves = true
 
 [node name="Mute" type="Button" parent="."]
 margin_left = 280.0

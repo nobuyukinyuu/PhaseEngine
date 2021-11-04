@@ -136,16 +136,16 @@ public class Test2 : Label
 
 
 
-        //FIXME:  This function is hacky and only sets the chip's channel ops to the processed value and has NO representation in the Voice outside of the preview!
-        //          Custom bitwise operation type and (in the future) other values unique to each sub-operator type should probably store these things in EG.
-        //          Then, EG should probably be moved to OpBase.....
+        //FIXME:  This function is hacky and only sets the chip's channel ops to the processed value.  Voice preview updates this manually as well.
+        //        Channel.NoteOn doesn't set the delegate because c# has no fuckin switch fallthru and I don't want to use an If statement right now
+        //        It's going to need to be fixed when creating a new BitwiseOperator in any other context (like music replayers)
         public void SetBitwiseFunc(byte opTarget, int val)
         {
             foreach(Channel ch in c.channels)
             {
                 var op = ch.ops[opTarget] as BitwiseOperator;
                 if (op==null) continue;
-                op.OpFuncType = (byte)val;
+                op.OpFuncType = (byte)val;  //Property has hidden side effect of updating the delegate
                 c.Voice.egs[opTarget].aux_func = (byte)val;
             }
         }
@@ -250,7 +250,7 @@ public class Test2 : Label
         {
             var op = c.channels[i].ops[opTarget] as Filter;
             if (op==null) continue;
-            op.eg.aux_func = c.Voice.egs[opTarget].aux_func;
+            op.SetOscillatorType(c.Voice.egs[opTarget].aux_func);
             op.eg.cutoff = c.Voice.egs[opTarget].cutoff;
             op.eg.resonance = c.Voice.egs[opTarget].resonance;
             op.Recalc();
@@ -263,6 +263,8 @@ public class Test2 : Label
             var op = c.Voice.preview.ops[i] as Filter;
             if (op==null) continue;
             op.eg.aux_func = c.Voice.egs[opTarget].aux_func;
+            op.eg.gain = c.Voice.egs[opTarget].gain;
+            op.eg.duty = c.Voice.egs[opTarget].duty;
             op.eg.cutoff = Math.Max(2, c.Voice.egs[opTarget].cutoff * RATIO);  //Preview note is midi_note 0!  Reduce cutoff a bunch to be more representative of A440.
             op.eg.resonance = c.Voice.egs[opTarget].resonance;
             op.Reset();

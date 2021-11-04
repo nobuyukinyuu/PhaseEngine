@@ -16,7 +16,7 @@ const icons = [
 func _ready():
 	$Filter.display_strings = global.FilterNames
 
-	for o in [$Frequency, $"Q [Resonance]"]:
+	for o in [$Frequency, $"Q [Resonance]", $"Dry Mix", $Gain]:
 		o.connect("value_changed", self, "setEG", [o.associated_property])
 
 	for i in $G.get_child_count():
@@ -29,6 +29,9 @@ func _ready():
 func select(value):
 	var eg = get_node(chip_loc)
 	eg.SetFilterType(self.operator, value)
+	
+	set_editable($Gain, value > 6)
+	
 	global.emit_signal("op_tab_value_changed")
 
 
@@ -46,6 +49,8 @@ func set_from_op(op:int):
 #	$Filter.value = d[""]
 	$Frequency.value = d["cutoff"]
 	$"Q [Resonance]".value = d["resonance"]
+	$"Dry Mix".value = d["duty"]
+	$Gain.value = d["gain"]
 
 	#TODO:  Consider using AMS to control wet/dry
 #	$Tweak/AMS.value = d["ams"]
@@ -64,6 +69,12 @@ func setEG(value, property):
 	global.emit_signal("op_tab_value_changed")
 
 
+func set_editable(which, is_enabled=true):  
+	if is_enabled:
+		which.modulate = Color(1,1,1)
+	else:
+		which.modulate = Color("505056")
+	which.editable = is_enabled
 
 func _on_Filter_value_changed(value):
 	var eg = get_node(chip_loc)

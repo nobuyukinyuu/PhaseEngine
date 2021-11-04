@@ -24,7 +24,7 @@ namespace gdsFM
 
         //We'd want to apply these impulses from the blep over a scaled -1.0-1.0 sample. We sample every time there's a discontinuity in the oscillator waveform.
         //For pulses, that's once at phase (0) and again at phase (0.5), which we need to translate later from n (ushort of n<<6 is 0-65535).
-        public static double polyBlep(double t, double dt)  //t=phase;  dt=increment
+        static double PolyBLEP(double t, double dt)  //t=phase;  dt=increment
         {
             // double t = phase * 0.0000152587890625;  // 1.0/65536.0
             // double dt = increment * 0.0000152587890625;
@@ -56,8 +56,8 @@ namespace gdsFM
             ushort phase = (ushort) unchecked((n<<6));
             var inc = (auxdata2 >> Global.FRAC_PRECISION_BITS) << 6;
             var output = phase >= duty?  -1.0:1.0;
-            var bump1=(polyBlep(phase, inc&65535));
-            var bump2=(polyBlep((phase - duty)&65535, inc&65535));
+            var bump1=(PolyBLEP(phase, inc&65535));
+            var bump2=(PolyBLEP((phase - duty)&65535, inc&65535));
 
             flip = (output < 0.0);
 
@@ -198,7 +198,7 @@ namespace gdsFM
             ushort phase = (ushort) unchecked((n<<6));
             var inc = (auxdata2 >> Global.FRAC_PRECISION_BITS) << 6;
             var output = phase / 32768.0 - 1.0;
-            var bump1=(polyBlep(phase, inc&65535));
+            var bump1=(PolyBLEP(phase, inc&65535));
 
             flip= (output < 0);
             output -= bump1;

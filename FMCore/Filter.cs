@@ -7,8 +7,8 @@ namespace gdsFM
     {
         //TODO:  Replace with delegate func array
         public enum FilterType {NONE, LOWPASS, HIPASS, BANDPASS_CSG, BANDPASS_CZPG, NOTCH, ALLPASS, PEAKING, LOWSHELF, HISHELF}
-        public delegate float FilterFunc(float input);
-        public FilterFunc ApplyFilter;
+        public delegate short FilterFunc(ushort input, ushort am_offset);
+        public FilterFunc FilterToApply;
 
         // public static readonly FilterFunc[] operations = {Bypass, Lowpass, Hipass, Bandpass_Csg, Bandpass_Czpg, Notch, AllPass, Peaking, LowShelf, HiShelf};
 
@@ -21,7 +21,7 @@ namespace gdsFM
         float ou1,ou2,in1,in2;
 
 
-        public Filter()    {Reset();}
+        public Filter()    {FilterToApply=RequestBypass; Reset();}
         public void Reset()
         {
             // reset filter coeffs
@@ -36,16 +36,20 @@ namespace gdsFM
             return;
         }
 
-        public override short RequestSample(ushort input, ushort am_offset)
+        public override short RequestSample(ushort input, ushort am_offset) { return FilterToApply(input, am_offset); }
+        public short RequestBypass(ushort input, ushort am_offset)  { return (short)input; }
+        public short RequestFilteredSample(ushort input, ushort am_offset)
         {
-            var output = Process(Tables.short2float[ (short)input + Tables.SIGNED_TO_INDEX]);  //FIXME: CHECK IF KEEPING THE VALUE USHORT IS THE SAME THING AS THIS CONVERSION
-
-            return Tools.Clamp((short)(output * short.MaxValue), short.MinValue, short.MaxValue);
+            var output = Process(Tables.short2float[ (short)input + Tables.SIGNED_TO_INDEX]);
+            var mix = (int)Tools.Clamp((output * short.MaxValue), short.MinValue, short.MaxValue);
+            mix = Tools.Lerp16(mix, (short)input, eg.duty);
+            return (short)(mix);
         }
 
         //Since filters don't have an oscillator, we can re-use this function to recalculate our filter type based on the index.
         public override void SetOscillatorType(byte index)
         {
+            if (index==0)  FilterToApply=RequestBypass; else FilterToApply=RequestFilteredSample;
             eg.aux_func = index;
             Recalc();
         }
@@ -69,7 +73,7 @@ namespace gdsFM
 
         //TODO:  Consider splitting out some derived values like omega etc to its own update function or otherwise simplifying this so less processing is done on recalc!!
 
-        public void Recalc() {Recalc((FilterType)eg.aux_func, eg.cutoff, eg.resonance, 6);}
+        public void Recalc() {Recalc((FilterType)eg.aux_func, eg.cutoff, eg.resonance, eg.gain);}
 
         public void Recalc(FilterType type, double frequency, double q, double db_gain, bool q_is_bandwidth=false)
         {

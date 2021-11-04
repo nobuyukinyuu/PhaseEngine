@@ -1,7 +1,15 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=22 format=2]
 
+[ext_resource path="res://gfx/wave/0.png" type="Texture" id=1]
 [ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=2]
 [ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=3]
+[ext_resource path="res://gfx/ui/hSlider.theme" type="Theme" id=4]
+[ext_resource path="res://ui/panels/EGWavePanel.gd" type="Script" id=5]
+[ext_resource path="res://ui/EGSlider.gd" type="Script" id=6]
+[ext_resource path="res://gfx/wave/2.png" type="Texture" id=7]
+[ext_resource path="res://gfx/wave/3.png" type="Texture" id=8]
+[ext_resource path="res://gfx/wave/1.png" type="Texture" id=9]
+[ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=10]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.447059, 0.172549, 0.145098, 1 )
@@ -39,7 +47,82 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
+[sub_resource type="StyleBoxFlat" id=4]
+bg_color = Color( 0, 0, 0, 0.25098 )
+border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+anti_aliasing = false
+
+[sub_resource type="Shader" id=5]
+code = "shader_type canvas_item;
+
+void fragment()
+{
+	COLOR.rgba = textureLod(TEXTURE, UV, 0).brga;
+}"
+
+[sub_resource type="ShaderMaterial" id=6]
+shader = SubResource( 5 )
+
+[sub_resource type="StyleBoxFlat" id=7]
+bg_color = Color( 0, 0, 0, 0.941176 )
+border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+expand_margin_left = 12.0
+expand_margin_right = 12.0
+expand_margin_top = 16.0
+expand_margin_bottom = 12.0
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=8]
+content_margin_left = 2.0
+content_margin_right = 2.0
+content_margin_top = 2.0
+content_margin_bottom = 2.0
+bg_color = Color( 0.278431, 0.388235, 0.564706, 0.737255 )
+border_width_left = 1
+border_width_top = 1
+border_color = Color( 0.8, 0.8, 0.8, 0.380392 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=9]
+content_margin_left = 2.0
+content_margin_right = 2.0
+content_margin_top = 2.0
+content_margin_bottom = 2.0
+bg_color = Color( 0.0784314, 0.0862745, 0.14902, 0.737255 )
+border_width_left = 1
+border_width_top = 1
+border_color = Color( 0.8, 0.8, 0.8, 0.380392 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+anti_aliasing = false
+
+[sub_resource type="Shader" id=10]
+code = "shader_type canvas_item;
+
+void fragment()
+{
+//	vec4 c = textureLod(TEXTURE, UV, 0);
+//	COLOR.rgb += 2.0-vec3(mod(UV.y, TEXTURE_PIXEL_SIZE.y*12.0))*24.0;
+//	COLOR.a = c.a;
+}"
+
+[sub_resource type="ShaderMaterial" id=11]
+shader = SubResource( 10 )
+
 [node name="WaveFoldPanel" type="Control"]
+modulate = Color( 3, 1, 1.8, 1 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -682.0
@@ -115,5 +198,131 @@ min_value = -32768.0
 max_value = 32767.0
 exp_edit = true
 associated_property = "bias"
+
+[node name="WavePanel" type="Panel" parent="."]
+visible = false
+margin_right = 192.0
+margin_bottom = 40.0
+custom_styles/panel = SubResource( 4 )
+script = ExtResource( 5 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Wave" type="HSlider" parent="WavePanel" instance=ExtResource( 2 )]
+modulate = Color( 1, 0.541176, 0.823529, 1 )
+anchor_right = 1.0
+margin_left = 48.0
+margin_top = 8.0
+margin_right = -8.0
+margin_bottom = 28.0
+rect_min_size = Vector2( 48, 20 )
+theme = ExtResource( 4 )
+max_value = 3.0
+scrollable = false
+ticks_on_borders = true
+script = ExtResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Preview" type="TextureRect" parent="WavePanel"]
+material = SubResource( 6 )
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 40.0
+margin_bottom = 32.0
+texture = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Popup" type="PopupDialog" parent="WavePanel"]
+visible = true
+margin_left = -128.0
+margin_top = 32.0
+margin_right = -56.0
+margin_bottom = 96.0
+rect_min_size = Vector2( 72, 64 )
+custom_styles/panel = SubResource( 7 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="WavePanel/Popup"]
+anchor_right = 1.0
+margin_top = -12.0
+margin_right = 8.0
+margin_bottom = -4.0
+custom_fonts/font = ExtResource( 10 )
+custom_colors/font_color = Color( 0.384314, 0.717647, 0.831373, 0.639216 )
+text = "Waveform="
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="G" type="GridContainer" parent="WavePanel/Popup"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 4.0
+margin_right = 2.0
+margin_bottom = 4.0
+custom_constants/vseparation = 2
+custom_constants/hseparation = 2
+columns = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Wave0" type="Button" parent="WavePanel/Popup/G"]
+margin_right = 36.0
+margin_bottom = 28.0
+custom_styles/hover = SubResource( 8 )
+custom_styles/normal = SubResource( 9 )
+icon = ExtResource( 1 )
+
+[node name="Wave1" type="Button" parent="WavePanel/Popup/G"]
+margin_left = 38.0
+margin_right = 74.0
+margin_bottom = 28.0
+custom_styles/hover = SubResource( 8 )
+custom_styles/normal = SubResource( 9 )
+icon = ExtResource( 7 )
+
+[node name="Wave2" type="Button" parent="WavePanel/Popup/G"]
+margin_top = 30.0
+margin_right = 36.0
+margin_bottom = 58.0
+custom_styles/hover = SubResource( 8 )
+custom_styles/normal = SubResource( 9 )
+icon = ExtResource( 9 )
+
+[node name="Wave3" type="Button" parent="WavePanel/Popup/G"]
+margin_left = 38.0
+margin_top = 30.0
+margin_right = 74.0
+margin_bottom = 58.0
+custom_styles/hover = SubResource( 8 )
+custom_styles/normal = SubResource( 9 )
+icon = ExtResource( 8 )
+
+[node name="lblTitle" type="Label" parent="."]
+material = SubResource( 11 )
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 56.0
+margin_bottom = 16.0
+rect_scale = Vector2( 2, 2 )
+custom_fonts/font = ExtResource( 3 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 1
+custom_constants/shadow_offset_y = 1
+text = "WaveFolder 1"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 [connection signal="toggled" from="Mute" to="." method="_on_Mute_toggled" binds= [ false ]]
 [connection signal="toggled" from="Bypass" to="." method="_on_Mute_toggled" binds= [ true ]]
+[connection signal="value_changed" from="WavePanel/Wave" to="WavePanel" method="_on_Wave_value_changed"]
+[connection signal="gui_input" from="WavePanel/Preview" to="WavePanel" method="_on_Preview_gui_input"]

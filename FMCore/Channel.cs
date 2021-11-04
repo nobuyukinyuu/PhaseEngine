@@ -50,6 +50,10 @@ namespace gdsFM
             bool setFree = true;
             for(int i=0; i<ops.Length; i++)
             {
+                //FIXME:  Skip over Filter ops when adding egStatus entirely and instead if an operator is connected to a filter,
+                //        Determine if the filter's connected to output, and only then process op as if directly connected to output.
+                //        Currently, the score for priority is way too high for stealing a channel since filters don't report a status.
+
                 if (voice.alg.connections[i] != 0)  continue;  //Skip over connections not connected to output.
                 var op=ops[i] as Operator;
                 if (busy==BusyState.BUSY ||
@@ -123,9 +127,8 @@ namespace gdsFM
                     op.pg.Recalc();
                     op.NoteOn();
                     break;
-
                 }
-                // if (intent == OpBase.Intents.FM_OP)
+
             }
             busy = BusyState.BUSY;                
         }

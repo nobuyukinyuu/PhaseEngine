@@ -12,7 +12,7 @@ onready var lblPos2 = Vector2(rect_size.x/2 - (len(str(value))+1)*charw/2.0, rec
 export(String) var associated_property = ""  #Determines the envelope property this slider's supposed to modify.
 
 export(bool) var useExpTicks
-enum SpecialDisplay {NONE, EG_HOLD, LFO_DELAY, LFO_SPEED, CUSTOM=0xFF}
+enum SpecialDisplay {NONE, EG_HOLD, LFO_DELAY, LFO_SPEED, PERCENT, CUSTOM=0xFF}
 export(SpecialDisplay) var special_display 
 export(PoolStringArray) var display_strings
 
@@ -73,6 +73,12 @@ func _draw():
 			vStr = str(val).pad_decimals(2)
 			pos2 = calc_pos2(vStr)
 			draw_string(font3, pos2 + Vector2((len(vStr))*charw*1.0 +2,2), s, col)
+
+		SpecialDisplay.PERCENT:
+			val = value/float(max_value)
+			vStr = str(val*100).pad_decimals(2) + "%"
+			pos2 = calc_pos2(vStr)
+			
 
 		SpecialDisplay.CUSTOM:
 			drawFont = font

@@ -41,6 +41,7 @@ namespace gdsFM
         public ushort duty=32767;
 
         public double cutoff=Global.MixRate, resonance=1.0;
+        public double gain=1.0;  //Used by Wavefolder and some filters.
 
         public byte ams;  //Amplitude modulation sensitivity (used to determine how much LFO to mix in)
         public bool osc_sync=true;  //Oscillator sync.  Oscillator phase will reset on NoteOn if true.
@@ -144,6 +145,7 @@ namespace gdsFM
                 j.Assign("mute", ref mute);
                 j.Assign("bypass", ref bypass);
                 j.Assign("aux_func", ref aux_func);
+                j.Assign("gain", ref gain);
             } catch {
                 return false;
             }
@@ -170,6 +172,7 @@ namespace gdsFM
             o.AddPrim("mute", mute);
             o.AddPrim("bypass", bypass);
             o.AddPrim("aux_func", aux_func);
+            o.AddPrim("gain", gain);
 
             return o.ToJSONString();
         }
@@ -195,6 +198,7 @@ namespace gdsFM
             o.Add("mute", mute);
             o.Add("bypass", bypass);
             o.Add("aux_func", aux_func);
+            o.Add("gain", gain);
             return o;
         }
         #endif 

@@ -27,6 +27,8 @@ namespace gdsFM
         public static short Lerp16(short A, short B, short x) { return (short)((A*(65535-x)+B*x+65535) >> 16); }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort Lerp16(ushort A, ushort B, ushort x) { return (ushort)((A*(65535-x)+B*x+65535) >> 16); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Lerp16(int A, int B, int x) { return ((A*(65535-x)+B*x+65535) >> 16); }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double Log2(double n){ return Math.Log(n) / Math.Log(2); }
