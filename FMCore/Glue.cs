@@ -12,6 +12,16 @@ namespace gdsFM
         /// In GDScript you can use obj.set(prop, val) or obj.get(prop); this is a similar feature for c#.
         /// Any class which implements the interface can use these methods to adjust a field or property of itself (provided it's public..)
         //TODO:  Make this safer
+        public static Type GetValType<T>(this T instance, string propertyName)  
+        {
+                Type type = typeof(T);
+                var property = type.GetProperty(propertyName);
+                if (property==null)
+                   return type.GetField(propertyName)?.FieldType;
+
+                return property.PropertyType;
+;
+        } 
         public static object GetVal<T>(this T instance, string propertyName)  
         {
                 Type type = typeof(T);

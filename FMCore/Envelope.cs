@@ -208,7 +208,7 @@ namespace gdsFM
         {
             try
             {
-                this.SetVal(property, unchecked((int) val));
+                this.SetVal(property, unchecked(val));
                 // GD.Print(String.Format("Set op{0}.eg.{1} to {2}.", opTarget, property, val));
             } catch(NullReferenceException) {
                 #if GODOT

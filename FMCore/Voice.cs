@@ -162,7 +162,7 @@ namespace gdsFM
 
                     case OpBase.Intents.FILTER:
                         var f = c.ops[i] as Filter;
-                        f.SetOscillatorType(egs[i].aux_func);
+                        f.SetOscillatorType(egs[i].aux_func); //Sets the filter func
                         f.Recalc();
                         break;
                 }
@@ -207,18 +207,7 @@ namespace gdsFM
         {
             if (opTarget >= opCount) return;
             var eg = egs[opTarget];
-
-            try
-            {
-                eg.SetVal(property, unchecked((int) val));
-                // GD.Print(String.Format("Set op{0}.eg.{1} to {2}.", opTarget, property, val));
-            } catch(NullReferenceException) {
-                #if GODOT
-                    GD.PrintErr(String.Format("No property handler for op{0}.eg.{1}.", opTarget, property, val));
-                #else
-                    System.Diagnostics.Debug.Print(String.Format("No property handler for op{0}.eg.{1}.", opTarget, property, val));
-                #endif
-            }            
+            eg.ChangeValue(property, val);
         }
 
         internal void SetIntent(byte opTarget, OpBase.Intents intent)
@@ -274,6 +263,26 @@ namespace gdsFM
             } catch {
                 System.Diagnostics.Debug.Print("Voice.FromJSON:  Malformed JSON or missing data");
             }
+        }
+
+        /// summary:  Will return True if the operator is directly connected to output, or indirectly via a filter, folder, or through a bypassed operator.
+        ///           Used to determine things like how much to scale the preview waveform, check when all ops are quiet, or determine priority score of all generator ops.
+        public bool OpReachesOutput(byte src_op)
+        {
+            if (alg.intent[src_op]!=OpBase.Intents.FILTER && alg.intent[src_op]!=OpBase.Intents.WAVEFOLDER && alg.connections[src_op] == 0) return true;
+
+            //Determine if the op is connected to a filter that's connected to output or the child op is bypassed to output..
+            var c= alg.connections[src_op];
+            for (int child_op=0; c>0; child_op++)
+            {
+                //Check the child op for connections to output.
+                if ( (c&1)==1)
+                    if ( alg.connections[child_op]==0 && 
+                        (alg.intent[child_op]==OpBase.Intents.FILTER || alg.intent[child_op]==OpBase.Intents.WAVEFOLDER || egs[child_op].bypass==true ) )
+                        return true;
+                c >>=1;
+            }
+            return false;
         }
 
 

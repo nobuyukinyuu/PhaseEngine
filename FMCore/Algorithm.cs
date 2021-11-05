@@ -1,5 +1,6 @@
 using System;
 using gdsFM;
+using System.Runtime.CompilerServices;
 
 namespace gdsFM 
 {
@@ -23,12 +24,12 @@ namespace gdsFM
         public byte[] wiringGrid;  //Description of where each operator goes on a wiring grid, in format [x1, y1 ... xn, yn] where n==opCount
         
 
-        public Algorithm()    {Reset();}
-        public Algorithm(byte opCount)    {this.opCount = opCount;  Reset();}
-        void Reset()
+        public Algorithm()    {Reset(true);}
+        public Algorithm(byte opCount)    {this.opCount = opCount;  Reset(true);}
+        void Reset(bool hard_init=false)
         {
             Array.Resize(ref intent, opCount);
-            Array.Fill(intent, OpBase.Intents.FM_OP);
+            if(hard_init) Array.Fill(intent, OpBase.Intents.FM_OP);
             processOrder = DefaultProcessOrder(opCount);
             connections = new byte[opCount];
             wiringGrid = DefaultWiringGrid(opCount);  //FIXME:  Determine default wiring grid for the number of operators
@@ -85,6 +86,23 @@ namespace gdsFM
 
             return output;
         }
+
+
+        //TODO:  Use this function when changing opCount to determine how to rearrange algorithms that had their operator count reduced.
+        //      ANY operator connected to a value higher than opCount needs its connections reset and put at the end of processOrder.
+
+        /// summary:  Checks an operator for invalid connections.  Any connections made to operators greater than current opCount will result in null access...
+        public bool ConnectionsOK(byte opTarget)
+        {
+            var invalid_connections = connections[opTarget] >> opCount;
+            return invalid_connections == 0;
+        }
+
+        /// summary:  Will mask out any connections considered invalid to this algorithm.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void FixConnections(byte opTarget)  { connections[opTarget] &= Tools.unsigned_bitmask(opCount); }
+        public void FixConnections()  { for(byte i=0; i<opCount; i++)  FixConnections(i); }
+
 
 #region presets
         //Info on preset algorithms adapted from:  https://gist.github.com/bryc/e997954473940ad97a825da4e7a496fa

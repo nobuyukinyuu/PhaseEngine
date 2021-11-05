@@ -55,17 +55,16 @@ func set_from_op(op:int):
 	#TODO:  Consider using AMS to control wet/dry
 #	$Tweak/AMS.value = d["ams"]
 
-	#TODO:  Consider using duty as the wet/dry value.	
-#	$Duty.value = d["duty"]
-
 	
 	$Mute.pressed = d["mute"]
 	$Bypass.pressed = d["bypass"]
 
 
-func setEG(value, property):
+func setEG(value, property, recalc=true):
 	get_node(chip_loc).SetEG(operator, property, value)
-	get_node(chip_loc).RecalcFilter(operator)
+	if recalc:  
+#		yield(get_tree(), "idle_frame")
+		get_node(chip_loc).RecalcFilter(operator)
 	global.emit_signal("op_tab_value_changed")
 
 

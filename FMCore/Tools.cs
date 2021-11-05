@@ -96,6 +96,7 @@ namespace gdsFM
 
         // TODO:  Consider rewriting these to not rely on rollover but instead return unsigned maxValue if width is exceeded and (1<<n)-1 otherwise...
         public static uint make_bitmask(int n) { return (uint)((n < (32) ? ((1u) << n) : (0u)) - 1); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static byte unsigned_bitmask(byte n) { return (byte)((1u << n) - 1); }
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ushort make_bitmask(short n) { return (ushort)((n < (16) ? ((1u) << n) : (0u)) - 1); }
         public static ulong make_bitmask(long n) { return (ulong)((n < (64) ? ((1ul) << (int)n) : unchecked((ulong)-1))); }  // Uhhhhh.....
 

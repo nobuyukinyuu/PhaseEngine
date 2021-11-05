@@ -48,21 +48,21 @@ namespace gdsFM
 
             //Check busy state for free.
             bool setFree = true;
-            for(int i=0; i<ops.Length; i++)
+            for(byte i=0; i<ops.Length; i++)
             {
                 //FIXME:  Skip over Filter ops when adding egStatus entirely and instead if an operator is connected to a filter,
                 //        Determine if the filter's connected to output, and only then process op as if directly connected to output.
                 //        Currently, the score for priority is way too high for stealing a channel since filters don't report a status.
 
-                if (voice.alg.connections[i] != 0)  continue;  //Skip over connections not connected to output.
-                var op=ops[i] as Operator;
+                if (!voice.OpReachesOutput(i) || voice.egs[i].mute)  continue;  //Skip over connections not connected to output.
+                var op=ops[i];
                 if (busy==BusyState.BUSY ||
-                   (busy==BusyState.RELEASED &&  (op!=null && op.egStatus != EGStatus.INACTIVE)) )
-                        setFree = false;
+                   (busy==BusyState.RELEASED &&  (op.egStatus != EGStatus.INACTIVE)) )
+                        setFree = false; //Found an active channel.  Don't set our busy state to FREE.
 
                 //Status of the envelope is such that the further along in the envelope it is, the higher the score.
                 //Lsh ensures that the value is always positive -- Delay is considered same priority as Decay, Hold the same as Sustained
-                if (op!=null) score += (int)op.egStatus <<4;  
+                score += (int)op.egStatus <<4;  
                 score >>= 1;  //Compensate for multiple operators connected to output.
             }
             if (setFree) busy = BusyState.FREE;
@@ -268,18 +268,23 @@ namespace gdsFM
                         case OpBase.Intents.FM_OP:
                             var op = new Operator();
                             ops[i] = op;
-                            op.eg = voice.egs[i];
+                            ops[i].eg = voice.egs[i];
                             op.pg = voice.pgs[i];  //ByVal copy
                             break;
                         case OpBase.Intents.FILTER:
                             ops[i] = new Filter();
+                            ops[i].eg = voice.egs[i];
+                            ops[i].SetOscillatorType(voice.egs[i].aux_func);  //TODO:  Check if values out of range cause the filter to freak out
                             break;
                         case OpBase.Intents.BITWISE:  //Extends FM_OP
                             var op2 = new BitwiseOperator();
                             ops[i] = op2;
-                            op2.eg = voice.egs[i];
+                            ops[i].eg = voice.egs[i];
                             op2.pg = voice.pgs[i];  //ByVal copy
                             break;
+
+                        // case OpBase.Intents.WAVEFOLDER:
+                            
                         default:
                             throw new NotImplementedException("Channel:  Attempting to create a new operator with no/invalid intent...");
                     }

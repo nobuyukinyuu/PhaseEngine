@@ -240,7 +240,14 @@ public class Test2 : Label
 
     public void SetFilterType(int opTarget, float val)
     {
-        c.Voice.egs[opTarget].aux_func = (byte)val;
+        // c.Voice.preview.ops[opTarget].SetOscillatorType((byte)val);  //This updates the reference for all EGs and sets the delegate for preview only.
+        for(int i=0; i<c.channels.Length; i++)
+        {
+            var op = c.channels[i].ops[opTarget] as Filter;
+            if (op==null) continue;
+            op.SetOscillatorType((byte) val);
+        }
+
         RecalcFilter(opTarget);
     }
 
@@ -249,24 +256,22 @@ public class Test2 : Label
         for(int i=0; i<c.channels.Length; i++)
         {
             var op = c.channels[i].ops[opTarget] as Filter;
-            if (op==null) continue;
-            op.SetOscillatorType(c.Voice.egs[opTarget].aux_func);
-            op.eg.cutoff = c.Voice.egs[opTarget].cutoff;
-            op.eg.resonance = c.Voice.egs[opTarget].resonance;
+            // if (op==null) continue;
+            // op.SetOscillatorType(c.Voice.egs[opTarget].aux_func);  //FixMe:  may be redundant
+            // op.eg.cutoff = c.Voice.egs[opTarget].cutoff;
+            // op.eg.resonance = c.Voice.egs[opTarget].resonance;
+            // op.eg.gain = c.Voice.egs[opTarget].gain;
+            // op.eg.duty = c.Voice.egs[opTarget].duty;
             op.Recalc();
         }
 
         //Recalc preview.
         const double RATIO = 16.35 / Global.BASE_HZ;
-        for (int i=0; i<c.Voice.preview.ops.Length; i++)
         {
-            var op = c.Voice.preview.ops[i] as Filter;
-            if (op==null) continue;
-            op.eg.aux_func = c.Voice.egs[opTarget].aux_func;
-            op.eg.gain = c.Voice.egs[opTarget].gain;
-            op.eg.duty = c.Voice.egs[opTarget].duty;
-            op.eg.cutoff = Math.Max(2, c.Voice.egs[opTarget].cutoff * RATIO);  //Preview note is midi_note 0!  Reduce cutoff a bunch to be more representative of A440.
-            op.eg.resonance = c.Voice.egs[opTarget].resonance;
+            var op = c.Voice.preview.ops[opTarget] as Filter;
+            op.eg = new Envelope(c.Voice.egs[opTarget]);  //Make copy.
+            // op.SetOscillatorType(c.Voice.egs[opTarget].aux_func);
+            op.eg.cutoff = Math.Max(2, op.eg.cutoff * RATIO);  //Preview note is midi_note 0!  Reduce cutoff a bunch to be more representative of A440.
             op.Reset();
             op.Recalc();
         } 

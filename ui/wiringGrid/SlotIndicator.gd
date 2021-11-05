@@ -105,7 +105,6 @@ func reset_focus(val):
 func set_ops(val):  #Set the number of operators in the grid.  Property setter.
 #	print ("SetOps: ", val, "total_ops: ", total_ops)
 	
-	
 	var oldsz = total_ops
 	total_ops = val
 	if not isReady:  return
@@ -190,7 +189,7 @@ func reset_default_op_positions(sz:int):
 	var start = sz*sz - sz
 	for i in sz:
 		var p = get_child(start+i)
-		p.set_slot(i, 1)  #1=carrier
+		if p.slot_type ==2:  p.set_slot(i, 1)  #1=carrier  2=modulator
 
 		setGridID(p.gridPos, i)
 
