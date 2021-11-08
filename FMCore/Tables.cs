@@ -21,7 +21,7 @@ namespace gdsFM
         //16kb tables
         public static readonly float[] vol2pitchDown = new float[8192];  //Converts an LFO's oscillator output to float mapping from 1-0.5
         public static readonly float[] vol2pitchUp = new float[8192];  //Converts an LFO's oscillator output to float mapping from 1-2
-        public static readonly ushort[] vol2attenuation = new ushort[8192];  //Converts a 12-bit (positive) volume to an attenuation value.
+        public static readonly ushort[] vol2attenuation = new ushort[8192+1];  //Converts a 12-bit (positive) volume to an attenuation value.
 
 
 
@@ -122,9 +122,11 @@ namespace gdsFM
                 attVol[i] = attenuation_to_volume(i);
                 vol2attenuation[attVol[i]] = i;
             }
+            //Above we calculated out all of the reasonable values from the known table, now we'll fill all the other values in between with similar attenuations.
+            //We added one to vol2attenuation's array length to accomodate possible overflows but don't want it offsetting the calcs, so subtract 1 in the loop.
             ushort lastVal = 2047;
             int first_instance=0;
-            for(ushort i=0; i<vol2attenuation.Length; i++)
+            for(ushort i=0; i<vol2attenuation.Length-1; i++)  
             {
                 if(vol2attenuation[i] == 0) 
                     vol2attenuation[i] = lastVal; 

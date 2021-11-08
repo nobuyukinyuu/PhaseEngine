@@ -214,6 +214,27 @@ namespace gdsFM
         {
             //Update the preview and the intent.
             alg.SetIntent(opTarget, intent);
+
+            switch (intent)
+            {
+                case OpBase.Intents.FM_OP:
+                case OpBase.Intents.BITWISE:
+                    egs[opTarget].duty = 32767;  //Reset duty cycle to default.
+                    egs[opTarget].osc_sync = true;  //Enable oscillator sync to reduce popping.
+                    break;
+
+                case OpBase.Intents.WAVEFOLDER:
+                    egs[opTarget].duty = 32767;  //Reset bias to default.
+                    egs[opTarget].osc_sync = false;  //Disable limiting (clamping).
+                    egs[opTarget].aux_func = 0;  //Disable bit crushing.
+                    break;
+                case OpBase.Intents.FILTER:
+                    egs[opTarget].duty = 0;  //Set dry mix to 0.  Default for FM ops is 0x7FFF (50%) and may confuse new users.
+                    egs[opTarget].gain = Math.Clamp(egs[opTarget].gain, Filter.GAIN_MIN, Filter.GAIN_MAX);  //Prevent extreme gain from wavefolders
+                    break;
+
+
+            }
             preview.SetIntents(opTarget, (byte)(opTarget + 1));
         }
 
@@ -269,7 +290,7 @@ namespace gdsFM
         ///           Used to determine things like how much to scale the preview waveform, check when all ops are quiet, or determine priority score of all generator ops.
         public bool OpReachesOutput(byte src_op)
         {
-            if (alg.intent[src_op]!=OpBase.Intents.FILTER && alg.intent[src_op]!=OpBase.Intents.WAVEFOLDER && alg.connections[src_op] == 0) return true;
+            if (alg.intent[src_op]!=OpBase.Intents.FILTER && alg.connections[src_op] == 0) return true;
 
             //Determine if the op is connected to a filter that's connected to output or the child op is bypassed to output..
             var c= alg.connections[src_op];
@@ -278,7 +299,7 @@ namespace gdsFM
                 //Check the child op for connections to output.
                 if ( (c&1)==1)
                     if ( alg.connections[child_op]==0 && 
-                        (alg.intent[child_op]==OpBase.Intents.FILTER || alg.intent[child_op]==OpBase.Intents.WAVEFOLDER || egs[child_op].bypass==true ) )
+                        (alg.intent[child_op]==OpBase.Intents.FILTER || egs[child_op].bypass==true ) )
                         return true;
                 c >>=1;
             }

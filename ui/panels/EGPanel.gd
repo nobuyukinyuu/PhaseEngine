@@ -52,19 +52,18 @@ func _ready():
 	if !chip_loc.is_empty():
 		set_from_op(operator)
 
-#Used as a helper for the KanbanScroll control element.
-onready var limiter:SceneTreeTimer = get_tree().create_timer(0)
-func _gui_input(_event):
-	if limiter.time_left > 0:  return
-	var vp = get_viewport()
-	if !vp.gui_is_dragging():  return
-	#Since we're detecting a drag, might as well update the owner column's preview rect...
-#	$"..".ownerColumn.update_preview_rect($"..".ownerColumn.get_local_mouse_position())
-	$"..".ownerColumn.reset_drop_preview()
-	$"..".set_drop_preview(false)
-	limiter = get_tree().create_timer(0.2)
+##Used as a helper for the KanbanScroll control element.
+#onready var limiter:SceneTreeTimer = get_tree().create_timer(0)
+#func _gui_input(_event):
+#	if limiter.time_left > 0:  return
+#	var vp = get_viewport()
+#	if !vp.gui_is_dragging():  return
+#	#Since we're detecting a drag, might as well update the owner column's preview rect...
+##	$"..".ownerColumn.update_preview_rect($"..".ownerColumn.get_local_mouse_position())
+#	$"..".ownerColumn.reset_drop_preview()
+#	$"..".set_drop_preview(false)
+#	limiter = get_tree().create_timer(0.2)
 
-	
 
 
 #Bus operator values from the C# Chip handler.  

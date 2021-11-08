@@ -50,11 +50,10 @@ namespace gdsFM
             bool setFree = true;
             for(byte i=0; i<ops.Length; i++)
             {
-                //FIXME:  Skip over Filter ops when adding egStatus entirely and instead if an operator is connected to a filter,
+                //        Skip over Filter ops when adding egStatus entirely and instead if an operator is connected to a filter,
                 //        Determine if the filter's connected to output, and only then process op as if directly connected to output.
-                //        Currently, the score for priority is way too high for stealing a channel since filters don't report a status.
-
                 if (!voice.OpReachesOutput(i) || voice.egs[i].mute)  continue;  //Skip over connections not connected to output.
+
                 var op=ops[i];
                 if (busy==BusyState.BUSY ||
                    (busy==BusyState.RELEASED &&  (op.egStatus != EGStatus.INACTIVE)) )
@@ -70,9 +69,6 @@ namespace gdsFM
 
 
             return (short)score;
-            //TODO:  Some sorta thing which enumerates the operators for their envelope status and attenuation.  The LOWER the score, the higher the priority.
-            //      Near-silent and near-finished voices should give the HIGEST scores.  Use processOrder in reverse, checking connections to output only.
-            //      Stop and return the score once we hit the first operator with connections, since these don't factor into the final output level.
           }
         }
 
@@ -95,6 +91,7 @@ namespace gdsFM
                 {
                 case OpBase.Intents.FM_OP:
                 case OpBase.Intents.BITWISE:
+                case OpBase.Intents.WAVEFOLDER:
                     var op = ops[i] as Operator;
                     op.eg = new Envelope(voice.egs[i]);  //Make copies of the old EG values so they can be altered on a per-note basis.
 
@@ -282,8 +279,10 @@ namespace gdsFM
                             ops[i].eg = voice.egs[i];
                             op2.pg = voice.pgs[i];  //ByVal copy
                             break;
-
-                        // case OpBase.Intents.WAVEFOLDER:
+                        case OpBase.Intents.WAVEFOLDER:
+                            ops[i] = new WaveFolder();
+                            ops[i].eg = voice.egs[i];
+                            break;
                             
                         default:
                             throw new NotImplementedException("Channel:  Attempting to create a new operator with no/invalid intent...");

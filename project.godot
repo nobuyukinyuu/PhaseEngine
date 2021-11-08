@@ -50,7 +50,7 @@ _global_script_class_icons={
 "EGSlider": "",
 "EGTooltip": "",
 "EnvelopeDisplay": "",
-"VoicePanel": "",
+"VoicePanel": "res://gfx/ui/icon_fm.svg",
 "WiringGridSlot": ""
 }
 

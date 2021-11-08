@@ -10,16 +10,12 @@ namespace gdsFM
         public delegate short FilterFunc(ushort input, ushort am_offset);
         public FilterFunc FilterToApply;
 
-        // public static readonly FilterFunc[] operations = {Bypass, Lowpass, Hipass, Bandpass_Csg, Bandpass_Czpg, Notch, AllPass, Peaking, LowShelf, HiShelf};
-
-        // public byte OpFuncType {get => eg.aux_func;  set { if (value<operations.Length)  {ApplyFilter = operations[value]; eg.aux_func=value;} }}
-
-
         // filter coeffs
         float b0a0=1,b1a0=1,b2a0=1,a1a0=1,a2a0=1;
         // in/out history
         float ou1,ou2,in1,in2;
 
+        public const double GAIN_MAX = 4.0, GAIN_MIN=0.25;
 
         public Filter()    {FilterToApply=RequestBypass; Reset();}
         public void Reset()
@@ -32,7 +28,7 @@ namespace gdsFM
 
         public override void Clock()
         {
-            //TODO:  Support recalculating filter envelopes
+            //TODO:  Support recalculating filter envelopes?
             return;
         }
 
@@ -95,7 +91,8 @@ namespace gdsFM
             // for peaking, lowshelf and hishelf
             if((int)type>6)
             {
-                A   	=	Math.Pow(10.0,(db_gain/40.0));
+                // A   	=	Math.Pow(10.0,(db_gain/40.0));
+                A   	=	db_gain;
                 beta	=	Math.Sqrt(A)/q;
             }
 

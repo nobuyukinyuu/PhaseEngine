@@ -366,9 +366,11 @@ margin_top = 256.0
 margin_right = 336.0
 margin_bottom = 276.0
 size_flags_horizontal = 3
-min_value = -24.0
-max_value = 24.0
+min_value = 0.25
+max_value = 4.0
 step = 0.01
+value = 1.0
+exp_edit = true
 editable = false
 associated_property = "gain"
 
