@@ -47,16 +47,25 @@ func set_text(t):
 	print("now ", $P/D.text)
 
 func set_icon(intent, osc_type):
+	var style = $PanelBG.get_stylebox("panel")
+	var style2 = $Tab.get_stylebox("panel")
+	style.border_color = Color("1da8b2") #Approx h value of 0.511185
+	style2.border_color = Color("1da8b2")
+
 	match intent:
 		global.OpIntent.FM_OP:
 			#Use waveform icons.
 			return load("res://gfx/ui/ops/%s.svg" % min(osc_type,4))
-			pass
 		global.OpIntent.FILTER:
 			return load("res://gfx/ui/filter/%s.svg" % osc_type)
 		global.OpIntent.BITWISE:
+			style.border_color.b = 0.85
+			style2.border_color.b = 0.85
 			return bit_icons[osc_type]
 		global.OpIntent.WAVEFOLDER:
+			style.border_color.h = 0.85
+			style2.border_color.h = 0.85
+
 			return preload("res://gfx/ui/ops/icon_wavefolder.svg")
 		_:
 			return preload("res://gfx/ui/icon_invalid.svg")
