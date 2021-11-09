@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/icon_fm.svg-eacb0271b84e450fd4e9d5dc44a800e1.stex"
+path="res://.import/icon_fm_symbol.svg-c3789f7e42619e742cce295e29f0f9e4.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://gfx/ui/icon_fm.svg"
-dest_files=[ "res://.import/icon_fm.svg-eacb0271b84e450fd4e9d5dc44a800e1.stex" ]
+source_file="res://gfx/ui/ops/icon_fm_symbol.svg"
+dest_files=[ "res://.import/icon_fm_symbol.svg-c3789f7e42619e742cce295e29f0f9e4.stex" ]
 
 [params]
 

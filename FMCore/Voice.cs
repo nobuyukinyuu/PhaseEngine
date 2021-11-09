@@ -142,7 +142,7 @@ namespace gdsFM
         //Creates a Chip to generate a preview of what this voice would sound like.
         public float[] CalcPreview(int period=12000, int size=256, bool disableLFO=true )
         {
-            const int NOTE_A4=69;
+            // const int NOTE_A4=69;
             var output = new float[size];  var oc=0;
             var stride = (period/(double)size);
             var strideCount = stride;

@@ -132,6 +132,29 @@ public class Test2 : Label
 
     public byte GetOpIntent(int opTarget){ if(opTarget >= c.opCount) return 0; else return (byte)c.Voice.alg.intent[opTarget]; }
     public byte GetOscType(int opTarget){ if(opTarget >= c.opCount) return 0; else return c.Voice.oscType[opTarget]; }
+
+    public byte GetOscTypeOrFunction(int opTarget)  //Returns a value corresponding to the primary function of the operator.  For determining preview icons, etc...
+    {
+        switch(c.Voice.alg.intent[opTarget])
+        {
+            case OpBase.Intents.FM_OP:
+                return GetOscType(opTarget);
+            case OpBase.Intents.FILTER:
+            case OpBase.Intents.BITWISE:
+                return c.Voice.egs[opTarget].aux_func;
+            case OpBase.Intents.WAVEFOLDER:  //Return an encoded value corresponding to gain instead.
+                var whole = (int)c.Voice.egs[opTarget].gain;
+                var frac = (int)Math.Round((c.Voice.egs[opTarget].gain - whole) * 10);
+
+                //Guarantee that the high bits are outside of the normal oscillator range.  Add one to gain.
+                // whole ++;  
+                return (byte)((whole << 4) | frac);  //4.4 fixed point value.  Whole value should be 1-11 now, and frac 0-9.
+
+
+            default:
+                return 0xFF;
+        }
+    }
     public int GetOpCount() { return c.opCount; }
 
 

@@ -49,6 +49,24 @@ func _gui_input(event):
 func __set_drag_preview(var tab):
 	var p = dragPreview.instance()
 	p.get_node("Tab/Lbl").text = tab.name
+
+	if tab is VoicePanel:
+		var c = get_node(owner.chip_loc)
+		var intent = c.GetOpIntent(tab.operator)
+		var osc_type = c.GetOscTypeOrFunction(tab.operator)
+		p.setup(intent, osc_type)
+		if intent==global.OpIntent.WAVEFOLDER:
+			#osc_type is a 4.4 fixed point value between 16-255.  Extract.
+			var whole = osc_type>>4
+			var frac = osc_type & 0xF
+			if frac > 9:  
+				frac -= 10
+				whole += 1
+			if whole < 10:
+				p.set_text("%s.%s" % [whole, frac])
+			else:
+				p.set_text(str(whole))
+
 	set_drag_preview(p)
 
 	ownerColumn.dirty = true

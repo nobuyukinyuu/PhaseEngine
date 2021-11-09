@@ -242,7 +242,7 @@ func redraw_grid():
 
 #Tree logic:  When requesting connection from one op to another, make sure the destination operator
 #		 isn't in the list of the source operator's connections.  If it is, swap the connections
-#		between the 2 operators.  Consider updating the drag tooltip to state a swap? 
+#		between the 2 operators.  
 #		Any operators that weren't part of the swap should update references to the old op with the new one.
 # 		If a swap isn't the intended operation, Remove the entire
 #		reference tree starting at any operators that connect to the source op.  Reconnect to dest op.

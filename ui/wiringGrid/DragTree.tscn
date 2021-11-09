@@ -3,7 +3,6 @@
 [ext_resource path="res://ui/wiringGrid/DragTree.gd" type="Script" id=1]
 [ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=2]
 
-
 [node name="DragTree" type="Control"]
 margin_right = 24.0
 margin_bottom = 25.0

@@ -41,6 +41,21 @@ namespace gdsFM
         { return Lerp(outFrom, outTo, InverseLerp(inFrom, inTo, value)); }
 
 
+        // public static double RoundToSignificantDigits(double d, int digits)
+        // {
+        //     if(d == 0)
+        //         return 0;
+        //     double scale = Math.Pow(10, Math.Floor(Math.Log10(Math.Abs(d))) + 1);
+        //     return scale * Math.Round(d / scale, digits);
+        // }
+        // public static double TruncToSignificantDigits(double d, int digits)
+        // {
+        //     if(d == 0)
+        //         return 0;
+        //     double scale = Math.Pow(10, Math.Floor(Math.Log10(Math.Abs(d))) + 1);
+        //     return scale * Math.Truncate(d / scale);
+        // }
+
 
         /// summary:  Slow converstion from float to fixed point.
         public static long ToFixedPoint(float n, byte decimalBitPrecision=Global.FRAC_PRECISION_BITS, bool preserveSignBit=false)

@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/icon_bitwise.svg-f82a2bf9211c6308c38b5c7ffcdd8a8c.stex"
+path="res://.import/3.svg-11dd50794f181ae2d749c21566e1ca95.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://gfx/ui/icon_bitwise.svg"
-dest_files=[ "res://.import/icon_bitwise.svg-f82a2bf9211c6308c38b5c7ffcdd8a8c.stex" ]
+source_file="res://gfx/ui/ops/3.svg"
+dest_files=[ "res://.import/3.svg-11dd50794f181ae2d749c21566e1ca95.stex" ]
 
 [params]
 

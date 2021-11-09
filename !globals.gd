@@ -9,10 +9,10 @@ const FilterNames = ["None", "Low Pass", "High Pass", "Bandpass (Skirt Gain)", "
 enum OpIntent { LFO=-1, NONE, FM_OP, FILTER, BITWISE, WAVEFOLDER };
 const OpIntentIcons = [
 			preload("res://gfx/ui/icon_invalid.svg"), 
-			preload("res://gfx/ui/icon_fm_symbol.svg"),
-			preload("res://gfx/ui/icon_filter_symbol.svg"),
-			preload("res://gfx/ui/icon_bitwise.svg"),
-			preload("res://gfx/ui/icon_wavefolder.svg"),
+			preload("res://gfx/ui/ops/icon_fm_symbol.svg"),
+			preload("res://gfx/ui/ops/icon_filter_symbol.svg"),
+			preload("res://gfx/ui/ops/icon_bitwise.svg"),
+			preload("res://gfx/ui/ops/icon_wavefolder.svg"),
 ]
 
 const mixRate = 48000.0  #Also set in Constants.cs for the c# backend.  This is used for UI calculations only

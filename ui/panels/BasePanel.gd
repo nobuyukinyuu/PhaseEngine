@@ -1,5 +1,5 @@
 extends Control
-class_name VoicePanel, "res://gfx/ui/icon_fm.svg"
+class_name VoicePanel, "res://gfx/ui/ops/icon_fm.svg"
 
 export (NodePath) var chip_loc  #Location of PhaseEngine instance in code
 export(int,0,8) var operator = 0

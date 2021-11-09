@@ -107,14 +107,14 @@ func set_preview(source_id, target_type=0, target_id=0):
 	
 func can_drop_data(_position, data):
 	if data is Array and data.size() > 0:
-		var last_slot = $"..".get_node(str($"..".last_slot_focused))
+		var last_slot = $"..".get_node_or_null(str($"..".last_slot_focused))
 #		if id >= 0 and last_slot.id != id:
 #			set_preview(last_slot.id, 2, id)
 #			print("blp")
 #		else: 
 #			set_preview(last_slot.id)
 
-		if last_slot == null:
+		if last_slot == null or last_slot.id==-1:
 #			printerr("slot.gd:  last_slot_focused is null!")
 			return
 		var target = $"..".check_target_type(data[0], gridPos)
