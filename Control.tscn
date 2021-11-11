@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=2]
+[gd_scene load_steps=35 format=2]
 
 [ext_resource path="res://MIDI.gd" type="Script" id=1]
 [ext_resource path="res://ui/VoiceMain.gd" type="Script" id=2]
@@ -24,6 +24,7 @@
 [ext_resource path="res://gfx/wave/6.png" type="Texture" id=22]
 [ext_resource path="res://FMPreview.gd" type="Script" id=23]
 [ext_resource path="res://ui/EGCheckBox.tres" type="Theme" id=24]
+[ext_resource path="res://ui/OpIntentMenu.tscn" type="PackedScene" id=25]
 
 [sub_resource type="Animation" id=1]
 resource_name = "NoteOn"
@@ -351,8 +352,8 @@ anchor_right = 1.0
 margin_top = -12.0
 margin_right = 8.0
 margin_bottom = -4.0
-custom_fonts/font = ExtResource( 12 )
 custom_colors/font_color = Color( 0.384314, 0.717647, 0.831373, 0.639216 )
+custom_fonts/font = ExtResource( 12 )
 text = "Waveform="
 valign = 1
 __meta__ = {
@@ -479,11 +480,11 @@ margin_left = 8.0
 margin_top = 149.0
 margin_right = 127.0
 margin_bottom = 163.0
+custom_fonts/font = ExtResource( 11 )
 custom_styles/hover = SubResource( 9 )
 custom_styles/pressed = SubResource( 9 )
 custom_styles/focus = SubResource( 9 )
 custom_styles/normal = SubResource( 9 )
-custom_fonts/font = ExtResource( 11 )
 text = "None"
 items = [ "None", null, false, 0, null, "Oscillator", null, false, 1, null, "End of Delay", null, false, 2, null ]
 selected = 0
@@ -521,6 +522,13 @@ max_value = 1023.0
 value = 1023.0
 exp_edit = true
 associated_property = "AMD"
+
+[node name="OpIntentMenu" parent="." instance=ExtResource( 25 )]
+margin_left = -136.0
+margin_top = 287.0
+margin_right = -8.0
+margin_bottom = 351.0
+
 [connection signal="timeout" from="FMPreview/Timer" to="FMPreview" method="_on_Timer_timeout"]
 [connection signal="gui_input" from="LTab/LFO/WavePanel/Preview/Panel" to="LTab" method="_on_Preview_gui_input"]
 [connection signal="item_selected" from="LTab/LFO/Sync" to="LTab" method="_on_Sync_item_selected"]

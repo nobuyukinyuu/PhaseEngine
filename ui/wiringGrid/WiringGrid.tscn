@@ -441,15 +441,6 @@ margin_bottom = 24.0
 texture = SubResource( 4 )
 stretch_mode = 4
 
-[node name="OpType" type="PopupMenu" parent="."]
-margin_left = -144.0
-margin_top = 280.0
-margin_right = -16.0
-margin_bottom = 344.0
-custom_constants/vseparation = 8
-__meta__ = {
-"_edit_use_anchors_": false
-}
 [connection signal="pressed" from="Add" to="." method="_on_Add_pressed"]
 [connection signal="pressed" from="Remove" to="." method="_on_Remove_pressed"]
 [connection signal="pressed" from="Preset" to="." method="_on_Preset_pressed"]
@@ -458,4 +449,3 @@ __meta__ = {
 [connection signal="about_to_show" from="Popup" to="Popup" method="_on_Popup_about_to_show"]
 [connection signal="popup_hide" from="Popup" to="Popup" method="_on_Popup_popup_hide"]
 [connection signal="item_activated" from="Popup/VBox/Scroll/ItemList" to="." method="_on_Preset_item_activated"]
-[connection signal="id_pressed" from="OpType" to="." method="_on_OpType_id_pressed"]

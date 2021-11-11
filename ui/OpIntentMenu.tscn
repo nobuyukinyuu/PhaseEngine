@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://ui/OpIntentMenu.gd" type="Script" id=1]
+
+[node name="OpType" type="PopupMenu"]
+margin_right = 128.0
+margin_bottom = 64.0
+custom_colors/font_color_separator = Color( 0.88, 0.88, 0.88, 0.372549 )
+custom_constants/vseparation = 8
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="id_pressed" from="." to="." method="_on_OpType_id_pressed"]

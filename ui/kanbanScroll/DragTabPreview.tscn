@@ -38,9 +38,9 @@ __meta__ = {
 
 [node name="PanelBG" type="PanelContainer" parent="."]
 margin_left = 8.0
-margin_top = 17.0
+margin_top = 16.0
 margin_right = 70.0
-margin_bottom = 56.0
+margin_bottom = 55.0
 custom_styles/panel = SubResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -48,12 +48,11 @@ __meta__ = {
 
 [node name="P" type="PanelContainer" parent="."]
 margin_left = 16.0
-margin_top = 17.0
+margin_top = 16.0
 margin_right = 70.0
-margin_bottom = 56.0
+margin_bottom = 55.0
 custom_styles/panel = SubResource( 1 )
 __meta__ = {
-"_edit_group_": true,
 "_edit_use_anchors_": false
 }
 
@@ -74,9 +73,9 @@ margin_top = 1.0
 margin_right = 53.0
 margin_bottom = 38.0
 mouse_filter = 2
-custom_fonts/font = ExtResource( 3 )
 custom_colors/font_color = Color( 0.796078, 0.976471, 1, 1 )
 custom_constants/hseparation = 0
+custom_fonts/font = ExtResource( 3 )
 text = "?"
 icon = ExtResource( 4 )
 flat = true

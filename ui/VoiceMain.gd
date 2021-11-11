@@ -56,6 +56,8 @@ func _on_op_size_changed(opNum:int, oldSz):
 	$FMPreview.recalc()
 
 func _on_op_intent_changed(opNum:int, intent, sender=null):  #Default sender:  WiringGrid.  Updated itself already.
+	if sender!=$WiringGrid:  $WiringGrid/SlotIndicator.redraw_grid()
+
 	#Update the kanbans to reflect the correct panel type.  First, find the location of the panel needing change.
 	var opName = "Op" + str(opNum+1)
 	var node_to_replace = $Kanban.find_node(opName, true, false)
@@ -71,17 +73,24 @@ func _on_op_intent_changed(opNum:int, intent, sender=null):  #Default sender:  W
 	var p = column.make_tab(tab_group, opNum, intent)  #Make a new panel.
 	tab_group.move_child(p, pos)
 	
+	
 
 
 #Handler for tooltips that need data from a chip.
 func _on_op_tooltip_needs_data(sender, tooltip):
-	if sender is TabContainer and tooltip is EGTooltip:
-		var idx = sender.get_tab_idx_at_point(sender.get_local_mouse_position())
-		if idx==-1:
-#			print("Couldn't find tab at %s!" % sender.get_local_mouse_position())
-			yield(get_tree(), "idle_frame")
-			tooltip.visible = false
-			return
-
-		var tab = sender.get_tab_control(idx)
-		tooltip.setup(chip_loc, tab.operator)
+	pass
+#	if sender is TabContainer and tooltip is EGTooltip:
+#		var idx = sender.get_tab_idx_at_point(sender.get_local_mouse_position())
+#		if idx==-1:
+##			print("Couldn't find tab at %s!" % sender.get_local_mouse_position())
+#			yield(get_tree(), "idle_frame")
+#			tooltip.visible = false
+#			return
+#
+#		var c = get_node(chip_loc)
+#		var tab = sender.get_tab_control(idx)
+#		if c.GetOpIntent(tab.operator) == global.OpIntent.FILTER:  
+#			print("replacement")
+##			tooltip.replace_by(preload("res://ui/FilterTooltip.tscn").instance())
+#			global.swap_scene(tooltip, preload("res://ui/FilterTooltip.tscn").instance())
+#		tooltip.setup(chip_loc, tab.operator)

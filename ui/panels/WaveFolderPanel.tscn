@@ -279,9 +279,9 @@ margin_left = 280.0
 margin_top = 8.0
 margin_right = 338.0
 margin_bottom = 24.0
+custom_fonts/font = ExtResource( 6 )
 custom_styles/pressed = SubResource( 2 )
 custom_styles/normal = SubResource( 3 )
-custom_fonts/font = ExtResource( 6 )
 toggle_mode = true
 text = "Mute"
 __meta__ = {
@@ -293,9 +293,9 @@ margin_left = 216.0
 margin_top = 8.0
 margin_right = 274.0
 margin_bottom = 24.0
+custom_fonts/font = ExtResource( 6 )
 custom_styles/pressed = SubResource( 4 )
 custom_styles/normal = SubResource( 3 )
-custom_fonts/font = ExtResource( 6 )
 toggle_mode = true
 text = "Bypass"
 __meta__ = {
@@ -371,5 +371,6 @@ valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
 [connection signal="toggled" from="Mute" to="." method="_on_Mute_toggled" binds= [ false ]]
 [connection signal="toggled" from="Bypass" to="." method="_on_Mute_toggled" binds= [ true ]]

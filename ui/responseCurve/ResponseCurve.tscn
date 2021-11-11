@@ -142,9 +142,9 @@ visible = false
 margin_left = -104.0
 margin_right = -54.0
 margin_bottom = 22.0
-custom_styles/normal = SubResource( 3 )
-custom_fonts/font = ExtResource( 24 )
 custom_colors/font_color = Color( 0.352941, 0.878431, 0.878431, 1 )
+custom_fonts/font = ExtResource( 24 )
+custom_styles/normal = SubResource( 3 )
 text = "0ff"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -180,8 +180,8 @@ margin_top = 16.0
 margin_right = 16.0
 margin_bottom = 288.0
 grow_horizontal = 0
-custom_fonts/font = ExtResource( 13 )
 custom_constants/line_spacing = 0
+custom_fonts/font = ExtResource( 13 )
 text = "63
 
 
@@ -251,8 +251,8 @@ margin_top = 288.0
 margin_right = 80.0
 margin_bottom = 302.0
 mouse_filter = 0
-custom_fonts/font = ExtResource( 7 )
 custom_colors/font_color = Color( 0.14902, 0.501961, 0.6, 1 )
+custom_fonts/font = ExtResource( 7 )
 text = "Octave"
 valign = 1
 script = ExtResource( 10 )
@@ -266,8 +266,8 @@ margin_top = 288.0
 margin_right = 296.0
 margin_bottom = 302.0
 mouse_filter = 0
-custom_fonts/font = ExtResource( 9 )
 custom_colors/font_color = Color( 0.15, 0.5025, 0.6, 1 )
+custom_fonts/font = ExtResource( 9 )
 text = "1  2  3  4  5  6  7  8  9  "
 valign = 1
 script = ExtResource( 10 )
@@ -282,8 +282,8 @@ margin_top = 288.0
 margin_right = 296.0
 margin_bottom = 302.0
 mouse_filter = 0
-custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0.15, 0.5025, 0.6, 1 )
+custom_fonts/font = ExtResource( 13 )
 text = "32     48    64    80     96    112   127"
 align = 2
 valign = 1
@@ -309,8 +309,8 @@ margin_left = 4.0
 margin_top = -10.0
 margin_right = 29.0
 margin_bottom = -2.0
-custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0.188235, 0.631373, 0.752941, 1 )
+custom_fonts/font = ExtResource( 13 )
 text = "00/00"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -374,5 +374,6 @@ margin_left = 360.0
 margin_top = 96.0
 margin_right = 528.0
 margin_bottom = 264.0
+
 [connection signal="value_changed" from="MinMax/sldMin" to="." method="_on_sldMinMax_value_changed" binds= [ false ]]
 [connection signal="value_changed" from="MinMax/sldMax" to="." method="_on_sldMinMax_value_changed" binds= [ true ]]

@@ -89,7 +89,7 @@ func add_tab_group():
 	p.owner = owner
 	p.name = "TabGroup" + str($V.get_child_count()-1)
 
-#TODO/FIXME:  support different types of panels!!
+#Creates a new tab in the given group with the specified intent.
 func make_tab(group_loc:TabContainer, opNum:int, intent):
 	var p
 	match intent:

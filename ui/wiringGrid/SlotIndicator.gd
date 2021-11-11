@@ -534,7 +534,8 @@ func _onSlotMidClicked(pos, pressed):
 func _onSlotRightClicked(gridPos, id):
 	print("Right click from ", id)
 	if id==-1:  return
-	get_parent().popup_intent_menu(id)
+#	get_parent().popup_intent_menu(id)
+	global.emit_signal("request_op_intent_menu", id)
 	
 
 func _gui_input(event):

@@ -1,0 +1,112 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://gfx/ui/filter/0.svg" type="Texture" id=1]
+[ext_resource path="res://ui/FilterTooltip.gd" type="Script" id=2]
+[ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=3]
+[ext_resource path="res://gfx/fonts/numerics_5x8.tres" type="BitmapFont" id=4]
+[ext_resource path="res://gfx/fonts/numerics_8x10.tres" type="BitmapFont" id=5]
+
+[sub_resource type="StyleBoxFlat" id=4]
+bg_color = Color( 0.129412, 0.121569, 0.145098, 0.572549 )
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+expand_margin_left = 4.0
+expand_margin_right = 4.0
+expand_margin_top = 2.0
+expand_margin_bottom = 2.0
+shadow_size = 2
+anti_aliasing_size = 2.723
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0, 0, 0, 1 )
+expand_margin_left = 2.0
+expand_margin_right = 4.0
+expand_margin_top = 2.0
+expand_margin_bottom = 4.0
+shadow_color = Color( 0, 0, 0, 0.627451 )
+shadow_size = 16
+shadow_offset = Vector2( 2, 2 )
+anti_aliasing_size = 4.0
+
+[node name="FilterTooltip" type="PanelContainer"]
+margin_right = 160.0
+margin_bottom = 64.0
+rect_min_size = Vector2( 160, 64 )
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="V" type="VBoxContainer" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 153.0
+margin_bottom = 64.0
+custom_constants/separation = 16
+
+[node name="H" type="HBoxContainer" parent="V"]
+margin_right = 146.0
+margin_bottom = 19.0
+
+[node name="Op" type="RichTextLabel" parent="V/H"]
+margin_right = 32.0
+margin_bottom = 19.0
+rect_min_size = Vector2( 32, 0 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_fonts/italics_font = ExtResource( 4 )
+custom_fonts/bold_font = ExtResource( 3 )
+custom_fonts/normal_font = ExtResource( 3 )
+bbcode_enabled = true
+bbcode_text = "0p[i].[/i][color=#ffff00][b]3[/b][/color]"
+text = "0p.3"
+
+[node name="Q" type="Label" parent="V/H"]
+margin_left = 36.0
+margin_top = 4.0
+margin_right = 86.0
+margin_bottom = 14.0
+size_flags_horizontal = 3
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_fonts/font = ExtResource( 5 )
+text = "1.0"
+align = 1
+
+[node name="Hz" type="Label" parent="V/H"]
+margin_left = 90.0
+margin_right = 146.0
+margin_bottom = 19.0
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_fonts/font = ExtResource( 3 )
+text = "22050hz
+~ 1.0x"
+align = 2
+
+[node name="Panel" type="PanelContainer" parent="V"]
+margin_top = 35.0
+margin_right = 146.0
+margin_bottom = 57.0
+custom_styles/panel = SubResource( 4 )
+
+[node name="Filter" type="Button" parent="V/Panel"]
+margin_right = 142.0
+margin_bottom = 22.0
+mouse_filter = 2
+size_flags_horizontal = 0
+custom_colors/font_color = Color( 1, 0.941176, 0.462745, 1 )
+button_mask = 0
+text = " No Filter Applied"
+icon = ExtResource( 1 )
+flat = true
+align = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Shadow" type="Panel" parent="."]
+show_behind_parent = true
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 153.0
+margin_bottom = 64.0
+mouse_filter = 2
+custom_styles/panel = SubResource( 3 )

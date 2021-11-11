@@ -40,6 +40,7 @@ signal op_tooltip_needs_data
 signal op_tab_value_changed
 signal algorithm_changed
 signal op_intent_changed
+signal request_op_intent_menu
 
 func _ready():
 	# Generate the period frequencies of every note based on center tuning (A-4) at 440hz
@@ -110,4 +111,15 @@ const LFO_SPEED = [
 
 func lfo_speed_to_secs(val):
 	return 1.0 / LFO_SPEED[val]
+
+
+func swap_scene(src, target, free_src=true):
+	var parent = src.get_parent()
+	var pos_in_parent = src.get_position_in_parent()
+	parent.remove_child(src)
+	parent.add_child(target)
+	parent.move_child(target, pos_in_parent)
+	if free_src:  src.queue_free()
+
+
 

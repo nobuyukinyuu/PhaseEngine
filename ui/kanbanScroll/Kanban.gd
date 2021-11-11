@@ -83,6 +83,7 @@ func resettle_tab_group(group, dest_column_vbox, src_column_vbox=null):
 	group.name = "TabGroup0"  #Should force every object to get renamed when added
 	dest_column_vbox.add_child(group, true)  #Make sure it gets a unique name.
 	group.ownerColumn = dest_column_vbox.get_parent()
+	if !group.owner:  group.owner = owner  #Give the orphans a valid parent.
 
 #Fills the kanban with scroll columns.
 func _fill(target_width:float):

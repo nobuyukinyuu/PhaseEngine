@@ -128,7 +128,7 @@ expand_margin_bottom = 4.0
 shadow_color = Color( 0, 0, 0, 0.627451 )
 shadow_size = 16
 shadow_offset = Vector2( 2, 2 )
-anti_aliasing_size = 4
+anti_aliasing_size = 4.0
 
 [node name="EGTooltip" type="PanelContainer"]
 margin_right = 160.0
@@ -153,10 +153,10 @@ margin_bottom = 10.0
 margin_right = 32.0
 margin_bottom = 10.0
 rect_min_size = Vector2( 32, 0 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
 custom_fonts/italics_font = ExtResource( 4 )
 custom_fonts/bold_font = ExtResource( 3 )
 custom_fonts/normal_font = ExtResource( 3 )
-custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
 bbcode_enabled = true
 bbcode_text = "0p[i].[/i][color=#ffff00][b]3[/b][/color]"
 text = "0p.3"
@@ -166,8 +166,8 @@ margin_left = 36.0
 margin_right = 102.0
 margin_bottom = 10.0
 size_flags_horizontal = 3
-custom_fonts/font = ExtResource( 5 )
 custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_fonts/font = ExtResource( 5 )
 text = "100.0%"
 align = 1
 
@@ -176,8 +176,8 @@ margin_left = 106.0
 margin_top = 1.0
 margin_right = 146.0
 margin_bottom = 9.0
-custom_fonts/font = ExtResource( 3 )
 custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_fonts/font = ExtResource( 3 )
 text = "7.50x"
 
 [node name="EnvelopeDisplay" parent="V" instance=ExtResource( 1 )]
@@ -213,8 +213,8 @@ margin_top = 102.0
 margin_right = 146.0
 margin_bottom = 122.0
 rect_min_size = Vector2( 0, 20 )
-custom_fonts/font = ExtResource( 3 )
 custom_colors/font_color = Color( 0.498587, 0.4816, 0.56, 1 )
+custom_fonts/font = ExtResource( 3 )
 text = "KSR    KSL    V"
 align = 2
 valign = 1
