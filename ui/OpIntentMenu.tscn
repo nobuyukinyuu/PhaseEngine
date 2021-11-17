@@ -1,6 +1,17 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://ui/OpIntentMenu.gd" type="Script" id=1]
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0, 0, 0, 1 )
+expand_margin_left = 2.0
+expand_margin_right = 4.0
+expand_margin_top = 2.0
+expand_margin_bottom = 4.0
+shadow_color = Color( 0, 0, 0, 0.627451 )
+shadow_size = 16
+shadow_offset = Vector2( 2, 2 )
+anti_aliasing_size = 4.0
 
 [node name="OpType" type="PopupMenu"]
 margin_right = 128.0
@@ -8,6 +19,20 @@ margin_bottom = 64.0
 custom_colors/font_color_separator = Color( 0.88, 0.88, 0.88, 0.372549 )
 custom_constants/vseparation = 8
 script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Shadow" type="Panel" parent="."]
+show_behind_parent = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 8.0
+margin_top = 8.0
+margin_right = -16.0
+margin_bottom = -8.0
+mouse_filter = 2
+custom_styles/panel = SubResource( 3 )
 __meta__ = {
 "_edit_use_anchors_": false
 }

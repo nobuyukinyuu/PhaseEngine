@@ -217,7 +217,7 @@ public class Test2 : Label
                 newEG.tl = tl;
 
                 var op = c.channels[i].ops[opTarget];
-                if (op !=null) op.eg = newEG; 
+                if (op != null) op.eg = newEG; 
             }
         else
             for(int i=0; i<c.channels.Length; i++)

@@ -524,6 +524,7 @@ exp_edit = true
 associated_property = "AMD"
 
 [node name="OpIntentMenu" parent="." instance=ExtResource( 25 )]
+visible = false
 margin_left = -136.0
 margin_top = 287.0
 margin_right = -8.0
