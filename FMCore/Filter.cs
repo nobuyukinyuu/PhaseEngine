@@ -13,17 +13,19 @@ namespace gdsFM
         // filter coeffs
         float b0a0=1,b1a0=1,b2a0=1,a1a0=1,a2a0=1;
         // in/out history
-        float ou1,ou2,in1,in2;
+        int ou1,ou2,in1,in2;
 
         public const double GAIN_MAX = 4.0, GAIN_MIN=0.25;
+        const int FRAC_PRECISION_BITS = 16-1;  //Precision bits for the Filter only
+        const int FRAC_SIZE = 1 << FRAC_PRECISION_BITS;
 
         public Filter()    {FilterToApply=RequestBypass; Reset();}
         public void Reset()
         {
             // reset filter coeffs
-            b0a0=b1a0=b2a0=a1a0=a2a0=1.0f;
+            b0a0=b1a0=b2a0=a1a0=a2a0= FRAC_SIZE;
             // reset in/out history
-            ou1=ou2=in1=in2=0.0f;	
+            ou1=ou2=in1=in2=0;	
         }
 
         public override void Clock()
@@ -34,11 +36,20 @@ namespace gdsFM
 
         public override short RequestSample(ushort input, ushort am_offset) { return FilterToApply(input, am_offset); }
         public short RequestBypass(ushort input, ushort am_offset)  { return (short)input; }
+        // public short RequestFilteredSample2(ushort input, ushort am_offset)
+        // {
+        //     var output = Process(Tables.short2float[ (short)input + Tables.SIGNED_TO_INDEX]);
+        //     var mix = (int)Tools.Clamp((output * short.MaxValue), short.MinValue, short.MaxValue);
+        //     mix = Tools.Lerp16(mix, (short)input, eg.duty);
+        //     return (short)(mix);
+        // }
         public short RequestFilteredSample(ushort input, ushort am_offset)
         {
-            var output = Process(Tables.short2float[ (short)input + Tables.SIGNED_TO_INDEX]);
-            var mix = (int)Tools.Clamp((output * short.MaxValue), short.MinValue, short.MaxValue);
-            mix = Tools.Lerp16(mix, (short)input, eg.duty);
+            var ins = (short)input;
+            var output = Process(ins);
+            var mix = Tools.Clamp(output, short.MinValue, short.MaxValue);
+            // int mix = (short)(output & SHORT_MASK);  //Causes wrap-around on overflow
+            mix = Tools.Lerp16(mix, ins, eg.duty);
             return (short)(mix);
         }
 
@@ -50,11 +61,11 @@ namespace gdsFM
             Recalc();
         }
 
-        public float Process(float in0)
+        public int Process(int in0)
         {
+            in0 <<= FRAC_PRECISION_BITS;
             // filter
-            float yn = b0a0*in0 + b1a0*in1 + b2a0*in2 - a1a0*ou1 - a2a0*ou2;
-
+            var yn = (int)(b0a0*in0 + b1a0*in1 + b2a0*in2 - a1a0*ou1 - a2a0*ou2);
             // push in/out buffers
             in2=in1;
             in1=in0;
@@ -62,7 +73,7 @@ namespace gdsFM
             ou1=yn;
 
             // return output
-            return yn;
+            return yn >> FRAC_PRECISION_BITS;
         }
 
 
