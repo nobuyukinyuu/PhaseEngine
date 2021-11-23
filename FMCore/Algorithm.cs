@@ -21,7 +21,7 @@ namespace gdsFM
 
         public static readonly byte[] DEFAULT_PROCESS_ORDER = {0,1,2,3,4,5,6,7};
 
-        public byte[] wiringGrid;  //Description of where each operator goes on a wiring grid, in format [x1, y1 ... xn, yn] where n==opCount
+        public byte[] wiringGrid;  //Description of where each operator goes on a wiring grid, in format [y1|x1, ..., yn|xn] where n==opCount
         
 
         public Algorithm()    {Reset(true);}
@@ -29,20 +29,68 @@ namespace gdsFM
         void Reset(bool hard_init=false)
         {
             Array.Resize(ref intent, opCount);
-            if(hard_init) Array.Fill(intent, OpBase.Intents.FM_OP);
-            processOrder = DefaultProcessOrder(opCount);
-            connections = new byte[opCount];
-            wiringGrid = DefaultWiringGrid(opCount);  //FIXME:  Determine default wiring grid for the number of operators
+            if(hard_init) 
+            {
+                Array.Fill(intent, OpBase.Intents.FM_OP);               
+                processOrder = DefaultProcessOrder(opCount);
+                connections = new byte[opCount];
+                wiringGrid = DefaultWiringGrid(opCount);
+            } else {
+                Array.Resize(ref processOrder, opCount);
+                Array.Resize(ref connections, opCount);
+                Array.Resize(ref wiringGrid, opCount);
+            } 
         }
         public void SetOpCount(byte opTarget)
         {
-            //If the op size is smaller than before, break the algorithm back to the default.
+            //If the op size is smaller than before, break the algorithm apart.
             //This is necessary in case any one connection relies on another which is deleted.
             if (opTarget<opCount)
             {
+                //First, find bad connections and remove them.
+                var badConnections = false;
+                for(int src_op=0; src_op<opTarget;  src_op++)
+                {
+                    var c=connections[src_op];
+                    for(int missingOp=opTarget; missingOp<opCount; missingOp++)
+                    {
+                        if ( (c>>missingOp & 1) == 1 ) //The src op has a bad connection.  Fix it.
+                        {
+                            connections[src_op] &= (byte)~(1<<missingOp);  //Turn off the offending bit.
+                            badConnections = true;
+                        }
+                    }
+                }
+
                 opCount = opTarget;
-                Reset();
-            } else {
+                Reset(); //Soft reset by resizing all of the arrays to the target.  
+
+                //If any op had a bad connection, we need to move them.  Going with the former processOrder in reverse,
+                //We assign a free slot for every operator, skipping over the missing ops.
+                if(badConnections)
+                {
+                    // var opsToProcess = new byte[opCount];
+                    // Array.Copy(processOrder, opsToProcess, opCount);
+                    // Array.Reverse(opsToProcess);
+                    // var hops = new byte[opTarget];  //Safe Y position of each operator.  Indexed from 1.
+
+                    //We'll need to recreate the wiringGrid and processOrder.
+                    wiringGrid = FabricateGrid();
+                } else {
+                    //No bad connections, but we need to shift up all the remaining operators on the wiring grid anyway to represent the new lower bounds.
+                    for(int i=0; i<opCount; i++)
+                    {
+                        var X = wiringGrid[i] & 0xF;
+                        var Y = (wiringGrid[i] >> 4) - 1;
+                        wiringGrid[i] = (byte)(Y << 4 | X);
+                    }
+                }
+
+                //Finally, restore the process order based on the grid positions assigned.
+                processOrder = DefaultProcessOrder(opTarget);
+                Array.Sort(processOrder, CompareByGridPos);
+
+            } else {  //opTarget >= opCount
                 Array.Resize(ref intent, opTarget);
                 Array.Resize(ref connections, opTarget);
                 Array.Resize(ref processOrder, opTarget);
@@ -67,12 +115,99 @@ namespace gdsFM
             return output;
         }
 
+
+        /// summary:  Returns an array of bytes representing the grid position of every operator.  4 high bits represent Y, low bits represent X.
         public static byte[] DefaultWiringGrid(byte opCount)
         {
             var output = new byte[opCount];
+            //For each operator, set the x/y value to (opNum, grid height).
             for (byte i=0; i<opCount; i++)   output[i] = g2b(i, (byte)(opCount -1));
             return output;
         }
+
+        /// summary:  Creates a grid from the existing connections.
+        public byte[] FabricateGrid()
+        {
+            System.Diagnostics.Debug.Assert(opCount!=0);
+            var output= new byte[opCount];
+
+            var hops = new byte[opCount];  //Safe Y position of each operator.  Indexed from 1.
+
+            for(byte i=0; i<opCount; i++)
+                hops[i] = MaxHopsToOutput(i, hops);  
+
+            //Now we need to assign grid spaces for each operator based on their levels.  Remember that hops > 0 and carriers start at y-pos opCount-1.
+            var freeslot = new byte[opCount];
+
+            for(byte i=0; i<opCount; i++)
+            {
+                var Y = opCount - hops[i];
+                var X = freeslot[Y];
+                freeslot[Y]++;  //Indicate next free slot for this level.
+
+                output[i] = (byte)(Y<<4 | X);
+            }
+
+            return output;
+        }
+
+        //Optimized(?) recursive algorithm checking hops of an operator to output.  Values of 0 are considered uninitialized; all ops must make at least 1 hop.
+        //This is used to determine a safe level (y-pos) on the wiring grid to place an op.
+        byte MaxHopsToOutput(byte opNum, byte[] hops)
+        {
+            if (hops[opNum] > 0) return hops[opNum];  //Exit early if we already checked hops for a previous op. FIXME: Check if this wrecks multi-connections
+            var c = connections[opNum];
+            if (c==0)
+            {
+                hops[opNum] = 1;
+                return 1;
+            } else {   //Op has connections.  Find the connection with the largest number of hops.
+                var maxHops = 0;
+                for(byte dest_op=0; c>0; dest_op++)
+                {
+                    if ((c&1) == 1)  //Connection here.  Recurse to get max hops.
+                        maxHops = Math.Max(maxHops, MaxHopsToOutput(dest_op, hops));
+                    c >>= 1;  //Crunch down the connections and check next op.
+                }
+                hops[opNum] = (byte)++maxHops;  //All connections explored.  Return the max number of hops to output plus ourself.
+                return hops[opNum];
+            }
+        }
+
+        /// summary: Compares the encoded positions of two ops in the wiring grid. Returns the value higher on the process order.
+        protected int CompareByGridPos(byte A, byte B) { if (wiringGrid[A]==wiringGrid[B]) return 0;  else return wiringGrid[A]>wiringGrid[B]? 1 : -1;}
+
+        /// summary:  Checks this algorithm's wiring grid for a free slot on the specified row. Will consider ops marked src_op as free.
+        public int FreeSlot(byte y, byte startFrom=0, byte src_op=0xFF)
+        {
+            var row = new int[opCount];
+            Array.Fill(row, -1);
+            for(int i=0; i<opCount; i++)  //Populate a row to check.
+            {
+                int yPos, xPos;
+                xPos = wiringGrid[i] & 0xF;
+                yPos = wiringGrid[i] >>  4;
+
+                if (yPos==y && i!=src_op)
+                    row[xPos] = i;
+            }
+
+            for(int x=startFrom; x<opCount; x++) {
+                if (row[x] != -1) continue;
+                return y<<4 | x;  // 0bYYYYXXXX encoded grid position
+            }                   
+            //Uh-oh.  Couldn't find a spot to the right of the operator.  Let's look to the left.
+            for(int x=startFrom; x>-1; x--) {
+                if (row[x] != -1) continue;
+                return y<<4 | x;  // 0bYYYYXXXX encoded grid position
+            }
+            #if DEBUG
+                throw new ArgumentException(String.Format("No free slot found at {0}!", y));
+            #else
+                return -1;
+            #endif            
+        }
+
 
         public static Algorithm FromPreset(byte preset, bool useSix=false)
         {
@@ -83,13 +218,10 @@ namespace gdsFM
             for(byte i=0; i<length; i++)     output.processOrder[i] = i;            
             Array.Copy(presets[preset], output.connections, length);
             Array.Fill(output.intent, OpBase.Intents.FM_OP);
+            output.wiringGrid = output.FabricateGrid();
 
             return output;
         }
-
-
-        //TODO:  Use this function when changing opCount to determine how to rearrange algorithms that had their operator count reduced.
-        //      ANY operator connected to a value higher than opCount needs its connections reset and put at the end of processOrder.
 
         /// summary:  Checks an operator for invalid connections.  Any connections made to operators greater than current opCount will result in null access...
         public bool ConnectionsOK(byte opTarget)

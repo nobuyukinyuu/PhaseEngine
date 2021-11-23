@@ -130,8 +130,8 @@ public class Test2 : Label
         }
     }
 
-    public byte GetOpIntent(int opTarget){ if(opTarget >= c.opCount) return 0; else return (byte)c.Voice.alg.intent[opTarget]; }
-    public byte GetOscType(int opTarget){ if(opTarget >= c.opCount) return 0; else return c.Voice.oscType[opTarget]; }
+    public byte GetOpIntent(int opTarget){ if(opTarget >= c.OpCount) return 0; else return (byte)c.Voice.alg.intent[opTarget]; }
+    public byte GetOscType(int opTarget){ if(opTarget >= c.OpCount) return 0; else return c.Voice.oscType[opTarget]; }
 
     public byte GetOscTypeOrFunction(int opTarget)  //Returns a value corresponding to the primary function of the operator.  For determining preview icons, etc...
     {
@@ -155,23 +155,45 @@ public class Test2 : Label
                 return 0xFF;
         }
     }
-    public int GetOpCount() { return c.opCount; }
+    public int GetOpCount() { return c.OpCount; }
+    public Godot.Collections.Dictionary SetOpCount(int opCount)
+    {
+        c.SetOpCount((byte)opCount, c.Voice);
+        var alg = c.Voice.GetAlgorithm();
+        return alg;
+    }
+
+    public void SetAlgorithm(Godot.Collections.Dictionary d){   c.SetAlgorithm(d); /*GD.Print("Setting algo...");*/    }
+    public Godot.Collections.Dictionary GetAlgorithm(Godot.Collections.Dictionary d){ return c.Voice.GetAlgorithm(); }
+
+    public Godot.Collections.Dictionary SetPreset(int preset, bool useSix)
+    {
+        c.Voice.SetOpCount(useSix? (byte)6 : (byte)4);
+        c.Voice.alg = Algorithm.FromPreset((byte)preset, useSix);
+
+        //DEBUG:  REMOVE ME
+        // var presets = useSix?  Algorithm.dx_presets : Algorithm.reface_presets;
+        // System.Diagnostics.Debug.Print(presets[preset].ToString());
+        // GD.Print(presets[preset].ToString());
+
+        return c.Voice.GetAlgorithm();
+
+    }
 
 
-
-        //FIXME:  This function is hacky and only sets the chip's channel ops to the processed value.  Voice preview updates this manually as well.
-        //        Channel.NoteOn doesn't set the delegate because c# has no fuckin switch fallthru and I don't want to use an If statement right now
-        //        It's going to need to be fixed when creating a new BitwiseOperator in any other context (like music replayers)
-        public void SetBitwiseFunc(byte opTarget, int val)
+    //FIXME:  This function is hacky and only sets the chip's channel ops to the processed value.  Voice preview updates this manually as well.
+    //        Channel.NoteOn doesn't set the delegate because c# has no fuckin switch fallthru and I don't want to use an If statement right now
+    //        It's going to need to be fixed when creating a new BitwiseOperator in any other context (like music replayers)
+    public void SetBitwiseFunc(byte opTarget, int val)
+    {
+        foreach(Channel ch in c.channels)
         {
-            foreach(Channel ch in c.channels)
-            {
-                var op = ch.ops[opTarget] as BitwiseOperator;
-                if (op==null) continue;
-                op.OpFuncType = (byte)val;  //Property has hidden side effect of updating the delegate
-                c.Voice.egs[opTarget].aux_func = (byte)val;
-            }
+            var op = ch.ops[opTarget] as BitwiseOperator;
+            if (op==null) continue;
+            op.OpFuncType = (byte)val;  //Property has hidden side effect of updating the delegate
+            c.Voice.egs[opTarget].aux_func = (byte)val;
         }
+    }
 
     public bool SetOpIntent(int opTarget, int _intent)
     {
@@ -299,25 +321,6 @@ public class Test2 : Label
             op.Recalc();
         } 
     }
-
-    public void SetAlgorithm(Godot.Collections.Dictionary d){   c.SetAlgorithm(d); /*GD.Print("Setting algo...");*/    }
-
-    public Godot.Collections.Dictionary SetPreset(int preset, bool useSix)
-    {
-        c.Voice.SetOpCount(useSix? (byte)6 : (byte)4);
-        c.Voice.alg = Algorithm.FromPreset((byte)preset, useSix);
-
-        //DEBUG:  REMOVE ME
-        var presets = useSix?  Algorithm.dx_presets : Algorithm.reface_presets;
-        System.Diagnostics.Debug.Print(presets[preset].ToString());
-        GD.Print(presets[preset].ToString());
-
-        // var output = new Godot.Collections.Dictionary();
-        // output = c.Voice.GetAlgorithm();
-        return c.Voice.GetAlgorithm();
-
-    }
-
 
     public void SetBypass(int opTarget, bool val) {c.Voice.egs[opTarget].bypass = val;}
     public void SetMute(int opTarget, bool val) {c.Voice.egs[opTarget].mute = val;}

@@ -51,6 +51,7 @@ func _on_slot_moved(delay=0):
 	
 	global.emit_signal("algorithm_changed")
 
+#Used to send the algorithm description to the chip.
 func get_algorithm_description() -> Dictionary:
 	var d= {}
 	d["opCount"] = $SlotIndicator.total_ops
@@ -63,14 +64,36 @@ func get_algorithm_description() -> Dictionary:
 
 func _on_Add_pressed():
 	if $SlotIndicator.total_ops < MAX_OPS:
-		$SlotIndicator.total_ops +=1
-		_on_slot_moved()
+		var target = $SlotIndicator.total_ops +1
+		yield($SlotIndicator.set_ops(target), "completed")
+		
+		#Probably because the chip isn't yet ready, the new op doesn't have a type to set.
+		#We can set it here to override that;  it's ugly, but it works......
+		var slot = $SlotIndicator.get_child($SlotIndicator.get_child_count()-1)
+		slot.set_slot_type(slot.opType.CARRIER)
+
+		_on_slot_moved() 
 
 
 func _on_Remove_pressed():
+	if chip_loc.is_empty():  
+		printerr("_on_slot_moved():  Wiring grid isn't connected to a chip bus!")
+		return
+
 	if $SlotIndicator.total_ops > 1:
-		$SlotIndicator.total_ops -=1
-		_on_slot_moved()
+		var target = $SlotIndicator.total_ops -1
+		#We don't want to reset default positions here, so instead we'll get an algorithm description from
+		#the chip once we've set the operator size.
+		var c = get_node(chip_loc)
+		var new_alg = c.SetOpCount(target)
+		
+		yield($SlotIndicator.set_ops(target, new_alg), "completed")
+		check_if_presets()
+		global.emit_signal("algorithm_changed")
+
+		
+#		$SlotIndicator.total_ops -=1
+#		_on_slot_moved()
 
 
 func _on_Preset_pressed():
@@ -87,7 +110,7 @@ func get_grid_description():
 #		output.append(o.gridPos.y)
 		output.append( ( int(o.gridPos.y) << 4) | int(o.gridPos.x)  )
 
-	return output
+	return PoolByteArray(output)
 	
 #Describes the wiring grid in terms of the height of each operator on the stack.
 func get_process_order():
@@ -143,6 +166,7 @@ func _on_Paste_pressed():
 	_on_slot_moved(0.05)
 
 
+#Activated when the user selects a preset algorithm.
 func _on_Preset_item_activated(index):
 	if chip_loc.is_empty():  
 		printerr("_on_Preset_item_activated():  Wiring grid isn't connected to a chip bus!")
@@ -155,15 +179,14 @@ func _on_Preset_item_activated(index):
 	$SlotIndicator.load_from_description( preset_description )
 	_on_slot_moved(0.05)
 
+#Checks whenever opNum changes as to whether or not presets are available for this number of ops.
 func check_if_presets():
 	#Check to see if presets are available.
 	match $SlotIndicator.total_ops:
 		4,6:
 			$Preset.disabled = false
 			$Popup.intent = $SlotIndicator.total_ops
-			pass
 		_:
 			$Preset.disabled = true
 
-func popup_intent_menu(id):
-	$OpType.popup_intent_menu(id)
+

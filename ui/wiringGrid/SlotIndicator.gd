@@ -26,12 +26,14 @@ func _ready():
 	update()
 
 
-func load_from_description(d:Dictionary):
+#Called when the grid needs to be rearranged to reflect a new algorithm entirely.
+#Uses a dictionary format similar to the kind 
+func load_from_description(d:Dictionary, from_set_ops=false):
 	if !d.has_all(["connections", "opCount"]):  
 		print("SlotIndicator.gd:  Load from description failed.")
 		return
 	
-	yield(set_ops(d["opCount"]), "completed")
+	if !from_set_ops:  yield(set_ops(d["opCount"]), "completed")
 
 	#Process in connections.
 	var connections = get_connections_from_description(d["connections"])
@@ -80,10 +82,6 @@ func load_from_description(d:Dictionary):
 	restore_grid()
 	redraw_grid()
 
-#Finds a position on the grid for an orphaned operator.
-func find_home():
-	pass
-
 
 func reset_focus(val):
 	if val != last_slot_focused:
@@ -102,21 +100,24 @@ func reset_focus(val):
 			last_slot_focused = -1
 
 
-func set_ops(val):  #Set the number of operators in the grid.  Property setter.
-#	print ("SetOps: ", val, "total_ops: ", total_ops)
-	
+#This function is executed any time the UI changes the opNum, including from WiringGrid.gd.
+func set_ops(val, positions_from_chip=null):  #Set the number of operators in the grid.  Property setter.
 	var oldsz = total_ops
 	total_ops = val
 	if not isReady:  return
 	resize_op_array(val)
-	if val >= oldsz:  yield(reinit_grid(val), "completed")
+	if val >= oldsz:  yield(reinit_grid(val), "completed")  #Wait for new child controls to reinit.
 	
 	visible = false
 	if val < oldsz:  
 		#Grid's smaller.  Can't guarantee connection tree is valid.
 
 		#Gotta move the remaining ops left back to carrier positions.
-		yield(reset_default_op_positions(val), "completed")
+		if positions_from_chip is Dictionary:
+			load_from_description(positions_from_chip, true)
+		else:  
+			yield(reset_default_op_positions(val), "completed")
+		
 		yield(reinit_grid(val), "completed")
 
 
@@ -608,7 +609,8 @@ func get_connection_descriptions():
 	
 	return output
 
-#Returns an array of connections from a set of bitmasked connection descriptions. DOES NOT distinguish manual connections.
+#Returns an array of connections from a set of bitmasked connection descriptions. 
+#DOES NOT distinguish manual connections.
 func get_connections_from_description(input:PoolByteArray):
 	var output = []
 	for connection in input:
@@ -623,6 +625,7 @@ func get_connections_from_description(input:PoolByteArray):
 	return output
 
 
+#This is a compare function that can be used by a sort routine to determine the processOrder.
 func compare_height(a:opNode,b:opNode):
 	return a.gridPos.y < b.gridPos.y
 

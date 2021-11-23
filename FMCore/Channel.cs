@@ -225,7 +225,7 @@ namespace gdsFM
 
 
 
-        private void SetOpCount(byte opTarget)
+        public void SetOpCount(byte opTarget)
         {
             byte opCount = (byte) ops.Length;
             Array.Resize(ref ops, opTarget);

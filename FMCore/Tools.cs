@@ -229,6 +229,13 @@ namespace gdsFM
            return sb.ToString();     
         }
 
+        // public static int[] Range(int start, int end)
+        // {
+        //     List<int> output = new List<int>();
+        //     if(end<start) {var temp=end; end=start; start=temp; }
+        //     for(int i=start; i<end; i++)  output.Add(i);
+        //     return output.ToArray();
+        // }
 
         //Branchless absolute value and sign methods
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static short Abs(short n) {int o=n; int s=(n>>31); o^=s; o-=s; return (short)(o);}

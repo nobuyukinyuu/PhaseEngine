@@ -12,7 +12,9 @@ namespace gdsFM
         public bool disableLFO;  //Used by processes that wish to calculate voices without the LFO, such as the offline preview.
 
 
-        public byte opCount = 6;  //Probably should be moved to a voice class, then the chip given a unitimbral description of the voice. Realloc on major change
+        byte opCount = 6;  //Probably should be moved to a voice class, then the chip given a unitimbral description of the voice. Realloc on major change
+        public byte OpCount{get=>opCount;}  //Use SetOpCount to set opCount outside of Chip.
+
         public byte polyphony = 6;
         public Channel[] channels;
 
@@ -228,6 +230,15 @@ namespace gdsFM
             voice = v;
             for (int i=0; i<channels.Length; i++)
                 channels[i].SetVoice(v);
+        }
+
+        /// Updates all channels' operator count.  Will also update any attached voice specified, if requested.
+        public void SetOpCount(byte opTarget, Voice v=null)
+        {
+            opCount = opTarget;
+            if (v!=null) v.SetOpCount(opTarget);
+            for (int i=0; i<channels.Length; i++)
+                channels[i].SetOpCount(opTarget);
         }
 
         //Sets the intents to the voice specified intent.

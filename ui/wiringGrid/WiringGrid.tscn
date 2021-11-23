@@ -50,7 +50,6 @@ __meta__ = {
 "_edit_group_": true,
 "_edit_use_anchors_": false
 }
-total_ops = 6
 
 [node name="0" parent="SlotIndicator" instance=ExtResource( 1 )]
 margin_right = 36.0
