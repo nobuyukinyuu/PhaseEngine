@@ -4,7 +4,7 @@ using Godot;
 using System;
 using System.Runtime.CompilerServices;
 
-namespace gdsFM
+namespace PhaseEngine
 {
     public static class Glue
     {

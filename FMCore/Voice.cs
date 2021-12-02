@@ -1,15 +1,21 @@
 using System;
-using gdsFM;
+using PhaseEngine;
 using GdsFMJson;
 
 #if GODOT
 using Godot;
 #endif
 
-namespace gdsFM 
+namespace PhaseEngine 
 {
     public class Voice
     {
+        ////// Metadata for file I/O and use in user implementations
+        public string name;
+        public float gain=1.0f;
+        public float pan=0;
+
+
         public byte opCount = 6; 
 
         //Keeps track of how to set the operator on a new note.

@@ -1,8 +1,8 @@
 using System;
-using gdsFM;
+using PhaseEngine;
 using System.Runtime.CompilerServices;
 
-namespace gdsFM 
+namespace PhaseEngine 
 {
     /// Summary:  Tracks the wiring of an FM algorithm.
     public class Algorithm

@@ -1,10 +1,10 @@
 using System;
-using gdsFM;
+using PhaseEngine;
 
 
 // Phase generator keeps track of tuning information
 
-namespace gdsFM 
+namespace PhaseEngine 
 {
     public struct Increments
     {

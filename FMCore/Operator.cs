@@ -1,7 +1,7 @@
 using System;
-using gdsFM;
+using PhaseEngine;
 
-namespace gdsFM 
+namespace PhaseEngine 
 {
     
     public abstract class OpBase  //Base for operator, LFO and filter classes
@@ -121,7 +121,7 @@ namespace gdsFM
 
             //Feedback causes amplitude oscillation issues when applied to sounds, so we don't use this function if the feedback's off.
             if (eg.feedback>0) operatorOutputSample = ComputeFeedback; else operatorOutputSample = ComputeVolume;
-        }  //TODO:  Operator types for filters and sample-based outputs
+        }
 
         public override void SetOscillatorType(byte waveform_index)
         {

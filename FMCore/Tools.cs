@@ -1,12 +1,12 @@
 //Some functions (BIT, make_bitmask) taken from MAME's coretmpl.h and adapted to C#.  BSD-3 license.
 
 using System;
-using gdsFM;
+using PhaseEngine;
 using System.Runtime.CompilerServices;
 using System.Numerics;
 using System.Collections.Generic;
 
-namespace gdsFM 
+namespace PhaseEngine 
 {
     public static class Tools
     {

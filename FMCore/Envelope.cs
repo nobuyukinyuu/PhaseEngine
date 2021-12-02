@@ -1,10 +1,10 @@
 using System;
-using gdsFM;
+using PhaseEngine;
 using GdsFMJson;
 
     //Thoughts:  Rates probably need fixed integer math to work, then translated to a level at the very end, since increments are very small.
 
-namespace gdsFM 
+namespace PhaseEngine 
 {
     public class Envelope
     {
