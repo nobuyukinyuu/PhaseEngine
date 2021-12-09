@@ -20,6 +20,9 @@ var last_value = 0
 
 enum {NO, PROCESS_LEFT, PROCESS_MID, PROCESS_RIGHT, PROCESS_MIDDRAG, PROCESS_MIDUP}  #For input events
 
+var changing=-1
+const font = preload("res://gfx/fonts/numerics_7seg.tres")
+
 
 var last_x=0   #Position to lock X to when holding shift.
 
@@ -79,10 +82,12 @@ func _gui_input(event):
 
 		var vol = maxValue * (val/100.0)
 		
+		changing = val
+		
 		#Generate a cursor to help user set proper map val
-		set_cursor(String(vol))
-		Input.set_custom_mouse_cursor(cursor_texture,0,Vector2(0,0)) #Temporarily blank to update
-		Input.set_custom_mouse_cursor(custom_texture,0,Vector2(0,0))
+#		set_cursor(String(vol))
+#		Input.set_custom_mouse_cursor(cursor_texture,0,Vector2(0,0)) #Temporarily blank to update
+#		Input.set_custom_mouse_cursor(custom_texture,0,Vector2(0,0))
 
 
 		tbl[arpos] = val  #Array position set to value.
@@ -105,6 +110,7 @@ func _gui_input(event):
 		return
 	else:
 		Input.set_custom_mouse_cursor(null)
+		changing=-1
 
 	match process:
 		PROCESS_MID:  #Start drawing a line.
@@ -199,6 +205,14 @@ func _draw():
 
 	#Draw the special process line.
 	draw_line(lineA.position, lineB.position, ColorN("yellow"),1.0,true)
+
+	if changing>=0:
+#		var scaleVal = round((rMax[owner.intent] / float(global.RT_MINUS_ONE)) * changing)
+		var scaleVal = round((changing - 50)/50.0 * 32768)
+		if scaleVal == 32768: scaleVal -=1
+		draw_string(font, get_local_mouse_position() + Vector2(16, 18), str(scaleVal), ColorN("black"))
+		draw_string(font, get_local_mouse_position() + Vector2(14, 16), str(scaleVal))	
+
 
 
 #Sets the mouse cursor to something useful

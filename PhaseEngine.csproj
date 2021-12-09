@@ -7,6 +7,6 @@
   <ItemGroup>
     <!-- <Compile Include="**\*.cs" Exclude="script_templates/*.cs" /> -->
     <Compile Include="./*.cs" Exclude="script_templates/*.cs" />
-    <Compile Include="FMCore/**/*.cs" />
+    <Compile Include="PhaseEngine/**/*.cs" />
   </ItemGroup>
 </Project>

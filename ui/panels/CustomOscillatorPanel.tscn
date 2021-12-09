@@ -1,0 +1,35 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=1]
+[ext_resource path="res://ui/panels/EGPanel.tscn" type="PackedScene" id=2]
+[ext_resource path="res://gfx/wave/9.png" type="Texture" id=5]
+
+[node name="EGPanel" instance=ExtResource( 2 )]
+
+[node name="Bank" parent="WavePanel" index="0" instance=ExtResource( 1 )]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -104.0
+margin_top = 8.0
+margin_right = -48.0
+margin_bottom = 28.0
+rect_min_size = Vector2( 48, 20 )
+max_value = 7.0
+special_display = 255
+display_strings = PoolStringArray( "A", "B", "C", "D", "E", "F", "G", "H" )
+
+[node name="Wave" parent="WavePanel" index="1"]
+visible = false
+
+[node name="Preview" parent="WavePanel" index="2"]
+visible = false
+
+[node name="FormPreview" type="TextureRect" parent="WavePanel" index="3"]
+margin_left = 80.0
+margin_top = 8.0
+margin_right = 112.0
+margin_bottom = 32.0
+texture = ExtResource( 5 )
+__meta__ = {
+"_edit_use_anchors_": false
+}

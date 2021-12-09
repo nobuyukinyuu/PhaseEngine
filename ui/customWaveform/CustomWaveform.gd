@@ -6,9 +6,12 @@ signal value_changed
 var wave = Riff.new()
 var import_path = ""
 
+const font = preload("res://gfx/fonts/numerics_7seg.tres")
+
+
 func _ready():
 	$H/MenuButton.get_popup().theme = $CPMenu.theme
-	$H/Banks.get_popup().theme = $CPMenu.theme
+#	$H/Banks.get_popup().theme = $CPMenu.theme
 
 	var check = AtlasTexture.new()
 	var uncheck = AtlasTexture.new()
@@ -18,13 +21,15 @@ func _ready():
 	uncheck.region = Rect2(0,0,16,16)
 	check.region = Rect2(16,0,16,16)
 	
-	$H/Banks.get_popup().add_icon_override("radio_unchecked", uncheck)
-	$H/Banks.get_popup().add_icon_override("radio_checked", check)
+#	$H/Banks.get_popup().add_icon_override("radio_unchecked", uncheck)
+#	$H/Banks.get_popup().add_icon_override("radio_checked", check)
 
 	connect("value_changed", self, "_on_value_changed")
 
 	var pop = $H/MenuButton.get_popup()
 	pop.connect("id_pressed", self, "_on_menu_item_selected")
+
+
 
 func reload():
 #	if !global.currentPatch:  return
@@ -53,7 +58,8 @@ func fetch_table(index=0):
 		print("Waveform: Can't find Patch's custom wavetable bank at %s." % index)
 
 func _on_value_changed(idx, val):
-	if !global.currentPatch:  return
+#	if !global.currentPatch:  return
+	pass
 
 
 func _on_menu_item_selected(index):  #Called when needing to add or remove banks
@@ -68,10 +74,11 @@ func _on_CPMenu_index_pressed(index):
 	if bank < 0:  return
 	
 	if index == 0:  #Copy
-		global.currentPatch.CopyWaveformBank(bank)
+#		global.currentPatch.CopyWaveformBank(bank)
+		pass
 	elif index == 2:  #Paste
-		var err = global.currentPatch.PasteWaveformBank(bank, true)
-		if err !=0:  print("RTable paste status: ", err)
+#		var err = global.currentPatch.PasteWaveformBank(bank, true)
+#		if err !=0:  print("RTable paste status: ", err)
 		fetch_table(bank)
 
 #Wave import file dialog

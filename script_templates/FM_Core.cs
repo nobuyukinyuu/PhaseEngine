@@ -1,11 +1,11 @@
 using System;
-using gdsFM;
+using PhaseEngine;
 
-namespace gdsFM 
+namespace PhaseEngine
 {
     public class %CLASS%
     {
         public %CLASS%()    {}
-    }
 
+    }
 }

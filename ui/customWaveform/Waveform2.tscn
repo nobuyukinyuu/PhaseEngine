@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=2]
+[gd_scene load_steps=26 format=2]
 
 [ext_resource path="res://ui/responseCurve/PresetMenu.theme" type="Theme" id=1]
 [ext_resource path="res://gfx/fonts/numerics_7seg.tres" type="BitmapFont" id=2]
@@ -9,10 +9,15 @@
 [ext_resource path="res://gfx/ui/vu/minmax_ruler_labels.png" type="Texture" id=7]
 [ext_resource path="res://gfx/ui/vu/ruler16.png" type="Texture" id=8]
 [ext_resource path="res://gfx/ui/vu/empty5.png" type="Texture" id=9]
+[ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=10]
 [ext_resource path="res://ui/customWaveform/CustomWaveform.gd" type="Script" id=11]
 [ext_resource path="res://gfx/fonts/numerics_5x8.tres" type="BitmapFont" id=12]
+[ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=13]
+[ext_resource path="res://ui/EGCheckBox.tres" type="Theme" id=14]
 [ext_resource path="res://gfx/ui/godot_icons/Load.svg" type="Texture" id=15]
 [ext_resource path="res://gfx/ui/icon_reset.svg" type="Texture" id=16]
+[ext_resource path="res://ui/FlatButton.theme" type="Theme" id=17]
+[ext_resource path="res://gfx/ui/filter/6.svg" type="Texture" id=18]
 
 [sub_resource type="StyleBoxFlat" id=1]
 content_margin_left = 8.0
@@ -60,6 +65,22 @@ expand_margin_top = 2.0
 expand_margin_bottom = 3.0
 
 [sub_resource type="ButtonGroup" id=6]
+
+[sub_resource type="StyleBoxFlat" id=7]
+bg_color = Color( 0, 0, 0, 0.878431 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 8
+border_color = Color( 0.435294, 0.815686, 0.945098, 1 )
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 6.0
+expand_margin_right = 4.0
+expand_margin_top = 6.0
+expand_margin_bottom = 6.0
 
 [node name="CustomWaveform" type="Control"]
 margin_right = 344.0
@@ -132,7 +153,6 @@ margin_left = 20.0
 margin_top = 52.0
 margin_right = 340.0
 margin_bottom = 308.0
-rect_clip_content = true
 hint_tooltip = "[Table not set]"
 mouse_filter = 0
 texture = ExtResource( 9 )
@@ -143,27 +163,18 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="VU"]
-margin_left = 214.0
-margin_top = 320.0
-margin_right = 254.0
-margin_bottom = 334.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="ToolTipProto" type="Label" parent="VU"]
 visible = false
 margin_left = -21.0
 margin_top = -4.0
 margin_right = 45.0
 margin_bottom = 18.0
-custom_styles/normal = SubResource( 5 )
-custom_fonts/font = ExtResource( 2 )
 custom_colors/font_color = Color( 0.352941, 0.878431, 0.878431, 1 )
 custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
 custom_constants/shadow_offset_x = 2
 custom_constants/shadow_offset_y = 2
+custom_fonts/font = ExtResource( 2 )
+custom_styles/normal = SubResource( 5 )
 text = "28.0"
 valign = 3
 __meta__ = {
@@ -171,12 +182,12 @@ __meta__ = {
 }
 
 [node name="CPMenu" type="PopupMenu" parent="."]
-margin_left = 392.0
-margin_top = 192.0
-margin_right = 512.0
-margin_bottom = 250.0
+margin_left = -128.0
+margin_top = 8.0
+margin_right = -8.0
+margin_bottom = 84.0
 theme = ExtResource( 1 )
-items = [ "Copy", ExtResource( 4 ), 0, false, false, 0, 0, null, "", false, "", null, 0, false, false, 2, 0, null, "", true, "Paste", ExtResource( 5 ), 0, false, false, 2, 0, null, "", false ]
+items = [ "Copy", ExtResource( 4 ), 0, false, false, 0, 0, null, "", false, "Paste", ExtResource( 5 ), 0, false, false, 2, 0, null, "", false, "", null, 0, false, false, 3, 0, null, "", true, "Smooth=", ExtResource( 18 ), 0, false, false, 3, 0, null, "", false ]
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -363,16 +374,94 @@ __meta__ = {
 margin_left = 309.0
 margin_right = 336.0
 margin_bottom = 32.0
-custom_fonts/font = ExtResource( 12 )
 custom_colors/font_color = Color( 1, 1, 1, 0.513726 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 0, 0.789855, 1, 1 )
+custom_fonts/font = ExtResource( 12 )
 text = ":::"
 align = 2
 items = [ "import...", ExtResource( 15 ), 0, false, false, 4, 0, null, "", false ]
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="SmoothDialog" type="PopupDialog" parent="."]
+visible = true
+margin_left = 16.0
+margin_top = 344.0
+margin_right = 208.0
+margin_bottom = 584.0
+theme = ExtResource( 14 )
+custom_styles/panel = SubResource( 7 )
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="V" type="VBoxContainer" parent="SmoothDialog"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 8.0
+margin_top = 8.0
+margin_right = -8.0
+margin_bottom = -8.0
+custom_constants/separation = 20
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="SmoothDialog/V"]
+margin_right = 176.0
+margin_bottom = 8.0
+custom_fonts/font = ExtResource( 13 )
+text = "Smooth Waveform="
+align = 1
+
+[node name="TextureRect" type="ColorRect" parent="SmoothDialog/V"]
+margin_top = 28.0
+margin_right = 176.0
+margin_bottom = 92.0
+rect_min_size = Vector2( 0, 64 )
+color = Color( 0, 0, 0, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Amount" parent="SmoothDialog/V" instance=ExtResource( 10 )]
+margin_top = 112.0
+margin_right = 176.0
+margin_bottom = 132.0
+max_value = 4.0
+step = 0.0
+special_display = 4
+
+[node name="Distance from Edge" parent="SmoothDialog/V" instance=ExtResource( 10 )]
+margin_top = 152.0
+margin_right = 176.0
+margin_bottom = 172.0
+max_value = 127.0
+step = 0.0
+value = 127.0
+special_display = 4
+text_offset = -18
+
+[node name="Control" type="Control" parent="SmoothDialog/V"]
+visible = false
+margin_top = 96.0
+margin_right = 176.0
+margin_bottom = 96.0
+
+[node name="Button" type="Button" parent="SmoothDialog/V"]
+margin_left = 56.0
+margin_top = 192.0
+margin_right = 120.0
+margin_bottom = 216.0
+rect_min_size = Vector2( 64, 24 )
+size_flags_horizontal = 4
+theme = ExtResource( 17 )
+custom_fonts/font = ExtResource( 13 )
+text = "Apply"
+
 [connection signal="index_pressed" from="CPMenu" to="." method="_on_CPMenu_index_pressed"]
 [connection signal="about_to_show" from="WaveImport" to="." method="_on_WaveImport_about_to_show"]
 [connection signal="confirmed" from="WaveImport" to="." method="_on_WaveImport_confirmed"]
