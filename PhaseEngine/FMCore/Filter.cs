@@ -47,7 +47,7 @@ namespace PhaseEngine
         {
             var ins = (short)input;
             var output = Process(ins);
-            var mix = Tools.Clamp(output, short.MinValue, short.MaxValue);
+            var mix = Math.Clamp(output, short.MinValue, short.MaxValue);
             // int mix = (short)(output & SHORT_MASK);  //Causes wrap-around on overflow
             mix = Tools.Lerp16(mix, ins, eg.duty);
             return (short)(mix);

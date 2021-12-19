@@ -4,13 +4,16 @@ var pts = []
 
 var should_be_visible:bool
 var previous_visible_state:bool
+var should_recalc:bool
 onready var anim:AnimationPlayer = $"../VisFlip"
 
 func _ready():
 	owner.get_node("MIDI Control").connect("note_on", self, "flip_on")
-	global.connect("op_tab_value_changed", self, "recalc")
-	global.connect("algorithm_changed", self, "recalc")
+	global.connect("op_tab_value_changed", self, "cache_recalc")
+	global.connect("algorithm_changed", self, "cache_recalc")
 
+func _physics_process(delta):
+	if should_recalc:  recalc()
 
 func _draw():
 	draw_line(rect_size, Vector2(rect_size.x,0), ColorN("white", 0.5))
@@ -29,8 +32,13 @@ func _draw():
 func _on_Timer_timeout():
 	var c = get_node(owner.chip_loc)
 	if !c:  return
+	#is_quiet procs PriorityScore for all channels so we only want to do it sparingly.
 	flip_on( c.is_quiet() )
 #	print ("Timeout")
+
+
+func cache_recalc():
+	should_recalc = true
 
 func recalc():
 	if !should_be_visible:  return
@@ -38,6 +46,7 @@ func recalc():
 	if !c:  return
 	pts = c.CalcPreview()
 	update()
+	should_recalc = false
 	
 
 func flip_on(var preview_on, var shim_from_midi=null):

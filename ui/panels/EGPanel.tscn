@@ -55,11 +55,13 @@ expand_margin_top = 1.0
 expand_margin_bottom = 1.0
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=4]
+[sub_resource type="StyleBoxFlat" id=16]
 bg_color = Color( 0, 0, 0, 0.941176 )
 border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
-corner_radius_top_left = 5
-corner_radius_bottom_right = 5
+corner_radius_top_left = 8
+corner_radius_top_right = 2
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 2
 expand_margin_left = 12.0
 expand_margin_right = 12.0
 expand_margin_top = 16.0
@@ -505,12 +507,13 @@ __meta__ = {
 }
 
 [node name="Popup" type="PopupDialog" parent="WavePanel"]
+visible = true
 margin_left = 128.0
 margin_top = 32.0
 margin_right = 200.0
 margin_bottom = 176.0
 rect_min_size = Vector2( 72, 144 )
-custom_styles/panel = SubResource( 4 )
+custom_styles/panel = SubResource( 16 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -705,23 +708,87 @@ text = "Velocity"
 intent = 1
 
 [node name="Duty" parent="." instance=ExtResource( 3 )]
-margin_left = 80.0
+margin_left = 8.0
 margin_top = 264.0
-margin_right = 328.0
+margin_right = 264.0
 margin_bottom = 284.0
 size_flags_horizontal = 3
 max_value = 65535.0
 associated_property = "duty"
 
-[node name="OscSync" type="CheckBox" parent="."]
+[node name="More" type="Button" parent="."]
 anchor_top = 0.0106383
 anchor_bottom = 0.0106383
-margin_left = 8.0
-margin_top = 264.0
-margin_right = 70.0
-margin_bottom = 282.0
+margin_left = 278.0
+margin_top = 265.915
+margin_right = 334.0
+margin_bottom = 281.915
 theme = ExtResource( 1 )
-text = "~Sync"
+text = "More }"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="P" type="PopupDialog" parent="More"]
+visible = true
+margin_left = 10.0
+margin_top = 34.0
+margin_right = 122.0
+margin_bottom = 130.0
+rect_min_size = Vector2( 112, 96 )
+custom_styles/panel = SubResource( 16 )
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Title" type="Label" parent="More/P"]
+margin_right = 112.0
+margin_bottom = 12.0
+rect_min_size = Vector2( 0, 12 )
+custom_colors/font_color = Color( 0.384314, 0.717647, 0.831373, 0.639216 )
+custom_fonts/font = ExtResource( 6 )
+text = "Advanced Opts="
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="More/P/Title"]
+modulate = Color( 1, 1, 1, 0.12549 )
+margin_top = 12.0
+margin_right = 112.0
+margin_bottom = 13.0
+rect_min_size = Vector2( 0, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="V" type="VBoxContainer" parent="More/P"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 32.0
+custom_constants/separation = 16
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Phase Offset" parent="More/P/V" instance=ExtResource( 3 )]
+margin_right = 112.0
+rect_min_size = Vector2( 64, 20 )
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.0
+associated_property = "phase_offset"
+special_display = 4
+
+[node name="OscSync" type="CheckBox" parent="More/P/V"]
+margin_top = 36.0
+margin_right = 112.0
+margin_bottom = 54.0
+theme = ExtResource( 1 )
+text = "~ Osc Sync"
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false
@@ -749,3 +816,4 @@ __meta__ = {
 [connection signal="toggled" from="FixedRatio" to="." method="_on_FixedRatio_toggled"]
 [connection signal="toggled" from="Mute" to="." method="_on_Mute_toggled" binds= [ false ]]
 [connection signal="toggled" from="Bypass" to="." method="_on_Mute_toggled" binds= [ true ]]
+[connection signal="pressed" from="More" to="." method="_on_More_pressed"]

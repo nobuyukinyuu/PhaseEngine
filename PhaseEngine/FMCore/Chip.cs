@@ -18,11 +18,22 @@ namespace PhaseEngine
         public byte polyphony = 6;
         public Channel[] channels;
 
+        //Used to determine if a chip is "Silent" so it can be put to sleep. Does
         public bool ChannelsAreFree {
             get{for(byte i=0; i<channels.Length; i++)
-                    if(channels[i].busy != BusyState.FREE) return false;
+                    {  //Proc the busy state by peeking at the priority score.
+                        channels[i].CalcPriorityScore();
+                        if(channels[i].busy != BusyState.FREE) return false;
+                    }
                 return true;
             }
+        }
+        public bool ChannelIsFree(byte chNum) 
+        {
+            System.Diagnostics.Debug.Assert(chNum>=0 && chNum<channels.Length, String.Format("Invalid channel {0}!", chNum));
+            channels[chNum].CalcPriorityScore();
+            if (channels[chNum].busy != BusyState.FREE) return false;
+            return true;
         }
 
         #region Constructors
@@ -152,6 +163,7 @@ namespace PhaseEngine
             Channel ch = FindChannel(eventID);
             if (ch == null) return false;
             ch.NoteOff();
+            ch.CalcPriorityScore();
             return true;
         }
 
@@ -175,7 +187,7 @@ namespace PhaseEngine
                     // return ch;
                 }
 
-                var chScore = ch.PriorityScore;
+                var chScore = ch.CalcPriorityScore();
                 if (chScore > score)
                 {
                     score = chScore;
@@ -278,7 +290,7 @@ namespace PhaseEngine
             for (int i=0; i<channels.Length; i++)
             {
                 var ch= channels[i];
-                sb.Append(String.Format("Ch.{0} (ID: {1}): {2} (Priority {3})", i, ch.eventID, ch.busy.ToString(), ch.PriorityScore));
+                sb.Append(String.Format("Ch.{0} (ID: {1}): {2} (Priority {3})", i, ch.eventID, ch.busy.ToString(), ch.lastPriorityScore));
                 sb.Append(nl);
             }
             return sb.ToString();

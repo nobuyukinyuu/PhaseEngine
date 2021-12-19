@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=2]
+[gd_scene load_steps=32 format=2]
 
 [ext_resource path="res://ui/EGCheckBox.tres" type="Theme" id=1]
 [ext_resource path="res://ui/envelopeDisplay/EnvelopeDisplay.tscn" type="PackedScene" id=2]
@@ -161,6 +161,19 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
+[sub_resource type="StyleBoxFlat" id=16]
+bg_color = Color( 0, 0, 0, 0.941176 )
+border_color = Color( 0.8, 0.8, 0.8, 0.498039 )
+corner_radius_top_left = 8
+corner_radius_top_right = 2
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 2
+expand_margin_left = 12.0
+expand_margin_right = 12.0
+expand_margin_top = 16.0
+expand_margin_bottom = 12.0
+anti_aliasing = false
+
 [sub_resource type="StyleBoxFlat" id=15]
 bg_color = Color( 0.0470588, 0.0470588, 0.0470588, 0.878431 )
 corner_radius_top_left = 12
@@ -213,10 +226,10 @@ margin_bottom = 24.0
 rect_min_size = Vector2( 0, 24 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
+custom_fonts/font = ExtResource( 8 )
 custom_styles/hover = SubResource( 1 )
 custom_styles/pressed = SubResource( 2 )
 custom_styles/normal = SubResource( 2 )
-custom_fonts/font = ExtResource( 8 )
 text = "A-4"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -519,8 +532,8 @@ anchor_right = 1.0
 margin_top = -12.0
 margin_right = 8.0
 margin_bottom = -4.0
-custom_fonts/font = ExtResource( 7 )
 custom_colors/font_color = Color( 0.384314, 0.717647, 0.831373, 0.639216 )
+custom_fonts/font = ExtResource( 7 )
 text = "Waveform="
 valign = 1
 __meta__ = {
@@ -610,9 +623,9 @@ margin_left = 280.0
 margin_top = 8.0
 margin_right = 338.0
 margin_bottom = 24.0
+custom_fonts/font = ExtResource( 6 )
 custom_styles/pressed = SubResource( 12 )
 custom_styles/normal = SubResource( 13 )
-custom_fonts/font = ExtResource( 6 )
 toggle_mode = true
 text = "Mute"
 __meta__ = {
@@ -624,9 +637,9 @@ margin_left = 216.0
 margin_top = 8.0
 margin_right = 274.0
 margin_bottom = 24.0
+custom_fonts/font = ExtResource( 6 )
 custom_styles/pressed = SubResource( 14 )
 custom_styles/normal = SubResource( 13 )
-custom_fonts/font = ExtResource( 6 )
 toggle_mode = true
 text = "Bypass"
 __meta__ = {
@@ -656,23 +669,96 @@ text = "Velocity"
 intent = 1
 
 [node name="Duty" parent="." instance=ExtResource( 3 )]
-margin_left = 80.0
+margin_left = 8.0
 margin_top = 264.0
-margin_right = 328.0
+margin_right = 264.0
 margin_bottom = 284.0
 size_flags_horizontal = 3
 max_value = 65535.0
 associated_property = "duty"
 
-[node name="OscSync" type="CheckBox" parent="."]
+[node name="More" type="Button" parent="."]
 anchor_top = 0.0106383
 anchor_bottom = 0.0106383
-margin_left = 8.0
-margin_top = 264.0
-margin_right = 70.0
-margin_bottom = 282.0
+margin_left = 278.0
+margin_top = 265.915
+margin_right = 334.0
+margin_bottom = 281.915
 theme = ExtResource( 1 )
-text = "~Sync"
+text = "More }"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="P" type="PopupDialog" parent="More"]
+visible = true
+margin_left = 10.0
+margin_top = 34.0
+margin_right = 122.0
+margin_bottom = 154.0
+rect_min_size = Vector2( 112, 96 )
+custom_styles/panel = SubResource( 16 )
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Title" type="Label" parent="More/P"]
+margin_right = 112.0
+margin_bottom = 12.0
+rect_min_size = Vector2( 0, 12 )
+custom_colors/font_color = Color( 0.384314, 0.717647, 0.831373, 0.639216 )
+custom_fonts/font = ExtResource( 6 )
+text = "Advanced Opts="
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="More/P/Title"]
+modulate = Color( 1, 1, 1, 0.12549 )
+margin_top = 12.0
+margin_right = 112.0
+margin_bottom = 13.0
+rect_min_size = Vector2( 0, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="V" type="VBoxContainer" parent="More/P"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 32.0
+custom_constants/separation = 12
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Phase Offset" parent="More/P/V" instance=ExtResource( 3 )]
+margin_right = 112.0
+rect_min_size = Vector2( 64, 20 )
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.0
+associated_property = "phase_offset"
+special_display = 4
+
+[node name="Feedback" parent="More/P/V" instance=ExtResource( 3 )]
+margin_top = 32.0
+margin_right = 112.0
+margin_bottom = 52.0
+rect_min_size = Vector2( 48, 20 )
+size_flags_horizontal = 3
+max_value = 10.0
+associated_property = "feedback"
+
+[node name="OscSync" type="CheckBox" parent="More/P/V"]
+margin_top = 64.0
+margin_right = 112.0
+margin_bottom = 82.0
+theme = ExtResource( 1 )
+text = "~ Osc Sync"
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false
@@ -690,6 +776,7 @@ valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
 [connection signal="value_changed" from="Frequency/Frequency" to="." method="setFreq"]
 [connection signal="item_selected" from="Frequency/H/Presets" to="Frequency" method="_on_Presets_item_selected"]
 [connection signal="pressed" from="Frequency/H/Presets" to="Frequency" method="_on_Presets_pressed"]
@@ -699,3 +786,4 @@ __meta__ = {
 [connection signal="toggled" from="FixedRatio" to="." method="_on_FixedRatio_toggled"]
 [connection signal="toggled" from="Mute" to="." method="_on_Mute_toggled" binds= [ false ]]
 [connection signal="toggled" from="Bypass" to="." method="_on_Mute_toggled" binds= [ true ]]
+[connection signal="pressed" from="More" to="." method="_on_More_pressed"]

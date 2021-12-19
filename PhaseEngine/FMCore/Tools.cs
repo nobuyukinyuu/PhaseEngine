@@ -10,6 +10,9 @@ namespace PhaseEngine
 {
     public static class Tools
     {
+        public static double SincN(double x) { if(x==0) return 1; x*=Math.PI; return Math.Sin(x)/x; }
+
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Lerp(float value1, float value2, float amount) { return value1 + (value2 - value1) * amount; }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

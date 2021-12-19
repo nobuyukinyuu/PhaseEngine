@@ -45,6 +45,7 @@ namespace PhaseEngine
 
         public byte ams;  //Amplitude modulation sensitivity (used to determine how much LFO to mix in)
         public bool osc_sync=true;  //Oscillator sync.  Oscillator phase will reset on NoteOn if true.
+        public double phase_offset;  //Percentage of phase offset.
 
         public byte aux_func;  //ONLY used for bitwise function operators, filters etc as an additional value specifier.
 
@@ -52,6 +53,7 @@ namespace PhaseEngine
         public RateTable ksr = new RateTable();
         public LevelTable ksl = new LevelTable();
         public VelocityTable velocity = new VelocityTable();
+
 
         public IResponseTable GetTable(RTableIntent intent)
         {
@@ -139,6 +141,7 @@ namespace PhaseEngine
                 j.Assign("duty", ref duty);
                 j.Assign("ams", ref ams);
                 j.Assign("osc_sync", ref osc_sync);
+                j.Assign("phase_offset", ref phase_offset);
                 j.Assign("cutoff", ref cutoff);
                 j.Assign("resonance", ref resonance);
 
@@ -166,6 +169,7 @@ namespace PhaseEngine
             o.AddPrim("duty", duty);
             o.AddPrim("ams", ams);
             o.AddPrim("osc_sync", osc_sync);
+            o.AddPrim("phase_offset", phase_offset);
             o.AddPrim("cutoff", cutoff);
             o.AddPrim("resonance", resonance);
 
@@ -192,6 +196,7 @@ namespace PhaseEngine
             o.Add("feedback", feedback);
             o.Add("duty", duty);
             o.Add("osc_sync", osc_sync);
+            o.Add("phase_offset", phase_offset);
             o.Add("cutoff", cutoff);
             o.Add("resonance", resonance);
 

@@ -88,6 +88,12 @@ namespace PhaseEngine
 
         }
 
+        /// summary:  Returns a partial increment for use with phase-offset NoteOn events
+        public static long PhaseOffsetOf(Increments prototype, double percent)
+        {
+            return (long)((Global.MixRate/prototype.hz) * prototype.increment * Math.Clamp(percent,0,1));
+        }
+
         public static Increments FromNote(byte note)
         {
             var o = new Increments();

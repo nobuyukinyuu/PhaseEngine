@@ -24,13 +24,16 @@ func _ready():
 #		o.connect("value_changed", self, "setEG", [o.associated_property])
 
 	if $Tweak.has_node("Feedback"):  #Done manually to trigger the oscillator function check
-		$Tweak/Feedback.connect("value_changed", self, "setFeedback") 
+		$Tweak/Feedback.connect("value_changed", self, "setFeedback")
+	elif $More/P/V.has_node("Feedback"):
+		$More/P/V/Feedback.connect("value_changed", self, "setFeedback")
 	if $Tweak.has_node("Func Type"):
 #		$"Tweak/Func Type".connect("value_changed", self, "setOpProperty", [$"Tweak/Func Type".associated_property])
 		$"Tweak/Func Type".connect("value_changed", self, "setBitwiseFunc")
 	$Tweak/AMS.connect("value_changed", self, "setEG", [$Tweak/AMS.associated_property])
 	$Duty.connect("value_changed", self, "setEG", ["duty"])
-	$OscSync.connect("toggled", self, "setEG", ["osc_sync"])
+	$"More/P/V/Phase Offset".connect("value_changed", self, "setEG", ["phase_offset"])
+	$More/P/V/OscSync.connect("toggled", self, "setEG", ["osc_sync"])
 
 
 	for o in $Levels.get_children():
@@ -117,7 +120,8 @@ func set_from_op(op:int):
 	if $Tweak.has_node("Func Type"):
 		$"Tweak/Func Type".value = d["aux_func"]
 	$Duty.value = d["duty"]
-	$OscSync.pressed = d["osc_sync"]
+	$"More/P/V/Phase Offset".value = d["phase_offset"]
+	$More/P/V/OscSync.pressed = d["osc_sync"]
 	
 	$Mute.pressed = d["mute"]
 	$Bypass.pressed = d["bypass"]
@@ -200,6 +204,8 @@ func _on_FixedRatio_toggled(button_pressed, update_chip=true):
 	
 	if !chip_loc.is_empty() and update_chip:
 		get_node(chip_loc).SetFixedFreq(operator, !button_pressed)
+		global.emit_signal("op_tab_value_changed")
+
 func setFreq(value):
 	get_node(chip_loc).SetFrequency(operator, value)
 	global.emit_signal("op_tab_value_changed")
@@ -229,5 +235,23 @@ func update_table(column:int, value:int, intent):
 func update_table_minmax(value, isMax:bool, intent):
 	var c = get_node(chip_loc)
 	get_node(chip_loc).SetTableMinMax(operator, value, isMax, intent)
+
+
+
+
+func _on_More_pressed():
+	var r = $More.get_global_rect()
+	r.position += Vector2(12, 16)
+	r.position.y += $More.rect_size.y
+	
+	r.size.y = max(r.size.y, $More/P/V.rect_position.y + $More/P/V.rect_size.y+4)
+	$More/P.popup(r)
+	$More.grab_focus()
+	
+	var vpx = get_viewport_rect().size.x
+	var popx = $More/P.rect_global_position.x + $More/P.rect_size.x
+	if popx >= vpx:
+		$More/P.rect_position.x = vpx - $More/P.rect_size.x - 16
+	
 
 

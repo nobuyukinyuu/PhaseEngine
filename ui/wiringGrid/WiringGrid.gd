@@ -64,6 +64,8 @@ func get_algorithm_description() -> Dictionary:
 
 func _on_Add_pressed():
 	if $SlotIndicator.total_ops < MAX_OPS:
+		set_buttons_enabled(false)
+
 		var target = $SlotIndicator.total_ops +1
 		yield($SlotIndicator.set_ops(target), "completed")
 		
@@ -73,14 +75,13 @@ func _on_Add_pressed():
 		slot.set_slot_type(slot.opType.CARRIER)
 
 		_on_slot_moved() 
+		set_buttons_enabled(true)
 
 
 func _on_Remove_pressed():
-	if chip_loc.is_empty():  
-		printerr("_on_slot_moved():  Wiring grid isn't connected to a chip bus!")
-		return
 
 	if $SlotIndicator.total_ops > 1:
+		set_buttons_enabled(false)
 		var target = $SlotIndicator.total_ops -1
 		#We don't want to reset default positions here, so instead we'll get an algorithm description from
 		#the chip once we've set the operator size.
@@ -94,6 +95,7 @@ func _on_Remove_pressed():
 		
 #		$SlotIndicator.total_ops -=1
 #		_on_slot_moved()
+		set_buttons_enabled(true)
 
 
 func _on_Preset_pressed():
@@ -190,3 +192,7 @@ func check_if_presets():
 			$Preset.disabled = true
 
 
+func set_buttons_enabled(enabled:bool):
+	var aux_btns = [$Add, $Remove, $Copy, $Paste]
+	for button in aux_btns:
+		button.disabled = !enabled

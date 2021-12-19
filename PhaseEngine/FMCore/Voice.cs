@@ -116,7 +116,6 @@ namespace PhaseEngine
                 d["connections"] = alg.connections;
 
                 return d;
-
             }
 
             public Godot.Collections.Dictionary GetEG(int opTarget) {return egs[opTarget >= opCount? 0:opTarget].GetDictionary();}

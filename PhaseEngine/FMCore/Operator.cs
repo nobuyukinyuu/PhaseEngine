@@ -55,7 +55,7 @@ namespace PhaseEngine
 
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)] 
-            void ResetPhase() {if (eg.osc_sync) phase=0;}
+            void ResetPhase() {if (eg.osc_sync) phase=0;  phase += Increments.PhaseOffsetOf(pg, eg.phase_offset);}
 
         public void NoteOn(Increments increments){ pg = increments;  NoteOn(); }
         public void NoteOn()

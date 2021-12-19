@@ -16,6 +16,7 @@ namespace PhaseEngine
 
         public short lastSample;
         public byte lastVelocity;
+        public short lastPriorityScore;
 
         public static ushort am_offset=0;  //Set by the chip when clocking to pass down when requesting samples from our operators.
 
@@ -39,10 +40,9 @@ namespace PhaseEngine
             }
         }
 
-        ////// PRIORITY SCORE
-        public short PriorityScore     
+        ////// RECALCULATES THE PRIORITY SCORE
+        public short CalcPriorityScore()
         {
-          get{
             int score=(int)256 - (Math.Abs(lastSample >> 6)); //0-127 -- simple volume value; 
             // int score=0; 
 
@@ -67,9 +67,8 @@ namespace PhaseEngine
             if (setFree) busy = BusyState.FREE;
             score += (int)busy;   //512 points if BusyState.Released;  1024 if free.
 
-
-            return (short)score;
-          }
+            lastPriorityScore = (short)score;
+            return lastPriorityScore;
         }
 
 
