@@ -4,7 +4,7 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 
 
 # Screenshots
-![Main View](https://user-images.githubusercontent.com/1023003/132632266-234ceb1e-1409-4792-bd2b-51457e80102d.png)
+![Main View](https://user-images.githubusercontent.com/1023003/147164517-5a67d4b3-70a9-4355-8b51-3bd2a86990eb.png)
 ![rTables](https://user-images.githubusercontent.com/1023003/132632455-aa52c44c-e76a-4805-a894-27921c8169da.png)![Wiring Grid and 6op Presets](https://user-images.githubusercontent.com/1023003/132633883-80a5c551-074c-42b8-b50a-892c93ccae4a.png)
 
 
