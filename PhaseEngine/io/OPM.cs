@@ -4,7 +4,7 @@ using System.IO;
 
 namespace PhaseEngine
 {
-    public class ImportOPM : IOVoiceBank
+    public class ImportOPM : VoiceBankImporter
     {
         public ImportOPM()    {}
 
@@ -18,14 +18,17 @@ namespace PhaseEngine
                     string line;
                     line=sr.ReadLine();
                     //Check header for validity
-                    if (!line.StartsWith("@:")) { throw new PE_ImportException(IOErrorFlags.UnrecognizedFormat); }
+                    if (!line.StartsWith("//MiOPMdrv")) { throw new PE_ImportException(IOErrorFlags.UnrecognizedFormat); }
+
+                    //OPM files all have 128 banks.  Initialize bank.
+                    bank = new string[128];
+
                 }
             }
-            catch (FileNotFoundException e) { err |= IOErrorFlags.NotFound; }
+            catch (FileNotFoundException) { err |= IOErrorFlags.NotFound; }
             catch (PE_ImportException e) { err |= e.flags; }
             catch //Anything else
             { err |= IOErrorFlags.Failed | IOErrorFlags.Corrupt; }
-
 
             return err;
         }

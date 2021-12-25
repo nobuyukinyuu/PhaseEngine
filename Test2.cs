@@ -169,15 +169,9 @@ public class Test2 : Label
     public Godot.Collections.Dictionary SetPreset(int preset, bool useSix)
     {
         c.Voice.SetOpCount(useSix? (byte)6 : (byte)4);
-        c.Voice.alg = Algorithm.FromPreset((byte)preset, useSix);
-
-        //DEBUG:  REMOVE ME
-        // var presets = useSix?  Algorithm.dx_presets : Algorithm.reface_presets;
-        // System.Diagnostics.Debug.Print(presets[preset].ToString());
-        // GD.Print(presets[preset].ToString());
+        c.Voice.alg = Algorithm.FromPreset((byte)preset, useSix? Algorithm.PresetType.DX : Algorithm.PresetType.Reface);
 
         return c.Voice.GetAlgorithm();
-
     }
 
 

@@ -209,10 +209,33 @@ namespace PhaseEngine
         }
 
 
-        public static Algorithm FromPreset(byte preset, bool useSix=false)
+        public static Algorithm FromPreset(byte preset, PresetType type)
         {
-            var length = useSix? (byte)6 : (byte)4;
-            var presets = useSix?  dx_presets : reface_presets;
+            byte length;
+            byte[][] presets;
+
+            switch(type) {
+                case PresetType.DX:
+                    presets = dx_presets;
+                    length = 6;
+                    break;
+                case PresetType.Reface:
+                    presets = reface_presets;
+                    length = 4;
+                    break;
+                case PresetType.OPL:
+                    presets= opl_4op_presets;
+                    length = 4;
+                    break;
+                default:
+                    presets = ym2xxx_presets;
+                    length = 4;
+                    break;
+            }
+
+            System.Diagnostics.Debug.Assert(preset>=0 && preset < presets.Length, 
+                    String.Format("Algorithm preset {0} outside expected range of {2}'s {1} presets!", preset, presets.Length, type.ToString()));
+
             var output = new Algorithm(length);
             
             for(byte i=0; i<length; i++)     output.processOrder[i] = i;            
@@ -240,13 +263,15 @@ namespace PhaseEngine
         //Info on preset algorithms adapted from:  https://gist.github.com/bryc/e997954473940ad97a825da4e7a496fa
         //Operator 1 (the first operator to be processed) never has anything connected to it. If we specified 1 here, it would get processed as an infinite loop.
         //Processing order is always done from the first operator to the last.  Connections to 0 are assumed to be connected to output.
-        public static readonly byte[][] reface_presets = {
+        public enum PresetType {Reface=4, DX=6, OPL=18, OPM=20, OPN=20}
+
+        public static readonly byte[][] reface_presets = {  //New 4-op presets
             Preset(2,3,4,0),    Preset(3,3,4,0),    Preset(2,4,4,0),    Preset(Multi(2,3), 4, 4, 0),
             Preset(4,4,4,0),    Preset(2,3,0,0),    Preset(2, Multi(3,4), 0, 0),    Preset(3,4,0,0),
             Preset(Multi(2,3,4), 0,0,0),    Preset(Multi(3,4), 0,0,0),    Preset(4,0,0,0),    Preset(0,0,0,0),
         };
 
-        public static readonly byte[][] dx_presets = {
+        public static readonly byte[][] dx_presets = {  //The classic 32 6-op presets.  Sy77 and FS1R compatible
             Preset(2,4,5,6,0,0),   Preset(2,4,5,6,0,0),   Preset(3,4,5,6,0,0),   Preset(3,4,5,6,0,0),   // 0-3
             Preset(4,5,6,0,0,0),   Preset(4,5,6,0,0,0),   Preset(4,5,6,6,0,0),   Preset(4,5,6,6,0,0),   // 4-7
             Preset(4,5,6,6,0,0),   Preset(4,5,5,6,0,0),   Preset(4,5,5,6,0,0),   Preset(5,5,5,6,0,0),   // 8-11
@@ -256,6 +281,13 @@ namespace PhaseEngine
             Preset(Multi(5,6), 0,0,0,0,0),   Preset(5,6,6,0,0,0),   Preset(5,6,6,0,0,0),   Preset(3,4,5,0,0,0),   // 24-27
             Preset(5,6,0,0,0,0),   Preset(2,5,0,0,0,0),   Preset(6,0,0,0,0,0),   Preset(0,0,0,0,0,0),   // 28-31
         };
+
+        public static readonly byte[][] ym2xxx_presets = {  //Most vintage 4-op chips use these algorithm presets.  Use for loading legacy FM formats.
+            Preset(2,3,4,0),    Preset(3,3,4,0),    Preset(4,3,4,0),    Preset(2,4,4,0),
+            Preset(2,0,4,0),    Preset(Multi(2,3,4),0,0,0),    Preset(2,0,0,0),    Preset(0,0,0,0),
+        };
+
+        public static readonly byte[][] opl_4op_presets = { Preset(2,3,4,0), Preset(2,0,4,0), Preset(0,3,4,0), Preset(0,3,0,0) };
 
         //Produces an operator's connection mask for a given series of inputs.  Output is negated to flag the preset function to process it.
         static short Multi(params byte[] input) {

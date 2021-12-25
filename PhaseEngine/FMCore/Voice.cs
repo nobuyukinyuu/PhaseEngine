@@ -64,11 +64,11 @@ namespace PhaseEngine
         {
             if (opCount >= 6)
             {
-                alg = Algorithm.FromPreset(preset, true);
+                alg = Algorithm.FromPreset(preset, Algorithm.PresetType.DX);
                 return true;
             } else if (opCount >= 4)
             {
-                alg = Algorithm.FromPreset(preset, false);
+                alg = Algorithm.FromPreset(preset, Algorithm.PresetType.Reface);
                 return true;
             }
             return false;
