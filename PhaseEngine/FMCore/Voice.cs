@@ -76,11 +76,11 @@ namespace PhaseEngine
 
         #if GODOT
             //Initializes new voice from a pure godot dict containing json data.  Necessary if changing opCount
-            public Voice(Godot.Collections.Dictionary d)
-            {
-                InitVoice((byte) d["opCount"]);
-                FromJSON( (JSONObject) JSONData.ReadJSON(d.ToString()) );
-            }
+            // public Voice(Godot.Collections.Dictionary d)
+            // {
+            //     InitVoice((byte) d["opCount"]);
+            //     FromJSON( (JSONObject) JSONData.ReadJSON(d.ToString()) );
+            // }
 
             /// Changes the algorithm without changing the opCount.
             public void SetAlgorithm(Godot.Collections.Dictionary d)

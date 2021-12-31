@@ -59,11 +59,11 @@ namespace PhaseEngine
         {
             Type type = typeof(T);
             System.Reflection.PropertyInfo property = type.GetProperty(propertyName);
-            var self = __makeref(instance);
 
             if(property==null)
             {
                 System.Reflection.FieldInfo field = type.GetField(propertyName);
+                var self = __makeref(instance);
 
                 //Try to force unchecked conversion to the target type
                 var unboxedVal2 = Convert.ChangeType(value, field.FieldType);
@@ -74,7 +74,9 @@ namespace PhaseEngine
             }
             //Try to force unchecked conversion to the target type
             var unboxedVal = Convert.ChangeType(value, property.PropertyType);
-            property.SetValue(instance, unboxedVal);
+            object box = RuntimeHelpers.GetObjectValue(instance);
+            property.SetValue(box, value);
+            instance = (T)box;  //Copy back the box over ourself
         }
         
 

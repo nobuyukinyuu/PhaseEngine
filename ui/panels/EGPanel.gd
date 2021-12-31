@@ -25,14 +25,18 @@ func _ready():
 
 	if $Tweak.has_node("Feedback"):  #Done manually to trigger the oscillator function check
 		$Tweak/Feedback.connect("value_changed", self, "setFeedback")
-	elif $More/P/V.has_node("Feedback"):
+	elif $More/P/V.has_node("Feedback"):  #Panel is a BitwiseOpPanel
 		$More/P/V/Feedback.connect("value_changed", self, "setFeedback")
-	if $Tweak.has_node("Func Type"):
-#		$"Tweak/Func Type".connect("value_changed", self, "setOpProperty", [$"Tweak/Func Type".associated_property])
+		
+	if $Tweak.has_node("Func Type"):  #BitwiseOpPanels only
 		$"Tweak/Func Type".connect("value_changed", self, "setBitwiseFunc")
+
 	$Tweak/AMS.connect("value_changed", self, "setEG", [$Tweak/AMS.associated_property])
 	$Duty.connect("value_changed", self, "setEG", ["duty"])
+	
 	$"More/P/V/Phase Offset".connect("value_changed", self, "setEG", ["phase_offset"])
+	$"More/P/V/Increment Offset".connect("value_changed", self, "setPG", ["increment_offset"])
+	$"More/P/V/Detune Randomness".connect("value_changed", self, "setPG", ["detune_randomness"])
 	$More/P/V/OscSync.connect("toggled", self, "setEG", ["osc_sync"])
 
 
@@ -82,7 +86,7 @@ func set_from_op(op:int):
 	$Tune/Fine.value = d2["fine"]
 	$Tune/Detune.value = d2["detune"]
 
-	$Frequency/H/Detune.value = d2["detune"]
+#	$Frequency/H/Detune.value = d2["detune"]
 	$FixedRatio.pressed = !d2["fixedFreq"]
 	_on_FixedRatio_toggled(!d2["fixedFreq"], false)
 	$Frequency/Frequency.value = d2["base_hz"]
@@ -117,10 +121,15 @@ func set_from_op(op:int):
 	
 	if $Tweak.has_node("Feedback"):  #Only set this if the control exists (it doesn't on a BitwiseOp)
 		$Tweak/Feedback.value = d["feedback"]
+	elif $More/P/V.has_node("Feedback"):
+		$More/P/V/Feedback.value = d["feedback"]
 	if $Tweak.has_node("Func Type"):
 		$"Tweak/Func Type".value = d["aux_func"]
 	$Duty.value = d["duty"]
-	$"More/P/V/Phase Offset".value = d["phase_offset"]
+
+	$"More/P/V/Phase Offset".value = d["phase_offset"] # Adjusted from EG
+	$"More/P/V/Increment Offset".value = d2["increment_offset"] # Adjusted from PG
+	$"More/P/V/Detune Randomness".value = d2["detune_randomness"] # ' '
 	$More/P/V/OscSync.pressed = d["osc_sync"]
 	
 	$Mute.pressed = d["mute"]
@@ -176,10 +185,10 @@ func setEG(value, property):
 	get_node(chip_loc).SetEG(operator, property, value)
 	global.emit_signal("op_tab_value_changed")
 func setPG(value, property):
-	#Keep the two detune properties in sync...
-	if property=="detune":  
-		$Frequency/H/Detune.value = value
-		$Tune/Detune.value = value
+#	#Keep the two detune properties in sync...
+#	if property=="detune":  
+#		$Frequency/H/Detune.value = value
+#		$Tune/Detune.value = value
 	get_node(chip_loc).SetPG(operator, property, value)
 	global.emit_signal("op_tab_value_changed")
 
@@ -206,8 +215,11 @@ func _on_FixedRatio_toggled(button_pressed, update_chip=true):
 		get_node(chip_loc).SetFixedFreq(operator, !button_pressed)
 		global.emit_signal("op_tab_value_changed")
 
-func setFreq(value):
-	get_node(chip_loc).SetFrequency(operator, value)
+func setFreq(val):
+	var freq = $Frequency/Frequency.value + $"Frequency/H/Fine Tune".value
+	get_node(chip_loc).SetFrequency(operator, freq)
+	
+	$Frequency/H/Presets.select(global.notenum_from_hz(freq))
 	global.emit_signal("op_tab_value_changed")
 
 
@@ -244,7 +256,9 @@ func _on_More_pressed():
 	r.position += Vector2(12, 16)
 	r.position.y += $More.rect_size.y
 	
-	r.size.y = max(r.size.y, $More/P/V.rect_position.y + $More/P/V.rect_size.y+4)
+	$More/P/V.rect_size.y = 1  #Reset minimum size so the next line doesn't keep expanding	
+	r.size.y = max($More/P.rect_min_size.y, $More/P/V.rect_position.y + $More/P/V.rect_size.y+4)
+	
 	$More/P.popup(r)
 	$More.grab_focus()
 	

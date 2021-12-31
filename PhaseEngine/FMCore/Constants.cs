@@ -65,12 +65,20 @@ namespace PhaseEngine
 
     static internal class XorShift64Star
     {
+        const double REAL_UNIT = 1.0/((double)int.MaxValue+1.0);        
+
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static uint rotl(uint x, int k) 
         {
             return unchecked((x << k) | (x >> (32 - k)));
         }
 
+        static XorShift64Star()
+        {
+            Seed();  Next(); Next();  //Seed and fill the buffer
+        }
+
+        static void Seed()  { s[0] = unchecked((uint)Environment.TickCount); }  //Does System.DateTime.Now.Ticks have more entropy?
 
         static uint[] s= {1,2};
 
@@ -91,6 +99,14 @@ namespace PhaseEngine
                 return result;
             }
         }   
+
+        public static double NextDouble(){
+            return REAL_UNIT*(int)(0x7FFFFFFF & Next());
+        }
+        public static double CurrentDouble(){
+            return REAL_UNIT*(int)(0x7FFFFFFF & Current());
+        }
+
     }
 
 

@@ -41,22 +41,6 @@ public class Test2 : Label
 
         fromMidi.Connect("note_on", this, "QueueNote");
         fromMidi.Connect("note_off", this, "QueueNote", new Godot.Collections.Array( new int[1] ) );
-
-        System.Text.StringBuilder s = new System.Text.StringBuilder();
-        // for(ushort k=8; k<11; k++)
-            for (ushort j=0; j<16; j++)
-            {
-                for (ushort i=0; i<16; i++)
-                {
-                    // s.Append( Tables.attenuation_to_volume((ushort)(k*256+j*16+i)) );
-                    s.Append((Tables.s_power_table[j*16+i] & 0x3FF));
-                    s.Append(", ");
-                }
-                s.Append("\n");
-            }
-        // System.Diagnostics.Debug.Print(s.ToString());
-        System.Diagnostics.Debug.Print("");
-        OS.Clipboard = s.ToString();
     }
 
     public void TryNoteOn(int midi_note, int velocity)

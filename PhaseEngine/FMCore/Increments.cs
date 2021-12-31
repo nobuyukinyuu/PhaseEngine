@@ -16,7 +16,7 @@ namespace PhaseEngine
         //       the bend would take the relevant increment references and update it.
 
         public double hz, base_hz;
-        double tuned_hz; //Frequency of base_hz * coarse * fine + detune; the tuning without any external modifiers from lfo/controllers
+        double tuned_hz; //Frequency of base_hz * coarse * fine + increment_offset; the tuning without any external modifiers from lfo/controllers
 
         public long noteIncrement;  // Calculated from the base frequency
         public long tunedIncrement;  //increment of tuned_hz
@@ -25,7 +25,34 @@ namespace PhaseEngine
         //Multiplier values etc
         public bool fixedFreq;
         public float mult,  lfoMult;  //lfoMult is set externally from an LFO object.
-        public int coarse, fine, detune;
+        public int coarse, fine, increment_offset;
+
+        //PhaseEngine max detune creates a ringing oscillation once per second at 440hz. Most other implementations' max detune (-3 to +3) is ever-so-slightly slower.
+        //A detune value of 1 in other cores is close to 1/6 the value (or 16.667%) of max detune here, or around 6 seconds at 440hz.  Detune in other cores does NOT
+        //scale linearly with notes, however.  Since it's an adjustment to fnum and increment lookup tables, detune will never be *perfectly* aligned.
+        //Detune at 1760hz seems to be 3s when expected to be closer to 3s at 880hz.  Might implement a scaling factor to offset this at NoteOn based on distance from A440.
+        const double DETUNE_MAX = 1 + 1/440.0;
+        const double DETUNE_MIN = 1/DETUNE_MAX;
+
+        //Percentage values.  Randomness is calculated by maximum range from detune to zero detune (100%=anywhere from current detune to no detune).
+        internal double _detune, detune_current;
+        public float detune_randomness;  
+
+        //User-friendly detune value from -1.0 to 1.0.  Use if you want your detune to conform to PhaseEngine's standard.
+        public float Detune {
+            get {
+                //Detune internally is always a positive value.  Negative values fed to Detune are represented as a reciprocal.
+                double output;
+                if (_detune>=1)
+                    output = Tools.InverseLerp(1, DETUNE_MAX, _detune);
+                else 
+                    output = Tools.InverseLerp(DETUNE_MIN, 1, _detune);
+                return (float)output;
+            } set {
+                _detune = Tools.Lerp(1, value>0? DETUNE_MAX : DETUNE_MIN, Math.Abs(value));
+                detune_current = _detune;  //Also set the current detune, since applying random is not done on recalc
+            }
+        }        
 
         const int NOTE_A4=69;
 
@@ -42,7 +69,9 @@ namespace PhaseEngine
                 o.Add("mult", mult);
                 o.Add("coarse", coarse);
                 o.Add("fine", fine);
-                o.Add("detune", detune);
+                o.Add("detune", Detune);  //NOT the raw value, but the value PhaseEngine UI expects to map the raw value from -1 to 1.
+                o.Add("detune_randomness", detune_randomness);
+                o.Add("increment_offset", increment_offset);
 
                 return o;
             }
@@ -51,12 +80,18 @@ namespace PhaseEngine
         public static Increments Prototype()
         {
             var o = new Increments();
+            o._detune = o.detune_current = 1;
             o.mult = 1;  
             o.lfoMult = 1;  
-            o.base_hz=o.tuned_hz=o.hz=Global.BASE_HZ;
+            o.base_hz=o.tuned_hz=o.hz = Global.BASE_HZ;
             o.increment = o.tunedIncrement = o.noteIncrement = IncOfFreq(o.hz);
             return o;
         }
+
+        //Applies a random detune value based on the current randomness parameter and the max specified detune level.
+        public void ApplyDetune()
+        { detune_current = Tools.Lerp(_detune, 1.0,  (XorShift64Star.NextDouble()) * detune_randomness); }
+
 
         // Recalculates the total increment given our current tuning settings.
         public void Recalc()
@@ -80,10 +115,10 @@ namespace PhaseEngine
 
                 var t = Tables.transpose[Tools.Abs(transpose)];  
                 if (transpose < 0)  t = 1/t;  //Negative transpose values are equal to the reciprocal of the positive transpose ratio
-                this.hz=this.tuned_hz = base_hz * mult * lfoMult * t; //TODO: Add any modifiers to the frequency here if necessary and split into 2 lines
+                this.hz=this.tuned_hz = base_hz * mult * lfoMult * t * detune_current; 
             }
 
-            tunedIncrement = IncOfFreq(this.tuned_hz) + detune;
+            tunedIncrement = IncOfFreq(this.tuned_hz) + increment_offset;
             increment=tunedIncrement;
 
         }

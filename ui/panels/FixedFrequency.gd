@@ -47,6 +47,7 @@ func _ready():
 
 func _on_Presets_item_selected(index):
 	$Frequency.value = global.periods[index]
+	$"H/Fine Tune".value = fmod(global.periods[index],1)
 	owner.setFreq(global.periods[index])
 
 

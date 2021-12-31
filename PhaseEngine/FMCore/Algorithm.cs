@@ -104,7 +104,7 @@ namespace PhaseEngine
             }
         }
 
-        //Sets the intent of a specific operator.  DOES NOT update channels.  Do this from Chip.
+        //Sets the intent of a specific operator.  DOES NOT update channels.  Do that from Chip.
         public void SetIntent(byte opTarget, OpBase.Intents intent)  { this.intent[opTarget] = intent; }
 
         /// Returns an array of the default process order for a given size op count.

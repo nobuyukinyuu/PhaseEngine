@@ -46,9 +46,7 @@ namespace PhaseEngine
             importerTypes = FindDerivedTypes<VoiceBankImporter>();
 
             foreach (Type t in importerTypes)
-            {
                 importers.Add( (VoiceBankImporter)Convert.ChangeType(System.Activator.CreateInstance(t), t) );
-            }
 
             foreach(VoiceBankImporter importer in importers)
             {

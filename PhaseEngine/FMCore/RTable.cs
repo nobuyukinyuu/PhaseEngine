@@ -55,7 +55,8 @@ namespace PhaseEngine
             }
         }
 
-        public string ToJSONString()
+        public string ToJSONString() { return ToJSONObject().ToJSONString(); }
+        public JSONObject ToJSONObject()
         {
             JSONObject j = new JSONObject();
 
@@ -65,7 +66,7 @@ namespace PhaseEngine
             
             j.AddPrim( "tbl", Convert.ToBase64String(TableAsBytes()) );
 
-            return j.ToJSONString();
+            return j;
         }
 
         public virtual byte[] TableAsBytes()  //Returns a table 2x the size of the normal table, every even index being a low byte and odd index a high byte.

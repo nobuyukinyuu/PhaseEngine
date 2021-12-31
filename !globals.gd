@@ -122,4 +122,5 @@ func swap_scene(src, target, free_src=true):
 	if free_src:  src.queue_free()
 
 
-
+func notenum_from_hz(hz):
+	return round( (12*log(hz/440.0))/log(2) + NOTE_A4)

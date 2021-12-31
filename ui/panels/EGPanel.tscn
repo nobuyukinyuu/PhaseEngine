@@ -188,7 +188,6 @@ __meta__ = {
 }
 
 [node name="Frequency" type="GridContainer" parent="."]
-visible = false
 margin_left = 8.0
 margin_top = 72.0
 margin_right = 288.0
@@ -229,18 +228,19 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Detune" parent="Frequency/H" instance=ExtResource( 3 )]
+[node name="Fine Tune" parent="Frequency/H" instance=ExtResource( 3 )]
 margin_left = 142.0
 margin_right = 280.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
-min_value = -32768.0
-max_value = 32767.0
+min_value = -2.0
+max_value = 2.0
+step = 0.01
 tick_count = 9
 ticks_on_borders = false
-associated_property = "detune"
 
 [node name="Tune" type="GridContainer" parent="."]
+visible = false
 margin_left = 8.0
 margin_top = 72.0
 margin_right = 288.0
@@ -294,11 +294,13 @@ margin_right = 280.0
 margin_bottom = 48.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
-min_value = -8192.0
-max_value = 8191.0
+min_value = -1.0
+max_value = 1.0
+step = 0.001
 tick_count = 9
 ticks_on_borders = false
-associated_property = "detune"
+associated_property = "Detune"
+special_display = 4
 
 [node name="Levels" type="GridContainer" parent="."]
 margin_left = 8.0
@@ -733,9 +735,9 @@ __meta__ = {
 visible = true
 margin_left = 10.0
 margin_top = 34.0
-margin_right = 122.0
-margin_bottom = 130.0
-rect_min_size = Vector2( 112, 96 )
+margin_right = 154.0
+margin_bottom = 178.0
+rect_min_size = Vector2( 144, 144 )
 custom_styles/panel = SubResource( 16 )
 __meta__ = {
 "_edit_group_": true,
@@ -743,8 +745,9 @@ __meta__ = {
 }
 
 [node name="Title" type="Label" parent="More/P"]
-margin_right = 112.0
-margin_bottom = 12.0
+anchor_right = 1.0
+margin_top = -8.0
+margin_bottom = 4.0
 rect_min_size = Vector2( 0, 12 )
 custom_colors/font_color = Color( 0.384314, 0.717647, 0.831373, 0.639216 )
 custom_fonts/font = ExtResource( 6 )
@@ -757,7 +760,7 @@ __meta__ = {
 [node name="ColorRect" type="ColorRect" parent="More/P/Title"]
 modulate = Color( 1, 1, 1, 0.12549 )
 margin_top = 12.0
-margin_right = 112.0
+margin_right = 144.0
 margin_bottom = 13.0
 rect_min_size = Vector2( 0, 1 )
 __meta__ = {
@@ -767,7 +770,8 @@ __meta__ = {
 [node name="V" type="VBoxContainer" parent="More/P"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_top = 32.0
+margin_top = 16.0
+margin_bottom = -10.0
 custom_constants/separation = 16
 __meta__ = {
 "_edit_group_": true,
@@ -775,7 +779,7 @@ __meta__ = {
 }
 
 [node name="Phase Offset" parent="More/P/V" instance=ExtResource( 3 )]
-margin_right = 112.0
+margin_right = 144.0
 rect_min_size = Vector2( 64, 20 )
 size_flags_horizontal = 3
 max_value = 1.0
@@ -783,10 +787,31 @@ step = 0.0
 associated_property = "phase_offset"
 special_display = 4
 
-[node name="OscSync" type="CheckBox" parent="More/P/V"]
+[node name="Increment Offset" parent="More/P/V" instance=ExtResource( 3 )]
 margin_top = 36.0
-margin_right = 112.0
-margin_bottom = 54.0
+margin_right = 144.0
+margin_bottom = 56.0
+rect_min_size = Vector2( 64, 20 )
+size_flags_horizontal = 3
+min_value = -32768.0
+max_value = 32767.0
+associated_property = "increment_offset"
+
+[node name="Detune Randomness" parent="More/P/V" instance=ExtResource( 3 )]
+margin_top = 72.0
+margin_right = 144.0
+margin_bottom = 92.0
+rect_min_size = Vector2( 64, 20 )
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.0
+associated_property = "detune_randomness"
+special_display = 4
+
+[node name="OscSync" type="CheckBox" parent="More/P/V"]
+margin_top = 108.0
+margin_right = 144.0
+margin_bottom = 126.0
 theme = ExtResource( 1 )
 text = "~ Osc Sync"
 align = 1
@@ -810,7 +835,7 @@ __meta__ = {
 [connection signal="value_changed" from="Frequency/Frequency" to="." method="setFreq"]
 [connection signal="item_selected" from="Frequency/H/Presets" to="Frequency" method="_on_Presets_item_selected"]
 [connection signal="pressed" from="Frequency/H/Presets" to="Frequency" method="_on_Presets_pressed"]
-[connection signal="value_changed" from="Frequency/H/Detune" to="." method="setPG" binds= [ "detune" ]]
+[connection signal="value_changed" from="Frequency/H/Fine Tune" to="." method="setFreq"]
 [connection signal="value_changed" from="WavePanel/Wave" to="WavePanel" method="_on_Wave_value_changed"]
 [connection signal="gui_input" from="WavePanel/Preview" to="WavePanel" method="_on_Preview_gui_input"]
 [connection signal="toggled" from="FixedRatio" to="." method="_on_FixedRatio_toggled"]

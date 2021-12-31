@@ -74,19 +74,22 @@ namespace PhaseEngine
         public Envelope() { Reset(); }
 
         //Copy constructor
-        public Envelope(Envelope prototype) 
+        public Envelope(Envelope prototype, bool deserializeRTables=false) 
         { 
             var data = prototype.ToJSONString();
-            if(this.FromString(data))  
+            if(this.FromString(data,deserializeRTables)) //if importation of copy succeeded...
             {
                     RecalcLevelRisings();
                     //Grab response table references from the prototype.  
                     //We don't need to copy the actual response tables as we want to share them between all channels.
-                    //TODO:  Consider moving this to Voice.  This would require keeping track of the tables separately there,
-                    //       possibly complicating serialization.
-                    ksr = prototype.ksr;
-                    ksl = prototype.ksl;
-                    velocity = prototype.velocity;
+                    //TODO:  Consider if each channel should have fully customizable RTables and remove the internal re-use option entirely....
+
+                    if (!deserializeRTables) //Reuse the RTables from the prototype. Saves resources when copying the rest of the EG to a channel.
+                    {
+                        ksr = prototype.ksr;
+                        ksl = prototype.ksl;
+                        velocity = prototype.velocity;
+                    }
             }
             else Reset(); //Attempt copy.  If failure, reinit envelope.
         }
@@ -123,7 +126,7 @@ namespace PhaseEngine
             // rising[(int)EGStatus.RELEASED] = (sl > rl);            
         }
 
-        public bool FromString(string input)
+        public bool FromString(string input, bool deserializeRTables=false)
         {
             var P = JSONData.ReadJSON(input);
             if (P is JSONDataError) return false;
@@ -149,7 +152,13 @@ namespace PhaseEngine
                 j.Assign("bypass", ref bypass);
                 j.Assign("aux_func", ref aux_func);
                 j.Assign("gain", ref gain);
+
+                if (deserializeRTables)
+                {
+                    //TODO/FIXME:  ADD A METHOD .FromJSONString IN RTable.cs TO DESERIALIZE THE OUTPUT OF .ToJSONString
+                }
             } catch {
+                System.Diagnostics.Debug.Assert(false,"EG Copy failed");  //FIXME:  DEBUG, REMOVE ME ONCE RTABLE IMPORT IS KNOWN WORKING
                 return false;
             }
             
@@ -177,6 +186,10 @@ namespace PhaseEngine
             o.AddPrim("bypass", bypass);
             o.AddPrim("aux_func", aux_func);
             o.AddPrim("gain", gain);
+
+            o.AddItem("ksr", ksr.ToJSONObject());
+            o.AddItem("ksl", ksl.ToJSONObject());
+            o.AddItem("velocity", velocity.ToJSONObject());
 
             return o.ToJSONString();
         }

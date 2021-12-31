@@ -99,6 +99,12 @@ namespace PhaseEngine
             else return val;
         }
 
+        //1d array initializer.  Parameterless
+        public static void InitArray<T>(this T[] instance) where T : class, new()
+        {
+            for(int i=0; i<instance.Length; i++)
+                instance[i] = new T();
+        }
 
         /// \defgroup bitutils Useful functions for bit shuffling
         /// \{
