@@ -69,9 +69,3 @@ func _process(_delta):
 			elif Input.is_action_just_released(n):
 				emit_signal("note_off", notenum)
 
-	if Input.is_action_just_pressed("debug1"):
-		var test = owner.get_node("Test")
-		test.NoteLow(true)
-	elif Input.is_action_just_released("debug1"):
-		var test = owner.get_node("Test")
-		test.NoteLow(false)
