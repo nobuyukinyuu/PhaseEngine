@@ -2,10 +2,10 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using System.Collections.Generic;
-using GdsFMJson;
+using PE_Json;
 using static System.Globalization.CultureInfo;
 
-namespace GdsFMJson{
+namespace PE_Json{
 
     public class JSONData
     {
@@ -522,7 +522,13 @@ namespace GdsFMJson{
         public void AddPrim( string value ){
             values.Add(JSONData.CreateJSONDataItem(value));
         }
-        
+
+        public void AddPrim(System.Enum value, bool asString=true)
+        {
+            if (asString) AddPrim(value.ToString());
+            else AddPrim(Convert.ToInt32(value));
+        }
+
         public void AddItem( JSONDataItem dataItem ){
             values.Add(dataItem);
         }
@@ -656,9 +662,22 @@ namespace GdsFMJson{
         public void AddPrim( string name, string value ){
             values[name] = JSONData.CreateJSONDataItem(value);
         }
-        
-        public void AddPrim<T>( string name, T[] value){
+
+        //Helper for enums
+        public void AddPrim( string name, System.Enum value, bool asString=true)
+        {
+            if (asString) AddPrim(name, value.ToString());
+            else AddPrim(name, Convert.ToInt32(value));
+        }
+        public void AddPrim<T>( string name, T[] value, bool asString=true) where T: System.Enum {
             var v = new JSONArray();
+            for(int i=0; i<value.Length;  i++){  v.AddPrim(value[i], asString);  }
+            values[name] = v;
+        }
+
+        public void AddPrim<T>( string name, T[] value) where T: struct {
+            var v = new JSONArray();
+
             switch(Type.GetTypeCode(typeof(T)))
             {
                 case TypeCode.Boolean:
@@ -734,6 +753,39 @@ namespace GdsFMJson{
             JSONDataItem item = values.ContainsKey(name)? values[name] : null;
             if (item != null) { val = item.ToBool(); return true; }
             return false;
+        }
+
+        public bool Assign<T>(string name, ref T val) where T: System.Enum
+        {
+            JSONDataItem item = values.ContainsKey(name)? values[name] : null;
+            bool success=false;
+            if (item != null) 
+            {
+                var s = item.ToString();
+                object result;
+                success = Enum.TryParse(val.GetType(), s, true, out result);
+                if (success) val =  (T) Convert.ChangeType(result, typeof(T));
+            }
+            return success;
+        }
+
+        public bool Assign<T>(string name, ref T[] val)
+        {
+            JSONDataItem item = values.ContainsKey(name)? values[name] : null;
+            if (item==null)
+            {
+                Debug.Print("JSONObject.Assign<T>:  Key not found.") ;
+                return false;
+            } else if (item.dataType != JSONDataType.JSON_ARRAY) {
+                Debug.Print("JSONObject.Assign<T>:  Key '"+ name +"' is not an array!") ;
+                return false;
+            }
+
+            var arr = (JSONArray) item;
+            var newval = GetItem<T>(name, val);
+            if (newval==val) return false;
+            val = newval;
+            return true;     
         }
 
     #endregion

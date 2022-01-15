@@ -148,7 +148,7 @@ public class Test2 : Label
     }
 
     public void SetAlgorithm(Godot.Collections.Dictionary d){   c.SetAlgorithm(d); /*GD.Print("Setting algo...");*/    }
-    public Godot.Collections.Dictionary GetAlgorithm(Godot.Collections.Dictionary d){ return c.Voice.GetAlgorithm(); }
+    public Godot.Collections.Dictionary GetAlgorithm(){ return c.Voice.GetAlgorithm(); }
 
     public Godot.Collections.Dictionary SetPreset(int preset, bool useSix)
     {
@@ -227,7 +227,7 @@ public class Test2 : Label
             }
     }
 
-    public void SetFixedFreq(int opTarget, bool isFixed) { c.Voice.pgs[opTarget].fixedFreq = isFixed; }
+    public void SetFixedFreq(int opTarget, bool isFixed) { c.Voice.pgs[opTarget].fixedFreq = isFixed; } //Used when fixed/ratio toggled
     public void SetFrequency(int opTarget, float freq)
     {
         c.Voice.pgs[opTarget].FreqSelect(freq);
@@ -324,13 +324,50 @@ public class Test2 : Label
     public void SetTableMinMax(int opNum, int value, bool isMax, RTableIntent intent)
     {
         IResponseTable tbl = c.Voice.egs[opNum].GetTable(intent);
-        tbl.SetScale(isMax? -1:value, isMax? value:-1);
+        tbl?.SetScale(isMax? -1:value, isMax? value:-1);
     }
     public string GetTable(int opNum, RTableIntent intent)
     {
         opNum = (opNum < c.Voice.opCount)?  opNum: 0;
         IResponseTable tbl = c.Voice.egs[opNum].GetTable(intent);
         return tbl.ToJSONString();
+    }
+
+
+    public string VoiceAsJSONString() {return c.Voice.ToJSONString();}
+    public Godot.Error PasteJSONData(string data) {return PasteJSONData(data, 0);}
+    public Godot.Error PasteJSONData(string data, int target)
+    {
+        JSONParseResult result = Godot.JSON.Parse(data);
+        if (result.Error != Error.Ok)
+        {
+            GD.PrintErr(String.Format("Error validating JSON: {0} (line {1})", result.ErrorString, result.ErrorLine) );
+            return result.Error;
+        }
+        var o = PE_Json.JSONData.ReadJSON(data) as PE_Json.JSONObject;
+        if (o == null)
+        {
+            System.Diagnostics.Debug.Print("PasteJSONData:  Failed to parse");
+            return Error.ParseError;
+        }
+
+        //Determine what the nature of the JSON attempting to be parsed in actually is.  Possibilities:  1.Operator with intent, 2.Algorithm, 3.Voice
+        if (o.HasItem("operators"))  //Probably Voice.  Create new voice and assign to chip.
+        {
+            var v = new Voice(o);
+            c.SetVoice(v); 
+            c.SetOpCount(v.opCount);
+
+        } else if (o.HasItem("grid") || o.HasItem("connections")) {  //Probably an Algorithm
+
+        } else if (o.HasItem("intent") && o.HasItem("envelope")) {  //Probably an Operator
+
+
+        } else { //Unrecognized JSON
+            GD.Print("Paste Failed:  Unrecognized JSON");
+        }
+
+        return Error.Ok;
     }
 
 

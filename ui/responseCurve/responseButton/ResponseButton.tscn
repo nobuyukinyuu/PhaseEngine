@@ -27,4 +27,5 @@ __meta__ = {
 }
 
 [node name="Curve" parent="P" instance_placeholder="res://ui/responseCurve/ResponseCurve.tscn"]
+
 [connection signal="popup_hide" from="P" to="." method="_on_P_popup_hide"]

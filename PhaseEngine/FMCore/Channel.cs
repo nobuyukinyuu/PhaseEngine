@@ -120,7 +120,7 @@ namespace PhaseEngine
                     //Prepare the note's increment based on calculated pitch
                     if (!op.pg.fixedFreq)
                         op.pg.NoteSelect(this.midi_note);
-                        op.pg.ApplyDetune();  //Select a detune amount based on specified level of randomness
+                        op.pg.ApplyDetuneRandomness();  //Select a detune amount based on specified level of randomness
 
                     op.pg.Recalc();
                     op.NoteOn();

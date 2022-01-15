@@ -19,7 +19,6 @@ func _ready():
 	#Populate EGPanels in column 0.
 	_on_op_size_changed(get_node(chip_loc).GetOpCount(), 0)
 
-
 func resized():
 	$Kanban.populate_columns(rect_size.x - $Kanban.rect_position.x)
 
@@ -48,7 +47,7 @@ func _on_op_size_changed(opNum:int, oldSz):
 
 
 		for column in $Kanban.get_children():
-			if !column is ScrollContainer:  continue
+			if !column is KanbanColumn:  continue
 			column.cleanup()
 #
 	elif opNum > oldSz:  #Next, find any tabs that need to be added.
@@ -78,8 +77,26 @@ func _on_op_intent_changed(opNum:int, intent, sender=null):  #Default sender:  W
 	tab_group.remove_child(node_to_replace)
 	var p = column.make_tab(tab_group, opNum, intent)  #Make a new panel.
 	tab_group.move_child(p, pos)
+
+
+#Called when Chip changes a lot (for example when parsing in JSON data)
+func reinit_all():
+	var chip = get_node(chip_loc)
+	var oldSz = chip.GetOpCount()
+	$WiringGrid/SlotIndicator.load_from_description( chip.GetAlgorithm() )
 	
+	#Update the number of operators.
+	var newSz = chip.GetOpCount()
+	yield(_on_op_size_changed(newSz, oldSz), "completed")
+
+	#Now, rebuild all op intents....
+	for i in newSz:
+		#Fake call from the wiring grid to avoid trying to redraw it, since we're going to do that later,
+		#if not done already....
+		_on_op_intent_changed(i, chip.GetOpIntent(i), $WiringGrid) 
 	
+
+	global.emit_signal("algorithm_changed")
 
 
 #Handler for tooltips that need data from a chip.

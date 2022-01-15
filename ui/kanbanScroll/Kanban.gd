@@ -20,7 +20,7 @@ func populate_columns(target_width:float=0):
 	#Grab the last current column for spillover later.
 	var srcColumnV = get_child(get_child_count()-1).get_node("V")
 
-	if target_width > rect_size.x:
+	if target_width > rect_size.x:  #Increase size
 		var new_columns_added = _fill(target_width)
 		if not new_columns_added:  return
 		set_c_width(-1, true)
@@ -38,7 +38,7 @@ func populate_columns(target_width:float=0):
 		global.emit_signal("tab_dropped")
 		
 		
-	elif target_width < rect_size.x and target_width > C_WIDTH:
+	elif target_width < rect_size.x and target_width > C_WIDTH:  #Decrease size
 		#Find the column(s) to clear tabs from.
 		var to_resettle = []
 		var total_size = rect_size.x

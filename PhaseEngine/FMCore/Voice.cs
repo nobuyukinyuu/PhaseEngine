@@ -1,6 +1,6 @@
 using System;
 using PhaseEngine;
-using GdsFMJson;
+using PE_Json;
 
 #if GODOT
 using Godot;
@@ -35,7 +35,7 @@ namespace PhaseEngine
         public Voice() {InitVoice(this.opCount);}
         public Voice(byte opCount) {InitVoice(opCount);}
 
-        public Voice(JSONObject data)
+        public Voice(JSONObject data, byte opCount=4)
         {
             InitVoice((byte) data.GetItem("opCount", opCount));
             FromJSON(data);
@@ -74,53 +74,6 @@ namespace PhaseEngine
             return false;
         }
 
-        #if GODOT
-            //Initializes new voice from a pure godot dict containing json data.  Necessary if changing opCount
-            // public Voice(Godot.Collections.Dictionary d)
-            // {
-            //     InitVoice((byte) d["opCount"]);
-            //     FromJSON( (JSONObject) JSONData.ReadJSON(d.ToString()) );
-            // }
-
-            /// Changes the algorithm without changing the opCount.
-            public void SetAlgorithm(Godot.Collections.Dictionary d)
-            {
-                // FIXME:  Don't set opCount here.  Use a separate function to change the op count.....
-                // TODO:  Consider replacing this function with one which converts d to json and just call FromJSON()
-
-                var grid = d["grid"];  //Should be a PoolByteArray, otherwise the below code will throw an exception (no converter interface)
-                if(grid !=null)
-                    alg.wiringGrid = (byte[]) Convert.ChangeType(grid, typeof(byte[]));
-
-                var order = d["processOrder"] as Godot.Collections.Array;
-                var c = d["connections"] as Godot.Collections.Array;
-
-                alg.processOrder = new byte[opCount];
-                alg.connections = new byte[opCount];
-                var opsToProcess = Math.Min(alg.opCount, order.Count);
-                for(int i=0; i<opsToProcess; i++)
-                {
-                    alg.processOrder[i] = Convert.ToByte(order[i]);
-                    alg.connections[i] = Convert.ToByte(c[i]);
-                }
-            }
-
-            public Godot.Collections.Dictionary GetAlgorithm()
-            {
-                var d = new Godot.Collections.Dictionary();
-
-                d["opCount"] = opCount;
-                d["grid"] = alg.wiringGrid;
-
-                d["processOrder"] = alg.processOrder;
-                d["connections"] = alg.connections;
-
-                return d;
-            }
-
-            public Godot.Collections.Dictionary GetEG(int opTarget) {return egs[opTarget >= opCount? 0:opTarget].GetDictionary();}
-            public Godot.Collections.Dictionary GetPG(int opTarget) {return pgs[opTarget >= opCount? 0:opTarget].GetDictionary();}
-        #endif
 
 
         // Called whenever the voice needs to change its operator count in the algorithm.
@@ -216,7 +169,13 @@ namespace PhaseEngine
             eg.ChangeValue(property, val);
         }
 
-        internal void SetIntent(byte opTarget, OpBase.Intents intent)
+        internal void ResetIntents(bool toDefault=false)
+        {
+            for (byte i=0; i<opCount; i++)
+                SetIntent(i, toDefault? OpBase.Intents.FM_OP : alg.intent[i]);
+        }
+
+        internal void SetIntent(byte opTarget, OpBase.Intents intent)  //Sets up envelopes for a new usage intent to saner defaults.
         {
             //Update the preview and the intent.
             alg.SetIntent(opTarget, intent);
@@ -251,46 +210,122 @@ namespace PhaseEngine
         }    
 
 
-
-
         //TODO:  Front-end IO that de/serializes the wiring grid configuration from an array (user-friendly) to processOrder and connections (code-friendly)
         public void FromJSON(JSONObject data)
         {
             try
             {
-                opCount = (byte) data.GetItem("opCount", opCount);
-                alg.wiringGrid = data.GetItem<byte>("grid", Algorithm.DefaultWiringGrid(opCount) );
-                var order = data.GetItem<byte>("processOrder", Algorithm.DefaultProcessOrder(opCount) );
+                if (data.HasItem("name"))  data.Assign("name", ref name);
+                data.Assign("gain", ref gain);
+                data.Assign("pan", ref pan);
 
-                var c = data.GetItem<byte>("connections", null);
-                if (c != null){ for(int i=0; i<opCount; i++)  alg.connections[i] = (byte) c[i]; }  //If no data found, assume all ops connect to output
-
-                var a = new Algorithm(opCount);
-                alg = a;
+                alg.FromJSON((JSONObject) data.GetItem("algorithm"));
+                SetOpCount(alg.opCount);
 
                 var ops = (JSONArray) data.GetItem("operators");
                 for (int i=0; i<opCount; i++)
                 {
                     var op = (JSONObject) ops[i];
-                    var e = (JSONObject) op.GetItem("envelope");
+                    if (op.HasItem("increments"))  pgs[i] = Increments.FromJSON((JSONObject) op.GetItem("increments"));
 
-                    bool success = egs[i].FromString(e.ToJSONString());
+                    var e = (JSONObject) op.GetItem("envelope");
+                    bool success = egs[i].FromJSON(e);
                     if (!success)
                     {
                         System.Diagnostics.Debug.Print(String.Format("Voice.FromJSON:  Problem parsing envelope {0}", i));
                         continue;
                     }
-
-
-                //TODO:  Phase generator processing, metadata, opType (should serialize to a name maybe?), etc
-
+                    
+                    //Try parsing in the osc type from the operator, now that the EG is confirmed good.
+                    var osc = Oscillator.oscTypes.Sine;
+                    if (op.Assign("oscillator", ref osc)) oscType[i] = (byte)osc;
                 }
 
+                lfo.FromJSON((JSONObject) data.GetItem("lfo"));
 
-            } catch {
-                System.Diagnostics.Debug.Print("Voice.FromJSON:  Malformed JSON or missing data");
+            } catch (Exception e) {
+                System.Diagnostics.Debug.Print("Voice.FromJSON:  Malformed JSON or missing data.. " + e.Data.ToString());
             }
         }
+
+        public string ToJSONString() {return ToJSONObject().ToJSONString();}
+        public JSONObject ToJSONObject()
+        {
+            var o = new JSONObject();
+
+            // Don't add the OpCount here.  Rely on the Algorithm for that.
+            o.AddPrim("FORMAT", Global.VERSION);
+            if(name!=null) o.AddPrim("name", name);
+            o.AddPrim("gain", gain);
+            o.AddPrim("pan", pan);
+            o.AddItem("algorithm", alg.ToJSONObject() );
+
+            o.AddItem("lfo", lfo.ToJSONObject());
+
+            var ops = new JSONArray();  //Operator array
+            for (byte i=0; i<opCount; i++) 
+                ops.AddItem(OpToJSON(i, false));
+
+            o.AddItem("operators", ops);
+
+            return o;
+        }
+
+        /// Returns a serialized description of a particular operator's envelope and increment values.
+        public JSONObject OpToJSON(byte opNum, bool includeIntent)
+        {
+            var output = new JSONObject();
+            //Intent is mainly for clipboard operations only, as it's stored in the Algorithm. Importing an op should check if the intent exists and fail if incorrect.
+            //In the main importer, Voice should call SetIntent() after everything else is set up.
+            if (includeIntent) output.AddPrim(alg.intent[opNum].ToString(), OpBase.Intents.FM_OP.ToString());
+
+            output.AddPrim("oscillator", (Oscillator.oscTypes)oscType[opNum]);
+            output.AddItem("envelope", egs[opNum].ToJSONObject());
+            output.AddItem("increments", pgs[opNum].ToJSONObject());
+
+            return output;
+        }
+
+
+        #if GODOT
+            /// Changes the algorithm without changing the opCount.
+            public void SetAlgorithm(Godot.Collections.Dictionary d)
+            {
+                // FIXME:  Don't set opCount here.  Use a separate function to change the op count.....
+                // TODO:  Consider replacing this function with one which converts d to json and just call FromJSON()
+
+                var grid = d["grid"];  //Should be a PoolByteArray, otherwise the below code will throw an exception (no converter interface)
+                if(grid !=null)
+                    alg.wiringGrid = (byte[]) Convert.ChangeType(grid, typeof(byte[]));
+
+                var order = d["processOrder"] as Godot.Collections.Array;
+                var c = d["connections"] as Godot.Collections.Array;
+
+                alg.processOrder = new byte[opCount];
+                alg.connections = new byte[opCount];
+                var opsToProcess = Math.Min(alg.opCount, order.Count);
+                for(int i=0; i<opsToProcess; i++)
+                {
+                    alg.processOrder[i] = Convert.ToByte(order[i]);
+                    alg.connections[i] = Convert.ToByte(c[i]);
+                }
+            }
+
+            public Godot.Collections.Dictionary GetAlgorithm()
+            {
+                var d = new Godot.Collections.Dictionary();
+
+                d["opCount"] = opCount;
+                d["grid"] = alg.wiringGrid;
+
+                d["processOrder"] = alg.processOrder;
+                d["connections"] = alg.connections;
+
+                return d;
+            }
+            public Godot.Collections.Dictionary GetEG(int opTarget) {return egs[opTarget >= opCount? 0:opTarget].GetDictionary();}
+            public Godot.Collections.Dictionary GetPG(int opTarget) {return pgs[opTarget >= opCount? 0:opTarget].GetDictionary();}
+        #endif
 
         /// summary:  Will return True if the operator is directly connected to output, or indirectly via a filter, folder, or through a bypassed operator.
         ///           Used to determine things like how much to scale the preview waveform, check when all ops are quiet, or determine priority score of all generator ops.

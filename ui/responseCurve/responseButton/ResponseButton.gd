@@ -52,6 +52,8 @@ func init_table(tbl):
 	else:	
 		placeholder_tbl["tbl"] = global.base64_to_table(placeholder_tbl["tbl"])  #2-byte conversion
 
+	lastmin = placeholder_tbl["floor"]
+	lastmax = placeholder_tbl["ceiling"]
 
 func table(pos:int):  #Returns the response curve table if it exists (and no placeholder exists)
 	if not $P/Curve is InstancePlaceholder or placeholder_tbl==null:
@@ -77,7 +79,7 @@ func _draw():
 	var enabled=false
 
 	if $P/Curve is InstancePlaceholder:  
-		if placeholder_tbl==null:  enabled=false
+		if placeholder_tbl!=null and placeholder_tbl["ceiling"]>0:  enabled=true
 	else:
 		#Check to see if we should draw the graph preview.
 		if $P/Curve/MinMax/sldMax.value != 0:  enabled = true
@@ -85,11 +87,21 @@ func _draw():
 
 	if enabled:  #Check for empty table.  We should still show OFF if empty.
 		enabled = false
-		for i in $P/Curve/VU.tbl.size():
-			if $P/Curve/VU.tbl[i] == 0:  continue
-			#Whoops, we reached a nonzero value.  Curve's enabled.
-			enabled = true
-			break;
+		if $P/Curve is InstancePlaceholder:  
+			for i in placeholder_tbl["tbl"].size():
+				if placeholder_tbl["tbl"][i] == 0:  continue
+				#Whoops, we reached a nonzero value.  Curve's enabled.
+				enabled = true
+				break;
+		else:
+			for i in $P/Curve/VU.tbl.size():
+				if $P/Curve/VU.tbl[i] == 0:  continue
+				#Whoops, we reached a nonzero value.  Curve's enabled.
+				enabled = true
+				break;
+
+	
+
 	
 	if !enabled:
 		draw_texture(no_preview, icon_offset)

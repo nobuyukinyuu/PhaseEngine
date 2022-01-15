@@ -10,9 +10,12 @@ namespace PhaseEngine
         short[] customWaveform = new short[128];
 
         public static readonly waveFunc[] waveFuncs = {Sine2, Tri, Saw, Pulse, White, Pink, Brown, Noise1, Noise2};
+        public enum oscTypes {Sine, Triangle, Saw, Pulse, White, Pink, Brown, Noise1, Noise2};
 
         public Oscillator(waveFunc wave)    {wf=wave;}
-        public void SetWaveform(waveFunc wave) {wf=wave;}
+        // public void SetWaveform(waveFunc wave) {wf=wave;}
+        oscTypes _current = oscTypes.Sine;
+        public oscTypes CurrentWaveform {get =>_current; set {_current = (oscTypes)value; wf=waveFuncs[(byte)value]; }}
 
         //TODO:  Set oscillator based on index for a list/dictionary of delegates, including particular delegates for whether duty cycle/etc is used
 

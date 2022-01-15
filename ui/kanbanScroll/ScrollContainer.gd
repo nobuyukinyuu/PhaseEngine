@@ -1,4 +1,5 @@
 extends ScrollContainer
+class_name KanbanColumn
 
 var drop_preview:Rect2 = Rect2(Vector2.ZERO, Vector2.ZERO)  #Rect box of the drag tab preview size to draw
 var dirty = false
@@ -7,7 +8,7 @@ var dirty = false
 
 func _ready():
 	cleanup()
-	global.connect("tab_dropped", self, "check_if_dirty")	
+	global.connect("tab_dropped", self, "check_if_dirty")
 	connect("mouse_exited", self, "reset_drop_preview")
 
 
@@ -28,8 +29,9 @@ func populate(to_add, to_remove):
 	if !rem.empty():
 		for node in rem:
 			node.queue_free()
-	#Wait for a bit to make sure the nodes are removed.
-#	yield(get_tree(), "idle_frame")
+		#Wait for a bit to make sure the nodes are removed.
+		yield(rem[rem.size()-1], "tree_exited")
+	#	yield(get_tree(), "idle_frame")
 
 	cleanup()
 

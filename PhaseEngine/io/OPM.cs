@@ -2,7 +2,7 @@ using System;
 using PhaseEngine;
 using System.IO;
 using System.Collections.Generic;
-using GdsFMJson;
+using PE_Json;
 
 namespace PhaseEngine
 {
@@ -10,6 +10,10 @@ namespace PhaseEngine
     {
         enum OpNames {M1=0, C1=1, M2=2, C2=3}
         public ImportOPM(){fileFormat="opm";}
+
+        readonly static float[] dt1_ratios = { 0, 0.25f, 0.667f, 1.0f, 0, -0.25f, -0.667f, -1.0f };
+        readonly static short[] dt2_coarse_ratios = { 0, 6, 8, 9};
+        readonly static short[] dt2_fine_ratios = { 0, 0, -20, 50};
 
         public override IOErrorFlags Load(string path)
         {
@@ -35,7 +39,10 @@ namespace PhaseEngine
                     string NextValidLine() { var ln=line; while(ln.StartsWith("//") || ln.Trim()=="") ln=sr.ReadLine(); if (ln==null) return null; return ln; }
 
                     //Prepare to process banks.
-                    var egs = new Envelope[4]; egs.InitArray();  //Envelope used to generate partial JSON.                    
+                    // var egs = new Envelope[4]; egs.InitArray();  //Envelope used to generate partial JSON.                    
+                    // var pgs = new Increments[4]; for(int i=0; i<pgs.Length; i++) pgs[i] = Increments.Prototype();
+                    var v = new Voice(4);
+
                     // for(int i=0; i<bank.Length; i++)
                     while(!sr.EndOfStream)
                     {
@@ -60,24 +67,84 @@ namespace PhaseEngine
                         l = l.Substring(2).Trim();  //Prep for split.
                         var splitLine = l.Split(" ", StringSplitOptions.RemoveEmptyEntries);  //Should have a length of 2.
                         var slot = Convert.ToInt32(splitLine[0]);  //Will be used to assign the correct bank once we have built our voice proto.
-                        p.AddPrim("name", splitLine[1]);
+                        // p.AddPrim("name", splitLine[1]);
+                        v.name = splitLine[1];
 
                         l=NextValidLine();  //Next line should be LFO.  However, order could be anything....
                         splitLine=l.Split(" ", StringSplitOptions.RemoveEmptyEntries);
                         
+                        int amd, ams=0, pmd=0, pms=0, nFrq=0;
+                        
+
                         ProcessNextLine:
                         switch(splitLine[0].Trim())
                         {
                             case "LFO:": //LFO configuration options.
+                                //Estimate LFO speed from OPM manual. Not very accurate -- FIXME.
+                                v.lfo.pg = Increments.FromFreq( Tools.Lerp(0.008, Global.MixRate, Convert.ToByte(splitLine[1]) / 255.0) );
+                                // v.lfo.pg.FreqSelect( Tools.Lerp(0.008, Global.MixRate, Convert.ToByte(splitLine[1]) / 255.0) );
+                                v.lfo.pg.Recalc();
+                                amd = (Convert.ToByte(splitLine[2])) << 3;  //Max value:  1016.
+                                pmd = (Convert.ToByte(splitLine[3]));  //Max value:  127.
+
+                                v.lfo.invert = true;
+
+                                //Determine LFO oscillator.
+                                Oscillator.oscTypes osc= Oscillator.oscTypes.Saw;
+                                switch(Convert.ToByte(splitLine[4]))
+                                {
+                                    case 0:
+                                        osc= Oscillator.oscTypes.Saw;
+                                        break;
+                                    case 1:
+                                        osc= Oscillator.oscTypes.Pulse;
+                                        break;
+                                    case 2:
+                                        osc= Oscillator.oscTypes.Triangle;
+                                        break;
+                                    case 3:
+                                        osc= Oscillator.oscTypes.Noise2;
+                                        break;
+                                }
+                                v.lfo.SetOscillatorType(osc);
+
+                                //Determine noise frequency, if the noise generator is active.
+                                nFrq = Convert.ToByte(splitLine[5]);
                                 break;
+
                             case "CH:":  //Voice configuration options.
+                                v.pan = Convert.ToByte(splitLine[1]) / 128.0f * 2 -1; //VOPM appears to set PAN to 64 by default, so we want to make sure 0 is our default
+                                v.egs[0].al = Convert.ToByte(splitLine[2]);  //Set operator 1 to the feedback level specified.
+                                v.alg = Algorithm.FromPreset(Convert.ToByte(splitLine[3]), Algorithm.PresetType.OPM); 
+                                ams = Convert.ToByte(splitLine[4]) << 1;  //Max value:  6
+                                pms = Convert.ToByte(splitLine[5]);  //Max value:  7
+
+                                //Process the mute mask.
+                                var mute = Convert.ToByte(splitLine[6]) >> 3;  //Default mute mask is 120.  Remove 3 LSBs.
+                                for(int i=0; i<4; i++)
+                                    v.egs[i].mute = (mute>>i & 1)==0;
+
+                                //Determine whether the waveform should be noise.
+                                if(Convert.ToByte(splitLine[7])>0)
+                                {
+                                    for (int i=0; i<4; i++) {
+                                        v.oscType[i] = (byte)Oscillator.oscTypes.Noise2;
+                                        v.egs[i].duty = (ushort)(31 - nFrq);
+                                    }
+                                } else {
+                                    for (int i=0; i<4; i++) {
+                                        v.oscType[i] = (byte)Oscillator.oscTypes.Sine;
+                                        v.egs[i].duty = 32767;
+                                    }
+                                }
+
                                 break;
                             default:  //One of the 4 operators.  Translate from OpNames to their correct values to assign the correct envelope.
                                 OpNames opName;
-                                if (Enum.TryParse<OpNames>(splitLine[0].Substring(0, 2), true, out opName)) //Only executes on success
+                                if (Enum.TryParse<OpNames>(splitLine[0].Trim().Substring(0, 2), true, out opName)) //Only executes on success
                                 {
                                     var opNum = (int)opName;
-                                    var e = egs[opNum];  //Select the envelope.
+                                    var e = v.egs[opNum];  //Select the envelope.
                                     //[OPname]: AR DR  SR  RR  DL   TL  KS MUL DT1 DT2 AMS-EN
 
                                     e.ar = Convert.ToByte(splitLine[1]);
@@ -89,9 +156,16 @@ namespace PhaseEngine
                                     e.tl = Convert.ToUInt16(splitLine[6]);
 
                                     //Assign envelope RateTable to a default preset and scale the max application.
+                                    e.ksr = new RateTable();  e.ksr.ceiling = Convert.ToUInt16(splitLine[7]) * 25; //FIXME:  Check accuracy
 
-                                    //TODO:  Import and assign the other values
+                                    var dt2 = Convert.ToUInt16(splitLine[10]);
+                                    v.pgs[opNum].mult = Convert.ToUInt16(splitLine[8]);
+                                    v.pgs[opNum].Detune = dt1_ratios[Convert.ToUInt16(splitLine[9])];  //DT1
+                                    v.pgs[opNum].coarse = dt2_coarse_ratios[dt2];  //DT2
+                                    v.pgs[opNum].fine = dt2_fine_ratios[dt2];
 
+                                    //Determine AMS.
+                                    e.ams = Convert.ToByte(splitLine[11])>0?  (byte)ams : (byte)0;   
                                 }
                             break;    
                         }
@@ -100,7 +174,15 @@ namespace PhaseEngine
                         if (l==null) break;  //End of File
                         else if (l.StartsWith("@:"))
                         {
+                            //Final prep of instrument that has all the values it's going to have plugged into it.  Now to merge PMS/PMD.
+                            //OPM LFO is not exactly linear in the pitch range from base note to min/max, so we use an estimate based on max,
+                            //where a PMD of 127 translates to a PhaseEngine PMD of ~±0.58_6363 repeating.
+                            v.lfo.pmd = Tools.Lerp(0, 0.586363f, pmd/127.0f) * (pms/7.0f);
+
+                            //TODO:  Consider whether recalcing the PG increments are necessary.
+
                             // bank[slot] = //TODO:  Convert voice to string here...  Or, change bank type to Voice[] from string[]....
+                            
                             goto ProcessNextVoice;
                         }
                         else goto ProcessNextLine;

@@ -1,4 +1,4 @@
-namespace GdsFMJson
+namespace PE_Json
 {
     public static class JsonExtensions
     {

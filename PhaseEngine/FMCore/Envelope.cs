@@ -1,6 +1,6 @@
 using System;
 using PhaseEngine;
-using GdsFMJson;
+using PE_Json;
 
     //Thoughts:  Rates probably need fixed integer math to work, then translated to a level at the very end, since increments are very small.
 
@@ -84,14 +84,16 @@ namespace PhaseEngine
                     //We don't need to copy the actual response tables as we want to share them between all channels.
                     //TODO:  Consider if each channel should have fully customizable RTables and remove the internal re-use option entirely....
 
-                    if (!deserializeRTables) //Reuse the RTables from the prototype. Saves resources when copying the rest of the EG to a channel.
+                    //Reuse the RTables from the prototype. Saves resources when copying the rest of the EG to a channel as an internal operation.
+                    //Otherwise,  this.FromString() should've already assigned these.
+                    if (!deserializeRTables) 
                     {
                         ksr = prototype.ksr;
                         ksl = prototype.ksl;
                         velocity = prototype.velocity;
                     }
             }
-            else Reset(); //Attempt copy.  If failure, reinit envelope.
+            else Reset(); //Attempt copy.  If failure, reinit envelope.  This could happen in release mode... TODO:  Check and see what happens with a fuzz test
         }
 
         public void Reset(bool rates=true, bool levels=true)
@@ -126,12 +128,9 @@ namespace PhaseEngine
             // rising[(int)EGStatus.RELEASED] = (sl > rl);            
         }
 
-        public bool FromString(string input, bool deserializeRTables=false)
+        public bool FromJSON(JSONObject input, bool deserializeRTables=true)
         {
-            var P = JSONData.ReadJSON(input);
-            if (P is JSONDataError) return false;
-            var j = (JSONObject) P;
-
+            var j = input;
             try
             {
                 rates = j.GetItem<byte>("rates", rates);
@@ -155,17 +154,30 @@ namespace PhaseEngine
 
                 if (deserializeRTables)
                 {
-                    //TODO/FIXME:  ADD A METHOD .FromJSONString IN RTable.cs TO DESERIALIZE THE OUTPUT OF .ToJSONString
+                    //Any one of these could throw an exception from RTable.FromString(), which will be passed to our error handler and be reported.
+                    if (j.HasItem("ksr")) ksr.FromJSON( (JSONObject) j.GetItem("ksr"));
+                    if (j.HasItem("ksl")) ksl.FromJSON( (JSONObject) j.GetItem("ksl"));
+                    if (j.HasItem("velocity")) velocity.FromJSON( (JSONObject) j.GetItem("velocity"));
                 }
-            } catch {
-                System.Diagnostics.Debug.Assert(false,"EG Copy failed");  //FIXME:  DEBUG, REMOVE ME ONCE RTABLE IMPORT IS KNOWN WORKING
+            } catch (Exception e) {
+                System.Diagnostics.Debug.Fail("EG fromJSON failed:  " + e.Message); //Consider removing?
                 return false;
             }
             
             return true;
+
         }
 
-        public string ToJSONString()
+        public bool FromString(string input, bool deserializeRTables=false)
+        {
+            var P = JSONData.ReadJSON(input);
+            if (P is JSONDataError) return false;
+            var j = (JSONObject) P;
+            return FromJSON(j, deserializeRTables);
+        }
+
+
+        internal JSONObject ToJSONObject()
         {
             var o = new JSONObject();
             o.AddPrim<byte>("rates", rates);
@@ -179,20 +191,22 @@ namespace PhaseEngine
             o.AddPrim("ams", ams);
             o.AddPrim("osc_sync", osc_sync);
             o.AddPrim("phase_offset", phase_offset);
-            o.AddPrim("cutoff", cutoff);
-            o.AddPrim("resonance", resonance);
+            if (cutoff<=22050)  o.AddPrim("cutoff", cutoff);
+            if (resonance!=1)  o.AddPrim("resonance", resonance);
 
             o.AddPrim("mute", mute);
             o.AddPrim("bypass", bypass);
             o.AddPrim("aux_func", aux_func);
             o.AddPrim("gain", gain);
 
-            o.AddItem("ksr", ksr.ToJSONObject());
-            o.AddItem("ksl", ksl.ToJSONObject());
-            o.AddItem("velocity", velocity.ToJSONObject());
+            //Add tables.  No intent needed.
+            o.AddItem("ksr", ksr.ToJSONObject(false));
+            o.AddItem("ksl", ksl.ToJSONObject(false));
+            o.AddItem("velocity", velocity.ToJSONObject(false));
 
-            return o.ToJSONString();
+            return o;
         }
+        public string ToJSONString(){ return ToJSONObject().ToJSONString(); }
 
         #if GODOT
         public Godot.Collections.Dictionary GetDictionary()

@@ -1,5 +1,6 @@
 using System;
 using PhaseEngine;
+using PE_Json;
 
 namespace PhaseEngine 
 {
@@ -33,6 +34,7 @@ namespace PhaseEngine
         public int Delay {get => (int)(delay / Global.MixRate * 1000); set => delay=(int)(value * Global.MixRate / 1000);}  
         public byte Speed{get => speed;  set=> SetSpeed(value);}
 
+        internal int SyncType {get=> delay_sync? 2: osc_sync? 1:0; set{ osc_sync=value>0;  delay_sync=value>1;} }  //For serialization
 
         public LFO()  {Init();}
         public LFO(byte speed)  {Init(speed);}
@@ -151,17 +153,17 @@ namespace PhaseEngine
         // ===========================================  Operator meta functions  =============================================================
 
         //Sets up the operator to act as an oscillator for FM output.
-        public void SetOscillatorType(Oscillator.waveFunc waveFunc)
+        public void SetOscillatorType(Oscillator.oscTypes type)
         {
-            oscillator.SetWaveform(waveFunc);
-            switch(waveFunc.Method.Name)
+            oscillator.CurrentWaveform = type;
+            switch(type.ToString())
             {
                 case "Brown":
                 case "White":
                 case "Pink":
                 case "Noise1":
                 case "Noise2":
-                case "Sine3":
+                // case "Sine3":
                 {
                     seed = 1;  //Reset the seed.
                     //Set the operator's sample output function to work in the linear domain.
@@ -188,7 +190,7 @@ namespace PhaseEngine
         public override void SetOscillatorType(byte waveform_index)
         {
             try{
-                SetOscillatorType(Oscillator.waveFuncs[waveform_index]);
+                SetOscillatorType( (Oscillator.oscTypes)waveform_index );
             } catch(IndexOutOfRangeException e) {
                 System.Diagnostics.Debug.Print(String.Format("Waveform {0} not implemented: {1}", waveform_index, e.ToString()));
             }
@@ -233,7 +235,39 @@ namespace PhaseEngine
             // return flip? (short)-result : (short)result;
         }
 
-        
+        public string ToJSONString() {return ToJSONObject().ToJSONString();}
+        public JSONObject ToJSONObject()
+        {
+            var o = new JSONObject();
+
+            o.AddPrim("oscillator", oscillator.CurrentWaveform);
+           
+            if (duty!=32767) o.AddPrim("duty", duty);
+            o.AddPrim("delay", Delay);  //Delay is tied to MixRate so we should get the independent value.
+            o.AddPrim("speed", Speed);  //Speed is tied to MixRate so we should get the independent value.
+            o.AddPrim("invert", invert);
+            o.AddPrim("pmd", pmd);
+            o.AddPrim("amd", AMD);  //Amp depth is specified in terms easier to use a LUT with.  Grab the user-friendly value instead.
+            o.AddPrim("syncType", SyncType);  //Condense sync types into one since delay_sync implies osc_sync
+            // o.AddPrim("", );
+
+            return o;
+        }
+        public void FromJSON(JSONObject j)
+        {
+            Oscillator.oscTypes osc = Oscillator.oscTypes.Sine;
+            if (j.Assign("oscillator", ref osc))  SetOscillatorType(osc);
+            else System.Diagnostics.Debug.Fail("LFO.FromJSON: Can't parse osc");
+           
+            j.Assign("duty", ref duty);
+            Delay = j.GetItem("delay", Delay);  //Convert delay and speed values to reflect our mix rate.
+            Speed = (byte) j.GetItem("speed", Speed);
+            j.Assign("invert", ref invert);
+            j.Assign("pmd", ref pmd);
+
+            AMD = (short) j.GetItem("amd", AMD);
+            SyncType = j.GetItem("syncType", SyncType);
+        }
 
     }
 

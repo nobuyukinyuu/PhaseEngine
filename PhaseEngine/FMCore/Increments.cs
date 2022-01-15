@@ -1,4 +1,5 @@
 using System;
+using PE_Json;
 using PhaseEngine;
 
 
@@ -8,7 +9,6 @@ namespace PhaseEngine
 {
     public struct Increments
     {
-
         //TODO:  Consider changing this from a struct to a class, and having a nullable field refer to the "next" increment in a chain.
         //       The idea being to define increment sweeps as linear slides from one increment to another, calculated once based on time
         //       when the next note in a chain of increments is met.  This allows non-interactive (but fast) pitch bends, which can be 
@@ -16,7 +16,7 @@ namespace PhaseEngine
         //       the bend would take the relevant increment references and update it.
 
         public double hz, base_hz;
-        double tuned_hz; //Frequency of base_hz * coarse * fine + increment_offset; the tuning without any external modifiers from lfo/controllers
+        double tuned_hz; //Frequency of base_hz * coarse * fine + detune; the tuning without any external modifiers from lfo/controllers
 
         public long noteIncrement;  // Calculated from the base frequency
         public long tunedIncrement;  //increment of tuned_hz
@@ -24,9 +24,10 @@ namespace PhaseEngine
 
         //Multiplier values etc
         public bool fixedFreq;
-        public float mult,  lfoMult;  //lfoMult is set externally from an LFO object.
+        public float mult; internal float lfoMult;  //lfoMult is set externally from an LFO object.
         public int coarse, fine, increment_offset;
 
+#region Detune
         //PhaseEngine max detune creates a ringing oscillation once per second at 440hz. Most other implementations' max detune (-3 to +3) is ever-so-slightly slower.
         //A detune value of 1 in other cores is close to 1/6 the value (or 16.667%) of max detune here, or around 6 seconds at 440hz.  Detune in other cores does NOT
         //scale linearly with notes, however.  Since it's an adjustment to fnum and increment lookup tables, detune will never be *perfectly* aligned.
@@ -46,15 +47,82 @@ namespace PhaseEngine
                 if (_detune>=1)
                     output = Tools.InverseLerp(1, DETUNE_MAX, _detune);
                 else 
-                    output = Tools.InverseLerp(DETUNE_MIN, 1, _detune);
+                    output = -Tools.InverseLerp(1, DETUNE_MIN, _detune);
                 return (float)output;
             } set {
                 _detune = Tools.Lerp(1, value>0? DETUNE_MAX : DETUNE_MIN, Math.Abs(value));
                 detune_current = _detune;  //Also set the current detune, since applying random is not done on recalc
             }
         }        
+        //Applies a random detune value based on the current randomness parameter and the max specified detune level.
+        public void ApplyDetuneRandomness()
+        { detune_current = Tools.Lerp(_detune, 1.0,  (XorShift64Star.NextDouble()) * detune_randomness); }
+#endregion
 
-        const int NOTE_A4=69;
+#region io / static constructors
+        public static Increments Prototype()
+        {
+            var o = new Increments();
+            o._detune = o.detune_current = 1;
+            o.mult = 1;  
+            o.lfoMult = 1;  
+            o.base_hz=o.tuned_hz=o.hz = Global.BASE_HZ;
+            o.increment = o.tunedIncrement = o.noteIncrement = IncOfFreq(o.hz);
+            return o;
+        }
+
+        public static Increments FromNote(byte note)
+        {
+            var o = new Increments();
+            o.NoteSelect(note);
+            o.increment = o.noteIncrement;
+            return o;
+        }
+        public static Increments FromFreq(double freq)
+        {
+            var o = new Increments();
+            o.FreqSelect(freq);
+            o.increment = o.noteIncrement;
+            o.fixedFreq = true;
+            return o;
+        }
+
+        public static Increments FromString(string s) 
+        { 
+            var P = JSONData.ReadJSON(s);
+            if (P is JSONDataError)
+            {
+                System.Diagnostics.Debug.Fail("Increments.FromJSON:  Parsing JSON string failed.");
+                return Increments.Prototype();
+            } 
+            var j = (JSONObject) P;
+            return FromJSON(j);
+        }
+        public static Increments FromJSON(JSONObject j)
+        {
+            var o = Increments.Prototype();
+            try
+            {
+                j.Assign("hz", ref o.hz);
+                j.Assign("base_hz", ref o.base_hz);
+                j.Assign("tuned_hz", ref o.tuned_hz);
+                j.Assign("fixedFreq", ref o.fixedFreq);
+
+                j.Assign("mult", ref o.mult);
+                j.Assign("coarse", ref o.coarse);
+                j.Assign("fine", ref o.fine);
+
+                o.Detune = j.GetItem("detune", o.Detune); //Set up real detune values using the setter
+                j.Assign("detune_randomness", ref o.detune_randomness);
+                j.Assign("increment_offset", ref o.increment_offset);
+
+                o.Recalc();
+            } catch (Exception e) {
+                System.Diagnostics.Debug.Assert(false, "PG Copy failed:  " + e.Message);
+            }
+
+            return o;
+        }
 
         #if GODOT
             public Godot.Collections.Dictionary GetDictionary()
@@ -77,21 +145,28 @@ namespace PhaseEngine
             }
         #endif 
 
-        public static Increments Prototype()
+        internal JSONObject ToJSONObject()
         {
-            var o = new Increments();
-            o._detune = o.detune_current = 1;
-            o.mult = 1;  
-            o.lfoMult = 1;  
-            o.base_hz=o.tuned_hz=o.hz = Global.BASE_HZ;
-            o.increment = o.tunedIncrement = o.noteIncrement = IncOfFreq(o.hz);
+            var o = new JSONObject();
+
+            if (fixedFreq || base_hz!=Global.BASE_HZ) //Fixed frequency or some other kinda custom note.  Record the frequency values.
+            {
+                // if (hz!=Global.BASE_HZ)  o.AddPrim("hz", hz);
+                if (base_hz!=Global.BASE_HZ)  o.AddPrim("base_hz", base_hz);
+                // if (tuned_hz!=Global.BASE_HZ)  o.AddPrim("tuned_hz", tuned_hz);
+                o.AddPrim("fixedFreq", fixedFreq);
+            }
+
+            o.AddPrim("mult", mult);
+            o.AddPrim("coarse", coarse);
+            o.AddPrim("fine", fine);
+            o.AddPrim("detune", Detune);  //NOT the raw value, but the value PhaseEngine UI expects to map the raw value from -1 to 1.
+            o.AddPrim("detune_randomness", detune_randomness);
+            o.AddPrim("increment_offset", increment_offset);
+
             return o;
         }
-
-        //Applies a random detune value based on the current randomness parameter and the max specified detune level.
-        public void ApplyDetune()
-        { detune_current = Tools.Lerp(_detune, 1.0,  (XorShift64Star.NextDouble()) * detune_randomness); }
-
+#endregion
 
         // Recalculates the total increment given our current tuning settings.
         public void Recalc()
@@ -112,14 +187,13 @@ namespace PhaseEngine
             } else {
                 var transpose = Math.Clamp((coarse*100) + fine, -1299, 1299);
                 
-
                 var t = Tables.transpose[Tools.Abs(transpose)];  
                 if (transpose < 0)  t = 1/t;  //Negative transpose values are equal to the reciprocal of the positive transpose ratio
                 this.hz=this.tuned_hz = base_hz * mult * lfoMult * t * detune_current; 
             }
 
-            tunedIncrement = IncOfFreq(this.tuned_hz) + increment_offset;
-            increment=tunedIncrement;
+            tunedIncrement = IncOfFreq(this.tuned_hz);
+            increment = tunedIncrement + increment_offset;
 
         }
 
@@ -129,26 +203,12 @@ namespace PhaseEngine
             return (long)((Global.MixRate/prototype.hz) * prototype.increment * Math.Clamp(percent,0,1));
         }
 
-        public static Increments FromNote(byte note)
-        {
-            var o = new Increments();
-            o.NoteSelect(note);
-            o.increment = o.noteIncrement;
-            return o;
-        }
-        public static Increments FromFreq(double freq)
-        {
-            var o = new Increments();
-            o.FreqSelect(freq);
-            o.increment = o.noteIncrement;
-            o.fixedFreq = true;
-            return o;
-        }
-
 
         /// summary:  Given a MIDI note value 0-127,  produce an increment appropriate to oscillate at the tone of the note.
         public void NoteSelect(byte n)
         {
+            const int NOTE_A4=69;
+
             base_hz = Global.BASE_HZ * Math.Pow(2, (n-NOTE_A4)/12.0);
             hz = base_hz;
             var whole = IncOfFreqD(hz);

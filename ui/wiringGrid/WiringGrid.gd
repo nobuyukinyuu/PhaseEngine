@@ -150,7 +150,9 @@ func get_process_order():
 
 
 func _on_Copy_pressed():
-	OS.clipboard = to_json(get_algorithm_description())
+#	OS.clipboard = to_json(get_algorithm_description())
+	OS.clipboard = get_node(chip_loc).VoiceAsJSONString()
+	pass
 
 
 func _on_Paste_pressed():
@@ -164,8 +166,18 @@ func _on_Paste_pressed():
 	var desc = parse_json(OS.clipboard)
 	if not desc is Dictionary:  return  
 	
-	$SlotIndicator.load_from_description( desc )
-	_on_slot_moved(0.05)
+#	$SlotIndicator.load_from_description( desc )
+#	_on_slot_moved(0.05)
+
+	err = get_node(chip_loc).PasteJSONData(OS.clipboard)
+	if err != OK:
+		print("PasteJSONData returned error %s" % err)
+		return
+	
+	#Reinit everything.
+	owner.reinit_all()
+#	$SlotIndicator.load_from_description( preset_description )
+	check_if_presets()
 
 
 #Activated when the user selects a preset algorithm.

@@ -1,6 +1,7 @@
 using System;
 using PhaseEngine;
 using System.Runtime.CompilerServices;
+using PE_Json;
 
 namespace PhaseEngine 
 {
@@ -10,8 +11,12 @@ namespace PhaseEngine
         public byte opCount = 6;
 
         public OpBase.Intents[] intent;  //What type of operator is this?  (See OpBase.Intents)
+        public static readonly byte[] DEFAULT_PROCESS_ORDER = {0,1,2,3,4,5,6,7};
         public byte[] processOrder;  //The processing order of the operators.  This should be able to be fetched from wiring grid, or a convenience func in Voice...
         public byte[] connections;  //Connections for each operator.  Stored as a bitmask.  NOTE:  If we have more than 8 ops, this won't work....
+        public byte[] wiringGrid;  //Description of where each operator goes on a wiring grid, in format [y1|x1, ..., yn|xn] where n==opCount
+        
+
         public byte NumberOfConnectionsToOutput { get {
                 byte output=0;
                 for(byte i=0; i<connections.Length; i++)
@@ -19,10 +24,6 @@ namespace PhaseEngine
                 return output;
         }   }
 
-        public static readonly byte[] DEFAULT_PROCESS_ORDER = {0,1,2,3,4,5,6,7};
-
-        public byte[] wiringGrid;  //Description of where each operator goes on a wiring grid, in format [y1|x1, ..., yn|xn] where n==opCount
-        
 
         public Algorithm()    {Reset(true);}
         public Algorithm(byte opCount)    {this.opCount = opCount;  Reset(true);}
@@ -43,6 +44,8 @@ namespace PhaseEngine
         }
         public void SetOpCount(byte opTarget)
         {
+            if (opTarget == opCount) return;  //Stops unnecessary processing when Voice calls this method after deserializing an algorithm and setting its own count.
+
             //If the op size is smaller than before, break the algorithm apart.
             //This is necessary in case any one connection relies on another which is deleted.
             if (opTarget<opCount)
@@ -63,7 +66,7 @@ namespace PhaseEngine
                 }
 
                 opCount = opTarget;
-                Reset(); //Soft reset by resizing all of the arrays to the target.  
+                Reset(false); //Soft reset by resizing all of the arrays to the target.  
 
                 //If any op had a bad connection, we need to move them.  Going with the former processOrder in reverse,
                 //We assign a free slot for every operator, skipping over the missing ops.
@@ -258,6 +261,62 @@ namespace PhaseEngine
         public void FixConnections(byte opTarget)  { connections[opTarget] &= Tools.unsigned_bitmask(opCount); }
         public void FixConnections()  { for(byte i=0; i<opCount; i++)  FixConnections(i); }
 
+
+        // public bool FromString
+
+        public void FromJSON(JSONObject data, bool fabricateGrid=false, bool reinit=false)
+        {
+            try
+            {
+                opCount = (byte) data.GetItem("opCount", opCount);
+                Reset(reinit);
+
+                var c = data.GetItem<byte>("connections", null); 
+                if (c!=null) connections = c;  //If no connections are specified then default to behavior specified by the reinit arg
+
+                //Check if the wiring grid exists.  If the grid doesn't exist, fabricate one.
+                if (!data.HasItem("grid")) wiringGrid = FabricateGrid();
+                else wiringGrid = data.GetItem<byte>("grid", Algorithm.DefaultWiringGrid(opCount) );
+
+                processOrder = data.GetItem<byte>("processOrder", Algorithm.DefaultProcessOrder(opCount) );
+
+                if (data.HasItem("intent"))
+                {
+                    string[] new_intents = data.GetItem("intent", new string[opCount]);
+                    for(int i=0; i<opCount; i++)  intent[i] = (OpBase.Intents) Enum.Parse(typeof(OpBase.Intents), new_intents[i]);
+                } else {
+                    //No intents?  Reset all intents to default.  The only reason to omit intents now is to save space for traditional algorithms.
+                    for(int i=0; i<opCount; i++)  intent[i] = OpBase.Intents.FM_OP;
+                }
+
+                // j.Assign("increment_offset", ref o.increment_offset);
+
+            } catch (Exception e) {
+                System.Diagnostics.Debug.Fail("Algorithm.FromJSON failed:  " + e.Message);
+            }
+
+        }
+
+        public string ToJSONString() { return ToJSONObject().ToJSONString(); }
+        internal JSONObject ToJSONObject()
+        {
+            var o=new JSONObject();
+            o.AddPrim("opCount", opCount);
+
+            for(byte i=0; i<opCount; i++)
+                if (intent[i] != OpBase.Intents.FM_OP)  //Don't bother writing intents if there's no custom operator types.
+                {
+                    //FIXME:  Figure out if the generic func can be resolved for the enum-specific condition without the extra argument
+                    o.AddPrim("intent", intent, true);  
+                    break;
+                }
+
+            o.AddPrim("grid", wiringGrid);
+            o.AddPrim("processOrder", processOrder);
+            o.AddPrim("connections", connections);
+
+            return o;
+        }
 
 #region presets
         //Info on preset algorithms adapted from:  https://gist.github.com/bryc/e997954473940ad97a825da4e7a496fa

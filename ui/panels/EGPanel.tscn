@@ -188,6 +188,7 @@ __meta__ = {
 }
 
 [node name="Frequency" type="GridContainer" parent="."]
+visible = false
 margin_left = 8.0
 margin_top = 72.0
 margin_right = 288.0
@@ -240,7 +241,6 @@ tick_count = 9
 ticks_on_borders = false
 
 [node name="Tune" type="GridContainer" parent="."]
-visible = false
 margin_left = 8.0
 margin_top = 72.0
 margin_right = 288.0

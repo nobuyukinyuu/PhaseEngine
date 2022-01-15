@@ -10,7 +10,7 @@ namespace PhaseEngine
         public Intents intent = Intents.NONE;
 
 
-        public Oscillator oscillator = new Oscillator(Oscillator.Sine2);
+        protected Oscillator oscillator = new Oscillator(Oscillator.Sine2);
         public delegate short SampleOutputFunc(ushort modulation = 0, ushort am_offset=0); //Primary function of the oscillator
         public SampleOutputFunc operatorOutputSample;
 
@@ -94,23 +94,20 @@ namespace PhaseEngine
             // return oscillator.Generate(unchecked(phase >> Global.FRAC_PRECISION_BITS), duty, ref flip);
         }
 
-        //Operator meta functions;  delegate points to either the FM operation or some other operation, like filtering, waveshape, FM+Feedback.
-        //Special op functions can be set to passthru or silence.
-        //TODO:  Consider whether there should be separate delegates for feedback-producing operators. 
-
+        public Oscillator.oscTypes GetOscillatorType(){ return oscillator.CurrentWaveform; }
 
         //Sets up the operator to act as an oscillator for FM output.
-        public void SetOscillatorType(Oscillator.waveFunc waveFunc)
+        public void SetOscillatorType(Oscillator.oscTypes type)
         {
-            oscillator.SetWaveform(waveFunc);
-            switch(waveFunc.Method.Name)
+            oscillator.CurrentWaveform = type;
+            switch(type.ToString())
             {
                 case "Brown":
                 case "White":
                 case "Pink":
                 case "Noise1":
                 case "Noise2":
-                case "Sine3":
+                // case "Sine3":
                 {
                     seed = 1;  //Reset the seed.
                     //Set the operator's sample output function to work in the linear domain.
@@ -126,7 +123,7 @@ namespace PhaseEngine
         public override void SetOscillatorType(byte waveform_index)
         {
             try{
-                SetOscillatorType(Oscillator.waveFuncs[waveform_index]);
+                SetOscillatorType((Oscillator.oscTypes)waveform_index);
             } catch(IndexOutOfRangeException e) {
                 System.Diagnostics.Debug.Print(String.Format("Waveform {0} not implemented: {1}", waveform_index, e.ToString()));
             }
