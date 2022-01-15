@@ -72,7 +72,7 @@ func set_from_op(op:int):
 	$Tweak/AMS.value = d["ams"]
 	$Tweak/Gain.value = d["gain"]
 	$Bias.value = d["duty"] - 32767
-	$Crush.value = d["aux_func"]
+	$Crush.value = d["aux_func"]-1  #Compensate for crush starting at 2 after 0. -1 will automatically become 0
 
 	
 	$Mute.pressed = d["mute"]

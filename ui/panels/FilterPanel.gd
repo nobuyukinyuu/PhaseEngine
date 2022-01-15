@@ -41,7 +41,8 @@ func set_from_op(op:int):
 	var d = eg.GetOpValues(0, op)  #EG dictionary
 
 	var type = d["aux_func"]
-	$Filter.value = type
+	if type >= global.FilterType.size():  type = global.FilterType.NONE #Type was invalid.  Reset.
+	$Filter.value = type 
 	$G.get_child(type).pressed = true
 	select(type)
 	

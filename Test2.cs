@@ -335,6 +335,7 @@ public class Test2 : Label
 
 
     public string VoiceAsJSONString() {return c.Voice.ToJSONString();}
+    public string OperatorAsJSONString(int opNum) { return c.Voice.OpToJSON((byte)opNum, true).ToJSONString();}
     public Godot.Error PasteJSONData(string data) {return PasteJSONData(data, 0);}
     public Godot.Error PasteJSONData(string data, int target)
     {
@@ -361,7 +362,7 @@ public class Test2 : Label
         } else if (o.HasItem("grid") || o.HasItem("connections")) {  //Probably an Algorithm
 
         } else if (o.HasItem("intent") && o.HasItem("envelope")) {  //Probably an Operator
-
+            c.Voice.SetOpFromJSON((byte)target, o);
 
         } else { //Unrecognized JSON
             GD.Print("Paste Failed:  Unrecognized JSON");

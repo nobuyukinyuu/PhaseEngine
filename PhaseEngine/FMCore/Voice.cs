@@ -223,22 +223,10 @@ namespace PhaseEngine
                 SetOpCount(alg.opCount);
 
                 var ops = (JSONArray) data.GetItem("operators");
-                for (int i=0; i<opCount; i++)
+                for (byte i=0; i<opCount; i++)
                 {
                     var op = (JSONObject) ops[i];
-                    if (op.HasItem("increments"))  pgs[i] = Increments.FromJSON((JSONObject) op.GetItem("increments"));
-
-                    var e = (JSONObject) op.GetItem("envelope");
-                    bool success = egs[i].FromJSON(e);
-                    if (!success)
-                    {
-                        System.Diagnostics.Debug.Print(String.Format("Voice.FromJSON:  Problem parsing envelope {0}", i));
-                        continue;
-                    }
-                    
-                    //Try parsing in the osc type from the operator, now that the EG is confirmed good.
-                    var osc = Oscillator.oscTypes.Sine;
-                    if (op.Assign("oscillator", ref osc)) oscType[i] = (byte)osc;
+                    SetOpFromJSON(i, op);
                 }
 
                 lfo.FromJSON((JSONObject) data.GetItem("lfo"));
@@ -272,18 +260,34 @@ namespace PhaseEngine
         }
 
         /// Returns a serialized description of a particular operator's envelope and increment values.
-        public JSONObject OpToJSON(byte opNum, bool includeIntent)
+        internal JSONObject OpToJSON(byte opNum, bool includeIntent)
         {
             var output = new JSONObject();
             //Intent is mainly for clipboard operations only, as it's stored in the Algorithm. Importing an op should check if the intent exists and fail if incorrect.
             //In the main importer, Voice should call SetIntent() after everything else is set up.
-            if (includeIntent) output.AddPrim(alg.intent[opNum].ToString(), OpBase.Intents.FM_OP.ToString());
+            if (includeIntent) output.AddPrim("intent", alg.intent[opNum]);
 
             output.AddPrim("oscillator", (Oscillator.oscTypes)oscType[opNum]);
             output.AddItem("envelope", egs[opNum].ToJSONObject());
             output.AddItem("increments", pgs[opNum].ToJSONObject());
 
             return output;
+        }
+        internal void SetOpFromJSON(byte idx, JSONObject op)
+        {
+            if (op.HasItem("increments"))  pgs[idx] = Increments.FromJSON((JSONObject) op.GetItem("increments"));
+
+            var e = (JSONObject) op.GetItem("envelope");
+            bool success = egs[idx].FromJSON(e);
+            if (!success)
+            {
+                System.Diagnostics.Debug.Print(String.Format("Voice.FromJSON:  Problem parsing envelope {0}", idx));
+                return;
+            }
+            
+            //Try parsing in the osc type from the operator, now that the EG is confirmed good.
+            var osc = Oscillator.oscTypes.Sine;
+            if (op.Assign("oscillator", ref osc)) oscType[idx] = (byte)osc;
         }
 
 

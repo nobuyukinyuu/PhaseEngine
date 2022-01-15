@@ -7,6 +7,7 @@ const FilterNames = ["None", "Low Pass", "High Pass", "Bandpass (Skirt Gain)", "
 
 
 enum OpIntent { LFO=-1, NONE, FM_OP, FILTER, BITWISE, WAVEFOLDER };
+const OpIntentNames = ["NONE", "FM_OP", "FILTER", "BITWISE", "WAVEFOLDER"]
 const OpIntentIcons = [
 			preload("res://gfx/ui/icon_invalid.svg"), 
 			preload("res://gfx/ui/ops/icon_fm_symbol.svg"),

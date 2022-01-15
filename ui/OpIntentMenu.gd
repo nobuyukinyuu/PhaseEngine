@@ -1,6 +1,10 @@
 extends PopupMenu
 enum {ID_COPY=80, ID_PASTE=81}
 
+#User setting for whether pasting a different op type changes the target intent or just updates values.
+#TODO:  Determine if this should be a global or moved somewhere else....
+var force_change_intent=false  
+
 
 func _ready():
 	#Populate the operator types popup menu.
@@ -47,15 +51,46 @@ func popup_intent_menu(id):  #Spawns the popup to view/change the operator type.
 	popup(Rect2(get_global_mouse_position(), Vector2.ONE))
 	set_meta("id", id)
 
-	#TODO:  Detect whether we should enable the paste menu!!
+	#Detect whether we should enable the paste menu!!
+	var err = validate_json(OS.clipboard)
+
+	#For some reason, CSVs pass JSON validation without enclosing brackets. So, we need to make sure
+	#that parsing only produces a Dictionary!  CSV's inexplicably return float
+	var desc = parse_json(OS.clipboard)
+
+	var is_valid_operator = err=="" and desc is Dictionary
+	if is_valid_operator: 
+		if not desc.has_all(["envelope", "intent"]):  is_valid_operator==false
+
+		#Consider only disabling paste if the intent types are a terrible mismatch...
+		if is_valid_operator and desc["intent"] != global.OpIntentNames[intent]:
+			#Determine if both are NOT filters.  If one is a filter we disable pasting unless BOTH are.
+			var A = intent == global.OpIntent.FILTER
+			var B = true if desc["intent"]=="FILTER" else false
+			is_valid_operator= A == B
+#			is_valid_operator=false
+	
+	set_item_disabled(get_item_index(ID_PASTE), not is_valid_operator)
+
 
 
 func _on_OpType_id_pressed(intent):
-	if intent >= ID_COPY:  return
-
 	var opTarget = get_meta("id")
-	print ("Setting Op%s to ID %s..." % [opTarget + 1, intent])
-	get_node(owner.chip_loc).SetOpIntent(opTarget, intent)
+
+	match intent:
+		ID_COPY:
+			OS.clipboard = get_node(owner.chip_loc).OperatorAsJSONString(opTarget)
+
+		ID_PASTE:
+			var old_intent = get_node(owner.chip_loc).GetOpIntent(opTarget)
+			get_node(owner.chip_loc).PasteJSONData(OS.clipboard, opTarget)
+
+			var new_intent = get_node(owner.chip_loc).GetOpIntent(opTarget)
+			global.emit_signal("op_intent_changed", opTarget, new_intent if force_change_intent else old_intent, self)
+
+		_:  #Some kinda intent setter probably
+			print ("Setting Op%s to ID %s..." % [opTarget + 1, intent])
+			get_node(owner.chip_loc).SetOpIntent(opTarget, intent)
 	
-	global.emit_signal("op_intent_changed", opTarget, intent, self)
+			global.emit_signal("op_intent_changed", opTarget, intent, self)
 	
