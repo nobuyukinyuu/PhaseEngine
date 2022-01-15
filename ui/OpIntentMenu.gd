@@ -52,18 +52,19 @@ func popup_intent_menu(id):  #Spawns the popup to view/change the operator type.
 	set_meta("id", id)
 
 	#Detect whether we should enable the paste menu!!
-	var err = validate_json(OS.clipboard)
+	var result:JSONParseResult = JSON.parse(OS.clipboard)
 
 	#For some reason, CSVs pass JSON validation without enclosing brackets. So, we need to make sure
 	#that parsing only produces a Dictionary!  CSV's inexplicably return float
-	var desc = parse_json(OS.clipboard)
+	var desc = result.result
 
-	var is_valid_operator = err=="" and desc is Dictionary
+	var is_valid_operator = result.error==OK and desc is Dictionary
 	if is_valid_operator: 
-		if not desc.has_all(["envelope", "intent"]):  is_valid_operator==false
+		is_valid_operator = desc.has_all( ["envelope", "intent"] )
 
 		#Consider only disabling paste if the intent types are a terrible mismatch...
-		if is_valid_operator and desc["intent"] != global.OpIntentNames[intent]:
+	if is_valid_operator:
+		if desc["intent"] != global.OpIntentNames[intent]:
 			#Determine if both are NOT filters.  If one is a filter we disable pasting unless BOTH are.
 			var A = intent == global.OpIntent.FILTER
 			var B = true if desc["intent"]=="FILTER" else false

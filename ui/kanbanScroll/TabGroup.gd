@@ -103,17 +103,16 @@ func _draw():
 
 
 func _make_custom_tooltip(for_text):
-	#FIXME:  Support other panel types
 	var p
 	var c = get_node(owner.chip_loc)
 		
 	var tab_idx=get_tab_idx_at_point(get_local_mouse_position())
 
 	if tab_idx==-1:
-#			print("Couldn't find tab at %s!" % sender.get_local_mouse_position())
-		p = Label.new()
-		yield(get_tree(), "idle_frame")
-		p.visible = false
+#		print("Couldn't find tab at %s!" % tab_idx)
+		p = Control.new()
+#		yield(get_tree(), "idle_frame")
+#		p.visible = false
 		return p
 
 	var tab = get_tab_control(tab_idx)

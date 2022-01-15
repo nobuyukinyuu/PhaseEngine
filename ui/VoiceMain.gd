@@ -77,6 +77,8 @@ func _on_op_intent_changed(opNum:int, intent, sender=null):  #Default sender:  W
 	tab_group.remove_child(node_to_replace)
 	var p = column.make_tab(tab_group, opNum, intent)  #Make a new panel.
 	tab_group.move_child(p, pos)
+	
+	node_to_replace.queue_free()
 
 
 #Called when Chip changes a lot (for example when parsing in JSON data)

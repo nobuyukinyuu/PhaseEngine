@@ -32,6 +32,7 @@ func set_from_op(op:int):
 
 	var eg = get_node(chip_loc)
 	var opCount = eg.GetOpCount()
+	var opType = eg.GetOpIntent(op)
 	if opCount < op+1 or op<0:  #Uh oh.  invalid op.
 		print("EGTooltip:  Invalid op %s.  Chip reports %s ops.  Goodbye!" % [op, opCount])
 		queue_free()
@@ -40,6 +41,7 @@ func set_from_op(op:int):
 	var d = eg.GetOpValues(0, op)  #EG dictionary
 	var d2 = eg.GetOpValues(1, op) #PG dictionary
 	
+	#Set the tables
 	for i in 3:
 		var intent = i
 		var data = eg.GetTable(op, intent)
@@ -74,6 +76,7 @@ func set_from_op(op:int):
 	#Set the labels.
 	$V/H/Op.bbcode_text = OPTEXT % (op+1)
 	$V/H/Level.text = "%*.*f%%" % [0, 1, (1.0-$V/EnvelopeDisplay.tl) * 100]
+	
 	if d2["fixedFreq"]:  #Show hz.
 		var freq = d2["base_hz"]  #tuned_hz might also work here but only detune is applied (too small to represent), so...
 		if freq >= 1000:
@@ -85,3 +88,13 @@ func set_from_op(op:int):
 		var mult = d2["tuned_hz"] / float(d2["base_hz"])  #Detune is not considered here since we only have 2 sigdigs..
 		$V/H/Hz.text = "%*.*fx" % [3, 2, mult]
 
+
+	#Override labels.
+	match opType:
+		global.OpIntent.WAVEFOLDER:
+			$V/EnvelopeDisplay/Wave.visible = false
+			$V/H/Level.text = "%*.*fx" % [3, 2, d["gain"]]
+			$V/H/Hz.text = "%s-bit" % [16-d["aux_func"]]
+
+		global.OpIntent.BITWISE:
+			$V/H/Level.text = ["aND", "0r:", "x0R"][clamp(d["aux_func"],0,2)]

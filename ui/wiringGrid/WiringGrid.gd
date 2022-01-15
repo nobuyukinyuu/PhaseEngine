@@ -156,20 +156,19 @@ func _on_Copy_pressed():
 
 
 func _on_Paste_pressed():
-	var err = validate_json(OS.clipboard)
-	if err:  
-		print("WiringGrid:  Clipboard data failed to pass JSON validation... Error at ", err)
+	var desc:JSONParseResult = JSON.parse(OS.clipboard)
+	if desc.error != OK:  
+		print("WiringGrid:  Clipboard data failed to pass JSON validation...")
+		print("%s (line %s)" % [desc.error_string, desc.error_line])
 		return
 
 	#For some reason, CSVs pass JSON validation without enclosing brackets. So, we need to make sure
 	#that parsing only produces a Dictionary!  CSV's inexplicably return float
-	var desc = parse_json(OS.clipboard)
-	if not desc is Dictionary:  return  
 	
-#	$SlotIndicator.load_from_description( desc )
-#	_on_slot_moved(0.05)
+	if not desc.result is Dictionary:  return  
+	if not desc.result.has("algorithm"):  return  #JSON data is not a Voice.
 
-	err = get_node(chip_loc).PasteJSONData(OS.clipboard)
+	var err = get_node(chip_loc).PasteJSONData(OS.clipboard)
 	if err != OK:
 		print("PasteJSONData returned error %s" % err)
 		return
