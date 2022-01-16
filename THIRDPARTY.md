@@ -1,6 +1,6 @@
 # THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
 
-This project includes third party components covered by licenses that require 
+This project includes third party components covered by licenses which require 
 that the following use notices be provided.
 
 The original copyrights and licenses under which this project used or adapted 
