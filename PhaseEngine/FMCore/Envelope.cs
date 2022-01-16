@@ -177,7 +177,7 @@ namespace PhaseEngine
         }
 
 
-        internal JSONObject ToJSONObject()
+        internal JSONObject ToJSONObject(bool includeRTables=true)
         {
             var o = new JSONObject();
             o.AddPrim<byte>("rates", rates);
@@ -199,10 +199,12 @@ namespace PhaseEngine
             o.AddPrim("aux_func", aux_func);
             o.AddPrim("gain", gain);
 
-            //Add tables.  No intent needed.
-            o.AddItem("ksr", ksr.ToJSONObject(false));
-            o.AddItem("ksl", ksl.ToJSONObject(false));
-            o.AddItem("velocity", velocity.ToJSONObject(false));
+            if (includeRTables) //Reasons to exclude:  Tables are all default/disabled, operator is a filter, etc.
+            {   //Add tables.  No intent needed.
+                o.AddItem("ksr", ksr.ToJSONObject(false));
+                o.AddItem("ksl", ksl.ToJSONObject(false));
+                o.AddItem("velocity", velocity.ToJSONObject(false));
+            }
 
             return o;
         }

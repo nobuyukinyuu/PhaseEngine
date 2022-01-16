@@ -268,8 +268,9 @@ namespace PhaseEngine
             if (includeIntent) output.AddPrim("intent", alg.intent[opNum]);
 
             output.AddPrim("oscillator", (Oscillator.oscTypes)oscType[opNum]);
-            output.AddItem("envelope", egs[opNum].ToJSONObject());
-            output.AddItem("increments", pgs[opNum].ToJSONObject());
+            output.AddItem( "envelope", egs[opNum].ToJSONObject(alg.intent[opNum] != OpBase.Intents.FILTER) );  //Don't include RTables if op is a filter.
+            if( ((int)alg.intent[opNum] & 1) == 1) //Only add increments object if the intent is FM_OP or BITWISE (1 or 3)
+                output.AddItem("increments", pgs[opNum].ToJSONObject());
 
             return output;
         }
