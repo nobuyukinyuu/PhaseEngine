@@ -95,7 +95,7 @@ window/vsync/use_vsync=false
 
 [editor_plugins]
 
-enabled=PoolStringArray( "mono_debugger" )
+enabled=PoolStringArray( "res://addons/launchy/plugin.cfg", "res://addons/mono_debugger/plugin.cfg" )
 
 [gui]
 
@@ -108,6 +108,10 @@ debug1={
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777255,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
+
+[mono]
+
+export/aot/enabled=true
 
 [rendering]
 

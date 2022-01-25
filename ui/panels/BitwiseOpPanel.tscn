@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=2]
+[gd_scene load_steps=32 format=2]
 
 [ext_resource path="res://ui/EGCheckBox.tres" type="Theme" id=1]
 [ext_resource path="res://ui/envelopeDisplay/EnvelopeDisplay.tscn" type="PackedScene" id=2]
@@ -11,9 +11,7 @@
 [ext_resource path="res://ui/panels/EGPanel.gd" type="Script" id=9]
 [ext_resource path="res://ui/panels/FixedFrequency.gd" type="Script" id=10]
 [ext_resource path="res://ui/panels/EGWavePanel.gd" type="Script" id=11]
-[ext_resource path="res://gfx/ui/hSlider.theme" type="Theme" id=12]
 [ext_resource path="res://gfx/ui/vCheck.png" type="Texture" id=13]
-[ext_resource path="res://ui/EGSlider.gd" type="Script" id=14]
 [ext_resource path="res://gfx/wave/1.png" type="Texture" id=17]
 [ext_resource path="res://gfx/wave/3.png" type="Texture" id=18]
 [ext_resource path="res://gfx/wave/2.png" type="Texture" id=19]
@@ -236,22 +234,15 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Fine Tune" type="HSlider" parent="Frequency/H" instance=ExtResource( 3 )]
+[node name="Fine Tune" parent="Frequency/H" instance=ExtResource( 3 )]
 margin_left = 142.0
 margin_right = 280.0
-margin_bottom = 20.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
-theme = ExtResource( 12 )
 min_value = -2.0
 max_value = 2.0
 step = 0.01
-scrollable = false
 tick_count = 9
-script = ExtResource( 14 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Tune" type="GridContainer" parent="."]
 visible = false
@@ -301,23 +292,17 @@ tick_count = 9
 ticks_on_borders = false
 associated_property = "fine"
 
-[node name="Detune" type="HSlider" parent="Tune" instance=ExtResource( 3 )]
+[node name="Detune" parent="Tune" instance=ExtResource( 3 )]
 margin_left = 148.0
 margin_top = 28.0
 margin_right = 280.0
 margin_bottom = 48.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
-theme = ExtResource( 12 )
 min_value = -1.0
 max_value = 1.0
 step = 0.001
-scrollable = false
 tick_count = 9
-script = ExtResource( 14 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 associated_property = "Detune"
 special_display = 4
 
@@ -481,11 +466,11 @@ __meta__ = {
 margin_right = 96.0
 rect_min_size = Vector2( 48, 20 )
 size_flags_horizontal = 3
-max_value = 2.0
+max_value = 3.0
 tick_count = 0
 associated_property = "OpFuncType"
 special_display = 255
-display_strings = PoolStringArray( "AND", "OR", "XOR" )
+display_strings = PoolStringArray( "AND", "OR", "XOR", "RingMod" )
 text_offset = -8
 
 [node name="AMS" parent="Tweak" instance=ExtResource( 3 )]
@@ -761,40 +746,24 @@ step = 0.0
 associated_property = "phase_offset"
 special_display = 4
 
-[node name="Increment Offset" type="HSlider" parent="More/P/V" instance=ExtResource( 3 )]
+[node name="Increment Offset" parent="More/P/V" instance=ExtResource( 3 )]
 margin_top = 32.0
 margin_right = 144.0
 margin_bottom = 52.0
 rect_min_size = Vector2( 64, 20 )
 size_flags_horizontal = 3
-theme = ExtResource( 12 )
 min_value = -32768.0
 max_value = 32767.0
-scrollable = false
-tick_count = 11
-ticks_on_borders = true
-script = ExtResource( 14 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 associated_property = "increment_offset"
 
-[node name="Detune Randomness" type="HSlider" parent="More/P/V" instance=ExtResource( 3 )]
+[node name="Detune Randomness" parent="More/P/V" instance=ExtResource( 3 )]
 margin_top = 64.0
 margin_right = 144.0
 margin_bottom = 84.0
 rect_min_size = Vector2( 64, 20 )
 size_flags_horizontal = 3
-theme = ExtResource( 12 )
 max_value = 1.0
 step = 0.0
-scrollable = false
-tick_count = 11
-ticks_on_borders = true
-script = ExtResource( 14 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 associated_property = "detune_randomness"
 special_display = 4
 

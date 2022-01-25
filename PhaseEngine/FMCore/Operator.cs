@@ -330,7 +330,7 @@ namespace PhaseEngine
     {
         public delegate short OpFunc(short modulation, short oscOutput); //Function of the operator.
         OpFunc BitwiseOp;
-        public static readonly OpFunc[] operations = {OP_AND, OP_OR, OP_XOR};
+        public static readonly OpFunc[] operations = {OP_AND, OP_OR, OP_XOR, OP_RINGMOD};
         public byte OpFuncType {get => eg.aux_func;  set { if (value<operations.Length)  {BitwiseOp = operations[value]; eg.aux_func=value;} }}
 
         public BitwiseOperator() {intent=Intents.BITWISE; BitwiseOp=OP_OR;}
@@ -358,6 +358,7 @@ namespace PhaseEngine
         public static short OP_AND(short modulation, short input) {return (short)(input & modulation);}
         public static short OP_OR(short modulation, short input) {return (short)(input | modulation);}
         public static short OP_XOR(short modulation, short input) {return (short)(input ^ modulation);}
+        public static short OP_RINGMOD(short modulation, short input) {return (short)(input * modulation >> 13);}
 
     }
 

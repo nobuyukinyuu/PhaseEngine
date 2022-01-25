@@ -1,6 +1,20 @@
 using System;
 using PhaseEngine;
 
+/*
+    BIG TODO LIST:
+    1.  Support key follow!  0-1 ratio whereby 0 is pure cutoff freq and 1 is the NoteOn frequency times a ratio specifier.
+    2.  Ratio specifier for key follow.  Might also affect filter envelopes?
+    3.  Consider the following hierarchy:  1.  Base cutoff frequency, which is multiplied by 2. Envelope output, which finally
+        is lerped Between itself and 3.  The key follow frequency (specified by NoteOn frequency times the 4. Ratio multiplier).
+    4.  Consider whether the filter envelope should be specified as points which cache lerp values or as an extension of the traditional envelope.
+    5.  Consider easing the envelope's recalculations so that it's impossible to "snap" the values to unsafe levels.
+    6.  Consider a recalc divider similar to LFO which lowers the processing burden on the filter.  Check if processing needs to be done more than 6000hz.
+    
+*/
+
+
+
 namespace PhaseEngine 
 {
     public class Filter : OpBase
