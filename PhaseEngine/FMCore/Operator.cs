@@ -312,7 +312,6 @@ namespace PhaseEngine
         	// result += pg.lastClockedAttenuation;
 
             // // add in total level
-            // result += m_regs.total_level() << 3;
             result += eg.tl;
 
             if (eg.ams > 0)
@@ -337,21 +336,7 @@ namespace PhaseEngine
 
         public override short RequestSample(ushort modulation = 0, ushort am_offset = 0)
         {
-            return BitwiseOp(ComputeOsc(am_offset), (short)modulation);  //Modulation sent to us is the sample value of previous operator.
-        }
-
-        public short ComputeOsc(ushort am_offset)
-        {
-            ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) /*+ modulation*/);
-
-            ushort sin_attenuation = oscillator.Generate(phase, eg.duty, ref flip, __makeref(pg.increment));
-
-            ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);
-
-            int result = Tables.attenuation_to_volume((ushort)(sin_attenuation + env_attenuation));
-            var output = flip?  (short)-result: (short)result;
-
-            return output;
+            return BitwiseOp(operatorOutputSample(0, am_offset), (short)modulation);  //Modulation sent to us is the sample value of previous operator.
         }
 
         //Bitwise Funcs.   TODO:  Implement ROR/ROL?  
