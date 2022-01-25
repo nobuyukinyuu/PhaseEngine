@@ -97,4 +97,4 @@ func set_from_op(op:int):
 			$V/H/Hz.text = "%s-bit" % [16-d["aux_func"]]
 
 		global.OpIntent.BITWISE:
-			$V/H/Level.text = ["aND", "0r:", "x0R"][clamp(d["aux_func"],0,2)]
+			$V/H/Level.text = ["aND", "0r:", "x0R", "R1Ng"][clamp(d["aux_func"],0,3)]
