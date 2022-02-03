@@ -10,6 +10,8 @@ namespace PhaseEngine
     {
         public byte opCount = 6;
 
+        public sbyte compatiblePreset=-1;
+
         public OpBase.Intents[] intent;  //What type of operator is this?  (See OpBase.Intents)
         public static readonly byte[] DEFAULT_PROCESS_ORDER = {0,1,2,3,4,5,6,7};
         public byte[] processOrder;  //The processing order of the operators.  This should be able to be fetched from wiring grid, or a convenience func in Voice...
@@ -29,6 +31,7 @@ namespace PhaseEngine
         public Algorithm(byte opCount)    {this.opCount = opCount;  Reset(true);}
         void Reset(bool hard_init=false)
         {
+            compatiblePreset=-1;
             Array.Resize(ref intent, opCount);
             if(hard_init) 
             {
@@ -246,6 +249,7 @@ namespace PhaseEngine
             Array.Fill(output.intent, OpBase.Intents.FM_OP);
             output.wiringGrid = output.FabricateGrid();
 
+            output.compatiblePreset=(sbyte)preset;
             return output;
         }
 
@@ -289,6 +293,7 @@ namespace PhaseEngine
                     for(int i=0; i<opCount; i++)  intent[i] = OpBase.Intents.FM_OP;
                 }
 
+                compatiblePreset = (sbyte) data.GetItem("compatiblePreset", -1);
                 // j.Assign("increment_offset", ref o.increment_offset);
 
             } catch (Exception e) {
@@ -314,6 +319,8 @@ namespace PhaseEngine
             o.AddPrim("grid", wiringGrid);
             o.AddPrim("processOrder", processOrder);
             o.AddPrim("connections", connections);
+
+            if(compatiblePreset>=0) o.AddPrim("compatiblePreset", compatiblePreset);
 
             return o;
         }

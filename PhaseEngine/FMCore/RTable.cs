@@ -186,6 +186,7 @@ namespace PhaseEngine
         {
             for(ushort i=0; i<values.Length; i++)
                 values[i] = (ushort)(i / 4.0);
+                // values[i] = (ushort)(i / 2.0);
 
             ceiling = 0;  //Disable rate scaling by default.
         }
@@ -206,7 +207,7 @@ namespace PhaseEngine
         public override void Apply(byte index, ref ushort target)  //Satisfy the abstract method
         {   // Rates add the scaled value to the target rate.
             var val = target;
-            target = (byte) Math.Clamp(val + ScaledValue(index), 0, Envelope.R_MAX);
+            target = (byte) Math.Min(val + ScaledValue(index), Envelope.R_MAX);
         }
 
         public override byte[] TableAsBytes() //Single byte table since all values are already 1 byte

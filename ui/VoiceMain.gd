@@ -18,6 +18,7 @@ func _ready():
 	
 	#Populate EGPanels in column 0.
 	_on_op_size_changed(get_node(chip_loc).GetOpCount(), 0)
+	
 
 func resized():
 	$Kanban.populate_columns(rect_size.x - $Kanban.rect_position.x)
@@ -101,21 +102,9 @@ func reinit_all():
 	global.emit_signal("algorithm_changed")
 
 
-#Handler for tooltips that need data from a chip.
-func _on_op_tooltip_needs_data(sender, tooltip):
-	pass
-#	if sender is TabContainer and tooltip is EGTooltip:
-#		var idx = sender.get_tab_idx_at_point(sender.get_local_mouse_position())
-#		if idx==-1:
-##			print("Couldn't find tab at %s!" % sender.get_local_mouse_position())
-#			yield(get_tree(), "idle_frame")
-#			tooltip.visible = false
-#			return
-#
-#		var c = get_node(chip_loc)
-#		var tab = sender.get_tab_control(idx)
-#		if c.GetOpIntent(tab.operator) == global.OpIntent.FILTER:  
-#			print("replacement")
-##			tooltip.replace_by(preload("res://ui/FilterTooltip.tscn").instance())
-#			global.swap_scene(tooltip, preload("res://ui/FilterTooltip.tscn").instance())
-#		tooltip.setup(chip_loc, tab.operator)
+
+
+
+func _on_Load_pressed():
+	$IO.open()
+	pass # Replace with function body.

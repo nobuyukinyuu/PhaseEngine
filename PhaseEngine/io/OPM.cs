@@ -9,14 +9,49 @@ namespace PhaseEngine
     public class ImportOPM : VoiceBankImporter
     {
         enum OpNames {M1=0, C1=1, M2=2, C2=3}
-        public ImportOPM(){fileFormat="opm";}
+        public ImportOPM(){fileFormat="opm"; description="VOPM Soundbank";}
 
+
+        //Ratios used to convert an OPM detune value to a PhaseEngine one.
         readonly static float[] dt1_ratios = { 0, 0.25f, 0.667f, 1.0f, 0, -0.25f, -0.667f, -1.0f };
         readonly static short[] dt2_coarse_ratios = { 0, 6, 8, 9};
         readonly static short[] dt2_fine_ratios = { 0, 0, -20, 50};
 
+        static double ClockMult = 55930.0/Global.MixRate * Global.ClockMult;  //Ratio needed to translate one OPM clock to a PhaseEngine clock at current mixrate
+        // static double ClockMult = 1;  //Ratio needed to translate one OPM clock to a PhaseEngine clock at current mixrate
+
+
+        //The below values are used to calculate ratios to translate values from the chips' defaults to PhaseEngine's level of precision.
+        const int TL_MAX = 127;
+        const int DL_MAX= 15;
+        const int AR_MAX= 31;
+        const int DR_MAX= 31;
+        const int SR_MAX= 31;
+        const int RR_MAX= 15;
+
+
+        // const float RATIO_TL = (Envelope.L_MAX) / (float)(TL_MAX+0);  //127<<3 = 1016; 1016/128 = ratio
+        const float RATIO_TL = 9.1f; 
+        // const float RATIO_DL = (Envelope.L_MAX) / (float)(DL_MAX+0);
+        const float RATIO_DL = RATIO_TL * 8.0f;
+
+
+        // const float RATIO_AR = (Envelope.R_MAX+1) / (float)(AR_MAX+1);
+        // const float RATIO_DR = Envelope.R_MAX / (float)DR_MAX;
+        // const float RATIO_SR = Envelope.R_MAX / (float)SR_MAX;
+        static double RATIO_RR = (Envelope.R_MAX+1) / (float)(RR_MAX+1) * ClockMult;
+
+        static double RATIO_AR = ClockMult;
+        static double RATIO_DR = ClockMult;
+        static double RATIO_SR = ClockMult;
+        // const float RATIO_RR = 1.0f;
+
+
         public override IOErrorFlags Load(string path)
         {
+            //Update the clock multiplier, in case sample rate changed....
+            ClockMult = 55930.0/Global.MixRate * Global.ClockMult;
+
             IOErrorFlags err = IOErrorFlags.OK;
             try
             {
@@ -33,10 +68,6 @@ namespace PhaseEngine
 
                     //OPM files all have 128 banks.  Initialize bank.
                     bank = new string[128];
-
-
-                    //At any point, some joker may have inserted a comment or empty line.  Use this local func to skip them.
-                    string NextValidLine() { var ln=line; while(ln.StartsWith("//") || ln.Trim()=="") ln=sr.ReadLine(); if (ln==null) return null; return ln; }
 
                     //Prepare to process banks.
                     // var egs = new Envelope[4]; egs.InitArray();  //Envelope used to generate partial JSON.                    
@@ -59,24 +90,25 @@ namespace PhaseEngine
                         var p = new JSONObject();
 
                         //Get the first instrument.
-                        var l=NextValidLine();
-                        while (!l.StartsWith("@:")) l=NextValidLine();
+                        var l=NextValidLine(sr);
+                        while (!l.StartsWith("@:")) l=NextValidLine(sr);
 
                         ProcessNextVoice:
                         //Currently, l should be the instrument header line. Process every instrument in the bank now.
                         l = l.Substring(2).Trim();  //Prep for split.
-                        var splitLine = l.Split(" ", StringSplitOptions.RemoveEmptyEntries);  //Should have a length of 2.
+                        string[] splitLine = {l.Substring(0, l.IndexOf(" ")), l.Substring(l.IndexOf(" "))};  //Split in two at first space
+                        // var splitLine = l.Split(" ", StringSplitOptions.RemoveEmptyEntries);  //Should have a length of 2.
                         var slot = Convert.ToInt32(splitLine[0]);  //Will be used to assign the correct bank once we have built our voice proto.
                         // p.AddPrim("name", splitLine[1]);
-                        v.name = splitLine[1];
+                        v.name = splitLine[1].Trim();
 
-                        l=NextValidLine();  //Next line should be LFO.  However, order could be anything....
-                        splitLine=l.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+                        l=NextValidLine(sr);  //Next line should be LFO.  However, order could be anything....
                         
                         int amd, ams=0, pmd=0, pms=0, nFrq=0;
                         
 
                         ProcessNextLine:
+                        splitLine=l.Split(" ", StringSplitOptions.RemoveEmptyEntries);
                         switch(splitLine[0].Trim())
                         {
                             case "LFO:": //LFO configuration options.
@@ -114,8 +146,9 @@ namespace PhaseEngine
 
                             case "CH:":  //Voice configuration options.
                                 v.pan = Convert.ToByte(splitLine[1]) / 128.0f * 2 -1; //VOPM appears to set PAN to 64 by default, so we want to make sure 0 is our default
-                                v.egs[0].al = Convert.ToByte(splitLine[2]);  //Set operator 1 to the feedback level specified.
-                                v.alg = Algorithm.FromPreset(Convert.ToByte(splitLine[3]), Algorithm.PresetType.OPM); 
+                                v.egs[0].feedback = Convert.ToByte(splitLine[2]);  //Set operator 1 to the feedback level specified.
+                                var algNum=Convert.ToByte(splitLine[3]);
+                                v.alg = Algorithm.FromPreset(algNum, Algorithm.PresetType.OPM); 
                                 ams = Convert.ToByte(splitLine[4]) << 1;  //Max value:  6
                                 pms = Convert.ToByte(splitLine[5]);  //Max value:  7
 
@@ -147,16 +180,17 @@ namespace PhaseEngine
                                     var e = v.egs[opNum];  //Select the envelope.
                                     //[OPname]: AR DR  SR  RR  DL   TL  KS MUL DT1 DT2 AMS-EN
 
-                                    e.ar = Convert.ToByte(splitLine[1]);
-                                    e.dr = Convert.ToByte(splitLine[2]);
-                                    e.sr = Convert.ToByte(splitLine[3]);
-                                    e.rr = Convert.ToByte(splitLine[4]);
+                                    e.ar = (byte) Math.Round(Convert.ToByte(splitLine[1]) * RATIO_AR);
+                                    e.dr = (byte) Math.Round(Convert.ToByte(splitLine[2]) * RATIO_DR);
+                                    e.sr = (byte) Math.Round(Convert.ToByte(splitLine[3]) * RATIO_SR);
+                                    e.rr = (byte) Math.Round(Convert.ToByte(splitLine[4]) * RATIO_RR);
 
-                                    e.dl = Convert.ToUInt16(splitLine[5]);
-                                    e.tl = Convert.ToUInt16(splitLine[6]);
+                                    e.dl = (ushort) Math.Min(Math.Round(Convert.ToUInt16(splitLine[5]) * RATIO_DL), Envelope.L_MAX);
+                                    e.sl = e.sr>0? Envelope.L_MAX: e.dl;
+                                    e.tl = (ushort) Math.Min(Math.Round(Convert.ToUInt16(splitLine[6]) * RATIO_TL), Envelope.L_MAX);
 
                                     //Assign envelope RateTable to a default preset and scale the max application.
-                                    e.ksr = new RateTable();  e.ksr.ceiling = Convert.ToUInt16(splitLine[7]) * 25; //FIXME:  Check accuracy
+                                    e.ksr = new RateTable();  e.ksr.ceiling = (float)(Convert.ToUInt16(splitLine[7]) * 25 / ClockMult); //FIXME:  Check accuracy
 
                                     var dt2 = Convert.ToUInt16(splitLine[10]);
                                     v.pgs[opNum].mult = Convert.ToUInt16(splitLine[8]);
@@ -170,9 +204,8 @@ namespace PhaseEngine
                             break;    
                         }
 
-                        l=NextValidLine();
-                        if (l==null) break;  //End of File
-                        else if (l.StartsWith("@:"))
+                        l=NextValidLine(sr);
+                        if (l==null || l.StartsWith("@:"))
                         {
                             //Final prep of instrument that has all the values it's going to have plugged into it.  Now to merge PMS/PMD.
                             //OPM LFO is not exactly linear in the pitch range from base note to min/max, so we use an estimate based on max,
@@ -182,8 +215,10 @@ namespace PhaseEngine
                             //TODO:  Consider whether recalcing the PG increments are necessary.
 
                             // bank[slot] = //TODO:  Convert voice to string here...  Or, change bank type to Voice[] from string[]....
-                            
-                            goto ProcessNextVoice;
+                            bank[slot] = v.ToJSONString();
+
+                            if (l==null) break;  //End of File                            
+                            else goto ProcessNextVoice;
                         }
                         else goto ProcessNextLine;
                     }
@@ -192,11 +227,24 @@ namespace PhaseEngine
             }
             catch (FileNotFoundException) { err |= IOErrorFlags.NotFound; }
             catch (PE_ImportException e) { err |= e.flags; }
-            catch //Anything else
-            { err |= IOErrorFlags.Failed | IOErrorFlags.Corrupt; }
+            // catch //Anything else
+            // { err |= IOErrorFlags.Failed | IOErrorFlags.Corrupt; }
 
             return err;
         }
+
+        //At any point, some joker may have inserted a comment or empty line.  Use this local func to skip them.
+        string NextValidLine(StreamReader sr) 
+        { 
+            string ln="";
+            while(ln.StartsWith("//") || ln.Trim()=="")
+            {
+                ln=sr.ReadLine(); 
+                if (ln==null) return null;
+            }
+            return ln; 
+        }
+
 
         public override string ToString()
         {

@@ -222,7 +222,15 @@ namespace PhaseEngine
             case EGStatus.HOLD:
                 if ((env_hold_counter >> 2) >= eg.hold)
                 {
-                    egStatus = EGStatus.DECAY;
+                    target = eg.levels[(int)EGStatus.SUSTAINED];
+                    //Skip the decay phase if we've already gone past the sustain level.
+                    //Deals with situations where the decay is set to 0 but we want to move on.
+                    // egStatus = egAttenuation>=eg.sl? EGStatus.SUSTAINED: EGStatus.DECAY;
+                    // egStatus = egAttenuation==eg.sl? EGStatus.SUSTAINED : EGStatus.DECAY;
+                    if ( ((egAttenuation >= target) && !eg.rising[(int)EGStatus.DECAY]) | (eg.rising[(int)EGStatus.DECAY] && (egAttenuation <= target)))
+                        egStatus = EGStatus.SUSTAINED;
+                    else egStatus = EGStatus.DECAY;
+
                     // target = eg.levels[(int)EGStatus.DECAY];
                 } else {
                     env_hold_counter++; 

@@ -1,0 +1,77 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://ui/FileDialog.theme" type="Theme" id=1]
+[ext_resource path="res://ui/voice_io/VoiceIODialogs.gd" type="Script" id=2]
+[ext_resource path="res://ui/voice_io/BankSelect.gd" type="Script" id=4]
+
+[node name="IO" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Open" type="FileDialog" parent="."]
+visible = true
+margin_left = 157.0
+margin_top = 84.0
+margin_right = 797.0
+margin_bottom = 484.0
+theme = ExtResource( 1 )
+popup_exclusive = true
+window_title = "Open a File"
+mode = 0
+access = 2
+current_dir = "/music/VST/VOPM/2612org OPMs"
+current_file = "Animaniacs_-_48_-_Password.opm"
+current_path = "/music/VST/VOPM/2612org OPMs/Animaniacs_-_48_-_Password.opm"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Save" type="FileDialog" parent="."]
+margin_left = 152.0
+margin_top = 100.0
+margin_right = 792.0
+margin_bottom = 500.0
+theme = ExtResource( 1 )
+popup_exclusive = true
+access = 2
+filters = PoolStringArray( "*.phv; PhaseEngine voice" )
+current_dir = "/Projects/godot/Code/PhaseEngine"
+current_path = "/Projects/godot/Code/PhaseEngine/"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BankSelect" type="ConfirmationDialog" parent="."]
+visible = true
+margin_left = 776.0
+margin_top = 144.0
+margin_right = 1032.0
+margin_bottom = 419.0
+theme = ExtResource( 1 )
+popup_exclusive = true
+window_title = "Select a Voice:"
+resizable = true
+script = ExtResource( 4 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="List" type="ItemList" parent="BankSelect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 8.0
+margin_top = 8.0
+margin_right = -8.0
+margin_bottom = -26.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="file_selected" from="Open" to="." method="_on_Open_file_selected"]
+[connection signal="file_selected" from="Save" to="." method="_on_Save_file_selected"]
+[connection signal="item_activated" from="BankSelect/List" to="BankSelect" method="_on_List_item_activated"]

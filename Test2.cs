@@ -279,12 +279,6 @@ public class Test2 : Label
         for(int i=0; i<c.channels.Length; i++)
         {
             var op = c.channels[i].ops[opTarget] as Filter;
-            // if (op==null) continue;
-            // op.SetOscillatorType(c.Voice.egs[opTarget].aux_func);  //FixMe:  may be redundant
-            // op.eg.cutoff = c.Voice.egs[opTarget].cutoff;
-            // op.eg.resonance = c.Voice.egs[opTarget].resonance;
-            // op.eg.gain = c.Voice.egs[opTarget].gain;
-            // op.eg.duty = c.Voice.egs[opTarget].duty;
             op.Recalc();
         }
 
@@ -333,6 +327,7 @@ public class Test2 : Label
         return tbl.ToJSONString();
     }
 
+    //////////////////////////////    IO    ////////////////////////////////////
 
     public string VoiceAsJSONString() {return c.Voice.ToJSONString();}
     public string OperatorAsJSONString(int opNum) { return c.Voice.OpToJSON((byte)opNum, true).ToJSONString();}
@@ -369,6 +364,39 @@ public class Test2 : Label
         }
 
         return Error.Ok;
+    }
+
+    public Godot.Collections.Array GetSupportedFormats()
+    {
+        var output = new Godot.Collections.Array();
+
+        foreach (VoiceBankImporter v in PE_ImportServer.loaders.Values)
+        {
+            output.Add(String.Format("*.{0}; {1}", v.fileFormat, v.description));
+        }
+
+        return output;
+    }
+
+    //Requests the import server to load a bank with specified voice import format and return 
+    public Godot.Collections.Array RequestVoiceImport(string path)
+    {
+        var output = new Godot.Collections.Array();
+        VoiceBankImporter v;
+        var err = PE_ImportServer.TryLoad(path, out v);
+
+        if (err !=IOErrorFlags.OK) return output;
+
+        for(int i=0; i<v.bank.Length; i++)
+        {  //Get the names of all the instruments in the bank and return them.
+            // PE_Json.JSONObject o = (PE_Json.JSONObject) PE_Json.JSONData.ReadJSON(v.bank[i]);
+            // var alg = (PE_Json.JSONObject) o.GetItem("algorithm");
+            // output.Add( String.Format("{0}: {1}", i, o.GetItem("name", "unnamed")), alg.GetItem("compatiblePreset", -1) );
+
+            output.Add( v.bank[i] );
+        }
+
+        return output;
     }
 
 

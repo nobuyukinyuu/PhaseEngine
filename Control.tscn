@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=2]
+[gd_scene load_steps=39 format=2]
 
 [ext_resource path="res://MIDI.gd" type="Script" id=1]
 [ext_resource path="res://ui/VoiceMain.gd" type="Script" id=2]
@@ -25,6 +25,10 @@
 [ext_resource path="res://FMPreview.gd" type="Script" id=23]
 [ext_resource path="res://ui/EGCheckBox.tres" type="Theme" id=24]
 [ext_resource path="res://ui/OpIntentMenu.tscn" type="PackedScene" id=25]
+[ext_resource path="res://ui/voice_io/VoiceIO.tscn" type="PackedScene" id=26]
+[ext_resource path="res://ui/FileDialog.theme" type="Theme" id=27]
+[ext_resource path="res://gfx/ui/godot_icons/Save.svg" type="Texture" id=28]
+[ext_resource path="res://gfx/ui/godot_icons/Load.svg" type="Texture" id=29]
 
 [sub_resource type="Animation" id=1]
 resource_name = "NoteOn"
@@ -523,14 +527,51 @@ value = 1023.0
 exp_edit = true
 associated_property = "AMD"
 
+[node name="C     l" type="Control" parent="LTab"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 1.0
+margin_top = 19.0
+margin_right = -223.0
+margin_bottom = -133.0
+
 [node name="OpIntentMenu" parent="." instance=ExtResource( 25 )]
 margin_left = -136.0
 margin_top = 287.0
 margin_right = -8.0
 margin_bottom = 351.0
 
+[node name="IO" parent="." instance=ExtResource( 26 )]
+margin_top = 600.0
+margin_bottom = 600.0
+chip_loc = NodePath("../Channels")
+
+[node name="Btn" type="HBoxContainer" parent="."]
+margin_left = 216.0
+margin_top = 568.0
+margin_right = 272.0
+margin_bottom = 592.0
+theme = ExtResource( 27 )
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Load" type="Button" parent="Btn"]
+margin_right = 24.0
+margin_bottom = 24.0
+icon = ExtResource( 29 )
+
+[node name="Save" type="Button" parent="Btn"]
+margin_left = 30.0
+margin_right = 54.0
+margin_bottom = 24.0
+icon = ExtResource( 28 )
+
 [connection signal="timeout" from="FMPreview/Timer" to="FMPreview" method="_on_Timer_timeout"]
 [connection signal="gui_input" from="LTab/LFO/WavePanel/Preview/Panel" to="LTab" method="_on_Preview_gui_input"]
 [connection signal="item_selected" from="LTab/LFO/Sync" to="LTab" method="_on_Sync_item_selected"]
+[connection signal="pressed" from="Btn/Load" to="." method="_on_Load_pressed"]
 
 [editable path="Kanban/Column0"]

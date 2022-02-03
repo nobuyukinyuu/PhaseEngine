@@ -16,6 +16,7 @@ namespace PE_Json{
         }
 
         public static JSONDataItem ReadJSON(string jsonString){
+            if (jsonString==null) return new JSONnull();
             JSONTokeniser tokeniser = new JSONTokeniser(jsonString);
             
             JSONDataItem data = GetJSONDataItem(tokeniser);

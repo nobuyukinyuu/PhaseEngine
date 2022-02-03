@@ -11,6 +11,7 @@ namespace PhaseEngine
         public string[] bank;
 
         public string fileFormat;  //Associated format
+        public string description="";
 
         public VoiceBankImporter()    {}
 
@@ -36,7 +37,7 @@ namespace PhaseEngine
 
     public static class PE_ImportServer
     {
-        static Dictionary<string, VoiceBankImporter> loaders = new Dictionary<string, VoiceBankImporter>();
+        public static Dictionary<string, VoiceBankImporter> loaders = new Dictionary<string, VoiceBankImporter>();
 
         static PE_ImportServer()
         {
@@ -60,6 +61,19 @@ namespace PhaseEngine
 
             System.Diagnostics.Debug.Print("Reached the end of the import server initializer.");
             Godot.GD.Print("ImportServer init");
+        }
+
+        public static IOErrorFlags TryLoad(string path, out VoiceBankImporter loader)
+        {
+            foreach(string format in loaders.Keys)
+                if(path.EndsWith(format))  //Try loading the format
+                {
+                    loader = loaders[format];
+                    return loader.Load(path);
+                }
+
+            loader = null;
+            return IOErrorFlags.UnrecognizedFormat;
         }
 
         static List<Type> FindDerivedTypes<T>() { return FindDerivedTypes<T>(Assembly.GetAssembly(typeof(T))); }

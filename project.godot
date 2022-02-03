@@ -45,6 +45,11 @@ _global_script_classes=[ {
 "path": "res://ui/kanbanScroll/ScrollContainer.gd"
 }, {
 "base": "Control",
+"class": "VoiceIODialogs",
+"language": "GDScript",
+"path": "res://ui/voice_io/VoiceIODialogs.gd"
+}, {
+"base": "Control",
 "class": "VoicePanel",
 "language": "GDScript",
 "path": "res://ui/panels/BasePanel.gd"
@@ -62,6 +67,7 @@ _global_script_class_icons={
 "EnvelopeDisplay": "",
 "FilterTooltip": "",
 "KanbanColumn": "",
+"VoiceIODialogs": "res://gfx/ui/godot_icons/Save.svg",
 "VoicePanel": "res://gfx/ui/ops/icon_fm.svg",
 "WiringGridSlot": ""
 }
