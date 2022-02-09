@@ -158,6 +158,22 @@ public class Test2 : Label
         return c.Voice.GetAlgorithm();
     }
 
+    public void NormalizeVoice()
+    {
+        //Find connections to output.
+        var outputs = new List<byte>(8);
+        var loudest = Envelope.L_MAX;
+        for(byte i=0; i<c.Voice.opCount; i++)
+        {
+            if(c.Voice.alg.connections[i]!=0) continue;
+            outputs.Add(i);
+            loudest = Math.Min(c.Voice.egs[i].tl, loudest);
+        }
+
+        // if (loudest==0) return;  //Voice is already normalized.
+        foreach(byte i in outputs) c.Voice.egs[i].tl -= loudest;
+    }
+
 
     //FIXME:  This function is hacky and only sets the chip's channel ops to the processed value.  Voice preview updates this manually as well.
     //        Channel.NoteOn doesn't set the delegate because c# has no fuckin switch fallthru and I don't want to use an If statement right now
@@ -422,6 +438,12 @@ public class Test2 : Label
 
     public bool is_quiet() {return c.ChannelsAreFree;}
     public int connections_to_output() {return c.Voice.alg.NumberOfConnectionsToOutput;}
+    public byte[] GetCarriers() {return c.Voice.alg.GetCarriers();}
+    public byte[] GetModulators(byte opNum) {
+        var m = c.Voice.alg.GetModulators(opNum);
+        var output=new byte[m.Count]; 
+        m.CopyTo(output); return output;
+        }
 
 
     ///////////////////////////////////    BUFFER    /////////////////////////////////////

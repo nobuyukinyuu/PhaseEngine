@@ -44,9 +44,10 @@ public class CPUMon : Label
 
     public override void _Ready()
     {
-         listener = new SystemRuntimeEventListener();
-         timer =  GetTree().CreateTimer(updateTimeout);
-         timer.Connect("timeout", this, "UpdateCounters");
+      if(!Visible)  return;
+      listener = new SystemRuntimeEventListener();
+      timer =  GetTree().CreateTimer(updateTimeout);
+      timer.Connect("timeout", this, "UpdateCounters");
     }
 
     // Called every frame. 'delta' is the elapsed time since the previous frame.

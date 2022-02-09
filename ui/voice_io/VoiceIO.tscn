@@ -1,8 +1,10 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://ui/FileDialog.theme" type="Theme" id=1]
 [ext_resource path="res://ui/voice_io/VoiceIODialogs.gd" type="Script" id=2]
 [ext_resource path="res://ui/voice_io/BankSelect.gd" type="Script" id=4]
+
+[sub_resource type="Theme" id=1]
 
 [node name="IO" type="Control"]
 anchor_right = 1.0
@@ -61,17 +63,38 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="List" type="ItemList" parent="BankSelect"]
+[node name="V" type="VBoxContainer" parent="BankSelect"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 8.0
 margin_top = 8.0
 margin_right = -8.0
 margin_bottom = -26.0
+theme = SubResource( 1 )
+custom_constants/separation = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="List" type="ItemList" parent="BankSelect/V"]
+margin_right = 240.0
+margin_bottom = 221.0
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Normalize" type="CheckBox" parent="BankSelect/V"]
+margin_top = 223.0
+margin_right = 240.0
+margin_bottom = 241.0
+pressed = true
+text = "Normalize"
+align = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [connection signal="file_selected" from="Open" to="." method="_on_Open_file_selected"]
 [connection signal="file_selected" from="Save" to="." method="_on_Save_file_selected"]
-[connection signal="item_activated" from="BankSelect/List" to="BankSelect" method="_on_List_item_activated"]
+[connection signal="item_activated" from="BankSelect/V/List" to="BankSelect" method="_on_List_item_activated"]

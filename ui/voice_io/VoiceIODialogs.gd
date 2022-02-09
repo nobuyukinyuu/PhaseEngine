@@ -28,6 +28,11 @@ func _ready():
 func open():
 	$Open.popup_centered()
 
+func save():
+	$Save.popup_centered()
+
+func reopen_bank():
+	$BankSelect.popup_centered()
 
 
 func _on_Open_file_selected(path):
@@ -52,15 +57,14 @@ func _on_Open_file_selected(path):
 	$BankSelect.populate(list)
 	$BankSelect.popup_centered()
 
-
 func _on_Save_file_selected(path):
 	pass # Replace with function body.
 
 #Activated when $BankSelect/List has chosen a voice selection.
-func load_bank(idx):
-	paste(last_bank[idx])
+func load_bank(idx, normalize=false):
+	paste(last_bank[idx], normalize)
 
-func paste(data:String):
+func paste(data:String, normalize=false):
 	var c = get_node(chip_loc)
 	if !c:  return
 
@@ -69,8 +73,13 @@ func paste(data:String):
 		print("PasteJSONData returned error %s" % err)
 		return
 	
+	if normalize:
+		c.NormalizeVoice()
+	
 	#Reinit everything.
 	owner.reinit_all()
-#	check_if_presets()
+	owner.get_node("WiringGrid").check_if_presets()
+
+
 
 

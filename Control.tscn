@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=2]
+[gd_scene load_steps=45 format=2]
 
 [ext_resource path="res://MIDI.gd" type="Script" id=1]
 [ext_resource path="res://ui/VoiceMain.gd" type="Script" id=2]
@@ -29,6 +29,12 @@
 [ext_resource path="res://ui/FileDialog.theme" type="Theme" id=27]
 [ext_resource path="res://gfx/ui/godot_icons/Save.svg" type="Texture" id=28]
 [ext_resource path="res://gfx/ui/godot_icons/Load.svg" type="Texture" id=29]
+[ext_resource path="res://gfx/ui/kanban/arrange_type_column.png" type="Texture" id=30]
+[ext_resource path="res://gfx/ui/kanban/arrange_stack.png" type="Texture" id=31]
+[ext_resource path="res://gfx/ui/kanban/arrange_group.svg" type="Texture" id=32]
+[ext_resource path="res://gfx/ui/kanban/voicebank.png" type="Texture" id=33]
+[ext_resource path="res://gfx/ui/kanban/arrange_spread.svg" type="Texture" id=34]
+[ext_resource path="res://gfx/ui/kanban/arrange_group_stacks.png" type="Texture" id=35]
 
 [sub_resource type="Animation" id=1]
 resource_name = "NoteOn"
@@ -241,6 +247,7 @@ margin_bottom = 224.0
 chip_loc = NodePath("../../VoiceTab/Channels")
 
 [node name="CPUMon" type="Label" parent="."]
+visible = false
 anchor_top = 1.0
 anchor_bottom = 1.0
 margin_left = 8.0
@@ -533,8 +540,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 1.0
 margin_top = 19.0
-margin_right = -223.0
-margin_bottom = -133.0
+margin_right = -1.0
+margin_bottom = -1.0
 
 [node name="OpIntentMenu" parent="." instance=ExtResource( 25 )]
 margin_left = -136.0
@@ -548,9 +555,9 @@ margin_bottom = 600.0
 chip_loc = NodePath("../Channels")
 
 [node name="Btn" type="HBoxContainer" parent="."]
-margin_left = 216.0
+margin_left = 12.0
 margin_top = 568.0
-margin_right = 272.0
+margin_right = 274.0
 margin_bottom = 592.0
 theme = ExtResource( 27 )
 __meta__ = {
@@ -558,20 +565,83 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Load" type="Button" parent="Btn"]
+[node name="ReloadBank" type="Button" parent="Btn"]
 margin_right = 24.0
 margin_bottom = 24.0
-icon = ExtResource( 29 )
+hint_tooltip = "Load a different voice from the current imported bank."
+icon = ExtResource( 33 )
 
-[node name="Save" type="Button" parent="Btn"]
+[node name="Load" type="Button" parent="Btn"]
 margin_left = 30.0
 margin_right = 54.0
 margin_bottom = 24.0
+hint_tooltip = "Open or import a voice."
+icon = ExtResource( 29 )
+
+[node name="Save" type="Button" parent="Btn"]
+margin_left = 60.0
+margin_right = 84.0
+margin_bottom = 24.0
+hint_tooltip = "Save voice."
 icon = ExtResource( 28 )
+
+[node name="VSeparator" type="VSeparator" parent="Btn"]
+margin_left = 90.0
+margin_right = 94.0
+margin_bottom = 24.0
+
+[node name="Arrange0" type="Button" parent="Btn"]
+margin_left = 100.0
+margin_right = 124.0
+margin_bottom = 24.0
+hint_tooltip = "Arrange all operators together in a single tab group."
+icon = ExtResource( 32 )
+
+[node name="Arrange1" type="Button" parent="Btn"]
+margin_left = 130.0
+margin_right = 154.0
+margin_bottom = 24.0
+hint_tooltip = "Arrange operators by spreading them across all available columns."
+icon = ExtResource( 34 )
+
+[node name="VSeparator2" type="VSeparator" parent="Btn"]
+margin_left = 160.0
+margin_right = 164.0
+margin_bottom = 24.0
+
+[node name="Arrange3" type="Button" parent="Btn"]
+margin_left = 170.0
+margin_right = 194.0
+margin_bottom = 24.0
+hint_tooltip = "Arrange operators into columns,
+based on modulation stacks to output."
+icon = ExtResource( 31 )
+
+[node name="Arrange2" type="Button" parent="Btn"]
+margin_left = 200.0
+margin_right = 224.0
+margin_bottom = 24.0
+hint_tooltip = "Arrange operators into groups,
+based on modulation stacks to output."
+icon = ExtResource( 35 )
+
+[node name="Arrange4" type="Button" parent="Btn"]
+margin_left = 230.0
+margin_right = 254.0
+margin_bottom = 24.0
+hint_tooltip = "Arrange operators by type into columns."
+icon = ExtResource( 30 )
 
 [connection signal="timeout" from="FMPreview/Timer" to="FMPreview" method="_on_Timer_timeout"]
 [connection signal="gui_input" from="LTab/LFO/WavePanel/Preview/Panel" to="LTab" method="_on_Preview_gui_input"]
 [connection signal="item_selected" from="LTab/LFO/Sync" to="LTab" method="_on_Sync_item_selected"]
-[connection signal="pressed" from="Btn/Load" to="." method="_on_Load_pressed"]
+[connection signal="pressed" from="Btn/ReloadBank" to="IO" method="reopen_bank"]
+[connection signal="pressed" from="Btn/Load" to="IO" method="open"]
+[connection signal="pressed" from="Btn/Save" to="IO" method="save"]
+[connection signal="pressed" from="Btn/Arrange0" to="." method="_on_Arrange_pressed" binds= [ 0 ]]
+[connection signal="pressed" from="Btn/Arrange1" to="." method="_on_Arrange_pressed" binds= [ 1 ]]
+[connection signal="pressed" from="Btn/Arrange3" to="." method="_on_Arrange_pressed" binds= [ 3 ]]
+[connection signal="pressed" from="Btn/Arrange2" to="." method="_on_Arrange_pressed" binds= [ 2 ]]
+[connection signal="pressed" from="Btn/Arrange4" to="." method="_on_Arrange_pressed" binds= [ 4 ]]
 
 [editable path="Kanban/Column0"]

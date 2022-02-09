@@ -15,16 +15,16 @@ signal voice_selected
 
 func _ready():
 #	for i in 128:
-#		$List.add_item("%s: Instrument %s" % [i,i], preload("res://gfx/ui/ops/icon_fm.svg"))
+#		$V/List.add_item("%s: Instrument %s" % [i,i], preload("res://gfx/ui/ops/icon_fm.svg"))
 
 #	visible = true
 	pass
 
 
 func populate(bank):
-	$List.clear()
+	$V/List.clear()
 	for i in bank.size():
-#		$List.add_item(bank[i], preload("res://gfx/ui/ops/icon_fm.svg"))
+#		$V/List.add_item(bank[i], preload("res://gfx/ui/ops/icon_fm.svg"))
 		
 		#TODO:  VALIDATE JSON
 		var p = parse_json(bank[i])
@@ -42,11 +42,11 @@ func populate(bank):
 			is_valid = false
 			preset=-1
 		
-		$List.add_item("%s: %s" % [i, name], alg_icons[preset] if preset >=0 else alg_custom, is_valid)
-		$List.set_item_disabled(i, !is_valid)
+		$V/List.add_item("%s: %s" % [i, name], alg_icons[preset] if preset >=0 else alg_custom, is_valid)
+		$V/List.set_item_disabled(i, !is_valid)
 
 
 func _on_List_item_activated(index):
-	emit_signal("voice_selected", index)
+	emit_signal("voice_selected", index, $V/Normalize.pressed)
 	hide()
 

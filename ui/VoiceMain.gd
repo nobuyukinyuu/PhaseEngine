@@ -1,6 +1,7 @@
 extends Control
 export (NodePath) var chip_loc  #Used by kanban columns to populate with new EGPanels.
 
+enum ArrangeType {GROUP, TILE, STACK_GROUPS, STACK_COLUMNS, BY_INTENT}
 	
 func _ready():
 	$WiringGrid/SlotIndicator.connect("op_size_changed", self, "_on_op_size_changed")
@@ -102,9 +103,127 @@ func reinit_all():
 	global.emit_signal("algorithm_changed")
 
 
+func _on_Arrange_pressed(type=ArrangeType.TILE):
+	var c=get_node(chip_loc)
+	if !c:  return
+
+	depopulate_kanban()
+	match type:
+		ArrangeType.GROUP:
+			_on_op_size_changed(get_node(chip_loc).GetOpCount(), 0)
+			
+		ArrangeType.TILE:
+			#Get list of columns available.
+			var columns = []
+			for column in $Kanban.get_children():
+				if column is KanbanColumn:  columns.append(column)
+
+			#Cycle through columns, round-robin, adding tab groups as necessary.
+			for i in c.GetOpCount():
+				var col = columns[i % columns.size()]
+				var group = col.add_tab_group()
+				col.make_tab(group, i, c.GetOpIntent(i))
 
 
+		ArrangeType.STACK_GROUPS:
+			var carriers = c.GetCarriers()
 
-func _on_Load_pressed():
-	$IO.open()
-	pass # Replace with function body.
+			var columns = []
+			for column in $Kanban.get_children():
+				if column is KanbanColumn:  columns.append(column)
+			
+			var placed = {}  #Tabs which have already been placed.
+			for i in carriers.size():
+				#Each carrier becomes the basis of a TabGroup.
+				var col = columns[i % columns.size()]
+				var group = col.add_tab_group()
+				var carrier = carriers[i]
+				var modulators = c.GetModulators(carrier)
+				
+				col.make_tab(group, carrier, c.GetOpIntent(carrier))
+				placed[carrier] = true
+				
+				for m in modulators:  #Place this carrier's modulators in the group.
+					if placed.has(m):  continue
+					col.make_tab(group, m, c.GetOpIntent(m))
+					placed[m] = true
+
+		ArrangeType.STACK_COLUMNS:
+			#TODO:  When number of columns is exhausted, group instead of modulo....
+			var carriers = c.GetCarriers()
+
+			var columns = []
+			for column in $Kanban.get_children():
+				if column is KanbanColumn:  columns.append(column)
+			
+			var placed = {}  #Tabs which have already been placed.
+			for i in carriers.size():
+#				var col = columns[i % columns.size()]
+				var col = columns[min(i, columns.size()-1)]
+				var carrier = carriers[i]
+				var modulators = c.GetModulators(carrier)
+				
+				var group = col.add_tab_group()
+				col.make_tab(group, carrier, c.GetOpIntent(carrier))
+				placed[carrier] = true
+				
+				for m in modulators:  #Place this carrier's modulators in the column.
+					if placed.has(m):  continue
+					if carriers.size() <= columns.size() or i < columns.size(): 
+						col.make_tab(col.add_tab_group(), m, c.GetOpIntent(m))
+					else:
+						col.make_tab(group, m, c.GetOpIntent(m))
+					placed[m] = true
+
+		ArrangeType.BY_INTENT:
+			var columns = []
+			for column in $Kanban.get_children():
+				if column is KanbanColumn:  columns.append(column)
+			
+			#Get the number of intents available, subtracting "NONE" and "LFO:
+			var numIntents = {}
+			for op in c.GetOpCount():
+				var intent = c.GetOpIntent(op)
+				if numIntents.has(intent):
+					numIntents[intent].append(op)
+				else:  numIntents[intent] = [op]
+
+			#Count the number of intent types we found in the algorithm.
+			#If the number of intent types exceed the number of columns, then stick all of the
+			#extra intents into the last column as groups.
+			var column_number=0
+			var must_group=false
+			for intent_group in numIntents.keys():
+				var group = columns[column_number].add_tab_group()
+
+				var ops = numIntents[intent_group]
+				for p in ops:
+					if not must_group: 
+						 #Make unique TabGroup for our operator.
+						group = columns[column_number].add_tab_group()
+					columns[column_number].make_tab(group, p, intent_group)
+	
+				column_number= column_number+1
+				if column_number >= columns.size()-1:
+					if numIntents.keys().size() > columns.size():
+						must_group=true
+					column_number = columns.size()-1
+
+
+	for column in $Kanban.get_children():
+		if column is KanbanColumn:  column.cleanup()
+
+
+func depopulate_kanban():
+	
+	var last_queued_to_free
+	for column in $Kanban.get_children():
+		if !(column is KanbanColumn):  continue
+		for tabgroup in column.get_node("V").get_children():
+			if !(tabgroup is TabContainer):  continue
+			last_queued_to_free = tabgroup.queue_free()
+			
+		if is_instance_valid(last_queued_to_free):  yield(last_queued_to_free, "tree_exited")
+		column.cleanup()
+
+

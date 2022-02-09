@@ -26,7 +26,6 @@ namespace PhaseEngine
                 return output;
         }   }
 
-
         public Algorithm()    {Reset(true);}
         public Algorithm(byte opCount)    {this.opCount = opCount;  Reset(true);}
         void Reset(bool hard_init=false)
@@ -323,6 +322,29 @@ namespace PhaseEngine
             if(compatiblePreset>=0) o.AddPrim("compatiblePreset", compatiblePreset);
 
             return o;
+        }
+
+        public byte[] GetCarriers() {
+            var output= new System.Collections.Generic.List<byte>(opCount);
+            for(byte i=0;  i<opCount;  i++)  if (connections[i] == 0) output.Add(i);
+            return output.ToArray();
+        }
+        public System.Collections.Generic.HashSet<byte> GetModulators(byte opNum, System.Collections.Generic.HashSet<byte> modulators=null)
+        {
+            if (modulators==null) modulators= new System.Collections.Generic.HashSet<byte>(opCount);
+            var modulators_left = new System.Collections.Generic.HashSet<byte>(opCount);
+
+            for (byte i=0; i<opCount; i++)
+            {
+                if (i==opNum || modulators.Contains(i)) continue;
+                if (Tools.BIT(connections[i], opNum)==1)  //Target is connected to us.  Add it to the set.
+                    { modulators.Add(i); modulators_left.Add(i); } 
+            }
+
+            //For all the items currently in the set, find the modulators connected to it.
+            foreach(byte m in modulators_left) GetModulators(m, modulators);
+
+           return modulators; 
         }
 
 #region presets
