@@ -1,4 +1,4 @@
-[gd_scene load_steps=45 format=2]
+[gd_scene load_steps=51 format=2]
 
 [ext_resource path="res://MIDI.gd" type="Script" id=1]
 [ext_resource path="res://ui/VoiceMain.gd" type="Script" id=2]
@@ -35,6 +35,11 @@
 [ext_resource path="res://gfx/ui/kanban/voicebank.png" type="Texture" id=33]
 [ext_resource path="res://gfx/ui/kanban/arrange_spread.svg" type="Texture" id=34]
 [ext_resource path="res://gfx/ui/kanban/arrange_group_stacks.png" type="Texture" id=35]
+[ext_resource path="res://ui/EGSliderEnabled.stylebox" type="StyleBox" id=36]
+[ext_resource path="res://ui/customWaveform/Waveform.tscn" type="PackedScene" id=37]
+[ext_resource path="res://gfx/fonts/thin_font_6x8.tres" type="BitmapFont" id=38]
+[ext_resource path="res://ui/knob/Knob.tscn" type="PackedScene" id=39]
+[ext_resource path="res://gfx/fonts/numerics_8x10.tres" type="BitmapFont" id=40]
 
 [sub_resource type="Animation" id=1]
 resource_name = "NoteOn"
@@ -160,6 +165,9 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
+[sub_resource type="Theme" id=10]
+default_font = ExtResource( 40 )
+
 [node name="VoiceTab" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -275,7 +283,97 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Metadata" type="Control" parent="LTab"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 1.0
+margin_top = 19.0
+margin_right = -1.0
+margin_bottom = -1.0
+
+[node name="GridContainer" type="Control" parent="LTab/Metadata"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 7.0
+margin_top = 13.0
+margin_right = -7.0
+margin_bottom = -23.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="LTab/Metadata/GridContainer"]
+margin_left = 8.0
+margin_top = 4.0
+margin_right = 120.0
+margin_bottom = 12.0
+custom_fonts/font = ExtResource( 11 )
+text = "Name:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LineEdit" type="LineEdit" parent="LTab/Metadata/GridContainer"]
+margin_left = 124.0
+margin_right = 248.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+theme = ExtResource( 27 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label2" type="Label" parent="LTab/Metadata/GridContainer"]
+margin_left = 8.0
+margin_top = 32.0
+margin_right = 120.0
+margin_bottom = 40.0
+custom_fonts/font = ExtResource( 11 )
+text = "Description:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LineEdit2" type="TextEdit" parent="LTab/Metadata/GridContainer"]
+margin_left = 124.0
+margin_top = 28.0
+margin_right = 248.0
+margin_bottom = 128.0
+size_flags_horizontal = 3
+theme = ExtResource( 27 )
+custom_fonts/font = ExtResource( 38 )
+text = "Text Content Margin test here!!"
+wrap_enabled = true
+caret_blink = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Gain" parent="LTab/Metadata/GridContainer" instance=ExtResource( 9 )]
+margin_top = 72.0
+margin_right = 112.0
+margin_bottom = 92.0
+rect_min_size = Vector2( 64, 20 )
+size_flags_vertical = 2
+min_value = -4.0
+max_value = 4.0
+step = 0.1
+
+[node name="Pan" parent="LTab/Metadata/GridContainer" instance=ExtResource( 9 )]
+margin_top = 104.0
+margin_right = 112.0
+margin_bottom = 124.0
+rect_min_size = Vector2( 64, 20 )
+size_flags_horizontal = 3
+min_value = -1.0
+max_value = 1.0
+step = 0.0
+special_display = 4
+
 [node name="LFO" type="Control" parent="LTab"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 1.0
@@ -304,6 +402,7 @@ margin_top = 8.0
 margin_right = -48.0
 margin_bottom = 28.0
 rect_min_size = Vector2( 56, 20 )
+custom_styles/slider = ExtResource( 36 )
 max_value = 1023.0
 
 [node name="Duty" parent="LTab/LFO/WavePanel" instance=ExtResource( 9 )]
@@ -312,6 +411,7 @@ margin_top = 4.0
 margin_right = 205.0
 margin_bottom = 24.0
 rect_min_size = Vector2( 64, 20 )
+custom_styles/slider = ExtResource( 36 )
 max_value = 65535.0
 value = 32767.0
 associated_property = "duty"
@@ -470,6 +570,7 @@ margin_top = 45.0
 margin_right = 255.0
 margin_bottom = 65.0
 rect_min_size = Vector2( 112, 20 )
+custom_styles/slider = ExtResource( 36 )
 max_value = 32767.0
 exp_edit = true
 associated_property = "Delay"
@@ -481,6 +582,7 @@ margin_top = 77.0
 margin_right = 255.0
 margin_bottom = 97.0
 rect_min_size = Vector2( 64, 20 )
+custom_styles/slider = ExtResource( 36 )
 max_value = 127.0
 value = 19.0
 associated_property = "Speed"
@@ -519,6 +621,7 @@ margin_top = 141.0
 margin_right = 255.0
 margin_bottom = 161.0
 rect_min_size = Vector2( 112, 20 )
+custom_styles/slider = ExtResource( 36 )
 max_value = 1.0
 step = 0.001
 associated_property = "pmd"
@@ -529,12 +632,13 @@ margin_top = 109.0
 margin_right = 255.0
 margin_bottom = 129.0
 rect_min_size = Vector2( 64, 20 )
+custom_styles/slider = ExtResource( 36 )
 max_value = 1023.0
 value = 1023.0
 exp_edit = true
 associated_property = "AMD"
 
-[node name="C     l" type="Control" parent="LTab"]
+[node name="Waveform" type="Control" parent="LTab"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -631,6 +735,45 @@ margin_right = 254.0
 margin_bottom = 24.0
 hint_tooltip = "Arrange operators by type into columns."
 icon = ExtResource( 30 )
+
+[node name="CustomWaveform" parent="." instance=ExtResource( 37 )]
+margin_left = 1037.0
+margin_top = 170.0
+margin_right = 1333.0
+margin_bottom = 594.0
+
+[node name="Knob" parent="." instance=ExtResource( 39 )]
+margin_left = 1168.36
+margin_top = 703.249
+margin_right = 198.363
+margin_bottom = 150.249
+theme = SubResource( 10 )
+value = 88.0
+notch = 0.246
+thickness = 0.5
+point_outwards = true
+value_align = Vector2( 0.5, 0.9 )
+
+[node name="Knob3" parent="." instance=ExtResource( 39 )]
+margin_left = 1116.36
+margin_top = 710.249
+margin_right = 145.363
+margin_bottom = 147.249
+theme = SubResource( 10 )
+max_value = 120.0
+value = 60.0
+tick_count = 11
+point_outwards = true
+
+[node name="Knob2" parent="." instance=ExtResource( 39 )]
+margin_left = 1085.75
+margin_top = 640.913
+margin_right = 110.745
+margin_bottom = 99.9127
+theme = SubResource( 10 )
+value = 25.0
+notch = 0.5
+thickness = 0.4
 
 [connection signal="timeout" from="FMPreview/Timer" to="FMPreview" method="_on_Timer_timeout"]
 [connection signal="gui_input" from="LTab/LFO/WavePanel/Preview/Panel" to="LTab" method="_on_Preview_gui_input"]

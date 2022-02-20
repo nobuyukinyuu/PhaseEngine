@@ -67,6 +67,29 @@ func arr_remove_all(arr:Array, item):
 		var idx = arr.find(item)
 		arr.remove(idx)
 
+func arr_smooth(arr, windowSize, wrap=false):
+	var result = []
+	result.resize(arr.size())
+
+	for i in arr.size() + (windowSize if wrap else 0):
+		var leftOffset = i - windowSize
+		var from = leftOffset if leftOffset >= 0 else 0
+		var to = i + windowSize + 1
+
+		var count = 0.0
+		var sum = 0.0
+		if wrap:
+			for j in range(from, to):
+				sum += arr[j % arr.size()]
+				count += 1
+		else:
+			for j in range(from, min(to, arr.size()) ):
+				sum += arr[j]
+				count += 1
+	
+		result[i%arr.size()] = sum / count
+	return result
+
 func delay_frames_to_time(nFrames:int):  #Converts a delay/hold value into its time in seconds.
 	return (nFrames<<2) / (mixRate/3)
 
@@ -125,3 +148,9 @@ func swap_scene(src, target, free_src=true):
 
 func notenum_from_hz(hz):
 	return round( (12*log(hz/440.0))/log(2) + NOTE_A4)
+
+func swap32(x):
+	return (((x << 24) & 0xFF000000) |
+			((x <<  8) & 0x00FF0000) |
+			((x >>  8) & 0x0000FF00) |
+			((x >> 24) & 0x000000FF))

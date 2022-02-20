@@ -45,7 +45,7 @@ namespace PhaseEngine
         public static readonly ushort[] saw = new ushort[256];
 
 
-        public static readonly short[] defaultWavetable = new short[256];
+        public static readonly short[] defaultWavetable = new short[WaveTableData.TBL_SIZE];
  
 
         //Note transposition ratio table
@@ -100,6 +100,7 @@ namespace PhaseEngine
                 // saw[i] = (ushort)(Tools.ToFixedPoint( inc, 8) | (uint)inc  & (ushort.MaxValue>>0));
                 saw[i] = (ushort) ( (float) Math.Round(-Tools.Log2(inc*2) * 256));
             }
+
 
             //LFOs, 16kb tables etc
             for (int i=1; i<8192; i++)

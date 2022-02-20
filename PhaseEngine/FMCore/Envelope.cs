@@ -54,6 +54,7 @@ namespace PhaseEngine
         public LevelTable ksl = new LevelTable();
         public VelocityTable velocity = new VelocityTable();
 
+        public byte wavetable_bank;
 
         public IResponseTable GetTable(RTableIntent intent)
         {

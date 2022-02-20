@@ -1,4 +1,4 @@
-extends WindowDialog
+extends Control
 
 # warning-ignore:unused_signal
 signal value_changed
@@ -9,12 +9,9 @@ var import_path = ""
 const font = preload("res://gfx/fonts/numerics_7seg.tres")
 
 
-
 func _ready():
-	show()
 	$H/MenuButton.get_popup().theme = $CPMenu.theme
-	$H/Banks.get_popup().theme = $CPMenu.theme
-	$H/Banks.get_popup().add_font_override("font", $H/Banks.get_font("font"))
+#	$H/Banks.get_popup().theme = $CPMenu.theme
 
 	var check = AtlasTexture.new()
 	var uncheck = AtlasTexture.new()
@@ -24,8 +21,8 @@ func _ready():
 	uncheck.region = Rect2(0,0,16,16)
 	check.region = Rect2(16,0,16,16)
 	
-	$H/Banks.get_popup().add_icon_override("radio_unchecked", uncheck)
-	$H/Banks.get_popup().add_icon_override("radio_checked", check)
+#	$H/Banks.get_popup().add_icon_override("radio_unchecked", uncheck)
+#	$H/Banks.get_popup().add_icon_override("radio_checked", check)
 
 	connect("value_changed", self, "_on_value_changed")
 
@@ -37,9 +34,20 @@ func _ready():
 		o.rect_min_size.y = 24
 		break
 
-	_on_Smooth_toggled($H2/Smooth.pressed)
 
 func reload():
+#	if !global.currentPatch:  return
+#	var sz = global.currentPatch.WaveformBankSize
+#
+#	$H/Banks.clear()
+#
+#	if sz == 0:
+#		print ("CustomWaveform:  Waveform bank size is 0...")
+##		add_bank()
+#
+#	for i in sz:
+#		$H/Banks.add_item(str(i), i)
+#
 	fetch_table()
 
 func fetch_table(index=0):
@@ -166,8 +174,12 @@ func _on_Dialog_file_selected(path):
 #	owner.modulate.a = 0.5
 	$WaveImport/Margin/V/Header.text = wave.to_string()
 	$WaveImport.popup_centered()
+	
 
 
+func _on_WaveImport_popup_hide():
+#	owner.modulate.a = 1.0
+	pass # Replace with function body.
 
 
 func _on_WaveImport_about_to_show():
@@ -249,16 +261,3 @@ func _on_btnSquish_pressed():
 
 func _on_Fidelity_value_changed(value):
 	$VU.fidelity_step = 1.0 / (1<<int(value))
-
-
-func _on_Quantize_value_changed(value):
-	$VU.quantize_step = 1<<int(value)
-
-onready var smooth_group = [$H2/Wrap, $Amount, $"Preserve Center"]
-func _on_Smooth_toggled(pressed):
-	for o in smooth_group:
-		o.disabled = !pressed
-	$VU.needs_recalc = true
-
-func _on_Wrap_toggled(_pressed):
-	$VU.needs_recalc = true

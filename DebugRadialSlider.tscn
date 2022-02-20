@@ -1,0 +1,151 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://gfx/polar.gdshader" type="Shader" id=1]
+[ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=3]
+
+[sub_resource type="StyleBoxFlat" id=8]
+bg_color = Color( 0.152941, 0.152941, 0.152941, 0.768627 )
+border_width_top = 1
+border_width_bottom = 1
+expand_margin_right = 1.0
+expand_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxFlat" id=9]
+bg_color = Color( 0.0784314, 0.482353, 1, 0.768627 )
+border_width_top = 1
+border_width_bottom = 1
+expand_margin_left = 1.0
+expand_margin_right = 1.0
+expand_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0.121569, 0.203922, 0.298039, 1 )
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id=4]
+bg_color = Color( 0.298039, 0.121569, 0.180392, 1 )
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id=7]
+content_margin_left = 8.0
+content_margin_right = 8.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+bg_color = Color( 0.423529, 0.756863, 1, 0.439216 )
+
+[sub_resource type="StyleBoxFlat" id=6]
+content_margin_left = 8.0
+content_margin_right = 8.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+bg_color = Color( 0.176471, 0.65098, 1, 0.439216 )
+
+[sub_resource type="ShaderMaterial" id=1]
+shader = ExtResource( 1 )
+shader_param/rect_size = Vector2( 32, 32 )
+shader_param/zoom_len = 1.0
+shader_param/zoom_angle = 1.0
+shader_param/point_outwards = false
+
+[sub_resource type="ViewportTexture" id=5]
+flags = 12
+viewport_path = NodePath("Viewport")
+
+[node name="Control" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Viewport" type="Viewport" parent="."]
+size = Vector2( 96, 17 )
+size_override_stretch = true
+transparent_bg = true
+handle_input_locally = false
+disable_3d = true
+usage = 0
+render_target_update_mode = 3
+
+[node name="Txt" parent="Viewport" instance=ExtResource( 3 )]
+margin_left = 1.0
+margin_top = -8.0
+margin_right = 95.0
+margin_bottom = 12.0
+rect_min_size = Vector2( 64, 20 )
+custom_styles/slider = SubResource( 8 )
+custom_styles/grabber_area_highlight = SubResource( 9 )
+custom_styles/grabber_area = SubResource( 9 )
+value = 32.0
+
+[node name="Panel" type="Panel" parent="Viewport"]
+visible = false
+margin_left = 4.0
+margin_top = 2.0
+margin_right = 68.0
+margin_bottom = 42.0
+custom_styles/panel = SubResource( 3 )
+
+[node name="Panel2" type="Panel" parent="Viewport"]
+visible = false
+margin_left = 84.0
+margin_top = 2.0
+margin_right = 124.0
+margin_bottom = 122.0
+custom_styles/panel = SubResource( 4 )
+
+[node name="Slider" type="HSlider" parent="Viewport"]
+visible = false
+margin_left = 1.0
+margin_top = 1.0
+margin_right = 95.0
+margin_bottom = 17.0
+custom_styles/grabber_area_highlight = SubResource( 7 )
+custom_styles/grabber_area = SubResource( 6 )
+value = 50.0
+tick_count = 7
+ticks_on_borders = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="Viewport"]
+visible = false
+margin_left = 48.0
+margin_right = 56.0
+margin_bottom = 14.0
+text = "V"
+
+[node name="T" type="TextureRect" parent="."]
+material = SubResource( 1 )
+margin_right = 32.0
+margin_bottom = 32.0
+texture = SubResource( 5 )
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ReferenceRect" type="ReferenceRect" parent="T"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+editor_only = false
+__meta__ = {
+"_edit_use_anchors_": false
+}

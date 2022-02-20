@@ -22,10 +22,10 @@ namespace PhaseEngine
         public Envelope eg = new Envelope();
         public EGStatus egStatus = EGStatus.INACTIVE;
         public ushort egAttenuation = Envelope.L_MAX;  //5-bit value
-
-
         public Increments pg = Increments.Prototype();
  
+        public WaveTableData wavetable;
+
         // public abstract void SetOscillatorType(Oscillator.waveFunc waveFunc);
         public abstract void SetOscillatorType(byte waveform_index);
         // public abstract short RequestSample(ushort modulation = 0);
@@ -114,6 +114,14 @@ namespace PhaseEngine
                     operatorOutputSample = OperatorType_Noise;
                     return;
                 }
+
+                case "Wave":
+                {
+                    //TODO:  Set special functions for waveform, send auxdata with current bank
+                    if (eg.feedback>0) operatorOutputSample = ComputeWavetableFeedback; else operatorOutputSample = ComputeWavetable;
+                    return;
+                    break; //change to return; once implemented
+                }
             }
 
             //Feedback causes amplitude oscillation issues when applied to sounds, so we don't use this function if the feedback's off.
@@ -132,6 +140,34 @@ namespace PhaseEngine
 
         //=============Oscillator output types.  Either standard waveform (log domain), noise, or sample.=========================
 
+
+        public short ComputeWavetableFeedback(ushort modulation, ushort am_offset)
+        {
+            var avg = (fbBuf[0] + fbBuf[1]) >> (10 - eg.feedback);
+            var output = ComputeWavetable(unchecked((ushort)(avg+modulation)), am_offset);
+            fbBuf[1] = fbBuf[0];
+            fbBuf[0] = output;
+
+            return output;            
+        }
+        public short ComputeWavetable(ushort modulation, ushort am_offset)
+        {
+            ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + modulation);
+
+            //TODO:  Consider using this.CurrentTable to reduce fetch calls.
+            //  This would also allow a Linear intent to create morphed tables during Clock() at a rate we can specify as a separate envelope
+            var tbl = this.wavetable?.GetTable(eg.wavetable_bank)?? Tables.defaultWavetable;  
+            var samp = (short) oscillator.Generate(phase, eg.duty, ref flip, __makeref(tbl));
+   
+            // get the attenuation from the envelope generator as a 4.6 value, shifted up to 4.8
+            ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);
+
+            // combine into a 5.8 value, then convert from attenuation to 13-bit linear volume
+            int result = Tables.attenuation_to_volume((ushort)(samp + env_attenuation));
+
+            return flip? (short)-result : (short)result;
+ 
+        }
 
         //Noise generators produce asymmetrical data.  Values must be translated to/from the log domain.
         public short OperatorType_Noise(ushort modulation, ushort am_offset)

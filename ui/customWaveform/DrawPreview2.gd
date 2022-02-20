@@ -1,14 +1,10 @@
 extends TextureRect
 
 var tbl = []
-var smooth_tbl = []
-var display_tbl = []
-
 const full16 = preload("res://gfx/ui/vu/full16_temp.png")
 const indicator = preload("res://gfx/ui/vu/indicator16.png")
 
 const light_color = Color("5b99c4")
-const lighter_color = Color("80ccff")
 const dark_color = Color("0072c4")
 
 var elementWidth = 5  #How wide is a column?
@@ -37,24 +33,32 @@ var lineA=Rect2()  #Line positions for line-drawing (midclick)
 var lineB=Rect2()  #Position is real x/y, size is table array pos + value
 
 var fidelity_step:float = 1/65536.0
-var quantize_step:float = 1
 
 func _ready():
 #	elementWidth = texture.get_width()
 	if elementWidth == null:  elementWidth = 5
 
-	for i in 256:
+	for i in 128:
 		tbl.append(50)
-		smooth_tbl.append(50)
-		display_tbl.append(50)
 
+	cursor_img.create(24,16,false,Image.FORMAT_RGBA8)
+	var tex = ImageTexture.new()
+
+	cursor_img.lock()
+	cursor_img.blit_rect(cursor,Rect2(Vector2.ZERO, cursor.get_size()),Vector2.ZERO)
+	cursor_img.unlock()
+#	set_cursor("01.9")
+	cursor_texture.create_from_image(cursor_img,0)
+	custom_texture.create_from_image(cursor_img,0)
+#	cursor_texture = tex
 
 	owner.connect("gui_input", self, "owner_input")
+#	owner.get_node("Panel").connect("gui_input", self, "owner_input")
 
 	connect("mouse_exited", self, "reset_relative_delta")
 
 var relative_delta = Vector2.ZERO
-func _gui_input(event):
+func _gui_input(event):	
 	
 	var process = NO
 	if event is InputEventMouseMotion:
@@ -65,8 +69,6 @@ func _gui_input(event):
 		if event.button_index == BUTTON_LEFT and event.pressed: 
 			process = PROCESS_LEFT
 			last_x = get_local_mouse_position().x
-		elif event.button_index == BUTTON_LEFT and !event.pressed:
-			changing = -1
 		if event.button_index == BUTTON_MIDDLE:
 			if event.pressed:  
 				process = PROCESS_MID  
@@ -94,20 +96,30 @@ func _gui_input(event):
 
 		changing = val
 
-#		tbl[arpos] = val  #Array position set to value.
-		set_table_pos(arpos, val)  #Array position set to value.
+		tbl[arpos] = val  #Array position set to value.
 
 		#Interpolate from last mouse position to fill gaps
-		if abs(relative_delta.x) > 1:
+		if abs(relative_delta.x) > 2:
 			var arpos2 = clamp(xy.x, 0, tbl.size()-1)
+			var val2 = xy.y
 			var stride = float(max(arpos, arpos2) - min(arpos, arpos2))
 			for i in stride:
 				var weight = i/stride
-				var val2 = lerp(xy.y, val, weight if arpos>arpos2 else 1.0-weight)
-				val2 = stepify(val2/100.0, fidelity_step) * 100
-#				tbl[min(arpos, arpos2)+i] = lerp(val2, val, weight if arpos>arpos2 else 1.0-weight)
-				set_table_pos( min(arpos, arpos2)+i, val2)
+				tbl[min(arpos, arpos2)+i] = lerp(val2, val, weight if arpos>arpos2 else 1.0-weight)
 
+		#Determine grouping.  Ideally we'd lerp the values between the one the user selected
+		#and the values next to it on the VU meter display.  Rudimentary set is also fine..
+		var numElements = int(rect_size.x / elementWidth)
+		var groupWidth = numElements / float(tbl.size())  #Value used to stepify between 1/(arraySize) to 1/(VisualElements)
+		var startPos = int(arpos * groupWidth) * (1/groupWidth)  #Stepified position.
+#		prints("Elements:", numElements, "groupWidth:", groupWidth, "startPos:",startPos)
+#
+
+#		#Interpolation methods.
+		for i in range(startPos, min(tbl.size(), startPos+ (1/groupWidth))):
+#				print(i)
+			tbl[i] = val
+			owner.emit_signal("value_changed", i, val)
 
 		update()
 		return
@@ -163,8 +175,7 @@ func process_line():
 		percent = stepify(percent, fidelity_step)
 		var val = lerp(startval, endval, percent )
 		print(percent)
-#		tbl[i] = val
-		set_table_pos(i, val)
+		tbl[i] = val
 		owner.emit_signal("value_changed", i, val)
 	
 	#finally,
@@ -182,44 +193,28 @@ func get_table_pos(lock_x=false, mouse=get_local_mouse_position()) -> Vector2:
 	var val = clamp(lerp(1,0, mouse.y / float(rect_size.y)) , 0, 1)
 	val = stepify(val, fidelity_step)
 	val *= 100
-	
-	arpos = floor(arpos/quantize_step) * quantize_step
 	return Vector2(arpos, val)
 
-func set_table_pos(arpos, val):
-	#Fill all values with the quantized step values
-	for i in quantize_step:
-		if arpos+i>= tbl.size():  break
-		tbl[arpos+i] = val
-
-	needs_recalc = true
 
 func _draw():
 	#Draw centerline
 	draw_line(Vector2(0,rect_size.y/2), Vector2(rect_size.x, rect_size.y/2), ColorN('teal', 0.5))
 
-	#Draw the line values.
-	var lastPos
-	var lastPos2
-	for i in range(0, rect_size.x):
+#	#Draw the bars.
+	for i in range(0, rect_size.x, elementWidth):
 		var val =  tbl[ lerp(0, tbl.size(), i / float(rect_size.x)) ]
-		var val2 =  display_tbl[ lerp(0, tbl.size(), i / float(rect_size.x)) ]
-		var pos = Vector2(i, rect_size.y - val/100.0 * rect_size.y )
-		var pos2 = Vector2(i, rect_size.y - val2/100.0 * rect_size.y )
-		var center = Vector2(i, rect_size.y/2)
-		
-		var c=light_color
-		var c2=dark_color
-		c2.a = 0.2
-		c.a = 0.5
-		draw_line(center, pos, c2)
-		if i>0:  
-			draw_line(lastPos, pos, c, 1.0, true)
-			draw_line(lastPos2, pos2, lighter_color, 1.0, true)
-		lastPos=pos
-		lastPos2=pos2
+		var pos = Vector2(i, rect_size.y - int( lerp(0, rect_size.y,val/200.0) ) * 2 )
+		var sz = Vector2(elementWidth, pos.y - (rect_size.y / 2) )
 
-	changing = -1
+		var rect = Rect2(pos,sz)
+
+		#Swap rect's y pos and y size so the lower value comes first
+		if val < 50:
+			var temp = rect.size.y
+			rect.position.y -= rect.size.y
+
+		draw_texture_rect(full16, rect,true, Color(1,1,1,0.5))
+		draw_texture_rect(indicator,Rect2(pos, Vector2(elementWidth,indicator.get_height())),false)
 
 
 	#Grid lines
@@ -232,16 +227,41 @@ func _draw():
 	#Draw the special process line.
 	draw_line(lineA.position, lineB.position, ColorN("yellow"),1.0,true)
 
-#	if changing>=0:
-##		var scaleVal = round((rMax[owner.intent] / float(global.RT_MINUS_ONE)) * changing)
-#		var scaleVal = round((changing - 50)/50.0 * (1.0/fidelity_step))
-#		if scaleVal == 32768: scaleVal -=1
-#		draw_string(font, get_local_mouse_position() + Vector2(16, 18), str(scaleVal), ColorN("black"))
-#		draw_string(font, get_local_mouse_position() + Vector2(14, 16), str(scaleVal))	
-	if changing != $Overlay/Txt.changing:
-		$Overlay/Txt.changing = changing
-		$Overlay/Txt.update()
+	if changing>=0:
+#		var scaleVal = round((rMax[owner.intent] / float(global.RT_MINUS_ONE)) * changing)
+		var scaleVal = round((changing - 50)/50.0 * (1.0/fidelity_step))
+		if scaleVal == 32768: scaleVal -=1
+		draw_string(font, get_local_mouse_position() + Vector2(16, 18), str(scaleVal), ColorN("black"))
+		draw_string(font, get_local_mouse_position() + Vector2(14, 16), str(scaleVal))	
 
+
+
+#Sets the mouse cursor to something useful
+func set_cursor(volume:String):
+	cursor_img.lock()
+
+	for i in range(1,4):
+		cursor_img.blit_rect(numbers,Rect2(4,0,4,8), Vector2(i*4 +8,8))
+	
+	for i in min(4, String(int(volume)).length()):
+		var n = int(volume.ord_at(i))
+		
+		var pos = Vector2(4,0)
+		if n == 46:
+			pos = Vector2.ZERO
+		elif (n>=48 and n<58):
+			pos = Vector2((n-48)*4 + 8, 0)
+		cursor_img.blit_rect(numbers,Rect2(pos, Vector2(4,8)),Vector2(i*4 +8,8))
+	
+#	if volume.begins_with("100"):  cursor_img.blit_rect(numbers,Rect2(4,0,4,8), Vector2(12,8))
+	
+	cursor_img.unlock()
+	custom_texture.create_from_image(cursor_img,0)
+
+
+func set_table(table):
+	tbl = table
+	update()
 
 
 func _make_custom_tooltip(_for_text):
@@ -252,49 +272,11 @@ func _make_custom_tooltip(_for_text):
 	
 
 	var yValue = (tbl[int(pos.x)]-50) / 50.0
+	
+
 	yValue = str(yValue).pad_decimals(2) 
 
 	var currentY = String((get_table_pos().y - 50)/50.0).pad_decimals(2)
 	p.text = "%sx: %s\ny: %s\n0n:%s" % [hint2, pos.x, yValue, currentY]
 	return p
 
-
-var needs_recalc = false
-func _on_RecalcSmooth_timeout():
-	if needs_recalc:
-		smooth()
-		needs_recalc = false
-		update()
-
-
-func smooth():
-	if !owner.get_node("H2/Smooth").pressed:
-		display_tbl = tbl
-		return
-	
-	smooth_tbl = global.arr_smooth(tbl, owner.get_node("Amount").value, owner.get_node("H2/Wrap").pressed)
-	
-	var val = owner.get_node("Preserve Center").value
-	var tmp = []
-	var dist:float = 64-val
-
-	if val > 0:  #Preserve edges
-		tmp.append_array(tbl)
-		for i in dist:  #Limit dist to half of tbl size if increasing range of the val slider
-			var j = tbl.size()-1-i
-			var percent = i/dist
-			tmp[i] = lerp(smooth_tbl[i], tbl[i], percent)
-			tmp[j] = lerp(smooth_tbl[j], tbl[j], percent)
-		for i in tbl.size():
-			var percent = val/64.0
-			tmp[i] = lerp(smooth_tbl[i], tmp[i], percent)
-		display_tbl = tmp
-	else:
-		display_tbl = smooth_tbl
-	
-func _on_Amount_value_changed(_val):
-	needs_recalc = true
-
-
-func _on_Preserve_Center_value_changed(_val):
-	needs_recalc = true

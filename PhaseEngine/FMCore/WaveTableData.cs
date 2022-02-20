@@ -5,50 +5,81 @@ namespace PhaseEngine
 {
     public class WaveTableData
     {
-        const ushort TBL_SIZE=256;
-        short[] tbl = Tables.defaultWavetable;
+        public const ushort TBL_SIZE=128;
+        short[][] tbl;
 
-        bool NotInUse {get => tbl==Tables.defaultWavetable;}
+        bool NotInUse {get => tbl==null || tbl.Length==0;}
+        public int NumBanks {get => (int)tbl?.Length;}
         public WaveTableData()    {}
-        public WaveTableData(short[] input) { tbl = input; }
+        public WaveTableData(uint numBanks)    {tbl.InitArray(numBanks, TBL_SIZE);}
+        public WaveTableData(short[] input) { tbl = Tools.InitArray(1, input); }
+        public WaveTableData(uint numBanks, short[] input) { tbl = Tools.InitArray(numBanks, input); }
 
         #if GODOT
-            public WaveTableData(Godot.Collections.Array input)
+            public WaveTableData(uint numBanks, Godot.Collections.Array input)
             {
-                //Convert godot table to short array
                 var output= new short[TBL_SIZE];
                 for (int i=0; i<TBL_SIZE; i++)
-                {
                     output[i] = (short) input[i];
-                }
-                tbl = output;
+                tbl = Tools.InitArray(numBanks, output);
+            }
+            public void SetBank(int bank, Godot.Collections.Array input)
+            {
+                // //Convert godot table to short array
+                // var output= new short[TBL_SIZE];
+                // for (int i=0; i<TBL_SIZE; i++)
+                //     output[i] = (short) input[i];
+                tbl[bank] = (short[]) Convert.ChangeType(input, typeof(short[]));
+            }
+
+            public void SetTable(int bank, int index, Godot.Collections.Array array)
+            {
+                short[] row = tbl?[bank];
+                if(row != null) 
+                    for(int i=0; i<array.Count; i++)
+                        SetTable(bank, index, (short) array[i]);
             }
         #endif 
+        public void SetTable(int bank, int index, short[] array)
+        {
+            short[] row = tbl?[bank];
+            if(row != null) tbl[bank] = array;
+        }
+        public void SetTable(int bank, int index, short value)
+        {
+            short[] row = tbl?[bank];
+            if(row != null) tbl[bank][index] = value;
+        }
+        public short[] GetTable(int bank)
+        {
+            if (NotInUse) return Tables.defaultWavetable;
+            return tbl[bank]?? Tables.defaultWavetable;
+        }
 
-        ///Summary:  Quantizes the values of the table to correspond to the total number of samples divided by the amount.
-        public void Quantize(int amt)
+        /// Summary:  Quantizes the values of the table to correspond to the total number of samples divided by the amount.
+        public void Quantize(int bank, int amt)
         {
             if (amt<=1 || NotInUse) return;
 
             for (int i=0; i<TBL_SIZE; i+=amt)
             {
-                short val=tbl[i];  //Get Quantize value for this portion.
+                short val=tbl[bank][i];  //Get Quantize value for this portion.
 
                 //Set the next n indices to the value.
                 for (int j=0; j<amt && (i+j<TBL_SIZE); j++)
                 {
-                    tbl[i+j] = val;
+                    tbl[bank][i+j] = val;
                 }
             }
         }
 
-        //Summary:  Crushes the values of the table corresponding to the amount to shift right.
-        public void Crush(int amt)
+        /// Summary:  Crushes the values of the table corresponding to the amount to shift right.
+        public void Crush(int bank, int amt)
         {
             if (amt<=0 || NotInUse) return;
 
             for (int i=0; i<TBL_SIZE; i++)
-                tbl[i] >>= amt;
+                tbl[bank][i] >>= amt;
         }
 
 

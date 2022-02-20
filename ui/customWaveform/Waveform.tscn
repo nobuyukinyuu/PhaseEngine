@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=2]
+[gd_scene load_steps=38 format=2]
 
 [ext_resource path="res://ui/responseCurve/PresetMenu.theme" type="Theme" id=1]
 [ext_resource path="res://gfx/fonts/numerics_7seg.tres" type="BitmapFont" id=2]
@@ -8,31 +8,41 @@
 [ext_resource path="res://ui/customWaveform/DrawPreview.gd" type="Script" id=6]
 [ext_resource path="res://gfx/ui/vu/minmax_ruler_labels.png" type="Texture" id=7]
 [ext_resource path="res://gfx/ui/vu/ruler16.png" type="Texture" id=8]
-[ext_resource path="res://gfx/ui/vu/empty5.png" type="Texture" id=9]
-[ext_resource path="res://gfx/fonts/NoteFont.tres" type="BitmapFont" id=10]
+[ext_resource path="res://gfx/ui/vu/stripe_bg.png" type="Texture" id=9]
+[ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=10]
 [ext_resource path="res://ui/customWaveform/CustomWaveform.gd" type="Script" id=11]
 [ext_resource path="res://gfx/fonts/numerics_5x8.tres" type="BitmapFont" id=12]
-[ext_resource path="res://gfx/ui/godot_icons/Add.svg" type="Texture" id=13]
-[ext_resource path="res://gfx/ui/godot_icons/Remove.svg" type="Texture" id=14]
+[ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=13]
+[ext_resource path="res://ui/EGCheckBox.tres" type="Theme" id=14]
 [ext_resource path="res://gfx/ui/godot_icons/Load.svg" type="Texture" id=15]
 [ext_resource path="res://gfx/ui/icon_reset.svg" type="Texture" id=16]
+[ext_resource path="res://ui/FlatButton.theme" type="Theme" id=17]
+[ext_resource path="res://gfx/ui/filter/6.svg" type="Texture" id=18]
+[ext_resource path="res://ui/FileDialog.theme" type="Theme" id=19]
+[ext_resource path="res://ui/customWaveform/SmoothDialog.gd" type="Script" id=20]
+[ext_resource path="res://gfx/ui/vu/25_percent_halftone_overlay.png" type="Texture" id=21]
+[ext_resource path="res://gfx/fonts/NoteFont.tres" type="BitmapFont" id=22]
+[ext_resource path="res://gfx/ui/godot_icons/Add.svg" type="Texture" id=23]
+[ext_resource path="res://gfx/ui/godot_icons/Remove.svg" type="Texture" id=24]
 
-[sub_resource type="StyleBoxFlat" id=1]
-content_margin_left = 8.0
-content_margin_right = 8.0
-content_margin_top = 8.0
-content_margin_bottom = 8.0
-bg_color = Color( 0, 0, 0, 1 )
+[sub_resource type="StyleBoxFlat" id=10]
+bg_color = Color( 0, 0, 0, 0.878431 )
 border_width_left = 1
-border_width_top = 1
+border_width_top = 20
 border_width_right = 1
-border_width_bottom = 1
-border_color = Color( 0.231373, 0.231373, 0.231373, 1 )
-border_blend = true
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
+border_width_bottom = 8
+border_color = Color( 0, 0.666667, 0.894118, 1 )
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 6.0
+expand_margin_right = 4.0
+expand_margin_top = 20.0
+expand_margin_bottom = 6.0
+shadow_size = 10
+
+[sub_resource type="StyleBoxEmpty" id=11]
 
 [sub_resource type="AtlasTexture" id=2]
 atlas = ExtResource( 7 )
@@ -62,26 +72,104 @@ expand_margin_right = 4.0
 expand_margin_top = 2.0
 expand_margin_bottom = 3.0
 
+[sub_resource type="GDScript" id=12]
+script/source = "extends Control
+
+var changing=0
+
+func _draw():
+	if changing>=0:
+#		var scaleVal = round((rMax[owner.intent] / float(global.RT_MINUS_ONE)) * changing)
+		var scaleVal = round((changing - 50)/50.0 * (1.0/$\"../..\".fidelity_step)) / 2
+		if scaleVal == 32768: scaleVal -=1
+		var font = $\"../..\".font
+		draw_string(font, get_local_mouse_position() + Vector2(16, 18), str(scaleVal), ColorN(\"black\"))
+		draw_string(font, get_local_mouse_position() + Vector2(14, 16), str(scaleVal))
+	pass
+"
+
+[sub_resource type="StyleBoxEmpty" id=9]
+
 [sub_resource type="ButtonGroup" id=6]
 
-[node name="CustomWaveform" type="Control"]
-margin_right = 344.0
-margin_bottom = 324.0
+[sub_resource type="StyleBoxFlat" id=14]
+bg_color = Color( 0, 0, 0, 0.752941 )
+expand_margin_left = 2048.0
+expand_margin_right = 2048.0
+expand_margin_top = 2048.0
+expand_margin_bottom = 2048.0
+
+[sub_resource type="StyleBoxFlat" id=13]
+bg_color = Color( 0, 0, 0, 0.776471 )
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id=7]
+bg_color = Color( 0, 0, 0, 0.878431 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 8
+border_color = Color( 0, 0.666667, 0.894118, 1 )
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 6.0
+expand_margin_right = 4.0
+expand_margin_top = 6.0
+expand_margin_bottom = 6.0
+shadow_size = 10
+
+[sub_resource type="GDScript" id=8]
+script/source = "extends ColorRect
+
+var tbl = []
+var borderColor = Color(\"736dc8ff\")
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	pass # Replace with function body.
+
+func _draw():
+	draw_line(Vector2.ZERO, Vector2(rect_size.x, 0), borderColor)
+	draw_line(Vector2.ZERO, Vector2(0, rect_size.y), borderColor)
+	draw_line(rect_size, Vector2(0, rect_size.y), borderColor)
+	draw_line(rect_size, Vector2(rect_size.x, 0), borderColor)
+	draw_line(Vector2(0, rect_size.y/2.0), Vector2(rect_size.x, rect_size.y/2.0), borderColor.darkened(0.7))
+	
+	for i in range(1,rect_size.x):
+		var A = table(i-1)
+		var B = table(i)
+		draw_line(A, B, ColorN(\"white\") )
+		
+func table(xPos):
+	if tbl.size() == 0: return 0
+	var x = xPos
+	var y = tbl[min(xPos, rect_size.x)/float(rect_size.x) * tbl.size()]
+	y = rect_size.y*0.5 - (y-50)/100.0 * rect_size.y
+	return Vector2(x,y)
+"
+
+[node name="CustomWaveform" type="WindowDialog"]
+margin_left = 8.0
+margin_top = 24.0
+margin_right = 304.0
+margin_bottom = 448.0
+custom_styles/panel = SubResource( 10 )
 script = ExtResource( 11 )
 __meta__ = {
-"_edit_lock_": true,
 "_edit_use_anchors_": false
 }
 
 [node name="Panel" type="Panel" parent="."]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_top = 36.0
-margin_right = -3.05176e-05
-margin_bottom = -3.05176e-05
+margin_top = 40.0
+margin_right = 24.0
+margin_bottom = 336.0
 mouse_filter = 2
-custom_styles/panel = SubResource( 1 )
+custom_styles/panel = SubResource( 11 )
 __meta__ = {
+"_edit_group_": true,
 "_edit_use_anchors_": false
 }
 
@@ -131,11 +219,10 @@ __meta__ = {
 }
 
 [node name="VU" type="TextureRect" parent="."]
-margin_left = 20.0
-margin_top = 52.0
-margin_right = 340.0
-margin_bottom = 308.0
-rect_clip_content = true
+margin_left = 24.0
+margin_top = 56.0
+margin_right = 280.0
+margin_bottom = 312.0
 hint_tooltip = "[Table not set]"
 mouse_filter = 0
 texture = ExtResource( 9 )
@@ -146,40 +233,55 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="VU"]
-margin_left = 214.0
-margin_top = 320.0
-margin_right = 254.0
-margin_bottom = 334.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="ToolTipProto" type="Label" parent="VU"]
 visible = false
 margin_left = -21.0
 margin_top = -4.0
 margin_right = 45.0
 margin_bottom = 18.0
-custom_styles/normal = SubResource( 5 )
-custom_fonts/font = ExtResource( 2 )
 custom_colors/font_color = Color( 0.352941, 0.878431, 0.878431, 1 )
 custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
 custom_constants/shadow_offset_x = 2
 custom_constants/shadow_offset_y = 2
+custom_fonts/font = ExtResource( 2 )
+custom_styles/normal = SubResource( 5 )
 text = "28.0"
 valign = 3
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Overlay" type="TextureRect" parent="VU"]
+self_modulate = Color( 0, 0, 0, 0.501961 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 21 )
+stretch_mode = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Txt" type="Control" parent="VU/Overlay"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = SubResource( 12 )
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="RecalcSmooth" type="Timer" parent="VU"]
+wait_time = 0.03
+autostart = true
+
 [node name="CPMenu" type="PopupMenu" parent="."]
-margin_left = 392.0
-margin_top = 192.0
-margin_right = 512.0
-margin_bottom = 250.0
+margin_left = -128.0
+margin_top = 8.0
+margin_right = -8.0
+margin_bottom = 84.0
 theme = ExtResource( 1 )
-items = [ "Copy", ExtResource( 4 ), 0, false, false, 0, 0, null, "", false, "", null, 0, false, false, 2, 0, null, "", true, "Paste", ExtResource( 5 ), 0, false, false, 2, 0, null, "", false ]
+items = [ "Copy", ExtResource( 4 ), 0, false, false, 0, 0, null, "", false, "Paste", ExtResource( 5 ), 0, false, false, 2, 0, null, "", false, "", null, 0, false, false, 3, 0, null, "", true, "Smooth=", ExtResource( 18 ), 0, false, false, 3, 0, null, "", false ]
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -195,13 +297,15 @@ __meta__ = {
 }
 
 [node name="WaveImport" type="ConfirmationDialog" parent="."]
-visible = true
-margin_left = 352.0
-margin_right = 600.0
-margin_bottom = 320.0
+margin_left = 648.0
+margin_top = 24.0
+margin_right = 984.0
+margin_bottom = 480.0
+theme = ExtResource( 19 )
 popup_exclusive = true
 window_title = "Import Waveform..."
 __meta__ = {
+"_edit_group_": true,
 "_edit_use_anchors_": false
 }
 
@@ -211,7 +315,8 @@ anchor_bottom = 1.0
 margin_left = 8.0
 margin_top = 8.0
 margin_right = -8.0
-margin_bottom = -36.0
+margin_bottom = -26.0
+theme = ExtResource( 19 )
 custom_constants/margin_right = 16
 custom_constants/margin_top = 16
 custom_constants/margin_left = 16
@@ -223,79 +328,80 @@ __meta__ = {
 [node name="V" type="VBoxContainer" parent="WaveImport/Margin"]
 margin_left = 16.0
 margin_top = 16.0
-margin_right = 624.0
-margin_bottom = 344.0
+margin_right = 304.0
+margin_bottom = 374.0
 custom_constants/separation = 8
 
 [node name="Header" type="Label" parent="WaveImport/Margin/V"]
-margin_right = 608.0
-margin_bottom = 65.0
+margin_right = 288.0
+margin_bottom = 41.0
 text = "Format:  RIFF Wave
 Size:  0 bytes
 Channels: 1
 Sample Rate:  44100 Hz, 16-bit"
 
 [node name="Separator" type="Panel" parent="WaveImport/Margin/V"]
-margin_top = 73.0
-margin_right = 608.0
-margin_bottom = 74.0
+margin_top = 49.0
+margin_right = 288.0
+margin_bottom = 50.0
 rect_min_size = Vector2( 0, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="chkSigned" type="CheckButton" parent="WaveImport/Margin/V"]
-margin_top = 82.0
-margin_right = 608.0
-margin_bottom = 122.0
+margin_top = 58.0
+margin_right = 288.0
+margin_bottom = 90.0
+custom_styles/normal = SubResource( 9 )
 pressed = true
 text = "Unsigned / Signed"
 
 [node name="chkBits" type="CheckButton" parent="WaveImport/Margin/V"]
-margin_top = 130.0
-margin_right = 608.0
-margin_bottom = 170.0
+margin_top = 98.0
+margin_right = 288.0
+margin_bottom = 130.0
+custom_styles/normal = SubResource( 9 )
 text = "8-bit / 16-bit"
 
 [node name="chkStereo" type="CheckButton" parent="WaveImport/Margin/V"]
-margin_top = 178.0
-margin_right = 608.0
-margin_bottom = 218.0
+margin_top = 138.0
+margin_right = 288.0
+margin_bottom = 170.0
+custom_styles/normal = SubResource( 9 )
 text = "Stereo"
 
 [node name="Separator2" type="Panel" parent="WaveImport/Margin/V"]
-margin_top = 226.0
-margin_right = 608.0
-margin_bottom = 227.0
+margin_top = 178.0
+margin_right = 288.0
+margin_bottom = 179.0
 rect_min_size = Vector2( 0, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Spacer" type="Control" parent="WaveImport/Margin/V"]
-margin_top = 235.0
-margin_right = 608.0
-margin_bottom = 243.0
+[node name="Spacer" type="HSeparator" parent="WaveImport/Margin/V"]
+modulate = Color( 1, 1, 1, 0.313726 )
+margin_top = 187.0
+margin_right = 288.0
+margin_bottom = 195.0
 rect_min_size = Vector2( 0, 8 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="HBoxContainer" type="HBoxContainer" parent="WaveImport/Margin/V"]
-margin_top = 251.0
-margin_right = 608.0
-margin_bottom = 275.0
+margin_top = 203.0
+margin_right = 288.0
+margin_bottom = 221.0
 
 [node name="Label" type="Label" parent="WaveImport/Margin/V/HBoxContainer"]
 margin_top = 5.0
-margin_right = 45.0
-margin_bottom = 19.0
+margin_right = 64.0
+margin_bottom = 13.0
 text = "Stride: "
 
 [node name="txtStride" type="LineEdit" parent="WaveImport/Margin/V/HBoxContainer"]
-margin_left = 49.0
-margin_right = 576.0
-margin_bottom = 24.0
+margin_left = 70.0
+margin_right = 258.0
+margin_bottom = 18.0
 size_flags_horizontal = 3
 align = 2
 placeholder_text = "(in bytes)"
@@ -314,9 +420,9 @@ group = SubResource( 6 )
 text = "Stride"
 
 [node name="btnSquish" type="Button" parent="WaveImport/Margin/V/HBoxContainer"]
-margin_left = 580.0
-margin_right = 608.0
-margin_bottom = 24.0
+margin_left = 264.0
+margin_right = 288.0
+margin_bottom = 18.0
 hint_tooltip = "Automatically set the sampling 
 stride based on the chunk size."
 custom_constants/hseparation = 8
@@ -324,51 +430,105 @@ group = SubResource( 6 )
 icon = ExtResource( 16 )
 
 [node name="Dialog" type="FileDialog" parent="WaveImport"]
-visible = true
 margin_left = 8.0
 margin_top = 8.0
-margin_right = 648.0
-margin_bottom = 400.0
-rect_min_size = Vector2( 640, 392 )
+margin_right = 328.0
+margin_bottom = 430.0
+rect_min_size = Vector2( 320, 392 )
+theme = ExtResource( 19 )
 popup_exclusive = true
 window_title = "Open a File"
 mode = 0
 access = 2
 filters = PoolStringArray( "*.wav; Wave File", "*.raw; Raw data" )
-current_dir = "/Projects/godot/Code/gdsFM"
-current_path = "/Projects/godot/Code/gdsFM/"
+current_dir = "/music/samples"
+current_path = "/music/samples/"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="H" type="HBoxContainer" parent="."]
+[node name="Darkener" type="Panel" parent="WaveImport/Dialog"]
+show_behind_parent = true
 margin_left = 8.0
-margin_right = 344.0
-margin_bottom = 32.0
+margin_top = 8.0
+margin_right = 312.0
+margin_bottom = 396.0
+mouse_filter = 2
+custom_styles/panel = SubResource( 14 )
+
+[node name="Darkener" type="Panel" parent="WaveImport"]
+show_behind_parent = true
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 328.0
+margin_bottom = 430.0
+mouse_filter = 2
+custom_styles/panel = SubResource( 14 )
+
+[node name="H" type="HBoxContainer" parent="."]
+anchor_right = 1.0
+margin_top = -21.0
+margin_right = -24.0
+margin_bottom = 6.0
 custom_constants/separation = 4
 __meta__ = {
 "_edit_group_": true,
 "_edit_use_anchors_": false
 }
 
-[node name="lblBank" type="Label" parent="H"]
-margin_top = 12.0
-margin_right = 205.0
-margin_bottom = 20.0
+[node name="MenuButton" type="MenuButton" parent="H"]
+margin_right = 27.0
+margin_bottom = 27.0
+custom_colors/font_color = Color( 0, 0, 0, 0.513726 )
+custom_colors/font_color_hover = Color( 0, 0, 0, 1 )
+custom_colors/font_color_pressed = Color( 0, 0.403922, 0.509804, 1 )
+custom_fonts/font = ExtResource( 12 )
+text = ":::"
+align = 2
+items = [ "Add", ExtResource( 23 ), 0, false, false, 0, 0, null, "", false, "", null, 0, false, false, 1, 0, null, "", true, "Delete", ExtResource( 24 ), 0, false, false, 5, 0, null, "", false, "", null, 0, false, true, 3, 0, null, "", true, "import...", ExtResource( 15 ), 0, false, false, 4, 0, null, "", false ]
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="lblTitle" type="Label" parent="H"]
+margin_left = 31.0
+margin_top = 9.0
+margin_right = 123.0
+margin_bottom = 17.0
+size_flags_horizontal = 3
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 1
+custom_constants/shadow_offset_y = 1
+custom_constants/shadow_as_outline = 1
+custom_fonts/font = ExtResource( 13 )
+text = " Waveform"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Spacer2" type="Label" parent="H"]
+margin_left = 127.0
+margin_top = 9.0
+margin_right = 220.0
+margin_bottom = 17.0
 size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 3 )
-text = "Waveform Bank:"
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Banks" type="OptionButton" parent="H"]
-margin_left = 209.0
-margin_right = 305.0
-margin_bottom = 32.0
-rect_min_size = Vector2( 96, 0 )
-custom_fonts/font = ExtResource( 10 )
+margin_left = 224.0
+margin_right = 272.0
+margin_bottom = 27.0
+rect_min_size = Vector2( 48, 0 )
+custom_fonts/font = ExtResource( 22 )
+custom_styles/hover = SubResource( 13 )
+custom_styles/pressed = SubResource( 13 )
+custom_styles/focus = SubResource( 13 )
+custom_styles/normal = SubResource( 13 )
 text = "0"
 align = 2
 items = [ "0", null, false, 0, null ]
@@ -377,24 +537,190 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="MenuButton" type="MenuButton" parent="H"]
-margin_left = 309.0
-margin_right = 336.0
-margin_bottom = 32.0
-custom_fonts/font = ExtResource( 12 )
-custom_colors/font_color = Color( 1, 1, 1, 0.513726 )
-custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
-custom_colors/font_color_pressed = Color( 0, 0.789855, 1, 1 )
-text = ":::"
+[node name="lblBank" type="Label" parent="H"]
+visible = false
+margin_left = 165.0
+margin_top = 5.0
+margin_right = 220.0
+margin_bottom = 13.0
+size_flags_horizontal = 3
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 1
+custom_constants/shadow_offset_y = 1
+custom_fonts/font = ExtResource( 13 )
+text = "Bank:"
 align = 2
-items = [ "Add", ExtResource( 13 ), 0, false, false, 0, 0, null, "", false, "", null, 0, false, false, 1, 0, null, "", true, "Delete", ExtResource( 14 ), 0, false, false, 5, 0, null, "", false, "", null, 0, false, true, 3, 0, null, "", true, "import...", ExtResource( 15 ), 0, false, false, 4, 0, null, "", false ]
+valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="SmoothDialog" type="PopupDialog" parent="."]
+margin_left = 440.0
+margin_top = 8.0
+margin_right = 632.0
+margin_bottom = 280.0
+theme = ExtResource( 14 )
+custom_styles/panel = SubResource( 7 )
+script = ExtResource( 20 )
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="V" type="VBoxContainer" parent="SmoothDialog"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 8.0
+margin_top = 8.0
+margin_right = -8.0
+margin_bottom = -8.0
+custom_constants/separation = 20
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="SmoothDialog/V"]
+margin_right = 176.0
+margin_bottom = 8.0
+custom_fonts/font = ExtResource( 13 )
+text = "Smooth Waveform="
+align = 1
+
+[node name="TextureRect" type="ColorRect" parent="SmoothDialog/V"]
+margin_top = 28.0
+margin_right = 176.0
+margin_bottom = 92.0
+rect_min_size = Vector2( 0, 64 )
+color = Color( 0, 0, 0, 1 )
+script = SubResource( 8 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Amount" parent="SmoothDialog/V" instance=ExtResource( 10 )]
+margin_top = 112.0
+margin_right = 176.0
+margin_bottom = 132.0
+max_value = 63.0
+step = 0.0
+special_display = 4
+
+[node name="Preserve Center" parent="SmoothDialog/V" instance=ExtResource( 10 )]
+margin_top = 152.0
+margin_right = 176.0
+margin_bottom = 172.0
+step = 0.0
+special_display = 4
+
+[node name="Wrap" type="CheckBox" parent="SmoothDialog/V"]
+margin_top = 192.0
+margin_right = 176.0
+margin_bottom = 210.0
+pressed = true
+text = " Wrap Around Edges"
+
+[node name="Control" type="Control" parent="SmoothDialog/V"]
+visible = false
+margin_top = 190.0
+margin_right = 176.0
+margin_bottom = 190.0
+
+[node name="Apply" type="Button" parent="SmoothDialog/V"]
+margin_left = 56.0
+margin_top = 230.0
+margin_right = 120.0
+margin_bottom = 254.0
+rect_min_size = Vector2( 64, 24 )
+size_flags_horizontal = 4
+theme = ExtResource( 17 )
+custom_fonts/font = ExtResource( 13 )
+text = "Apply"
+
+[node name="Fidelity" parent="." instance=ExtResource( 10 )]
+margin_left = 8.0
+margin_top = 16.0
+margin_right = 136.0
+margin_bottom = 36.0
+min_value = 2.0
+max_value = 16.0
+value = 16.0
+exp_edit = true
+
+[node name="Quantize" parent="." instance=ExtResource( 10 )]
+margin_left = 152.0
+margin_top = 16.0
+margin_right = 280.0
+margin_bottom = 36.0
+min_value = 1.0
+max_value = 6.0
+value = 1.0
+
+[node name="H2" type="HBoxContainer" parent="."]
+anchor_right = 1.0
+margin_left = 24.0
+margin_top = 320.0
+margin_right = -16.0
+margin_bottom = 344.0
+custom_constants/separation = 10
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Smooth" type="CheckBox" parent="H2"]
+margin_right = 82.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+custom_fonts/font = ExtResource( 13 )
+text = "Smooth"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Wrap" type="CheckBox" parent="H2"]
+margin_left = 92.0
+margin_right = 256.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+custom_fonts/font = ExtResource( 13 )
+pressed = true
+text = " Wrap Around Edge"
+
+[node name="Amount" parent="." instance=ExtResource( 10 )]
+margin_left = 8.0
+margin_top = 352.0
+margin_right = 280.0
+margin_bottom = 372.0
+max_value = 63.0
+step = 0.0
+exp_edit = true
+special_display = 4
+
+[node name="Preserve Center" parent="." instance=ExtResource( 10 )]
+margin_left = 8.0
+margin_top = 384.0
+margin_right = 280.0
+margin_bottom = 404.0
+step = 0.0
+special_display = 4
+
+[connection signal="timeout" from="VU/RecalcSmooth" to="VU" method="_on_RecalcSmooth_timeout"]
 [connection signal="index_pressed" from="CPMenu" to="." method="_on_CPMenu_index_pressed"]
 [connection signal="about_to_show" from="WaveImport" to="." method="_on_WaveImport_about_to_show"]
 [connection signal="confirmed" from="WaveImport" to="." method="_on_WaveImport_confirmed"]
 [connection signal="popup_hide" from="WaveImport" to="." method="_on_WaveImport_popup_hide"]
 [connection signal="pressed" from="WaveImport/Margin/V/HBoxContainer/btnSquish" to="." method="_on_btnSquish_pressed"]
 [connection signal="file_selected" from="WaveImport/Dialog" to="." method="_on_Dialog_file_selected"]
-[connection signal="item_selected" from="H/Banks" to="." method="_on_Banks_item_selected"]
+[connection signal="about_to_show" from="SmoothDialog" to="SmoothDialog" method="_on_SmoothDialog_about_to_show"]
+[connection signal="value_changed" from="SmoothDialog/V/Amount" to="SmoothDialog" method="_on_Amount_value_changed"]
+[connection signal="value_changed" from="SmoothDialog/V/Preserve Center" to="SmoothDialog" method="_on_Amount_value_changed"]
+[connection signal="toggled" from="SmoothDialog/V/Wrap" to="SmoothDialog" method="_on_Wrap_toggled"]
+[connection signal="pressed" from="SmoothDialog/V/Apply" to="." method="_on_Smooth_Apply_pressed"]
+[connection signal="value_changed" from="Fidelity" to="." method="_on_Fidelity_value_changed"]
+[connection signal="value_changed" from="Quantize" to="." method="_on_Quantize_value_changed"]
+[connection signal="toggled" from="H2/Smooth" to="." method="_on_Smooth_toggled"]
+[connection signal="toggled" from="H2/Wrap" to="." method="_on_Wrap_toggled"]
+[connection signal="value_changed" from="Amount" to="VU" method="_on_Amount_value_changed"]
+[connection signal="value_changed" from="Preserve Center" to="VU" method="_on_Preserve_Center_value_changed"]

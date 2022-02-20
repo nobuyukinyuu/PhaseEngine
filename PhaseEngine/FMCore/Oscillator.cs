@@ -9,8 +9,8 @@ namespace PhaseEngine
         waveFunc wf = Sine;
         short[] customWaveform = new short[128];
 
-        public static readonly waveFunc[] waveFuncs = {Sine2, Tri, Saw, Pulse, White, Pink, Brown, Noise1, Noise2};
-        public enum oscTypes {Sine, Triangle, Saw, Pulse, White, Pink, Brown, Noise1, Noise2};
+        public static readonly waveFunc[] waveFuncs = {Sine2, Tri, Saw, Pulse, White, Pink, Brown, Noise1, Noise2, Wave};
+        public enum oscTypes {Sine, Triangle, Saw, Pulse, White, Pink, Brown, Noise1, Noise2, Wave};
 
         public Oscillator(waveFunc wave)    {wf=wave;}
         // public void SetWaveform(waveFunc wave) {wf=wave;}
@@ -52,6 +52,18 @@ namespace PhaseEngine
         //     t = Math.Min((0.5f-s*(t-0.5f))/dt, 1.0f);    
         //     return s*(t*t - 2.0f*t + 1.0f);
         // }
+
+
+        public static ushort Wave(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
+        {
+            var auxdata2 = __refvalue(auxdata, short[]);
+            ushort phase = (ushort) unchecked((n>>3));  //TODO:  change this based on the bit depth of the table if it changes to len 256
+            var volume = auxdata2[phase & 0x7F];
+            var attenuation = Tables.vol2attenuation[Tools.Abs(volume) >> 2]; //Convert sample to 14-bit and get attenuation.
+
+            flip = volume < 0;
+            return attenuation;  //0x7F for tables of 128, or 0xFF for 256 if upped later....
+        }
 
         public static ushort Pulse(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {

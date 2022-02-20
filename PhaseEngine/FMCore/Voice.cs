@@ -29,6 +29,8 @@ namespace PhaseEngine
         public Algorithm alg = new Algorithm();
         public LFO lfo = new LFO();
 
+        public WaveTableData wavetable;
+
         public Channel preview;
 
         //TODO:  Voice description / meta probably goes here too....
@@ -296,7 +298,6 @@ namespace PhaseEngine
             /// Changes the algorithm without changing the opCount.
             public void SetAlgorithm(Godot.Collections.Dictionary d)
             {
-                // FIXME:  Don't set opCount here.  Use a separate function to change the op count.....
                 // TODO:  Consider replacing this function with one which converts d to json and just call FromJSON()
 
                 var grid = d["grid"];  //Should be a PoolByteArray, otherwise the below code will throw an exception (no converter interface)

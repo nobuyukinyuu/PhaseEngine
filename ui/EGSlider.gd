@@ -1,10 +1,10 @@
 tool
 class_name EGSlider
 extends HSlider
-var font = preload("res://gfx/fonts/spelunkid_font.tres")
-var font2 = preload("res://gfx/fonts/numerics_8x10.tres")
-var font3 = preload("res://gfx/fonts/numerics_5x8.tres")
-var expTicks = preload("res://gfx/ui/expTicks.png")
+const font = preload("res://gfx/fonts/spelunkid_font.tres")
+const font2 = preload("res://gfx/fonts/numerics_8x10.tres")
+const font3 = preload("res://gfx/fonts/numerics_5x8.tres")
+const expTicks = preload("res://gfx/ui/expTicks.png")
 const charw = 8
 onready var lblPos = Vector2(rect_size.x - len(name)*charw + text_offset, -2)
 onready var lblPos2 = Vector2(rect_size.x/2 - (len(str(value))+1)*charw/2.0, rect_size.y/2)
@@ -17,12 +17,27 @@ export(SpecialDisplay) var special_display
 export(PoolStringArray) var display_strings
 
 export(int,-32,32) var text_offset = 0 setget set_offset
+
+export(bool) var disabled=false setget set_disabled
+
 var needs_recalc=false
+
+const grabber_disabled = preload("res://ui/hSlider_grabber_disabled.tres")
+const style_disabled = preload("res://ui/EGSliderDisabled.stylebox")
 
 func set_offset(val):
 	text_offset = val
 	needs_recalc = true
 	update()
+
+func set_disabled(val):
+	if !is_inside_tree():  return
+	disabled = val
+	editable = !disabled
+	add_stylebox_override("slider", style_disabled if disabled else null)
+	add_stylebox_override("grabber_area_highlight", grabber_disabled if disabled else null)
+	add_stylebox_override("grabber_area", grabber_disabled if disabled else null)
+	self_modulate.a = 0.5 if disabled else 1.0
 
 
 func _ready():
@@ -32,7 +47,7 @@ func _ready():
 
 func _draw():
 	if needs_recalc:  recalc()
-	var col = ColorN("yellow") if has_focus() else ColorN("white")
+	var col = ColorN("yellow") if has_focus() and !disabled else ColorN("white")
 	
 	if useExpTicks:  draw_texture(expTicks, Vector2(0, 9), Color(1,1,1,0.35))
 	

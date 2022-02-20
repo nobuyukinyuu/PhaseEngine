@@ -106,6 +106,28 @@ namespace PhaseEngine
                 instance[i] = new T();
         }
 
+        //2d array initializer for type prims
+        public static void InitArray<T>(this T[][] instance, uint x, uint y) where T : struct
+        {
+            var output = new T[x][];
+            for(uint i=0; i<x; i++)
+                output[i] = new T[y];
+            instance = output;
+        }
+        //Fills an array with arrays that are copies of defaultData
+        public static void InitArray<T>(this T[][] instance, uint length, T[] defaultData) where T : struct
+        { instance = InitArray(length, defaultData); }
+        public static T[][] InitArray<T>(uint length, T[] defaultData) where T : struct
+        {
+            var output = new T[length][];
+            for(uint i=0; i<length; i++)
+            {
+                output[i] = new T[defaultData.Length];
+                defaultData.CopyTo(output[i], 0);
+            }
+            return output;
+        }
+
         /// \defgroup bitutils Useful functions for bit shuffling
         /// \{
 
