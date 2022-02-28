@@ -44,7 +44,7 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://ui/kanbanScroll/ScrollContainer.gd"
 }, {
-"base": "Slider",
+"base": "HSlider",
 "class": "Knob",
 "language": "GDScript",
 "path": "res://ui/knob/Knob.gd"
@@ -108,7 +108,7 @@ window/vsync/use_vsync=false
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/BitmapFontCutterPlus/plugin.cfg", "res://addons/launchy/plugin.cfg", "res://addons/mono_debugger/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/launchy/plugin.cfg", "res://addons/mono_debugger/plugin.cfg" )
 
 [global]
 

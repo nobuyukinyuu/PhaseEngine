@@ -115,7 +115,7 @@ public class Test2 : Label
     }
 
     public byte GetOpIntent(int opTarget){ if(opTarget >= c.OpCount) return 0; else return (byte)c.Voice.alg.intent[opTarget]; }
-    public byte GetOscType(int opTarget){ if(opTarget >= c.OpCount) return 0; else return c.Voice.oscType[opTarget]; }
+    public byte GetOscType(int opTarget){if(opTarget >= c.OpCount) return 0; else if (opTarget==-1) return (byte)c.Voice.lfo.OscType; else return c.Voice.oscType[opTarget];}
 
     public byte GetOscTypeOrFunction(int opTarget)  //Returns a value corresponding to the primary function of the operator.  For determining preview icons, etc...
     {
@@ -196,10 +196,7 @@ public class Test2 : Label
 
     }
 
-    public void SetLFO(string property, float val)
-    {
-        c.Voice.lfo.SetVal(property, val);
-    }
+    public void SetLFO(string property, float val){ c.Voice.lfo.SetVal(property, val); }
 
     // Called from EG controls to bus to the appropriate tuning properties.
     public void SetPG(int opTarget, string property, float val)
@@ -312,7 +309,7 @@ public class Test2 : Label
 
     public void SetBypass(int opTarget, bool val) {c.Voice.egs[opTarget].bypass = val;}
     public void SetMute(int opTarget, bool val) {c.Voice.egs[opTarget].mute = val;}
-
+    public void SetVoiceData(string property, object val) {c.Voice.SetVal(property, val);}
 
     //////////////////////////////    rTABLE    ////////////////////////////////////
     ///summary:  Updates a single column in an rTable.

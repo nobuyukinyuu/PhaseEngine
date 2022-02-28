@@ -31,7 +31,6 @@ func populate(to_add, to_remove):
 			node.queue_free()
 		#Wait for a bit to make sure the nodes are removed.
 		yield(rem[rem.size()-1], "tree_exited")
-	#	yield(get_tree(), "idle_frame")
 
 	cleanup()
 

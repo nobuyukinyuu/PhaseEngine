@@ -26,13 +26,10 @@ func resized():
 
 
 func _on_op_size_changed(opNum:int, oldSz):
-#	if !is_inside_tree():  return
-	
 	#This delay is necessary if the wiring grid is waiting to set the algorithm in order to
 	#send the correct grid positions, since the grid needs to be re-init'd when opSize changes.
 	#If we didn't wait to add tabs, the chip may not be ready to offer data for new operators.
 	yield(get_tree(), "idle_frame")
-	
 	
 	#Repopulate kanbans.
 	var col = $Kanban/Column0
@@ -99,7 +96,7 @@ func reinit_all():
 		#if not done already....
 		_on_op_intent_changed(i, chip.GetOpIntent(i), $WiringGrid) 
 	
-
+	$LTab.reinit()
 	global.emit_signal("algorithm_changed")
 
 

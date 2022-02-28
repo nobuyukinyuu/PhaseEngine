@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://ui/knob/polar.gdshader" type="Shader" id=2]
 [ext_resource path="res://ui/knob/Knob.gd" type="Script" id=3]
@@ -10,54 +10,20 @@ shader_param/rect_size = Vector2( 32, 32 )
 shader_param/zoom_len = 1.0
 shader_param/zoom_angle = 1.0
 shader_param/point_outwards = false
+shader_param/desaturate = false
 
-[sub_resource type="ViewportTexture" id=5]
-flags = 12
+[sub_resource type="ViewportTexture" id=19]
+flags = 4
 viewport_path = NodePath("VP")
-
-[sub_resource type="StyleBoxFlat" id=7]
-content_margin_left = 8.0
-content_margin_right = 8.0
-content_margin_top = 8.0
-content_margin_bottom = 8.0
-bg_color = Color( 0.423529, 0.756863, 1, 0.439216 )
-
-[sub_resource type="StyleBoxFlat" id=6]
-content_margin_left = 8.0
-content_margin_right = 8.0
-content_margin_top = 8.0
-content_margin_bottom = 8.0
-bg_color = Color( 0.176471, 0.65098, 1, 0.439216 )
 
 [node name="Knob" type="HSlider"]
 self_modulate = Color( 1, 1, 1, 0 )
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_right = -992.0
-margin_bottom = -568.0
+margin_right = 32.0
+margin_bottom = 32.0
 rect_min_size = Vector2( 24, 24 )
 tick_count = 7
 ticks_on_borders = true
 script = ExtResource( 3 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="BG" type="TextureRect" parent="."]
-material = SubResource( 1 )
-margin_right = 32.0
-margin_bottom = 32.0
-texture = SubResource( 5 )
-expand = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ReferenceRect" type="ReferenceRect" parent="BG"]
-visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-editor_only = false
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -69,16 +35,22 @@ transparent_bg = true
 handle_input_locally = false
 disable_3d = true
 usage = 0
-render_target_update_mode = 3
 
 [node name="Slider" type="HSlider" parent="VP"]
 margin_right = 96.0
 margin_bottom = 16.0
-custom_styles/grabber_area_highlight = SubResource( 7 )
-custom_styles/grabber_area = SubResource( 6 )
-value = 50.0
 tick_count = 7
 ticks_on_borders = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BG" type="TextureRect" parent="."]
+material = SubResource( 1 )
+margin_right = 32.0
+margin_bottom = 32.0
+texture = SubResource( 19 )
+expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -90,6 +62,21 @@ margin_right = 24.0
 margin_bottom = 23.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "02"
+text = "0"
 align = 1
 valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="lblTitle" type="Label" parent="."]
+margin_top = -10.2
+margin_right = 32.0
+margin_bottom = 3.8
+grow_horizontal = 2
+grow_vertical = 2
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}

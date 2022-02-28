@@ -135,13 +135,12 @@ func update_table(column:int, value:int, intent):
 	var curve = rTables[intent]
 	
 	if column >= 0:
-		get_node(chip_loc).UpdateTable(operator, column, value, intent)
+		c.UpdateTable(operator, column, value, intent)
 	else:
 		#Update the entire table.
 		#FIXME:  Don't reference this if instance is placeholder.  Probably shouldn't ever happen, but?
-		get_node(chip_loc).SetTable(operator, curve.get_node("P/Curve/VU").tbl, intent)
+		c.SetTable(operator, curve.get_node("P/Curve/VU").tbl, intent)
 
 
 func update_table_minmax(value, isMax:bool, intent):
-	var c = get_node(chip_loc)
 	get_node(chip_loc).SetTableMinMax(operator, value, isMax, intent)

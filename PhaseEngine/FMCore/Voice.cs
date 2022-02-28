@@ -11,7 +11,7 @@ namespace PhaseEngine
     public class Voice
     {
         ////// Metadata for file I/O and use in user implementations
-        public string name;
+        public string name, desc;
         public float gain=1.0f;
         public float pan=0;
 
@@ -218,6 +218,7 @@ namespace PhaseEngine
             try
             {
                 if (data.HasItem("name"))  data.Assign("name", ref name);
+                if (data.HasItem("desc"))  data.Assign("desc", ref desc);
                 data.Assign("gain", ref gain);
                 data.Assign("pan", ref pan);
 
@@ -245,7 +246,8 @@ namespace PhaseEngine
 
             // Don't add the OpCount here.  Rely on the Algorithm for that.
             o.AddPrim("FORMAT", Global.VERSION);
-            if(name!=null) o.AddPrim("name", name);
+            if(name!=null && name!=String.Empty) o.AddPrim("name", name);
+            if(desc!=null && desc!=String.Empty) o.AddPrim("desc", desc);
             o.AddPrim("gain", gain);
             o.AddPrim("pan", pan);
             o.AddItem("algorithm", alg.ToJSONObject() );

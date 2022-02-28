@@ -64,7 +64,6 @@ func set_from_op(op:int):
 func setEG(value, property, recalc=true):
 	get_node(chip_loc).SetEG(operator, property, value)
 	if recalc:  
-#		yield(get_tree(), "idle_frame")
 		get_node(chip_loc).RecalcFilter(operator)
 	global.emit_signal("op_tab_value_changed")
 

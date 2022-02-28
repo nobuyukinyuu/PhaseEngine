@@ -7,6 +7,8 @@ uniform float zoom_len : hint_range(0.1, 4.0) = 1.0;
 uniform float zoom_angle : hint_range(0.0, 1.0) = 1.0;
 uniform bool point_outwards;
 
+uniform bool desaturate = false;
+
 const float PI = 3.1415926535897932384626433832795;
 const float TAU = PI*2.0;
 const float HALF_PI = PI/2.0;
@@ -46,5 +48,10 @@ void fragment(){
 	if(polar_uv.x < 0.0 || polar_uv.x > 1.0 || polar_uv.y < 0.0 || polar_uv.y > 1.0 )
 		COLOR = vec4(0);
 //	COLOR = texture(TEXTURE, mod(polar_uv, vec2(repeat)));
-	else COLOR = texture(TEXTURE, polar_uv);
+	else
+	{
+		vec4 c = texture(TEXTURE, polar_uv);
+		if (desaturate) c.rgb = vec3(c.r+c.g+c.b / 3.0);
+		 COLOR = c
+	}
 }

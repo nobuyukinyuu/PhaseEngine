@@ -102,7 +102,7 @@ func _draw():
 	draw_rect(drop_preview, ColorN("yellow", 0.5) if get_child_count()>0 else ColorN("cyan", 0.2))
 
 
-func _make_custom_tooltip(for_text):
+func _make_custom_tooltip(_for_text):
 	var p
 	var c = get_node(owner.chip_loc)
 		

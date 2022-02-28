@@ -17,7 +17,6 @@ namespace PhaseEngine
         oscTypes _current = oscTypes.Sine;
         public oscTypes CurrentWaveform {get =>_current; set {_current = (oscTypes)value; wf=waveFuncs[(byte)value]; }}
 
-        //TODO:  Set oscillator based on index for a list/dictionary of delegates, including particular delegates for whether duty cycle/etc is used
 
         public ushort Generate(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {

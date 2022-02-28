@@ -11,6 +11,7 @@ namespace PhaseEngine
 
 
         protected Oscillator oscillator = new Oscillator(Oscillator.Sine2);
+        public Oscillator.oscTypes OscType{ get => oscillator.CurrentWaveform; }
         public delegate short SampleOutputFunc(ushort modulation = 0, ushort am_offset=0); //Primary function of the oscillator
         public SampleOutputFunc operatorOutputSample;
 
@@ -93,8 +94,6 @@ namespace PhaseEngine
             return operatorOutputSample(modulation, am_offset);
             // return oscillator.Generate(unchecked(phase >> Global.FRAC_PRECISION_BITS), duty, ref flip);
         }
-
-        public Oscillator.oscTypes GetOscillatorType(){ return oscillator.CurrentWaveform; }
 
         //Sets up the operator to act as an oscillator for FM output.
         public void SetOscillatorType(Oscillator.oscTypes type)
