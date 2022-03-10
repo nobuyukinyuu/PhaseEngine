@@ -97,6 +97,30 @@ namespace PhaseEngine
             else Reset(); //Attempt copy.  If failure, reinit envelope.  This could happen in release mode... TODO:  Check and see what happens with a fuzz test
         }
 
+        public bool Configure(Envelope prototype, bool deserializeRTables=false) 
+        {
+            var data = prototype.ToJSONString();
+            if(this.FromString(data,deserializeRTables)) //if importation of copy succeeded...
+            {
+                    RecalcLevelRisings();
+                    //Grab response table references from the prototype.  
+                    //We don't need to copy the actual response tables as we want to share them between all channels.
+                    //TODO:  Consider if each channel should have fully customizable RTables and remove the internal re-use option entirely....
+
+                    //Reuse the RTables from the prototype. Saves resources when copying the rest of the EG to a channel as an internal operation.
+                    //Otherwise,  this.FromString() should've already assigned these.
+                    if (!deserializeRTables) 
+                    {
+                        ksr = prototype.ksr;
+                        ksl = prototype.ksl;
+                        velocity = prototype.velocity;
+                    }
+                return true;
+            }
+            else Reset(); //Attempt copy.  If failure, reinit envelope.  This could happen in release mode... TODO:  Check and see what happens with a fuzz test
+            return false;
+        }
+
         public void Reset(bool rates=true, bool levels=true)
         {
             if (rates){
@@ -153,6 +177,8 @@ namespace PhaseEngine
                 j.Assign("aux_func", ref aux_func);
                 j.Assign("gain", ref gain);
 
+                j.Assign("wavetable_bank", ref wavetable_bank);
+
                 if (deserializeRTables)
                 {
                     //Any one of these could throw an exception from RTable.FromString(), which will be passed to our error handler and be reported.
@@ -200,6 +226,8 @@ namespace PhaseEngine
             o.AddPrim("aux_func", aux_func);
             o.AddPrim("gain", gain);
 
+            if (wavetable_bank>0) o.AddPrim("wavetable_bank", wavetable_bank);
+
             if (includeRTables) //Reasons to exclude:  Tables are all default/disabled, operator is a filter, etc.
             {   //Add tables.  No intent needed.
                 o.AddItem("ksr", ksr.ToJSONObject(false));
@@ -234,6 +262,8 @@ namespace PhaseEngine
             o.Add("bypass", bypass);
             o.Add("aux_func", aux_func);
             o.Add("gain", gain);
+
+            o.Add("wavetable_bank", wavetable_bank);
             return o;
         }
         #endif 
@@ -255,6 +285,30 @@ namespace PhaseEngine
         }
 
 
+    }
+
+    public class EnvelopePool : ObjectPool<Envelope>
+    {
+        public static EnvelopePool Prototype() {
+            // ObjectPool<Envelope>(() => new Envelope());
+            return (EnvelopePool) new ObjectPool<Envelope>( () => new Envelope() );
+        }
+
+        //These static functions provide constructor routines which satisfy the base ctor requirement of passing in a generator func.
+        internal static Func<Envelope> Generator() {return () => new Envelope(); }
+        internal static Func<Envelope> Generator(Envelope prototype) {return () => new Envelope(prototype); }
+    
+        public EnvelopePool() : base(Generator()) {}
+        public EnvelopePool(Envelope prototype, bool deserializeRTables=false) : base(Generator(prototype)) {}
+
+        public EnvelopePool(Func<Envelope> generator) : base(generator){}
+
+        public Envelope Get(Envelope prototype, bool deserializeRTables=false)
+        {
+            var output = Get();  //Only performs Envelope's default ctor if there's nothing in the pool. Otherwise we get an old Envelope needing reconfig...
+            output.Configure(prototype, deserializeRTables);
+            return output;
+        } 
     }
 
     public enum EGStatus

@@ -71,11 +71,14 @@ namespace PhaseEngine
             return lastPriorityScore;
         }
 
+        //Convenience method which generates a new envelope every time.
+        // public void NoteOn(byte midi_note=Global.NO_NOTE_SPECIFIED, byte velocity=127) => NoteOn(null, midi_note, velocity);
 
+        //Generates a Note on this channel by setting new properties from a Voice.
         public void NoteOn(byte midi_note=Global.NO_NOTE_SPECIFIED, byte velocity=127)
         {
             eventID = Global.NewEventID();
-            if (midi_note >= 0x80)  return;
+            if (midi_note >= 0x80)  return;  //Invalid note
             this.midi_note = midi_note;
             this.lastVelocity = velocity;
 
@@ -92,7 +95,18 @@ namespace PhaseEngine
                 case OpBase.Intents.BITWISE:
                 case OpBase.Intents.WAVEFOLDER:
                     var op = ops[i] as Operator;
-                    op.eg = new Envelope(voice.egs[i]);  //Make copies of the old EG values so they can be altered on a per-note basis.
+                    op.eg.Configure(voice.egs[i]);
+
+                    //TODO:  Consider pooling envelope resources to reduce memory thrash
+                    //No EG Source?  Generate a new envelope.
+                    // if (EGSource==null)
+                    // {
+                    //     op.eg = new Envelope(voice.egs[i]);  //Make copies of the old EG values so they can be altered on a per-note basis.
+                    // } else {
+                    //     //Return the previous envelope we were using to the pool and get a fresh one.
+                    //     EGSource.Return(op.eg);
+                    //     op.eg = EGSource.Get(voice.egs[i]);
+                    // }
 
                     // Adjust the EG based on values from the RTables.
                     if (midi_note < 0x80) 

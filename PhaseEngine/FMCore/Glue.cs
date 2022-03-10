@@ -3,6 +3,7 @@ using Godot;
 #endif
 using System;
 using System.Runtime.CompilerServices;
+using System.Collections.Concurrent;
 
 namespace PhaseEngine
 {
@@ -79,6 +80,28 @@ namespace PhaseEngine
             instance = (T)box;  //Copy back the box over ourself
         }
         
+
+    }
+
+    public class ObjectPool<T>
+    {
+        readonly ConcurrentBag<T> _objects;
+        readonly Func<T> _objectGenerator;
+
+        // //Generates a warning.......
+        // public static ObjectPool<T> Prototype<T>() where T: new()  //Default ctor convenience func
+        // { return new ObjectPool<T>( () => new T() ); }
+
+       public ObjectPool(Func<T> objectGenerator)
+        {
+            _objectGenerator = objectGenerator ?? throw new ArgumentNullException(nameof(objectGenerator));
+            _objects = new ConcurrentBag<T>();
+        }
+
+        public void Clear() => _objects.Clear();
+        public T Get() => _objects.TryTake(out T item) ? item : _objectGenerator();
+        public void Return(T item) => _objects.Add(item);
+
 
     }
 

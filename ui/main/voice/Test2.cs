@@ -102,7 +102,8 @@ public class Test2 : Label
 
     }
 
-
+    //Used by Op panels to populate the UI elements.  
+    //TODO:  Consider having these convert from JSON to dict here and get rid of dupe methods in Envelope and Increments...
     public Godot.Collections.Dictionary GetOpValues(int whichKind, int opTarget)
     {
         switch(whichKind)
@@ -223,14 +224,13 @@ public class Test2 : Label
         if (property=="tl")  //Recalc level from rTables if necessary.
             for(int i=0; i<c.channels.Length; i++)
             {
-                var newEG = new Envelope(c.Voice.egs[opTarget]);
+                var EG = c.Voice.egs[opTarget];
                 var note = c.channels[i].midi_note;
                 var velocity = c.channels[i].lastVelocity;
-                ushort tl = (ushort) (val + newEG.ksl[note] + newEG.velocity[velocity]);  //This incurs a 'hidden' recalc cost from rTable thru the indexer
-                newEG.tl = tl;
+                ushort tl = (ushort) (val + EG.ksl[note] + EG.velocity[velocity]);  //This incurs a 'hidden' recalc cost from rTable thru the indexer
 
                 var op = c.channels[i].ops[opTarget];
-                if (op != null) op.eg = newEG; 
+                if (op != null) op.eg.tl = tl; 
             }
         else
             for(int i=0; i<c.channels.Length; i++)
@@ -264,14 +264,14 @@ public class Test2 : Label
             c.channels[i].ops[opTarget].SetOscillatorType(GetOscType(opTarget));
     }
 
-    public void SetWaveform(int opTarget, float val)
+    public void SetOscillator(int opTarget, float val)
     {
         if (opTarget==-1) //LFO
         {
             c.Voice.lfo.SetOscillatorType((byte)val);
             return;
         }
-        c.Voice.SetWaveform(opTarget, (int)val);
+        c.Voice.SetOscillator(opTarget, (int)val);
     }
 
     public void SetFilterType(int opTarget, float val)
@@ -436,12 +436,63 @@ public class Test2 : Label
     public bool is_quiet() {return c.ChannelsAreFree;}
     public int connections_to_output() {return c.Voice.alg.NumberOfConnectionsToOutput;}
     public byte[] GetCarriers() {return c.Voice.alg.GetCarriers();}
-    public byte[] GetModulators(byte opNum) {
+    public byte[] GetModulators(byte opNum) {  //Used by the UI to arrange operators in the kanban by stack.
         var m = c.Voice.alg.GetModulators(opNum);
         var output=new byte[m.Count]; 
         m.CopyTo(output); return output;
         }
 
+    ///////////////////////////////////    WAVEFORM    /////////////////////////////////////
+    public Godot.Collections.Array AddWave() {
+        c.Voice.wavetable.AddBank(); 
+        return new Godot.Collections.Array(c.Voice.wavetable.GetTable(c.Voice.wavetable.NumBanks-1));
+        }
+    public void RemoveWave(int idx) {c.Voice.wavetable.RemoveBank(idx);}
+
+    public int NumBanks {get => c.Voice.wavetable.NumBanks;}
+
+    public void SetWaveBank(int opNum, int bank) 
+    {
+        c.Voice.egs[opNum].wavetable_bank = (byte) bank;
+
+        //Override the current wavetable in the operators.  This is necessary cuz there's no method in Chip to do this yet.
+        //The relevant method should probably be in SetVoice, since that's where all the other references the channels need are...
+
+        //TODO:  Maybe consider setting the bank on Channel.NoteOn instead of having an explicit method in Chip???????
+        for(int i=0; i<c.channels.Length; i++)
+            c.channels[i].ops[opNum].wavetable = c.Voice.wavetable;
+    }
+
+    public Godot.Collections.Array GetWave(int bank)
+    {
+        var tbl = c.Voice.wavetable;
+        var output = new Godot.Collections.Array();
+        if (tbl.NumBanks <=0) return output;
+        if (bank<=-1)  //Get all banks
+            for(int i=0; i<tbl.NumBanks; i++)
+                output.Add(tbl.GetTable(i));
+        else if (bank<tbl.NumBanks)
+            output= new Godot.Collections.Array(c.Voice.wavetable.GetTable(bank));
+
+        return output;
+    }
+
+    public void SetWave(int bank, int index, int value)
+    {
+        var tbl = c.Voice.wavetable;
+        if (tbl.NumBanks <=0) return;
+
+        tbl.SetTable(bank, index, (short) value);
+    }
+    public void SetWave(int bank, int[] input)
+    {
+        var tbl = c.Voice.wavetable;
+        if (tbl.NumBanks <=0) return;
+
+        // var output = (short[]) Convert.ChangeType(input, typeof(short[]));
+        var output = Array.ConvertAll(input, Convert.ToInt16);
+        tbl.SetTable(bank, output);
+    }
 
     ///////////////////////////////////    BUFFER    /////////////////////////////////////
     void fill_buffer()

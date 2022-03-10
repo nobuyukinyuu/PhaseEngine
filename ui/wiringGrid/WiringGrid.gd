@@ -28,7 +28,7 @@ func _ready():
 		chip = get_node(chip_loc)
 		if chip:
 			$SlotIndicator.total_ops = chip.GetOpCount()
-
+	
 	check_if_presets()
 
 #func _physics_process(_delta):
@@ -99,8 +99,7 @@ func _on_Remove_pressed():
 
 
 func _on_Preset_pressed():
-	$Popup.popup(Rect2(get_global_mouse_position(), $Popup.rect_size))
-
+	popup_presets()
 
 #Describes the wiring grid in terms of an array of bytes.  Only works when MAX_OPS <= 8.
 #Each position in the output array describes an ID's location, with maxValue being 0b 0111_0111.
@@ -198,9 +197,21 @@ func check_if_presets():
 	match $SlotIndicator.total_ops:
 		4,6:
 			$Preset.disabled = false
-			$Popup.intent = $SlotIndicator.total_ops
+#			$Popup.intent = $SlotIndicator.total_ops
 		_:
 			$Preset.disabled = true
+
+
+func popup_presets():
+	if !has_node("Popup"):
+		var p = load("res://ui/wiringGrid/PresetsPopup.tscn").instance()
+		add_child(p, true)
+		p.name = "Popup"
+		p.owner = self
+		p.get_node("VBox/Scroll/ItemList").connect("item_activated", self, "_on_Preset_item_activated")
+		
+	$Popup.intent = $SlotIndicator.total_ops
+	$Popup.popup(Rect2(get_global_mouse_position(), $Popup.rect_size))
 
 
 func set_buttons_enabled(enabled:bool):

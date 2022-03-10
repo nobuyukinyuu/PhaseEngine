@@ -46,7 +46,7 @@ func _ready():
 		o.connect("value_changed", self, "update_env", [o])
 
 
-	$WavePanel/Wave.connect("value_changed", self, "setWaveform")
+	$WavePanel/Wave.connect("value_changed", self, "set_oscillator")
 
 
 	#Connect the rTables.
@@ -192,8 +192,8 @@ func setPG(value, property):
 	get_node(chip_loc).SetPG(operator, property, value)
 	global.emit_signal("op_tab_value_changed")
 
-func setWaveform(value):
-	get_node(chip_loc).SetWaveform(operator, value)
+func set_oscillator(value):
+	get_node(chip_loc).SetOscillator(operator, value)
 	global.emit_signal("op_tab_value_changed")
 
 func setFeedback(value):

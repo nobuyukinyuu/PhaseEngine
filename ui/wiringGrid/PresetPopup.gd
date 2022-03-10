@@ -21,11 +21,7 @@ const alg_descs = {4: [
 ]
 }
 
-func _ready():
-#	create_context()
-	pass
-	
-	
+
 
 func create_context():
 	var list = $VBox/Scroll/ItemList
@@ -50,4 +46,5 @@ func _on_Popup_about_to_show():
 
 func _on_Popup_popup_hide():
 	$VBox/Scroll/ItemList.clear()
+	queue_free()
 	pass # Replace with function body.

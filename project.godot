@@ -81,7 +81,7 @@ _global_script_class_icons={
 [application]
 
 config/name="PhaseEngine"
-run/main_scene="res://Control.tscn"
+run/main_scene="res://ui/main/voice/Control.tscn"
 run/low_processor_mode=true
 boot_splash/image="res://gfx/logos/logo_light_150.png"
 boot_splash/fullsize=false

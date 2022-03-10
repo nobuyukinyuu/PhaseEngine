@@ -3,6 +3,7 @@ extends TextureRect
 var tbl = []
 var smooth_tbl = []
 var display_tbl = []
+var revert_tbl = []
 
 const full16 = preload("res://gfx/ui/vu/full16_temp.png")
 const indicator = preload("res://gfx/ui/vu/indicator16.png")
@@ -39,11 +40,29 @@ var lineB=Rect2()  #Position is real x/y, size is table array pos + value
 var fidelity_step:float = 1/65536.0
 var quantize_step:float = 1
 
+#Sets up table for use.  Imports a table from Chip and converts it to 0-100 float values we use.
+func set_table(input):
+	var output=[]
+	revert_tbl=[]
+	for i in input.size():
+		var v=range_lerp(input[i], -32768, 32767, 0, 100)
+		output.append(v)
+		revert_tbl.append(v)
+	tbl=output
+	smooth_tbl=output
+	display_tbl=output
+	
+	update()
+
+func revert_to_original():
+	tbl = Array(revert_tbl)
+	update()
+
 func _ready():
 #	elementWidth = texture.get_width()
 	if elementWidth == null:  elementWidth = 5
 
-	for i in 256:
+	for i in global.WAVETABLE_SIZE:
 		tbl.append(50)
 		smooth_tbl.append(50)
 		display_tbl.append(50)
@@ -165,7 +184,7 @@ func process_line():
 		print(percent)
 #		tbl[i] = val
 		set_table_pos(i, val)
-		owner.emit_signal("value_changed", i, val)
+#		owner.emit_signal("value_changed", i, val)
 	
 	#finally,
 	lineA = Rect2(0,0,0,0)
@@ -191,6 +210,9 @@ func set_table_pos(arpos, val):
 	for i in quantize_step:
 		if arpos+i>= tbl.size():  break
 		tbl[arpos+i] = val
+
+		#Update single position if necessary
+		if !owner.get_node("H2/Smooth").pressed:  owner.update_table(arpos+i, val)
 
 	needs_recalc = true
 
@@ -259,42 +281,58 @@ func _make_custom_tooltip(_for_text):
 	return p
 
 
+#Executed approx 24fps when recalc of the entire table is needed.
 var needs_recalc = false
 func _on_RecalcSmooth_timeout():
 	if needs_recalc:
 		smooth()
 		needs_recalc = false
 		update()
+#		yield(get_tree(), "idle_frame")
+		if owner.get_node("H2/Smooth").pressed:  owner.update_table(-1)
 
 
 func smooth():
-	if !owner.get_node("H2/Smooth").pressed:
+	if !owner.get_node("H2/Smooth").pressed or owner.get_node("Amount").value==0:
 		display_tbl = tbl
 		return
-	
-	smooth_tbl = global.arr_smooth(tbl, owner.get_node("Amount").value, owner.get_node("H2/Wrap").pressed)
-	
-	var val = owner.get_node("Preserve Center").value
-	var tmp = []
-	var dist:float = 64-val
-
-	if val > 0:  #Preserve edges
-		tmp.append_array(tbl)
-		for i in dist:  #Limit dist to half of tbl size if increasing range of the val slider
-			var j = tbl.size()-1-i
-			var percent = i/dist
-			tmp[i] = lerp(smooth_tbl[i], tbl[i], percent)
-			tmp[j] = lerp(smooth_tbl[j], tbl[j], percent)
-		for i in tbl.size():
-			var percent = val/64.0
-			tmp[i] = lerp(smooth_tbl[i], tmp[i], percent)
-		display_tbl = tmp
 	else:
-		display_tbl = smooth_tbl
+		smooth_tbl = global.arr_smooth(tbl, owner.get_node("Amount").value, owner.get_node("H2/Wrap").pressed)
 	
+		var val = owner.get_node("Preserve Center").value
+		var tmp = []
+		var dist:float = 64-val
+
+		if val > 0:  #Preserve edges
+			tmp.append_array(tbl)
+			for i in dist:  #Limit dist to half of tbl size if increasing range of the val slider
+				var j = tbl.size()-1-i
+				var percent = i/dist
+				tmp[i] = lerp(smooth_tbl[i], tbl[i], percent)
+				tmp[j] = lerp(smooth_tbl[j], tbl[j], percent)
+			for i in tbl.size():
+				var percent = val/64.0
+				tmp[i] = lerp(smooth_tbl[i], tmp[i], percent)
+			display_tbl = tmp
+		else:
+			display_tbl = smooth_tbl
+
+
+func to_short(val):
+	return int(range_lerp(val, 0, 100, -32768, 32767))
+
 func _on_Amount_value_changed(_val):
 	needs_recalc = true
 
-
 func _on_Preserve_Center_value_changed(_val):
 	needs_recalc = true
+
+func _on_Amt_value_changed(value):
+	owner.get_node("Amount").value = value
+#	needs_recalc = true
+
+func _on_Ctr_value_changed(value):
+	owner.get_node("Preserve Center").value = value
+#	needs_recalc = true
+
+

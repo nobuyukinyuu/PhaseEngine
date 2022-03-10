@@ -75,14 +75,18 @@ namespace PhaseEngine
         public void Clock()
         {
             Channel.am_offset = voice.lfo.RequestAM();
+            // System.Threading.Tasks.Parallel.For(0, channels.Length, i =>
             for (int i=0; i<channels.Length;  i++)
             {
-                channels[i].Clock();
-                
-                //Apply LFO pitch changes.
-                for(int j=0; j<opCount; j++)
-                    voice.lfo.ApplyPM(ref channels[i].ops[j].pg);
-            }
+                if(channels[i].busy != BusyState.FREE) //Clock optimization
+                {
+                    channels[i].Clock();
+                    
+                    //Apply LFO pitch changes.
+                    for(int j=0; j<opCount; j++)
+                        voice.lfo.ApplyPM(ref channels[i].ops[j].pg);
+                }
+            }//);
 
             voice.lfo.Clock();
         }

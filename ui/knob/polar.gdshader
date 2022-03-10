@@ -51,7 +51,7 @@ void fragment(){
 	else
 	{
 		vec4 c = texture(TEXTURE, polar_uv);
-		if (desaturate) c.rgb = vec3(c.r+c.g+c.b / 3.0);
+		if (desaturate) c.rgb = vec3(c.r+c.g+c.b / 3.0) / 2.0;
 		 COLOR = c
 	}
 }

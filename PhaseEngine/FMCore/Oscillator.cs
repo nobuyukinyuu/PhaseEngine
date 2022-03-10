@@ -55,10 +55,13 @@ namespace PhaseEngine
 
         public static ushort Wave(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
+            const ushort MASK = WaveTableData.TBL_SIZE -1;
+            const byte BITS = 10 - WaveTableData.TBL_BITS;
             var auxdata2 = __refvalue(auxdata, short[]);
-            ushort phase = (ushort) unchecked((n>>3));  //TODO:  change this based on the bit depth of the table if it changes to len 256
-            var volume = auxdata2[phase & 0x7F];
-            var attenuation = Tables.vol2attenuation[Tools.Abs(volume) >> 2]; //Convert sample to 14-bit and get attenuation.
+            ushort phase = (ushort) unchecked((n>>BITS));  //TODO:  change this based on the bit depth of the table if it changes to len 256
+            var volume = auxdata2[phase & MASK];
+            volume ^= 1;  //Effectively brings a number one closer to 0; this is done to stop an overflow if the value is MinValue
+            var attenuation = Tables.vol2attenuation[Math.Abs(volume) >> 2]; //Convert sample to 14-bit and get attenuation.
 
             flip = volume < 0;
             return attenuation;  //0x7F for tables of 128, or 0xFF for 256 if upped later....

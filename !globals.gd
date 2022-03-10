@@ -32,16 +32,18 @@ const L_MAX=1024.0
 const R_MAX=64.0
 const DB_MAX=96.0   #Measured:  every 64 values results in -6dB volume, so -48dB actually occurs at half L_MAX
 
+const WAVETABLE_SIZE = 256  #This needs to be the same size as TBL_SIZE in WaveTableData.cs
 const RTABLE_SIZE = 1024
 const RT_MINUS_ONE = 1023
 
 signal tab_dropped  #Emitted by a tab drop preview to signal columns to check their dirty state
-signal window_resized
-signal op_tooltip_needs_data
-signal op_tab_value_changed
-signal algorithm_changed
-signal op_intent_changed
-signal request_op_intent_menu
+#signal window_resized
+#signal op_tooltip_needs_data #Emitted by TabGroups when a tooltip needs someone else to populate it (unused?)
+signal op_tab_value_changed #Emitted by tabs to refresh the output preview
+signal algorithm_changed  #Emitted by WiringGrid and VoiceMain to refresh the output preview
+signal op_intent_changed  #Emitted by the op intent menu to signal refreshing tabs
+signal request_op_intent_menu  #Emitted by a tab or context menu from wiring grid
+signal wavebanks_changed #Emitted by the Waveform bank tab to signal panels to update their bank spinner.
 
 func _ready():
 	# Generate the period frequencies of every note based on center tuning (A-4) at 440hz

@@ -119,7 +119,6 @@ namespace PhaseEngine
                     //TODO:  Set special functions for waveform, send auxdata with current bank
                     if (eg.feedback>0) operatorOutputSample = ComputeWavetableFeedback; else operatorOutputSample = ComputeWavetable;
                     return;
-                    break; //change to return; once implemented
                 }
             }
 

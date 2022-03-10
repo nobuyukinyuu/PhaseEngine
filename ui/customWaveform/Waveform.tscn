@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=2]
+[gd_scene load_steps=41 format=2]
 
 [ext_resource path="res://ui/responseCurve/PresetMenu.theme" type="Theme" id=1]
 [ext_resource path="res://gfx/fonts/numerics_7seg.tres" type="BitmapFont" id=2]
@@ -17,13 +17,15 @@
 [ext_resource path="res://gfx/ui/godot_icons/Load.svg" type="Texture" id=15]
 [ext_resource path="res://gfx/ui/icon_reset.svg" type="Texture" id=16]
 [ext_resource path="res://ui/FlatButton.theme" type="Theme" id=17]
-[ext_resource path="res://gfx/ui/filter/6.svg" type="Texture" id=18]
+[ext_resource path="res://ui/knob/Knob.tscn" type="PackedScene" id=18]
 [ext_resource path="res://ui/FileDialog.theme" type="Theme" id=19]
 [ext_resource path="res://ui/customWaveform/SmoothDialog.gd" type="Script" id=20]
 [ext_resource path="res://gfx/ui/vu/25_percent_halftone_overlay.png" type="Texture" id=21]
 [ext_resource path="res://gfx/fonts/NoteFont.tres" type="BitmapFont" id=22]
 [ext_resource path="res://gfx/ui/godot_icons/Add.svg" type="Texture" id=23]
 [ext_resource path="res://gfx/ui/godot_icons/Remove.svg" type="Texture" id=24]
+[ext_resource path="res://gfx/ui/hSlider.theme" type="Theme" id=25]
+[ext_resource path="res://gfx/fonts/numerics_8x10.tres" type="BitmapFont" id=27]
 
 [sub_resource type="StyleBoxFlat" id=10]
 bg_color = Color( 0, 0, 0, 0.878431 )
@@ -151,7 +153,18 @@ func table(xPos):
 	return Vector2(x,y)
 "
 
+[sub_resource type="StyleBoxFlat" id=15]
+bg_color = Color( 0.0784314, 0.141176, 0.27451, 1 )
+border_width_left = 1
+border_width_top = 2
+border_width_right = 1
+border_width_bottom = 2
+expand_margin_bottom = 12.0
+shadow_size = 1
+shadow_offset = Vector2( 1, 1 )
+
 [node name="CustomWaveform" type="WindowDialog"]
+visible = true
 margin_left = 8.0
 margin_top = 24.0
 margin_right = 304.0
@@ -272,16 +285,16 @@ __meta__ = {
 }
 
 [node name="RecalcSmooth" type="Timer" parent="VU"]
-wait_time = 0.03
+wait_time = 0.04
 autostart = true
 
 [node name="CPMenu" type="PopupMenu" parent="."]
 margin_left = -128.0
 margin_top = 8.0
 margin_right = -8.0
-margin_bottom = 84.0
+margin_bottom = 66.0
 theme = ExtResource( 1 )
-items = [ "Copy", ExtResource( 4 ), 0, false, false, 0, 0, null, "", false, "Paste", ExtResource( 5 ), 0, false, false, 2, 0, null, "", false, "", null, 0, false, false, 3, 0, null, "", true, "Smooth=", ExtResource( 18 ), 0, false, false, 3, 0, null, "", false ]
+items = [ "Copy", ExtResource( 4 ), 0, false, false, 0, 0, null, "", false, "Paste", ExtResource( 5 ), 0, false, false, 2, 0, null, "", false ]
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -493,7 +506,7 @@ __meta__ = {
 [node name="lblTitle" type="Label" parent="H"]
 margin_left = 31.0
 margin_top = 9.0
-margin_right = 123.0
+margin_right = 149.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
 custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
@@ -508,9 +521,9 @@ __meta__ = {
 }
 
 [node name="Spacer2" type="Label" parent="H"]
-margin_left = 127.0
+margin_left = 153.0
 margin_top = 9.0
-margin_right = 220.0
+margin_right = 272.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 3 )
@@ -520,6 +533,7 @@ __meta__ = {
 }
 
 [node name="Banks" type="OptionButton" parent="H"]
+visible = false
 margin_left = 224.0
 margin_right = 272.0
 margin_bottom = 27.0
@@ -685,10 +699,12 @@ margin_right = 256.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 13 )
+disabled = true
 pressed = true
 text = " Wrap Around Edge"
 
 [node name="Amount" parent="." instance=ExtResource( 10 )]
+visible = false
 margin_left = 8.0
 margin_top = 352.0
 margin_right = 280.0
@@ -699,6 +715,7 @@ exp_edit = true
 special_display = 4
 
 [node name="Preserve Center" parent="." instance=ExtResource( 10 )]
+visible = false
 margin_left = 8.0
 margin_top = 384.0
 margin_right = 280.0
@@ -706,6 +723,57 @@ margin_bottom = 404.0
 step = 0.0
 special_display = 4
 
+[node name="Amt" parent="." instance=ExtResource( 18 )]
+margin_left = 16.0
+margin_top = 368.0
+margin_right = 72.0
+margin_bottom = 424.0
+theme = ExtResource( 25 )
+custom_styles/slider = SubResource( 15 )
+min_value = 1.0
+max_value = 63.0
+value = 1.0
+exp_edit = true
+editable = false
+title = "Amount"
+travel_multiplier = 5.0
+notch = 0.5
+thickness = 0.35
+relative_movement_only = false
+value_font = ExtResource( 27 )
+disabled = true
+
+[node name="Ctr" parent="." instance=ExtResource( 18 )]
+margin_left = 88.0
+margin_top = 368.0
+margin_right = 144.0
+margin_bottom = 424.0
+theme = ExtResource( 25 )
+custom_styles/slider = SubResource( 15 )
+max_value = 63.0
+editable = false
+title = "Keep Ctr"
+travel_multiplier = 5.0
+notch = 0.5
+thickness = 0.35
+relative_movement_only = false
+value_font = ExtResource( 27 )
+disabled = true
+
+[node name="Revert" type="Button" parent="."]
+margin_left = 168.0
+margin_top = 360.0
+margin_right = 272.0
+margin_bottom = 400.0
+theme = ExtResource( 17 )
+custom_fonts/font = ExtResource( 13 )
+disabled = true
+text = "Revert"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="visibility_changed" from="." to="." method="_on_CustomWaveform_visibility_changed"]
 [connection signal="timeout" from="VU/RecalcSmooth" to="VU" method="_on_RecalcSmooth_timeout"]
 [connection signal="index_pressed" from="CPMenu" to="." method="_on_CPMenu_index_pressed"]
 [connection signal="about_to_show" from="WaveImport" to="." method="_on_WaveImport_about_to_show"]
@@ -724,3 +792,6 @@ special_display = 4
 [connection signal="toggled" from="H2/Wrap" to="." method="_on_Wrap_toggled"]
 [connection signal="value_changed" from="Amount" to="VU" method="_on_Amount_value_changed"]
 [connection signal="value_changed" from="Preserve Center" to="VU" method="_on_Preserve_Center_value_changed"]
+[connection signal="value_changed" from="Amt" to="VU" method="_on_Amt_value_changed"]
+[connection signal="value_changed" from="Ctr" to="VU" method="_on_Ctr_value_changed"]
+[connection signal="pressed" from="Revert" to="." method="_on_Revert_pressed"]

@@ -1,19 +1,21 @@
 using System;
 using PhaseEngine;
+using System.Collections.Generic;
 
 namespace PhaseEngine 
 {
     public class WaveTableData
     {
-        public const ushort TBL_SIZE=128;
-        short[][] tbl;
+        internal const byte TBL_BITS=8;  //Can't be over 10
+        internal const ushort TBL_SIZE= 1<<TBL_BITS;  //Must be a power of 2
+        List<short[]> tbl;
 
-        bool NotInUse {get => tbl==null || tbl.Length==0;}
-        public int NumBanks {get => (int)tbl?.Length;}
+        internal bool NotInUse {get => tbl==null || tbl.Count==0;}
+        public int NumBanks {get => tbl==null? -1 : tbl.Count;}
         public WaveTableData()    {}
-        public WaveTableData(uint numBanks)    {tbl.InitArray(numBanks, TBL_SIZE);}
-        public WaveTableData(short[] input) { tbl = Tools.InitArray(1, input); }
-        public WaveTableData(uint numBanks, short[] input) { tbl = Tools.InitArray(numBanks, input); }
+        public WaveTableData(uint numBanks)    {tbl= Tools.InitList(numBanks, new short[TBL_SIZE]);}
+        public WaveTableData(short[] input) { tbl = new List<short[]>(); tbl.Add(input);}
+        public WaveTableData(uint numBanks, short[] input) { tbl = Tools.InitList(numBanks, input); }
 
         #if GODOT
             public WaveTableData(uint numBanks, Godot.Collections.Array input)
@@ -21,7 +23,7 @@ namespace PhaseEngine
                 var output= new short[TBL_SIZE];
                 for (int i=0; i<TBL_SIZE; i++)
                     output[i] = (short) input[i];
-                tbl = Tools.InitArray(numBanks, output);
+                tbl = Tools.InitList(numBanks, output);
             }
             public void SetBank(int bank, Godot.Collections.Array input)
             {
@@ -40,7 +42,15 @@ namespace PhaseEngine
                         SetTable(bank, index, (short) array[i]);
             }
         #endif 
-        public void SetTable(int bank, int index, short[] array)
+
+        public void AddBank()
+        {
+            if(tbl==null) tbl = new List<short[]>();
+            tbl.Add(new short[TBL_SIZE]);
+        }
+        public void RemoveBank(int idx)  { tbl.RemoveAt(idx); }
+
+        public void SetTable(int bank, short[] array)
         {
             short[] row = tbl?[bank];
             if(row != null) tbl[bank] = array;
@@ -52,8 +62,8 @@ namespace PhaseEngine
         }
         public short[] GetTable(int bank)
         {
-            if (NotInUse) return Tables.defaultWavetable;
-            return tbl[bank]?? Tables.defaultWavetable;
+            if (NotInUse) return Tables.defaultWavetable;            
+            try { return tbl[bank]; } catch { return Tables.defaultWavetable; }
         }
 
         /// Summary:  Quantizes the values of the table to correspond to the total number of samples divided by the amount.

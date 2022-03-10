@@ -128,6 +128,22 @@ namespace PhaseEngine
             return output;
         }
 
+        // public static void InitArray<T[]>(this List<T[]> instance, uint length, T[] defaultData)
+        // { instance = InitList(length, defaultData); }
+        public static List<T[]> InitList<T>(uint length, T[] defaultData) 
+        {
+            var output = new List<T[]>((int)length);
+            for(uint i=0; i<length; i++)
+            {
+                var p = new T[defaultData.Length];
+                defaultData.CopyTo(p, 0);
+                output.Add(p);
+            }
+            return output;
+        }
+    
+
+
         /// \defgroup bitutils Useful functions for bit shuffling
         /// \{
 
@@ -269,9 +285,9 @@ namespace PhaseEngine
         // }
 
         //Branchless absolute value and sign methods
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static short Abs(short n) {int o=n; int s=(n>>31); o^=s; o-=s; return (short)(o);}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static short Abs(short n) {int o=n; int s=(short)(n>>31); o^=s; o-=s; return (short)(o);}
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static int Abs(int n) {int s=(n>>31); n^=s; n-=s; return n;}
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static long Abs(long n) {long s=(n>>31); n^=s; n-=s; return n;}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static long Abs(long n) {long s=(n>>63); n^=s; n-=s; return n;}
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static int Sign(int value) => (value >> 31) | (int)((uint)(-value) >> 31);
 

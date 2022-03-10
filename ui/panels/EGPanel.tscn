@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=2]
+[gd_scene load_steps=44 format=2]
 
 [ext_resource path="res://ui/EGCheckBox.tres" type="Theme" id=1]
 [ext_resource path="res://ui/envelopeDisplay/EnvelopeDisplay.tscn" type="PackedScene" id=2]
@@ -22,6 +22,7 @@
 [ext_resource path="res://gfx/wave/5.png" type="Texture" id=20]
 [ext_resource path="res://gfx/wave/7.png" type="Texture" id=21]
 [ext_resource path="res://ui/EGSliderEnabled.stylebox" type="StyleBox" id=22]
+[ext_resource path="res://gfx/fonts/spelunkid_font.png" type="Texture" id=23]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.501961, 0.501961, 0.501961, 0.25098 )
@@ -98,6 +99,72 @@ corner_radius_bottom_right = 5
 shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=17]
+content_margin_left = 4.0
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+bg_color = Color( 0, 0, 0, 0.305882 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.8, 0.8, 0.8, 0.709804 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+expand_margin_left = 2.0
+expand_margin_right = 12.0
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=20]
+content_margin_left = 4.0
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+bg_color = Color( 0, 0, 0, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.45098, 0.45098, 0.45098, 0.709804 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+expand_margin_left = 2.0
+expand_margin_right = 12.0
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=21]
+bg_color = Color( 0, 0, 0, 0.878431 )
+border_width_left = 1
+border_width_top = 2
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0, 0.6, 1, 1 )
+border_blend = true
+corner_radius_top_left = 3
+corner_radius_bottom_right = 3
+expand_margin_left = 4.0
+expand_margin_right = 4.0
+expand_margin_top = 4.0
+expand_margin_bottom = 4.0
+shadow_size = 3
+
+[sub_resource type="Theme" id=18]
+LineEdit/colors/cursor_color = Color( 0.941176, 0.941176, 0.941176, 0.376471 )
+LineEdit/colors/font_color_selected = Color( 0.792157, 0.792157, 0.792157, 1 )
+LineEdit/colors/selection_color = Color( 0.145098, 0.282353, 0.447059, 1 )
+LineEdit/constants/minimum_spaces = 4
+LineEdit/fonts/font = ExtResource( 7 )
+LineEdit/styles/focus = null
+LineEdit/styles/normal = SubResource( 17 )
+LineEdit/styles/read_only = SubResource( 20 )
+TooltipLabel/colors/font_color = Color( 1, 1, 1, 1 )
+TooltipLabel/colors/font_color_shadow = Color( 0, 0, 0, 0.317647 )
+TooltipLabel/fonts/font = ExtResource( 6 )
+TooltipPanel/styles/panel = SubResource( 21 )
+
+[sub_resource type="AtlasTexture" id=19]
+atlas = ExtResource( 23 )
+region = Rect2( 120, 61, 8, 10 )
 
 [sub_resource type="AtlasTexture" id=7]
 atlas = ExtResource( 13 )
@@ -646,6 +713,32 @@ custom_styles/hover = SubResource( 5 )
 custom_styles/normal = SubResource( 6 )
 icon = ExtResource( 14 )
 
+[node name="Bank" type="SpinBox" parent="WavePanel"]
+visible = false
+margin_left = 16.0
+margin_top = 17.0
+margin_right = 68.0
+margin_bottom = 31.0
+theme = SubResource( 18 )
+custom_icons/updown = SubResource( 19 )
+editable = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="lbl" type="Label" parent="WavePanel/Bank"]
+anchor_left = -0.0769231
+anchor_right = -0.0769231
+margin_top = -11.0
+margin_right = 60.0
+margin_bottom = -3.0
+custom_fonts/font = ExtResource( 7 )
+text = "Bank"
+align = 2
+__meta__ = {
+"_edit_use_anchors_": true
+}
+
 [node name="FixedRatio" type="CheckBox" parent="."]
 anchor_left = -0.000978474
 anchor_top = -0.00174216
@@ -862,6 +955,7 @@ __meta__ = {
 [connection signal="value_changed" from="Frequency/H/Fine Tune" to="." method="setFreq"]
 [connection signal="value_changed" from="WavePanel/Wave" to="WavePanel" method="_on_Wave_value_changed"]
 [connection signal="gui_input" from="WavePanel/Preview" to="WavePanel" method="_on_Preview_gui_input"]
+[connection signal="value_changed" from="WavePanel/Bank" to="WavePanel" method="_on_Bank_value_changed"]
 [connection signal="toggled" from="FixedRatio" to="." method="_on_FixedRatio_toggled"]
 [connection signal="toggled" from="Mute" to="." method="_on_Mute_toggled" binds= [ false ]]
 [connection signal="toggled" from="Bypass" to="." method="_on_Mute_toggled" binds= [ true ]]

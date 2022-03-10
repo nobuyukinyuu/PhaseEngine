@@ -8,5 +8,6 @@
     <!-- <Compile Include="**\*.cs" Exclude="script_templates/*.cs" /> -->
     <Compile Include="./*.cs" Exclude="script_templates/*.cs" />
     <Compile Include="PhaseEngine/**/*.cs" />
+    <Compile Include="ui\main\voice\Test2.cs" />
   </ItemGroup>
 </Project>

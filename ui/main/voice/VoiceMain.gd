@@ -10,7 +10,7 @@ func _ready():
 	#Otherwise, the value specified in the editor will only be valid for us and none of our children.
 	chip_loc = get_node(chip_loc).get_path()  
 	
-	global.connect("op_tooltip_needs_data", self, "_on_op_tooltip_needs_data")
+#	global.connect("op_tooltip_needs_data", self, "_on_op_tooltip_needs_data")
 	global.connect("op_intent_changed", self, "_on_op_intent_changed")
 	
 	#Expand the kanban scroller to fill the window.

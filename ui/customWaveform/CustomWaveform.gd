@@ -7,8 +7,42 @@ var wave = Riff.Wave.new()
 var import_path = ""
 
 const font = preload("res://gfx/fonts/numerics_7seg.tres")
+var bank=-1
 
+var revert_tbl = []   #Different than the revert_tbl in $VU, this holds the REAL original values.
 
+signal wave_updated
+
+enum {ALL=-1, REVERT=-2}
+
+#Sends table updates back to the chip.
+func update_table(pos, val=0):
+	var c = get_node(owner.chip_loc)
+#	if !c:  prints("CustomWaveform.gd:  Chip not found!!", pos, val)
+	match pos:
+		ALL:  #Grab entire table from $VU and convert
+			$Revert.disabled = false
+			var tbl = $VU.tbl if !$H2/Smooth.pressed else $VU.display_tbl
+			var output = []
+			for i in tbl.size():
+#				print("All, Setting %s to %s.  Converted value:  " % [i,tbl[i]], $VU.to_short(tbl[i]))
+				output.append($VU.to_short(tbl[i]))
+			c.SetWave(bank, output)
+#			prints("Setting all in bank", bank,".", randi())
+
+		REVERT:
+			$VU.set_table(revert_tbl)
+			$Revert.disabled = true
+			$H2/Smooth.pressed = false  #Should prevent recalc from sending another table copy back to us.
+			_on_Smooth_toggled(false)
+			c.SetWave(bank, revert_tbl)
+
+		_:  #Singular value.
+			$Revert.disabled = false
+#			print("Setting %s to %s.  Converted value:  " % [pos,val], $VU.to_short(val))
+			c.SetWave(bank, pos, $VU.to_short(val))
+
+	global.emit_signal("op_tab_value_changed")
 
 func _ready():
 	show()
@@ -37,25 +71,25 @@ func _ready():
 		o.rect_min_size.y = 24
 		break
 
-	_on_Smooth_toggled($H2/Smooth.pressed)
+#	_on_Smooth_toggled($H2/Smooth.pressed)
 
-func reload():
-	fetch_table()
-
-func fetch_table(index=0):
-	if !global.currentPatch:  return
-	var input:Dictionary = global.currentPatch.GetWaveformBank(index,false) 
+func fetch_table(bank=0):
+	var c = get_node(owner.chip_loc)
+	if !c:  
+		hide()
+		return
+	var input = c.GetWave(bank)
 		
 	if input:
-		$VU.set_table(input.get("values"))
-		return input
-		
+		$VU.set_table(input)
+		revert_tbl = input
+		$H/lblTitle.text = "Waveform %s" % bank
+#		return input
 	else:
-		print("Waveform: Can't find Patch's custom wavetable bank at %s." % index)
+		print("Waveform: Can't find Voice's custom wavetable bank at %s." % bank)
 
-func _on_value_changed(idx, val):
-#	if !global.currentPatch:  return
-	pass
+	self.bank = bank
+
 
 
 func _on_menu_item_selected(index):  #Called when needing to add or remove banks
@@ -198,19 +232,21 @@ func _on_WaveImport_confirmed():
 	var stride = float($WaveImport/Margin/V/HBoxContainer/txtStride.text)
 	
 	if stride <= 0:  stride = 1
-	for i in 128:
+	for i in global.WAVETABLE_SIZE:
 		f.seek(wave.dataStartPos + pos)
-		$VU.tbl[i] = readbits(f, $WaveImport/Margin/V/chkBits.pressed, 
+		$VU.set_table_pos(i, readbits(f, $WaveImport/Margin/V/chkBits.pressed, 
 								$WaveImport/Margin/V/chkStereo.pressed,
 								$WaveImport/Margin/V/chkSigned.pressed)
+						)
 
 		pos = fmod(pos+stride, wave.chunkSize)
 
 	f.close()
 
-	#Send the table to the patch.
-	for i in 128:
-		_on_value_changed(i, $VU.tbl[i])
+#	#Send the table to the patch.
+#	for i in global.WAVETABLE_SIZE:
+#		_on_value_changed(i, $VU.tbl[i])
+		
 	$VU.update()
 
 func readbits(f:File, wide=false, stereo=false, signed=true):
@@ -244,7 +280,7 @@ func _on_Smooth_Apply_pressed():
 
 
 func _on_btnSquish_pressed():
-	$WaveImport/Margin/V/HBoxContainer/txtStride.text = str(wave.chunkSize / 128.0)
+	$WaveImport/Margin/V/HBoxContainer/txtStride.text = str(wave.chunkSize / float(global.WAVETABLE_SIZE))
 
 
 func _on_Fidelity_value_changed(value):
@@ -254,11 +290,28 @@ func _on_Fidelity_value_changed(value):
 func _on_Quantize_value_changed(value):
 	$VU.quantize_step = 1<<int(value)
 
-onready var smooth_group = [$H2/Wrap, $Amount, $"Preserve Center"]
+onready var smooth_group = [$H2/Wrap, $Amount, $"Preserve Center", $Amt, $Ctr]
 func _on_Smooth_toggled(pressed):
 	for o in smooth_group:
 		o.disabled = !pressed
 	$VU.needs_recalc = true
+	if !pressed:  #Need to update the entire table
+		update_table(-1)
+
 
 func _on_Wrap_toggled(_pressed):
 	$VU.needs_recalc = true
+
+
+
+
+#Hacky workaround to deal with non-popup hiding when the close button is pressed
+func _on_CustomWaveform_visibility_changed():
+	if !visible:  emit_signal("wave_updated", bank)
+#	if !visible:  emit_signal("popup_hide")
+
+
+
+
+func _on_Revert_pressed():
+	update_table(REVERT)

@@ -29,7 +29,7 @@ namespace PhaseEngine
         public Algorithm alg = new Algorithm();
         public LFO lfo = new LFO();
 
-        public WaveTableData wavetable;
+        public WaveTableData wavetable = new WaveTableData();
 
         public Channel preview;
 
@@ -206,7 +206,7 @@ namespace PhaseEngine
         }
 
         /// Sets the canonical waveform to reference when setting an operator's waveFunc on NoteOn.
-        public void SetWaveform(int opTarget, int val)
+        public void SetOscillator(int opTarget, int val)
         {   // NOTE:  This does NOT actually set an operator's waveFunc!  This is done in NoteOn when referencing this value from Voice.
             oscType[opTarget] = (byte)val;
         }    

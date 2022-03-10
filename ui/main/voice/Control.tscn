@@ -1,45 +1,46 @@
-[gd_scene load_steps=53 format=2]
+[gd_scene load_steps=54 format=2]
 
-[ext_resource path="res://MIDI.gd" type="Script" id=1]
-[ext_resource path="res://ui/VoiceMain.gd" type="Script" id=2]
-[ext_resource path="res://CPUMon.cs" type="Script" id=3]
-[ext_resource path="res://Test2.cs" type="Script" id=4]
-[ext_resource path="res://ui/kanbanScroll/Column.tscn" type="PackedScene" id=5]
+[ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=1]
+[ext_resource path="res://ui/kanbanScroll/Column.tscn" type="PackedScene" id=2]
+[ext_resource path="res://ui/knob/Knob.tscn" type="PackedScene" id=3]
+[ext_resource path="res://ui/OpIntentMenu.tscn" type="PackedScene" id=4]
+[ext_resource path="res://ui/voice_io/VoiceIO.tscn" type="PackedScene" id=5]
 [ext_resource path="res://ui/wiringGrid/WiringGrid.tscn" type="PackedScene" id=6]
-[ext_resource path="res://ui/kanbanScroll/Kanban.gd" type="Script" id=7]
-[ext_resource path="res://ui/TabContainer.theme" type="Theme" id=8]
-[ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=9]
-[ext_resource path="res://gfx/wave/0.png" type="Texture" id=10]
+[ext_resource path="res://gfx/fonts/numerics_8x10.tres" type="BitmapFont" id=7]
+[ext_resource path="res://gfx/fonts/thin_font_6x8.tres" type="BitmapFont" id=8]
+[ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=9]
+[ext_resource path="res://gfx/fonts/numerics_5x8.tres" type="BitmapFont" id=10]
 [ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=11]
-[ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=12]
-[ext_resource path="res://gfx/wave/3.png" type="Texture" id=13]
-[ext_resource path="res://ui/panels/LFOPanel.gd" type="Script" id=14]
-[ext_resource path="res://gfx/wave/7.png" type="Texture" id=15]
-[ext_resource path="res://gfx/wave/2.png" type="Texture" id=16]
-[ext_resource path="res://gfx/wave/8a.png" type="Texture" id=17]
-[ext_resource path="res://gfx/wave/8.png" type="Texture" id=18]
-[ext_resource path="res://gfx/wave/9.png" type="Texture" id=19]
-[ext_resource path="res://gfx/wave/1.png" type="Texture" id=20]
-[ext_resource path="res://gfx/wave/5.png" type="Texture" id=21]
-[ext_resource path="res://gfx/wave/6.png" type="Texture" id=22]
-[ext_resource path="res://FMPreview.gd" type="Script" id=23]
-[ext_resource path="res://ui/EGCheckBox.tres" type="Theme" id=24]
-[ext_resource path="res://ui/OpIntentMenu.tscn" type="PackedScene" id=25]
-[ext_resource path="res://ui/voice_io/VoiceIO.tscn" type="PackedScene" id=26]
-[ext_resource path="res://ui/FileDialog.theme" type="Theme" id=27]
-[ext_resource path="res://gfx/ui/godot_icons/Save.svg" type="Texture" id=28]
-[ext_resource path="res://gfx/ui/godot_icons/Load.svg" type="Texture" id=29]
-[ext_resource path="res://gfx/ui/kanban/arrange_type_column.png" type="Texture" id=30]
-[ext_resource path="res://gfx/ui/kanban/arrange_stack.png" type="Texture" id=31]
-[ext_resource path="res://gfx/ui/kanban/arrange_group.svg" type="Texture" id=32]
-[ext_resource path="res://gfx/ui/kanban/voicebank.png" type="Texture" id=33]
-[ext_resource path="res://gfx/ui/kanban/arrange_spread.svg" type="Texture" id=34]
-[ext_resource path="res://gfx/ui/kanban/arrange_group_stacks.png" type="Texture" id=35]
-[ext_resource path="res://ui/EGSliderEnabled.stylebox" type="StyleBox" id=36]
-[ext_resource path="res://gfx/fonts/thin_font_6x8.tres" type="BitmapFont" id=38]
-[ext_resource path="res://ui/knob/Knob.tscn" type="PackedScene" id=39]
-[ext_resource path="res://gfx/fonts/numerics_8x10.tres" type="BitmapFont" id=40]
-[ext_resource path="res://gfx/fonts/numerics_5x8.tres" type="BitmapFont" id=41]
+[ext_resource path="res://ui/main/voice/Test2.cs" type="Script" id=12]
+[ext_resource path="res://CPUMon.cs" type="Script" id=13]
+[ext_resource path="res://ui/main/voice/MIDI.gd" type="Script" id=14]
+[ext_resource path="res://ui/EGCheckBox.tres" type="Theme" id=15]
+[ext_resource path="res://ui/TabContainer.theme" type="Theme" id=16]
+[ext_resource path="res://ui/FileDialog.theme" type="Theme" id=17]
+[ext_resource path="res://ui/main/voice/VoiceMain.gd" type="Script" id=18]
+[ext_resource path="res://ui/EGSliderEnabled.stylebox" type="StyleBox" id=19]
+[ext_resource path="res://gfx/wave/0.png" type="Texture" id=20]
+[ext_resource path="res://gfx/wave/8a.png" type="Texture" id=21]
+[ext_resource path="res://gfx/wave/7.png" type="Texture" id=22]
+[ext_resource path="res://gfx/wave/1.png" type="Texture" id=23]
+[ext_resource path="res://gfx/wave/6.png" type="Texture" id=24]
+[ext_resource path="res://gfx/wave/2.png" type="Texture" id=25]
+[ext_resource path="res://gfx/wave/5.png" type="Texture" id=26]
+[ext_resource path="res://gfx/wave/3.png" type="Texture" id=27]
+[ext_resource path="res://gfx/wave/9.png" type="Texture" id=28]
+[ext_resource path="res://gfx/wave/8.png" type="Texture" id=29]
+[ext_resource path="res://ui/kanbanScroll/Kanban.gd" type="Script" id=30]
+[ext_resource path="res://gfx/ui/godot_icons/Save.svg" type="Texture" id=31]
+[ext_resource path="res://gfx/ui/godot_icons/Load.svg" type="Texture" id=32]
+[ext_resource path="res://gfx/ui/kanban/arrange_type_column.png" type="Texture" id=33]
+[ext_resource path="res://gfx/ui/kanban/voicebank.png" type="Texture" id=34]
+[ext_resource path="res://gfx/ui/kanban/arrange_stack.png" type="Texture" id=35]
+[ext_resource path="res://gfx/ui/kanban/arrange_group.svg" type="Texture" id=36]
+[ext_resource path="res://gfx/ui/kanban/arrange_group_stacks.png" type="Texture" id=37]
+[ext_resource path="res://gfx/ui/kanban/arrange_spread.svg" type="Texture" id=38]
+[ext_resource path="res://ui/panels/LFOPanel.gd" type="Script" id=39]
+[ext_resource path="res://ui/main/voice/FMPreview.gd" type="Script" id=40]
+[ext_resource path="res://ui/main/voice/WaveformBanksTab.tscn" type="PackedScene" id=41]
 
 [sub_resource type="Animation" id=1]
 resource_name = "NoteOn"
@@ -101,7 +102,7 @@ content_margin_bottom = 8.0
 bg_color = Color( 0.423529, 0.756863, 1, 0.439216 )
 
 [sub_resource type="Theme" id=10]
-default_font = ExtResource( 38 )
+default_font = ExtResource( 8 )
 HSlider/styles/grabber_area = SubResource( 11 )
 HSlider/styles/grabber_area_highlight = SubResource( 12 )
 
@@ -187,7 +188,7 @@ anti_aliasing = false
 [node name="VoiceTab" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource( 2 )
+script = ExtResource( 18 )
 __meta__ = {
 "_edit_lock_": true,
 "_edit_use_anchors_": false
@@ -198,7 +199,7 @@ chip_loc = NodePath("../VoiceTab/Channels")
 anims/NoteOn = SubResource( 1 )
 
 [node name="MIDI Control" type="Node" parent="."]
-script = ExtResource( 1 )
+script = ExtResource( 14 )
 
 [node name="FMPreview" type="Label" parent="."]
 self_modulate = Color( 1, 1, 1, 0.568627 )
@@ -207,7 +208,7 @@ margin_top = 256.0
 margin_right = 268.0
 margin_bottom = 384.0
 text = "Output:"
-script = ExtResource( 23 )
+script = ExtResource( 40 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -224,7 +225,7 @@ margin_right = 276.0
 margin_bottom = 400.0
 custom_colors/font_color = Color( 0.952941, 0.952941, 0.952941, 0.552941 )
 text = "WAVEFORM DISPLAY"
-script = ExtResource( 4 )
+script = ExtResource( 12 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -254,13 +255,13 @@ margin_right = 644.0
 rect_min_size = Vector2( 364, 0 )
 size_flags_vertical = 3
 custom_constants/separation = 0
-script = ExtResource( 7 )
+script = ExtResource( 30 )
 __meta__ = {
 "_edit_group_": true,
 "_edit_use_anchors_": false
 }
 
-[node name="Column0" parent="Kanban" instance=ExtResource( 5 )]
+[node name="Column0" parent="Kanban" instance=ExtResource( 2 )]
 rect_min_size = Vector2( 360, 0 )
 
 [node name="WiringGrid" parent="." instance=ExtResource( 6 )]
@@ -280,7 +281,7 @@ margin_right = 68.0
 margin_bottom = -1.0
 text = "CPU:  0%
 Mem:  0k"
-script = ExtResource( 3 )
+script = ExtResource( 13 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -291,10 +292,10 @@ margin_top = 368.0
 margin_right = 272.0
 margin_bottom = 560.0
 rect_min_size = Vector2( 264, 0 )
-theme = ExtResource( 8 )
+theme = ExtResource( 16 )
 custom_styles/panel = SubResource( 3 )
 tab_align = 0
-script = ExtResource( 14 )
+script = ExtResource( 39 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -324,8 +325,8 @@ margin_top = 21.0
 margin_right = 251.0
 margin_bottom = 37.0
 size_flags_horizontal = 3
-theme = ExtResource( 27 )
-custom_fonts/font = ExtResource( 12 )
+theme = ExtResource( 17 )
+custom_fonts/font = ExtResource( 9 )
 placeholder_text = "(Instrument)"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -348,33 +349,35 @@ margin_top = 49.0
 margin_right = 251.0
 margin_bottom = 149.0
 size_flags_horizontal = 3
-theme = ExtResource( 27 )
-custom_fonts/font = ExtResource( 38 )
+theme = ExtResource( 17 )
+custom_fonts/font = ExtResource( 8 )
 wrap_enabled = true
 caret_blink = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Gain" parent="LTab/Metadata" instance=ExtResource( 39 )]
+[node name="Gain" parent="LTab/Metadata" instance=ExtResource( 3 )]
 margin_left = 15.0
 margin_top = 101.0
 margin_right = 55.0
 margin_bottom = 144.0
 theme = SubResource( 10 )
+min_value = 0.05
 max_value = 5.0
 step = 0.05
 value = 1.0
+exp_edit = true
 title = "Gain"
-travel_multiplier = 8.0
+travel_multiplier = 10.0
 notch = 0.5
 thickness = 0.4
 point_outwards = true
 title_align = Vector2( 0.3, -0.1 )
 decimal_pad = 2
-value_font = ExtResource( 41 )
+value_font = ExtResource( 10 )
 
-[node name="Pan" parent="LTab/Metadata" instance=ExtResource( 39 )]
+[node name="Pan" parent="LTab/Metadata" instance=ExtResource( 3 )]
 margin_left = 71.0
 margin_top = 101.0
 margin_right = 111.0
@@ -389,7 +392,7 @@ notch = 0.5
 thickness = 0.4
 point_outwards = true
 title_align = Vector2( 0.3, -0.1 )
-value_font = ExtResource( 40 )
+value_font = ExtResource( 7 )
 
 [node name="LFO" type="Control" parent="LTab"]
 visible = false
@@ -414,23 +417,23 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Wave" parent="LTab/LFO/WavePanel" instance=ExtResource( 9 )]
+[node name="Wave" parent="LTab/LFO/WavePanel" instance=ExtResource( 1 )]
 visible = false
 margin_left = -104.0
 margin_top = 8.0
 margin_right = -48.0
 margin_bottom = 28.0
 rect_min_size = Vector2( 56, 20 )
-custom_styles/slider = ExtResource( 36 )
+custom_styles/slider = ExtResource( 19 )
 max_value = 1023.0
 
-[node name="Duty" parent="LTab/LFO/WavePanel" instance=ExtResource( 9 )]
+[node name="Duty" parent="LTab/LFO/WavePanel" instance=ExtResource( 1 )]
 margin_left = 69.0
 margin_top = 4.0
 margin_right = 205.0
 margin_bottom = 24.0
 rect_min_size = Vector2( 64, 20 )
-custom_styles/slider = ExtResource( 36 )
+custom_styles/slider = ExtResource( 19 )
 max_value = 65535.0
 value = 32767.0
 associated_property = "duty"
@@ -440,7 +443,7 @@ margin_left = 219.0
 margin_top = 4.0
 margin_right = 251.0
 margin_bottom = 28.0
-texture = ExtResource( 10 )
+texture = ExtResource( 20 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -460,7 +463,7 @@ margin_left = 5.0
 margin_top = 8.0
 margin_right = 59.0
 margin_bottom = 26.0
-theme = ExtResource( 24 )
+theme = ExtResource( 15 )
 custom_fonts/font = ExtResource( 11 )
 text = "Flip"
 __meta__ = {
@@ -483,7 +486,7 @@ margin_top = -12.0
 margin_right = 8.0
 margin_bottom = -4.0
 custom_colors/font_color = Color( 0.384314, 0.717647, 0.831373, 0.639216 )
-custom_fonts/font = ExtResource( 12 )
+custom_fonts/font = ExtResource( 9 )
 text = "Waveform="
 valign = 1
 __meta__ = {
@@ -505,7 +508,7 @@ margin_right = 36.0
 margin_bottom = 28.0
 custom_styles/hover = SubResource( 7 )
 custom_styles/normal = SubResource( 8 )
-icon = ExtResource( 10 )
+icon = ExtResource( 20 )
 
 [node name="Wave1" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
 margin_left = 38.0
@@ -513,7 +516,7 @@ margin_right = 74.0
 margin_bottom = 28.0
 custom_styles/hover = SubResource( 7 )
 custom_styles/normal = SubResource( 8 )
-icon = ExtResource( 16 )
+icon = ExtResource( 25 )
 
 [node name="Wave2" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
 margin_top = 30.0
@@ -521,7 +524,7 @@ margin_right = 36.0
 margin_bottom = 58.0
 custom_styles/hover = SubResource( 7 )
 custom_styles/normal = SubResource( 8 )
-icon = ExtResource( 20 )
+icon = ExtResource( 23 )
 
 [node name="Wave3" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
 margin_left = 38.0
@@ -530,7 +533,7 @@ margin_right = 74.0
 margin_bottom = 58.0
 custom_styles/hover = SubResource( 7 )
 custom_styles/normal = SubResource( 8 )
-icon = ExtResource( 13 )
+icon = ExtResource( 27 )
 
 [node name="Wave4" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
 margin_top = 60.0
@@ -538,7 +541,7 @@ margin_right = 36.0
 margin_bottom = 88.0
 custom_styles/hover = SubResource( 7 )
 custom_styles/normal = SubResource( 8 )
-icon = ExtResource( 21 )
+icon = ExtResource( 26 )
 
 [node name="Wave5" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
 margin_left = 38.0
@@ -547,7 +550,7 @@ margin_right = 74.0
 margin_bottom = 88.0
 custom_styles/hover = SubResource( 7 )
 custom_styles/normal = SubResource( 8 )
-icon = ExtResource( 22 )
+icon = ExtResource( 24 )
 
 [node name="Wave6" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
 margin_top = 90.0
@@ -555,7 +558,7 @@ margin_right = 36.0
 margin_bottom = 118.0
 custom_styles/hover = SubResource( 7 )
 custom_styles/normal = SubResource( 8 )
-icon = ExtResource( 15 )
+icon = ExtResource( 22 )
 
 [node name="Wave7" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
 margin_left = 38.0
@@ -564,7 +567,7 @@ margin_right = 74.0
 margin_bottom = 118.0
 custom_styles/hover = SubResource( 7 )
 custom_styles/normal = SubResource( 8 )
-icon = ExtResource( 17 )
+icon = ExtResource( 21 )
 
 [node name="Wave8" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
 margin_top = 120.0
@@ -572,7 +575,7 @@ margin_right = 36.0
 margin_bottom = 148.0
 custom_styles/hover = SubResource( 7 )
 custom_styles/normal = SubResource( 8 )
-icon = ExtResource( 18 )
+icon = ExtResource( 29 )
 
 [node name="Wave9" type="Button" parent="LTab/LFO/WavePanel/Popup/G"]
 margin_left = 38.0
@@ -581,27 +584,27 @@ margin_right = 74.0
 margin_bottom = 148.0
 custom_styles/hover = SubResource( 7 )
 custom_styles/normal = SubResource( 8 )
-icon = ExtResource( 19 )
+icon = ExtResource( 28 )
 
-[node name="+Delay" parent="LTab/LFO" instance=ExtResource( 9 )]
+[node name="+Delay" parent="LTab/LFO" instance=ExtResource( 1 )]
 margin_left = 7.0
 margin_top = 45.0
 margin_right = 255.0
 margin_bottom = 65.0
 rect_min_size = Vector2( 112, 20 )
-custom_styles/slider = ExtResource( 36 )
+custom_styles/slider = ExtResource( 19 )
 max_value = 32767.0
 exp_edit = true
 associated_property = "Delay"
 special_display = 2
 
-[node name="Speed" parent="LTab/LFO" instance=ExtResource( 9 )]
+[node name="Speed" parent="LTab/LFO" instance=ExtResource( 1 )]
 margin_left = 7.0
 margin_top = 77.0
 margin_right = 255.0
 margin_bottom = 97.0
 rect_min_size = Vector2( 64, 20 )
-custom_styles/slider = ExtResource( 36 )
+custom_styles/slider = ExtResource( 19 )
 max_value = 127.0
 value = 19.0
 associated_property = "Speed"
@@ -627,52 +630,49 @@ __meta__ = {
 [node name="Label" type="Label" parent="LTab/LFO/Sync"]
 margin_top = -11.0
 margin_right = 119.0
-custom_fonts/font = ExtResource( 12 )
+custom_fonts/font = ExtResource( 9 )
 text = "Sync"
 align = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Pitch Depth" parent="LTab/LFO" instance=ExtResource( 9 )]
+[node name="Pitch Depth" parent="LTab/LFO" instance=ExtResource( 1 )]
 margin_left = 135.0
 margin_top = 141.0
 margin_right = 255.0
 margin_bottom = 161.0
 rect_min_size = Vector2( 112, 20 )
-custom_styles/slider = ExtResource( 36 )
+custom_styles/slider = ExtResource( 19 )
 max_value = 1.0
 step = 0.001
 associated_property = "pmd"
 
-[node name="Amplitude Depth" parent="LTab/LFO" instance=ExtResource( 9 )]
+[node name="Amplitude Depth" parent="LTab/LFO" instance=ExtResource( 1 )]
 margin_left = 7.0
 margin_top = 109.0
 margin_right = 255.0
 margin_bottom = 129.0
 rect_min_size = Vector2( 64, 20 )
-custom_styles/slider = ExtResource( 36 )
+custom_styles/slider = ExtResource( 19 )
 max_value = 1023.0
 value = 1023.0
 exp_edit = true
 associated_property = "AMD"
 
-[node name="Waveform" type="Control" parent="LTab"]
+[node name="Waveform" parent="LTab" instance=ExtResource( 41 )]
 visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 1.0
-margin_top = 19.0
 margin_right = -1.0
 margin_bottom = -1.0
+chip_loc = NodePath("../../Channels")
 
-[node name="OpIntentMenu" parent="." instance=ExtResource( 25 )]
+[node name="OpIntentMenu" parent="." instance=ExtResource( 4 )]
 margin_left = -136.0
 margin_top = 287.0
 margin_right = -8.0
 margin_bottom = 351.0
 
-[node name="IO" parent="." instance=ExtResource( 26 )]
+[node name="IO" parent="." instance=ExtResource( 5 )]
 margin_top = 600.0
 margin_bottom = 600.0
 chip_loc = NodePath("../Channels")
@@ -682,7 +682,7 @@ margin_left = 12.0
 margin_top = 568.0
 margin_right = 274.0
 margin_bottom = 592.0
-theme = ExtResource( 27 )
+theme = ExtResource( 17 )
 __meta__ = {
 "_edit_group_": true,
 "_edit_use_anchors_": false
@@ -692,21 +692,21 @@ __meta__ = {
 margin_right = 24.0
 margin_bottom = 24.0
 hint_tooltip = "Load a different voice from the current imported bank."
-icon = ExtResource( 33 )
+icon = ExtResource( 34 )
 
 [node name="Load" type="Button" parent="Btn"]
 margin_left = 30.0
 margin_right = 54.0
 margin_bottom = 24.0
 hint_tooltip = "Open or import a voice."
-icon = ExtResource( 29 )
+icon = ExtResource( 32 )
 
 [node name="Save" type="Button" parent="Btn"]
 margin_left = 60.0
 margin_right = 84.0
 margin_bottom = 24.0
 hint_tooltip = "Save voice."
-icon = ExtResource( 28 )
+icon = ExtResource( 31 )
 
 [node name="VSeparator" type="VSeparator" parent="Btn"]
 margin_left = 90.0
@@ -718,14 +718,14 @@ margin_left = 100.0
 margin_right = 124.0
 margin_bottom = 24.0
 hint_tooltip = "Arrange all operators together in a single tab group."
-icon = ExtResource( 32 )
+icon = ExtResource( 36 )
 
 [node name="Arrange1" type="Button" parent="Btn"]
 margin_left = 130.0
 margin_right = 154.0
 margin_bottom = 24.0
 hint_tooltip = "Arrange operators by spreading them across all available columns."
-icon = ExtResource( 34 )
+icon = ExtResource( 38 )
 
 [node name="VSeparator2" type="VSeparator" parent="Btn"]
 margin_left = 160.0
@@ -738,7 +738,7 @@ margin_right = 194.0
 margin_bottom = 24.0
 hint_tooltip = "Arrange operators into columns,
 based on modulation stacks to output."
-icon = ExtResource( 31 )
+icon = ExtResource( 35 )
 
 [node name="Arrange2" type="Button" parent="Btn"]
 margin_left = 200.0
@@ -746,14 +746,14 @@ margin_right = 224.0
 margin_bottom = 24.0
 hint_tooltip = "Arrange operators into groups,
 based on modulation stacks to output."
-icon = ExtResource( 35 )
+icon = ExtResource( 37 )
 
 [node name="Arrange4" type="Button" parent="Btn"]
 margin_left = 230.0
 margin_right = 254.0
 margin_bottom = 24.0
 hint_tooltip = "Arrange operators by type into columns."
-icon = ExtResource( 30 )
+icon = ExtResource( 33 )
 
 [connection signal="timeout" from="FMPreview/Timer" to="FMPreview" method="_on_Timer_timeout"]
 [connection signal="gui_input" from="LTab/LFO/WavePanel/Preview/Panel" to="LTab" method="_on_Preview_gui_input"]
