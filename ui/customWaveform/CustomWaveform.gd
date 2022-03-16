@@ -188,10 +188,10 @@ func _on_Dialog_file_selected(path):
 		else:
 			print ("RIFF (Unknown type)")
 			wave.description = "RIFF (Unknown type)"
-			wave = Riff.new()
+			wave = Riff.Wave.new()
 	else:
 		print ("Raw.....")
-		wave = Riff.new()
+		wave = Riff.Wave.new()
 		wave.chunkSize = f.get_len()
 	
 	import_path = path
@@ -315,3 +315,15 @@ func _on_CustomWaveform_visibility_changed():
 
 func _on_Revert_pressed():
 	update_table(REVERT)
+
+
+func _on_str_pressed():
+	var c = get_node(owner.chip_loc)
+	var output = c.TableStr(bank)
+	
+#	c.SetWave(bank, output)
+	print("Bank set.")
+	fetch_table(bank)
+	print("Refreshing...")
+	
+	pass # Replace with function body.

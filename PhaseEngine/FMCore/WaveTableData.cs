@@ -2,11 +2,15 @@ using System;
 using PhaseEngine;
 using System.Collections.Generic;
 
+#if GODOT
+using Godot;
+#endif
+
 namespace PhaseEngine 
 {
     public class WaveTableData
     {
-        internal const byte TBL_BITS=8;  //Can't be over 10
+        internal const byte TBL_BITS=10;  //Can't be over 10
         internal const ushort TBL_SIZE= 1<<TBL_BITS;  //Must be a power of 2
         List<short[]> tbl;
 
@@ -90,6 +94,61 @@ namespace PhaseEngine
 
             for (int i=0; i<TBL_SIZE; i++)
                 tbl[bank][i] >>= amt;
+        }
+
+        public string TableAsString(int bank=0)
+        {
+            var arr = tbl?[bank];
+            if (arr==null) return "";
+
+            //  Wavetable banks are compressed using a few techniques. Each bank is encoded as a delta waveform which is then DEFLATEd and encoded in Z85.
+            //  Variable bank sizes:  Use a lookup table to find bit width for each bank, then add to a bankWidths field.  The field should have a format
+            //  Where if the first value is 0, the next index is the width for ALL. 
+            //  Otherwise we will iterate each 4 bits to determine width of each bank and number of banks.
+            //  number 1 starts at 4 bits and so on, with top number being 7 for 10 bits. Encode 2 banks per byte, padding the low bits if necessary.
+            //  Then Z85 encode it.  If last 4 bits are 0 again, we know to reduce the number of target banks by 1.
+
+            //  The wavetable data itself should be concat'd from all banks into one large array so that the compression method used is the most efficient.
+            //  Then we can use the decoded lengths from earlier to determine the size of each table
+
+
+            //To get optimal compression size, first we reinterpret the data as deltas.  The first entry in the array is the index (doesn't change)
+            var input = new short[arr.Length];
+            input[0] = arr[0];
+            for (int i=1; i<arr.Length; i++)
+                input[i] = (short)(arr[i] - arr[i-1]);
+
+
+            var input2 = Z85.ShortsToBytes(input);  //Convert our delta bank into a bytestream.
+            GD.PrintS("uncompressed", input2.Length);
+            input2 = Glue.Deflate(input2, System.IO.Compression.CompressionMode.Compress);
+            GD.PrintS("compressed", input2.Length);
+
+            var padAmt = input2.Length % 4;
+            if (padAmt > 0)
+            {   //Pad the compressed array to a 4 byte multiple to meet Z85 spec
+                Array.Resize(ref input2, input2.Length + (4-padAmt) );
+            }
+
+            //Finally, convert the data to a Z85-encoded string.
+            var output = Z85.Encode(input2);
+            return output;
+        }
+
+        //DEBUG:  Convert a compressed string back into a table.  Currently assumes only one bank is in the compressed string.
+        public short[] DeflatedZ85ToTable(string input)
+        {
+            //Do the encoding process in reverse.  TODO
+            var decoded = Z85.Decode(input);
+            var uncompressed = Glue.Deflate(decoded);
+            
+            //Each value in the bytestream represents a delta coded value.  Translate.
+            var output = new short[uncompressed.Length];
+            output[0] = uncompressed[0];
+            for (int i=1; i<output.Length; i++)
+                output[i] = (short) (output[i-1] + uncompressed[i]);
+
+            return output;
         }
 
 

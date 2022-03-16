@@ -27,8 +27,7 @@ namespace PhaseEngine
             get {
                 var val = ScaledValue(i);
                 return (T) Convert.ChangeType(val, typeof(T));  //Stuff a square peg into a round hole
-            }
-            set {
+            } set {
                 values[i] = value;
             }
         }

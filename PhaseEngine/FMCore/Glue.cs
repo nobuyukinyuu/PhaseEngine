@@ -4,6 +4,8 @@ using Godot;
 using System;
 using System.Runtime.CompilerServices;
 using System.Collections.Concurrent;
+using System.IO;
+using System.IO.Compression;
 
 namespace PhaseEngine
 {
@@ -80,6 +82,21 @@ namespace PhaseEngine
             instance = (T)box;  //Copy back the box over ourself
         }
         
+
+        public static byte[] Deflate(byte[] input, CompressionMode mode=CompressionMode.Decompress)
+        {
+            using (var inputStream = new MemoryStream(input))
+            {
+                using (var outputStream = new MemoryStream())
+                {
+                    using (var deflate = new DeflateStream(mode==CompressionMode.Compress? outputStream : inputStream, mode))
+                    {       
+                        if(mode == CompressionMode.Compress) inputStream.CopyTo(deflate); else deflate.CopyTo(outputStream);
+                    }
+                    return outputStream.ToArray();
+                }
+            }            
+        }
 
     }
 

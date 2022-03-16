@@ -58,10 +58,7 @@ public class Test2 : Label
 
     System.Collections.Concurrent.ConcurrentDictionary<int, byte> notes_queued = new System.Collections.Concurrent.ConcurrentDictionary<int, byte>();
     public void QueueNote(int midi_note, int velocity)  //Set Velocity to 0 to trigger noteOff
-    {
-        notes_queued[midi_note] = (byte)velocity;
-    }
-
+    { notes_queued[midi_note] = (byte)velocity; }
 
     public override void _Process(float delta)
     {
@@ -492,6 +489,20 @@ public class Test2 : Label
         // var output = (short[]) Convert.ChangeType(input, typeof(short[]));
         var output = Array.ConvertAll(input, Convert.ToInt16);
         tbl.SetTable(bank, output);
+    }
+
+
+    public string TableStr(int bank)
+    {
+        //DEBUG FUNCTION:  TEST TABLE COMPRESSION AND DECOMPRESSION ROUTINES.
+        var compressed = c.Voice.wavetable.TableAsString( bank );
+
+        var decompressed = c.Voice.wavetable.DeflatedZ85ToTable(compressed);
+
+        //Pop the decompressed table back into the bank.  Let the UI reload it
+        c.Voice.wavetable.SetTable(bank, decompressed);
+        
+        return compressed;
     }
 
     ///////////////////////////////////    BUFFER    /////////////////////////////////////

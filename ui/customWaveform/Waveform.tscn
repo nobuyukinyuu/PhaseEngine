@@ -773,12 +773,23 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="str" type="Button" parent="."]
+margin_left = 280.0
+margin_top = 360.0
+margin_right = 330.0
+margin_bottom = 400.0
+theme = ExtResource( 17 )
+custom_fonts/font = ExtResource( 13 )
+text = "Str"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="visibility_changed" from="." to="." method="_on_CustomWaveform_visibility_changed"]
 [connection signal="timeout" from="VU/RecalcSmooth" to="VU" method="_on_RecalcSmooth_timeout"]
 [connection signal="index_pressed" from="CPMenu" to="." method="_on_CPMenu_index_pressed"]
 [connection signal="about_to_show" from="WaveImport" to="." method="_on_WaveImport_about_to_show"]
 [connection signal="confirmed" from="WaveImport" to="." method="_on_WaveImport_confirmed"]
-[connection signal="popup_hide" from="WaveImport" to="." method="_on_WaveImport_popup_hide"]
 [connection signal="pressed" from="WaveImport/Margin/V/HBoxContainer/btnSquish" to="." method="_on_btnSquish_pressed"]
 [connection signal="file_selected" from="WaveImport/Dialog" to="." method="_on_Dialog_file_selected"]
 [connection signal="about_to_show" from="SmoothDialog" to="SmoothDialog" method="_on_SmoothDialog_about_to_show"]
@@ -795,3 +806,4 @@ __meta__ = {
 [connection signal="value_changed" from="Amt" to="VU" method="_on_Amt_value_changed"]
 [connection signal="value_changed" from="Ctr" to="VU" method="_on_Ctr_value_changed"]
 [connection signal="pressed" from="Revert" to="." method="_on_Revert_pressed"]
+[connection signal="pressed" from="str" to="." method="_on_str_pressed"]

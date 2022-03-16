@@ -232,7 +232,10 @@ namespace PhaseEngine
         }
 
         // public static double FRatio { get =>  (1<<Tables.SINE_TABLE_BITS) / Global.MixRate; } // The increment of a frequency of 1 at the current mixing rate.
-        public static double FRatio { get =>  0x400 / Global.MixRate; } //The increment of a frequency of 1 at the current mixing rate. We assume default table size of 1024.
+
+        //The increment of a frequency of 1 at the current mixing rate. We assume default table size of 1024 as this is the sine table size once mirrored to a full period.
+        public static double FRatio { get =>  0x400 / Global.MixRate; } 
+        
         private static double IncOfFreqD(double freq)  //Get the increment of a given frequency as a double.
             {return FRatio * freq;}
 

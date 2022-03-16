@@ -181,7 +181,7 @@ func process_line():
 		var percent = (i-startpos) / float(endpos-startpos)
 		percent = stepify(percent, fidelity_step)
 		var val = lerp(startval, endval, percent )
-		print(percent)
+#		print(percent)
 #		tbl[i] = val
 		set_table_pos(i, val)
 #		owner.emit_signal("value_changed", i, val)

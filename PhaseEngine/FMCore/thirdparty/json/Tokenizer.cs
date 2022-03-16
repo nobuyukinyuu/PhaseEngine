@@ -289,8 +289,8 @@ class ASCIICodes {
     public const int CHR_NUL = 0;       //  null characteracter
     public const int CHR_SOH = 1;       //  Start of Heading
     public const int CHR_STX = 2;       //  Start of Text
-    public const int CHR_ETX = 3;       //  } of Text
-    public const int CHR_EOT = 4;       //  } of Transmission
+    public const int CHR_ETX = 3;       //  End of Text
+    public const int CHR_EOT = 4;       //  End of Transmission
     public const int CHR_ENQ = 5;       //  Enquiry
     public const int CHR_ACK = 6;       //  Acknowledgment
     public const int CHR_BEL = 7;       //  Bell
@@ -309,9 +309,9 @@ class ASCIICodes {
     public const int CHR_DC4 = 20;      //  Device Control 4;
     public const int CHR_NAK = 21;      //  Negative Acknowledgment
     public const int CHR_SYN = 22;      //  Synchronous Idle
-    public const int CHR_ETB = 23;      //  } of Transmit Block
+    public const int CHR_ETB = 23;      //  End of Transmit Block
     public const int CHR_CAN = 24;      //  Cancel
-    public const int CHR_EM = 25;       //  } of Medium
+    public const int CHR_EM = 25;       //  End of Medium
     public const int CHR_SUB = 26;      //  Substitute
     public const int CHR_ESCAPE = 27;   //  Escape
     public const int CHR_FS = 28;       //  File separator
