@@ -124,24 +124,29 @@ namespace PhaseEngine
             input2 = Glue.Deflate(input2, System.IO.Compression.CompressionMode.Compress);
             GD.PrintS("compressed", input2.Length);
 
-            var padAmt = input2.Length % 4;
+            var padAmt = 4 - (input2.Length % 4);
             if (padAmt > 0)
             {   //Pad the compressed array to a 4 byte multiple to meet Z85 spec
-                Array.Resize(ref input2, input2.Length + (4-padAmt) );
+                Array.Resize(ref input2, input2.Length + padAmt );
             }
 
             //Finally, convert the data to a Z85-encoded string.
             var output = Z85.Encode(input2);
-            return output;
+            return String.Format("{0},{1}", padAmt, output);
         }
 
         //DEBUG:  Convert a compressed string back into a table.  Currently assumes only one bank is in the compressed string.
         public short[] DeflatedZ85ToTable(string input)
         {
             //Do the encoding process in reverse.  TODO
-            var decoded = Z85.Decode(input);
-            var uncompressed = Glue.Deflate(decoded);
+            var split = input.Split(",", StringSplitOptions.RemoveEmptyEntries);
+            var padAmt = Convert.ToInt32(split[0]);
+            var decoded = Z85.Decode(split[1]);
+            Array.Resize(ref decoded, decoded.Length - padAmt);
+            var uncompressed = Z85.BytesToShorts(Glue.Deflate(decoded));
             
+
+
             //Each value in the bytestream represents a delta coded value.  Translate.
             var output = new short[uncompressed.Length];
             output[0] = uncompressed[0];

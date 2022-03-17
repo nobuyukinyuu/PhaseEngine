@@ -131,12 +131,16 @@ namespace PhaseEngine
             try{
                 SetOscillatorType((Oscillator.oscTypes)waveform_index);
             } catch(IndexOutOfRangeException e) {
+                #if GODOT
+                Godot.GD.Print(String.Format("Waveform {0} not implemented: {1}", waveform_index, e.ToString()));
+                #else
                 System.Diagnostics.Debug.Print(String.Format("Waveform {0} not implemented: {1}", waveform_index, e.ToString()));
+                #endif
             }
         }
 
 
-        //=============Oscillator output types.  Either standard waveform (log domain), noise, or sample.=========================
+        //=============Oscillator output types.  Either standard waveform (log domain), noise, or wavetable sample.=========================
 
 
         public short ComputeWavetableFeedback(ushort modulation, ushort am_offset)

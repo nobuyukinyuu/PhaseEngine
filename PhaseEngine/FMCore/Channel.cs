@@ -258,6 +258,9 @@ namespace PhaseEngine
             this.voice = voice;
             if(voice.opCount != ops.Length)  SetOpCount(voice.opCount);
             SetIntents(0, voice.opCount);
+
+            for(int i=0; i<voice.opCount; i++) ops[i].wavetable = voice.wavetable;
+
             // for (int i=0; i<voice.opCount;  i++)
             // {
             //     //Initialize some values copied from the voice.  This only applies to FM_OPs currently.

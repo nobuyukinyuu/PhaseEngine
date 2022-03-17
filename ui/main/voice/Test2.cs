@@ -411,24 +411,6 @@ public class Test2 : Label
 
 
     public float[] CalcPreview() {return c.Voice.CalcPreview();}
-    // public string FramesPerOscillation()
-    // {
-    //     const int PRECISION=4;
-    //     var fpc = new long[c.opCount];  //Frames per cycle
-    //     var sb = new System.Text.StringBuilder();
-    //     for(int i=0; i<c.opCount; i++)
-    //     {
-    //         // fpc[i] = Tools.ToFixedPoint((float)(Global.MixRate / c.Voice.pgs[i].hz), PRECISION );
-    //         // fpc[i] = (long)Math.Round(Global.MixRate / c.Voice.pgs[i].hz);
-    //         fpc[i] = (long)Math.Round(c.Voice.pgs[i].scopeMult * 100);
-    //         // sb.Append((fpc[i]>>PRECISION).ToString() + ", ");
-    //         sb.Append((fpc[i]).ToString() + ", ");
-    //     }
-    //     var lcm = Tools.LCM(fpc);
-    //     // sb.Append("\n" + lcm.ToString() + ", " + (int)Tools.FromFixedPoint((long)lcm, PRECISION) );
-    //     sb.Append("\n" + lcm.ToString() + ", " + (lcm/Global.MixRate) );
-    //     return sb.ToString();
-    // }
 
     public bool is_quiet() {return c.ChannelsAreFree;}
     public int connections_to_output() {return c.Voice.alg.NumberOfConnectionsToOutput;}
@@ -438,6 +420,7 @@ public class Test2 : Label
         var output=new byte[m.Count]; 
         m.CopyTo(output); return output;
         }
+
 
     ///////////////////////////////////    WAVEFORM    /////////////////////////////////////
     public Godot.Collections.Array AddWave() {
@@ -456,8 +439,8 @@ public class Test2 : Label
         //The relevant method should probably be in SetVoice, since that's where all the other references the channels need are...
 
         //TODO:  Maybe consider setting the bank on Channel.NoteOn instead of having an explicit method in Chip???????
-        for(int i=0; i<c.channels.Length; i++)
-            c.channels[i].ops[opNum].wavetable = c.Voice.wavetable;
+        // for(int i=0; i<c.channels.Length; i++)
+        //     c.channels[i].ops[opNum].wavetable = c.Voice.wavetable;
     }
 
     public Godot.Collections.Array GetWave(int bank)

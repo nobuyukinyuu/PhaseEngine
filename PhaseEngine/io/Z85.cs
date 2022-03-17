@@ -1,5 +1,9 @@
 using PhaseEngine;
 
+//  Z85 C# implementation for PhaseEngine, by Nobuyuki
+//  Based on the iMatix Z85 reference implementation. 
+//  MIT License.  See THIRDPARTY.md for details.
+
 namespace PhaseEngine
 {
     public static class Z85
@@ -78,7 +82,7 @@ namespace PhaseEngine
 
             uint charNum=0, byteNum=0;
             uint value = 0;
-            while (charNum< input.Length)
+            while (charNum < input.Length)
             {
                 // Accumulate value in base 85
                 value = value * 85 + decoder [(byte) s[charNum++] - 32];
@@ -101,6 +105,9 @@ namespace PhaseEngine
 
         public static string Encode(short[] data) => Encode(ShortsToBytes(data));
 
+
+        // Below functions convert Short arrays to byte arrays and vice-versa in order of high 8 bits, then low 8 bits.
+
         public static byte[] ShortsToBytes(short[] data)
         {
             var output = new byte[data.Length * 2];
@@ -113,15 +120,25 @@ namespace PhaseEngine
             return output;
         }
 
-        public static short[] BytesToInt16(byte[] data)
+        public static short[] BytesToShorts(byte[] data)
         {
             if (data.Length % 2 != 0) throw new System.IndexOutOfRangeException("Input size must be a multiple of 2.");
             var output = new short[data.Length / 2];
-            for(int i=0; i<data.Length; i++)
-                output[i/2] = (short)( data[i] << 8 | data[i+1] );
+            for(int i=0; i<output.Length; i++)
+                output[i] = (short)((data[i*2] << 8) | data[i*2 + 1]);
 
             return output;
         }
+
+        // public static short[] BytesToInt16(byte[] data)
+        // {
+        //     if (data.Length % 2 != 0) throw new System.IndexOutOfRangeException("Input size must be a multiple of 2.");
+        //     var output = new short[data.Length / 2];
+        //     for(int i=0; i<data.Length; i++)
+        //         output[i/2] = (short)( data[i] << 8 | data[i+1] );
+
+        //     return output;
+        // }
         
 
     }
