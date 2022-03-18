@@ -22,8 +22,14 @@ func _ready():
 	for i in $G.get_child_count():
 		$G.get_child(i).connect("pressed", self, "select", [i])
 
+
+	if !chip_loc.is_empty():
+		set_from_op(operator)
+		
 	yield(get_tree(),"idle_frame")
 	$lblTitle.text = "Filter %s" % (self.operator+1)
+
+
 
 #Selects a filter type.
 func select(value):

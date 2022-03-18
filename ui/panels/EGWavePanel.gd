@@ -7,7 +7,9 @@ func _ready():
 	
 #	for i in global.waves.size():
 	for i in $Popup/G.get_child_count():
-		$Popup/G.get_child(i).connect("pressed", self, "_on_Popup_button_pressed", [i])
+		var idx = $Popup/G.get_child(i).name
+		idx= int(idx.substr(len(idx)-1))  #Use Wave idx name to assign, for Bitwise doesn't use Noise
+		$Popup/G.get_child(i).connect("pressed", self, "_on_Popup_button_pressed", [idx])
 	
 	$Preview.texture = global.wave_img[0]
 	$Popup.rect_size = $Popup/G.rect_size
@@ -64,6 +66,7 @@ func _on_Bank_value_changed(value):
 
 #	print("op%s Bank changed to %s" % [owner.operator+1, value])
 	c.SetWaveBank(owner.operator, value)
+	global.emit_signal("op_tab_value_changed")
 
 
 const tooltip_text= "No sample banks defined for the voice.\nAdd from the Waveform panel, or select a new oscillator."

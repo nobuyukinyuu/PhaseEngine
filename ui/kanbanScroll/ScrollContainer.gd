@@ -112,7 +112,7 @@ func make_tab(group_loc:TabContainer, opNum:int, intent):
 	p.chip_loc = owner.chip_loc
 	p.operator = opNum
 	p.owner = owner
-	p.set_from_op(opNum)
+	p.set_from_op(opNum)  #This should be done in the _ready() of the panel already??
 	p.set_meta("_tab_icon", global.OpIntentIcons[intent])
 
 	return p

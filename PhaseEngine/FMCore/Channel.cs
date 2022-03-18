@@ -285,23 +285,27 @@ namespace PhaseEngine
                         case OpBase.Intents.FM_OP:
                             var op = new Operator();
                             ops[i] = op;
-                            ops[i].eg = voice.egs[i];
+                            op.eg.Configure(voice.egs[i]);
                             op.pg = voice.pgs[i];  //ByVal copy
+                            op.wavetable = voice.wavetable;
                             break;
                         case OpBase.Intents.FILTER:
                             ops[i] = new Filter();
-                            ops[i].eg = voice.egs[i];
+                            ops[i].eg.Configure(voice.egs[i]);
                             ops[i].SetOscillatorType(voice.egs[i].aux_func);  //TODO:  Check if values out of range cause the filter to freak out
+                            ops[i].wavetable = voice.wavetable;
                             break;
                         case OpBase.Intents.BITWISE:  //Extends FM_OP
                             var op2 = new BitwiseOperator();
                             ops[i] = op2;
-                            ops[i].eg = voice.egs[i];
+                            op2.eg.Configure(voice.egs[i]);
                             op2.pg = voice.pgs[i];  //ByVal copy
+                            op2.wavetable = voice.wavetable;
                             break;
                         case OpBase.Intents.WAVEFOLDER:
                             ops[i] = new WaveFolder();
-                            ops[i].eg = voice.egs[i];
+                            ops[i].eg.Configure(voice.egs[i]);
+                            ops[i].wavetable = voice.wavetable;
                             break;
                             
                         default:

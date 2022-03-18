@@ -70,7 +70,7 @@ expand_margin_top = 16.0
 expand_margin_bottom = 12.0
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=5]
+[sub_resource type="StyleBoxFlat" id=22]
 content_margin_left = 2.0
 content_margin_right = 2.0
 content_margin_top = 2.0
@@ -85,7 +85,7 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id=6]
+[sub_resource type="StyleBoxFlat" id=23]
 content_margin_left = 2.0
 content_margin_right = 2.0
 content_margin_top = 2.0
@@ -633,24 +633,24 @@ __meta__ = {
 [node name="Wave0" type="Button" parent="WavePanel/Popup/G"]
 margin_right = 36.0
 margin_bottom = 28.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/normal = SubResource( 6 )
+custom_styles/hover = SubResource( 22 )
+custom_styles/normal = SubResource( 23 )
 icon = ExtResource( 5 )
 
 [node name="Wave1" type="Button" parent="WavePanel/Popup/G"]
 margin_left = 38.0
 margin_right = 74.0
 margin_bottom = 28.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/normal = SubResource( 6 )
+custom_styles/hover = SubResource( 22 )
+custom_styles/normal = SubResource( 23 )
 icon = ExtResource( 19 )
 
 [node name="Wave2" type="Button" parent="WavePanel/Popup/G"]
 margin_top = 30.0
 margin_right = 36.0
 margin_bottom = 58.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/normal = SubResource( 6 )
+custom_styles/hover = SubResource( 22 )
+custom_styles/normal = SubResource( 23 )
 icon = ExtResource( 17 )
 
 [node name="Wave3" type="Button" parent="WavePanel/Popup/G"]
@@ -658,16 +658,16 @@ margin_left = 38.0
 margin_top = 30.0
 margin_right = 74.0
 margin_bottom = 58.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/normal = SubResource( 6 )
+custom_styles/hover = SubResource( 22 )
+custom_styles/normal = SubResource( 23 )
 icon = ExtResource( 18 )
 
 [node name="Wave4" type="Button" parent="WavePanel/Popup/G"]
 margin_top = 60.0
 margin_right = 36.0
 margin_bottom = 88.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/normal = SubResource( 6 )
+custom_styles/hover = SubResource( 22 )
+custom_styles/normal = SubResource( 23 )
 icon = ExtResource( 20 )
 
 [node name="Wave5" type="Button" parent="WavePanel/Popup/G"]
@@ -675,16 +675,16 @@ margin_left = 38.0
 margin_top = 60.0
 margin_right = 74.0
 margin_bottom = 88.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/normal = SubResource( 6 )
+custom_styles/hover = SubResource( 22 )
+custom_styles/normal = SubResource( 23 )
 icon = ExtResource( 12 )
 
 [node name="Wave6" type="Button" parent="WavePanel/Popup/G"]
 margin_top = 90.0
 margin_right = 36.0
 margin_bottom = 118.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/normal = SubResource( 6 )
+custom_styles/hover = SubResource( 22 )
+custom_styles/normal = SubResource( 23 )
 icon = ExtResource( 21 )
 
 [node name="Wave7" type="Button" parent="WavePanel/Popup/G"]
@@ -692,16 +692,16 @@ margin_left = 38.0
 margin_top = 90.0
 margin_right = 74.0
 margin_bottom = 118.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/normal = SubResource( 6 )
+custom_styles/hover = SubResource( 22 )
+custom_styles/normal = SubResource( 23 )
 icon = ExtResource( 16 )
 
 [node name="Wave8" type="Button" parent="WavePanel/Popup/G"]
 margin_top = 120.0
 margin_right = 36.0
 margin_bottom = 148.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/normal = SubResource( 6 )
+custom_styles/hover = SubResource( 22 )
+custom_styles/normal = SubResource( 23 )
 icon = ExtResource( 15 )
 
 [node name="Wave9" type="Button" parent="WavePanel/Popup/G"]
@@ -709,8 +709,8 @@ margin_left = 38.0
 margin_top = 120.0
 margin_right = 74.0
 margin_bottom = 148.0
-custom_styles/hover = SubResource( 5 )
-custom_styles/normal = SubResource( 6 )
+custom_styles/hover = SubResource( 22 )
+custom_styles/normal = SubResource( 23 )
 icon = ExtResource( 14 )
 
 [node name="Bank" type="SpinBox" parent="WavePanel"]

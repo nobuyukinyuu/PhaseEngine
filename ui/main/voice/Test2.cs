@@ -434,13 +434,6 @@ public class Test2 : Label
     public void SetWaveBank(int opNum, int bank) 
     {
         c.Voice.egs[opNum].wavetable_bank = (byte) bank;
-
-        //Override the current wavetable in the operators.  This is necessary cuz there's no method in Chip to do this yet.
-        //The relevant method should probably be in SetVoice, since that's where all the other references the channels need are...
-
-        //TODO:  Maybe consider setting the bank on Channel.NoteOn instead of having an explicit method in Chip???????
-        // for(int i=0; i<c.channels.Length; i++)
-        //     c.channels[i].ops[opNum].wavetable = c.Voice.wavetable;
     }
 
     public Godot.Collections.Array GetWave(int bank)

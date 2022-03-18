@@ -169,7 +169,9 @@ namespace PhaseEngine
                 j.Assign("ams", ref ams);
                 j.Assign("osc_sync", ref osc_sync);
                 j.Assign("phase_offset", ref phase_offset);
-                j.Assign("cutoff", ref cutoff);
+                // j.Assign("cutoff", ref cutoff);
+                cutoff = j.GetItem("cutoff", Global.MixRate);  //Reset if the tag doesn't exist so a channel doesn't reuse a previous value.
+                resonance = j.GetItem("resonance", 1.0f);  //Reset if the tag doesn't exist so a channel doesn't reuse a previous value.
                 j.Assign("resonance", ref resonance);
 
                 j.Assign("mute", ref mute);
@@ -177,7 +179,8 @@ namespace PhaseEngine
                 j.Assign("aux_func", ref aux_func);
                 j.Assign("gain", ref gain);
 
-                j.Assign("wavetable_bank", ref wavetable_bank);
+                // j.Assign("wavetable_bank", ref wavetable_bank);
+                wavetable_bank = (byte) j.GetItem("wavetable_bank", 0); //Reset if the tag doesn't exist so a channel doesn't reuse a previous value.
 
                 if (deserializeRTables)
                 {
