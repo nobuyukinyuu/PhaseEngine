@@ -243,9 +243,6 @@ grow_horizontal = 0
 grow_vertical = 0
 align = 2
 valign = 2
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Kanban" type="HBoxContainer" parent="."]
 anchor_bottom = 1.0

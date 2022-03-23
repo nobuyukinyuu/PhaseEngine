@@ -3,17 +3,25 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="16px" height="16px" viewBox="0 0 16 16" enable-background="new 0 0 16 16" xml:space="preserve">
-<g>
+<circle fill="none" stroke="#1462C8" stroke-width="1.5" stroke-miterlimit="10" cx="8" cy="8" r="6"/>
+<line fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="5.5" y1="10.5" x2="10.5" y2="5.5"/>
+<line fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="5.5" y1="5.5" x2="10.5" y2="10.499"/>
+<g opacity="0.6">
 	
-		<line fill="none" stroke="#A6A6A6" stroke-width="1.5" stroke-linecap="round" stroke-miterlimit="10" x1="15.188" y1="7.964" x2="12.49" y2="7.964"/>
+		<line fill="none" stroke="#8AB2E6" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="bevel" stroke-miterlimit="10" x1="13.961" y1="13.442" x2="11.908" y2="11.392"/>
+	<polyline fill="#89B0E3" stroke="#89B0E3" stroke-width="1.25" stroke-linecap="round" stroke-miterlimit="10" points="
+		14.107,11.392 11.893,11.392 11.893,13.608 	"/>
+</g>
+<g opacity="0.6">
 	
-		<line fill="none" stroke="#A6A6A6" stroke-width="1.5" stroke-linecap="round" stroke-miterlimit="10" x1="4.409" y1="9.854" x2="0.813" y2="9.854"/>
+		<line fill="none" stroke="#8AB2E6" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="bevel" stroke-miterlimit="10" x1="2.058" y1="13.461" x2="4.108" y2="11.408"/>
+	<polyline fill="#89B0E3" stroke="#89B0E3" stroke-width="1.25" stroke-linecap="round" stroke-miterlimit="10" points="
+		4.108,13.607 4.108,11.393 1.892,11.393 	"/>
+</g>
+<g opacity="0.6">
 	
-		<line fill="none" stroke="#A6A6A6" stroke-width="1.5" stroke-linecap="round" stroke-miterlimit="10" x1="4.409" y1="6.076" x2="0.813" y2="6.076"/>
-	<g>
-		<path fill="#E0E0E0" d="M5.149,4.446c2.726,0.647,4.768,1.801,6.365,3.579c-1.401,1.669-3.751,2.987-6.366,3.607
-			C5.945,9.24,5.945,6.837,5.149,4.446 M2.611,2.5c2.177,3.703,2.177,7.319,0.043,11c4.226-0.216,8.785-2.302,10.746-5.536
-			C10.662,4.297,6.864,2.968,2.611,2.5L2.611,2.5z"/>
-	</g>
+		<line fill="none" stroke="#8AB2E6" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="bevel" stroke-miterlimit="10" x1="8.026" y1="3.736" x2="8.025" y2="0.834"/>
+	<polyline fill="#89B0E3" stroke="#89B0E3" stroke-width="1.25" stroke-linecap="round" stroke-miterlimit="10" points="9.58,2.39 
+		8.014,0.823 6.446,2.391 	"/>
 </g>
 </svg>

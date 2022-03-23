@@ -3,13 +3,14 @@ extends Control
 
 const wave_desc = ["Sin", "Tri", "Saw", "Sqr", "Wht", "Pnk", "Brn", "Ns1", "APU", "Wav"]
 const filt_desc = ["Flt", "LPF", "HPF", "BPF", "BPz", "Not", "All", "Pk" , "LoS", "HiS"]
-const bit_desc  = ["And", "Or", "Xor"]
+const bit_desc  = ["And", "Or", "Xor", "R\\g"]
 const intent_cols = ["ffffff", "36d5ff", "38dfc8", "b3efff", "ffb9b5"]
 
 const bit_icons = [
 	preload("res://gfx/ui/ops/icon_and.svg"),
-	preload("res://gfx/ui/ops/icon_bitwise.svg"),
+	preload("res://gfx/ui/ops/icon_or.svg"),
 	preload("res://gfx/ui/ops/icon_xor.svg"),
+	preload("res://gfx/ui/ops/icon_rectifier.svg"),
 ]
 
 func _ready():

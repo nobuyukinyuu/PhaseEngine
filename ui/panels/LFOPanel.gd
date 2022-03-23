@@ -90,7 +90,7 @@ func _on_Preview_gui_input(event):
 		popup.popup(Rect2(pos, popup.rect_size))
 
 func _on_Popup_button_pressed(idx):
-	get_node(owner.chip_loc).SetWaveform(global.OpIntent.LFO, idx)
+	get_node(owner.chip_loc).SetOscillator(global.OpIntent.LFO, idx)
 	$LFO/WavePanel/Preview.texture = global.wave_img[idx]
 	$LFO/WavePanel/Popup.hide()
 	pass

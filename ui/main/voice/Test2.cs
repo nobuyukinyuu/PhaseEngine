@@ -273,7 +273,7 @@ public class Test2 : Label
 
     public void SetFilterType(int opTarget, float val)
     {
-        // c.Voice.preview.ops[opTarget].SetOscillatorType((byte)val);  //This updates the reference for all EGs and sets the delegate for preview only.
+        c.Voice.egs[opTarget].aux_func = (byte)val;  //Needed for GetOscTypeOrFunction to work
         for(int i=0; i<c.channels.Length; i++)
         {
             var op = c.channels[i].ops[opTarget] as Filter;
