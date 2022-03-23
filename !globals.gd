@@ -32,7 +32,7 @@ const L_MAX=1024.0
 const R_MAX=64.0
 const DB_MAX=96.0   #Measured:  every 64 values results in -6dB volume, so -48dB actually occurs at half L_MAX
 
-const WAVETABLE_SIZE = 1<<10  #This needs to be the same size as TBL_SIZE in WaveTableData.cs
+#const WAVETABLE_SIZE = 1<<10  #This needs to be the same size as TBL_SIZE in WaveTableData.cs
 const RTABLE_SIZE = 1024
 const RT_MINUS_ONE = 1023
 

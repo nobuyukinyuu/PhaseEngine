@@ -8,6 +8,7 @@ var import_path = ""
 
 const font = preload("res://gfx/fonts/numerics_7seg.tres")
 var bank=-1
+var wavetable_size = 1024
 
 var revert_tbl = []   #Different than the revert_tbl in $VU, this holds the REAL original values.
 
@@ -73,17 +74,20 @@ func _ready():
 
 #	_on_Smooth_toggled($H2/Smooth.pressed)
 
+#Sets up the waveform editor window to edit the waveform we expect.
 func fetch_table(bank=0):
 	var c = get_node(owner.chip_loc)
 	if !c:  
-		hide()
+#		hide()
+		emit_signal("wave_updated", -1)
 		return
 	var input = c.GetWave(bank)
 		
 	if input:
+		wavetable_size = input.size()
 		$VU.set_table(input)
 		revert_tbl = input
-		$H/lblTitle.text = "Waveform %s" % bank
+		$H/lblTitle.text = "Waveform %s  (%s samples)" % [bank, input.size()]
 #		return input
 	else:
 		print("Waveform: Can't find Voice's custom wavetable bank at %s." % bank)
@@ -232,7 +236,7 @@ func _on_WaveImport_confirmed():
 	var stride = float($WaveImport/Margin/V/HBoxContainer/txtStride.text)
 	
 	if stride <= 0:  stride = 1
-	for i in global.WAVETABLE_SIZE:
+	for i in wavetable_size:
 		f.seek(wave.dataStartPos + pos)
 		$VU.set_table_pos(i, readbits(f, $WaveImport/Margin/V/chkBits.pressed, 
 								$WaveImport/Margin/V/chkStereo.pressed,
@@ -244,7 +248,7 @@ func _on_WaveImport_confirmed():
 	f.close()
 
 #	#Send the table to the patch.
-#	for i in global.WAVETABLE_SIZE:
+#	for i in wavetable_size:
 #		_on_value_changed(i, $VU.tbl[i])
 		
 	$VU.update()
@@ -280,7 +284,7 @@ func _on_Smooth_Apply_pressed():
 
 
 func _on_btnSquish_pressed():
-	$WaveImport/Margin/V/HBoxContainer/txtStride.text = str(wave.chunkSize / float(global.WAVETABLE_SIZE))
+	$WaveImport/Margin/V/HBoxContainer/txtStride.text = str(wave.chunkSize / float(wavetable_size))
 
 
 func _on_Fidelity_value_changed(value):
@@ -320,10 +324,11 @@ func _on_Revert_pressed():
 func _on_str_pressed():
 	var c = get_node(owner.chip_loc)
 	var output = c.TableStr(bank)
+
+
+	OS.clipboard = output
 	
-#	c.SetWave(bank, output)
 	print("Bank set.")
-	fetch_table(bank)
-	print("Refreshing...")
-	
-	pass # Replace with function body.
+#	fetch_table(bank)
+#	print("Refreshing...")
+

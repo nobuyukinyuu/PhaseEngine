@@ -1,6 +1,7 @@
 using System;
 using PhaseEngine;
 using System.Collections.Generic;
+using PE_Json;
 
 #if GODOT
 using Godot;
@@ -47,10 +48,10 @@ namespace PhaseEngine
             }
         #endif 
 
-        public void AddBank()
+        public void AddBank(byte sampleWidthInBits=10)
         {
             if(tbl==null) tbl = new List<short[]>();
-            tbl.Add(new short[TBL_SIZE]);
+            tbl.Add(new short[ 1<<sampleWidthInBits ]);
         }
         public void RemoveBank(int idx)  { tbl.RemoveAt(idx); }
 
@@ -96,13 +97,49 @@ namespace PhaseEngine
                 tbl[bank][i] >>= amt;
         }
 
-        public string TableAsString(int bank=0)
+
+        public string ToJSONString(){ return ToJSONObject().ToJSONString(); }
+        public JSONObject ToJSONObject()
         {
-            var arr = tbl?[bank];
-            if (arr==null) return "";
+            var o = new JSONObject();
+            if (NotInUse) return o;
+
+            o.AddPrim("size", NumBanks);
+
+            var bankWidths = new List<byte> ( new byte[]{ (byte)Tools.Ctz(tbl[0].Length) } );  //Set first value to first bank's size.
+            var fixedWidth = true;
+            var defaultWidth = bankWidths[0]; 
+            var totalLength = tbl[0].Length;  
+
+            //Iterate over the banks.  If any bank is a different size than the default, then we have variable width banks
+            //and have to store the representation differently.
+            for (int i=1; i<tbl.Count; i++)
+            {
+                var bits = (byte) Tools.Ctz(tbl[i].Length);
+                bankWidths.Add( bits );
+                if ( defaultWidth != bits ) fixedWidth = false;
+                totalLength += tbl[i].Length;
+            }
+
+            o.AddPrim<byte>("bankWidths", fixedWidth?  new byte[]{defaultWidth} : bankWidths.ToArray());
+
+
+            //Consolidate all of the banks into one big data chunk and convert them.
+            var data = new List<short>(totalLength);
+            for (int i=0; i<tbl.Count; i++) data.AddRange( tbl[i] );
+
+            o.AddPrim("data", TableAsString( data.ToArray() ));
+
+            return o;
+        }
+
+        public string TableAsString(short[] arr)
+        {
+            // var arr = tbl?[bank];
+            if (arr==null || arr.Length==0) return "";
 
             //  Wavetable banks are compressed using a few techniques. Each bank is encoded as a delta waveform which is then DEFLATEd and encoded in Z85.
-            //  Variable bank sizes:  Use a lookup table to find bit width for each bank, then add to a bankWidths field.  The field should have a format
+            //  Variable bank sizes:  Use Tools.Ctz to find bit width for each bank, then add to a bankWidths field.  The field should have a format
             //  Where if the first value is 0, the next index is the width for ALL. 
             //  Otherwise we will iterate each 4 bits to determine width of each bank and number of banks.
             //  number 1 starts at 4 bits and so on, with top number being 7 for 10 bits. Encode 2 banks per byte, padding the low bits if necessary.

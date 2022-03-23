@@ -1,14 +1,68 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=1]
 [ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=2]
 [ext_resource path="res://ui/FlatButton.theme" type="Theme" id=3]
 [ext_resource path="res://ui/FileDialog.theme" type="Theme" id=4]
 [ext_resource path="res://ui/main/voice/WaveformBanksTab.gd" type="Script" id=5]
+[ext_resource path="res://gfx/fonts/thin_font_6x8.tres" type="BitmapFont" id=6]
 [ext_resource path="res://gfx/ui/godot_icons/Add.svg" type="Texture" id=7]
 [ext_resource path="res://gfx/ui/godot_icons/Sub.svg" type="Texture" id=8]
 
-[node name="Waveform" type="Control"]
+[sub_resource type="StyleBoxFlat" id=22]
+content_margin_left = 2.0
+content_margin_right = 2.0
+content_margin_top = 2.0
+content_margin_bottom = 2.0
+bg_color = Color( 0.0784314, 0.141176, 0.27451, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.572549, 0.572549, 0.572549, 1 )
+corner_radius_top_left = 2
+corner_radius_bottom_right = 2
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=17]
+content_margin_left = 2.0
+content_margin_right = 2.0
+content_margin_top = 2.0
+content_margin_bottom = 2.0
+bg_color = Color( 0, 0, 0, 0.745098 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.482353, 0.482353, 0.482353, 1 )
+corner_radius_top_left = 2
+corner_radius_bottom_right = 2
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id=21]
+content_margin_left = 2.0
+content_margin_right = 2.0
+content_margin_top = 2.0
+content_margin_bottom = 2.0
+bg_color = Color( 0.145098, 0.282353, 0.447059, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.482353, 0.482353, 0.482353, 1 )
+corner_radius_top_left = 2
+corner_radius_bottom_right = 2
+anti_aliasing = false
+
+[sub_resource type="Theme" id=18]
+default_font = ExtResource( 6 )
+Button/styles/hover = SubResource( 22 )
+Button/styles/normal = SubResource( 17 )
+Button/styles/pressed = SubResource( 21 )
+
+[sub_resource type="ButtonGroup" id=19]
+
+[node name="Waveforms" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 1.0
@@ -16,9 +70,6 @@ margin_top = 19.0
 margin_right = -760.0
 margin_bottom = -376.0
 script = ExtResource( 5 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Items" type="ItemList" parent="."]
 margin_left = 7.0
@@ -28,6 +79,109 @@ margin_bottom = 170.0
 theme = ExtResource( 4 )
 allow_reselect = true
 fixed_icon_size = Vector2( 64, 32 )
+
+[node name="Menu" type="VBoxContainer" parent="."]
+margin_left = 187.0
+margin_top = 119.0
+margin_right = 259.0
+margin_bottom = 169.0
+theme = SubResource( 18 )
+custom_constants/separation = 2
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Title" type="Label" parent="Menu"]
+margin_right = 72.0
+margin_bottom = 8.0
+custom_fonts/font = ExtResource( 6 )
+text = "Sample Size"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="Menu/Title"]
+visible = false
+modulate = Color( 1, 1, 1, 0.12549 )
+anchor_right = 1.0
+margin_top = 12.0
+margin_bottom = 13.0
+rect_min_size = Vector2( 0, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Grid" type="GridContainer" parent="Menu"]
+margin_top = 10.0
+margin_right = 72.0
+margin_bottom = 36.0
+custom_constants/vseparation = 2
+custom_constants/hseparation = 3
+columns = 3
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="4" type="Button" parent="Menu/Grid"]
+margin_right = 22.0
+margin_bottom = 12.0
+toggle_mode = true
+group = SubResource( 19 )
+text = "16"
+
+[node name="5" type="Button" parent="Menu/Grid"]
+margin_left = 25.0
+margin_right = 47.0
+margin_bottom = 12.0
+toggle_mode = true
+pressed = true
+group = SubResource( 19 )
+text = "32"
+
+[node name="6" type="Button" parent="Menu/Grid"]
+margin_left = 50.0
+margin_right = 72.0
+margin_bottom = 12.0
+toggle_mode = true
+group = SubResource( 19 )
+text = "64"
+
+[node name="7" type="Button" parent="Menu/Grid"]
+margin_top = 14.0
+margin_right = 22.0
+margin_bottom = 26.0
+toggle_mode = true
+group = SubResource( 19 )
+text = "128"
+
+[node name="8" type="Button" parent="Menu/Grid"]
+margin_left = 25.0
+margin_top = 14.0
+margin_right = 47.0
+margin_bottom = 26.0
+toggle_mode = true
+group = SubResource( 19 )
+text = "256"
+
+[node name="9" type="Button" parent="Menu/Grid"]
+margin_left = 50.0
+margin_top = 14.0
+margin_right = 72.0
+margin_bottom = 26.0
+toggle_mode = true
+group = SubResource( 19 )
+text = "512"
+
+[node name="10" type="Button" parent="Menu"]
+margin_top = 38.0
+margin_right = 72.0
+margin_bottom = 50.0
+toggle_mode = true
+group = SubResource( 19 )
+text = "1024 "
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -39,7 +193,7 @@ margin_left = -71.0
 margin_top = 13.0
 margin_right = -7.0
 margin_bottom = 41.0
-hint_tooltip = "Adds an operator to the wiring grid."
+hint_tooltip = "Adds a waveform to the sample bank."
 theme = ExtResource( 3 )
 text = "Add "
 icon = ExtResource( 7 )
@@ -55,7 +209,7 @@ margin_left = -71.0
 margin_top = 45.0
 margin_right = -7.0
 margin_bottom = 73.0
-hint_tooltip = "Removes an operator from the wiring grid."
+hint_tooltip = "Removes a wave from the sample bank."
 theme = ExtResource( 3 )
 disabled = true
 text = "Del "
@@ -69,9 +223,9 @@ __meta__ = {
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -72.0
-margin_top = 141.0
+margin_top = 85.0
 margin_right = -8.0
-margin_bottom = 169.0
+margin_bottom = 113.0
 theme = ExtResource( 3 )
 custom_fonts/font = ExtResource( 2 )
 disabled = true

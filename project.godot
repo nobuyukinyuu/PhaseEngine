@@ -108,7 +108,7 @@ window/vsync/use_vsync=false
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/launchy/plugin.cfg", "res://addons/mono_debugger/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/launchy/plugin.cfg" )
 
 [global]
 

@@ -423,8 +423,9 @@ public class Test2 : Label
 
 
     ///////////////////////////////////    WAVEFORM    /////////////////////////////////////
-    public Godot.Collections.Array AddWave() {
-        c.Voice.wavetable.AddBank(); 
+    public Godot.Collections.Array AddWave(int tableSize) {
+        var sampleWidth = Tools.Ctz(tableSize);  //Snap table size to the nearest power of 2 by specifying the bit width to wavetable.AddBank().
+        c.Voice.wavetable.AddBank((byte) Math.Clamp(sampleWidth, 4, 10)); 
         return new Godot.Collections.Array(c.Voice.wavetable.GetTable(c.Voice.wavetable.NumBanks-1));
         }
     public void RemoveWave(int idx) {c.Voice.wavetable.RemoveBank(idx);}
@@ -470,15 +471,15 @@ public class Test2 : Label
 
     public string TableStr(int bank)
     {
-        //DEBUG FUNCTION:  TEST TABLE COMPRESSION AND DECOMPRESSION ROUTINES.
-        var compressed = c.Voice.wavetable.TableAsString( bank );
+    //     //DEBUG FUNCTION:  TEST TABLE COMPRESSION AND DECOMPRESSION ROUTINES.
+    //     var compressed = c.Voice.wavetable.TableAsString( bank );
 
-        var decompressed = c.Voice.wavetable.DeflatedZ85ToTable(compressed);
+    //     var decompressed = c.Voice.wavetable.DeflatedZ85ToTable(compressed);
 
-        //Pop the decompressed table back into the bank.  Let the UI reload it
-        c.Voice.wavetable.SetTable(bank, decompressed);
+    //     //Pop the decompressed table back into the bank.  Let the UI reload it
+    //     c.Voice.wavetable.SetTable(bank, decompressed);
         
-        return compressed;
+        return c.Voice.wavetable.ToJSONString();
     }
 
     ///////////////////////////////////    BUFFER    /////////////////////////////////////

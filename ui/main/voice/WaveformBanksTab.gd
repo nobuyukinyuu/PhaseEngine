@@ -3,11 +3,19 @@ export(NodePath) var chip_loc #Location of PhaseEngine instance in code
 
 const ALL=-1
 
+var wavetable_size = 1024
+
 func _ready():
 	#Convert the chip location to an absolute location!!
 	#Otherwise, the value specified in the editor will only be valid for us and none of our children.
 	if chip_loc:
 		chip_loc = get_node(chip_loc).get_path()
+
+	for o in $Menu/Grid.get_child(0).group.get_buttons():
+		var size = 1 << int(o.name)  #Number of bits in name converted to table size
+		o.set_meta("size", size)
+		o.connect("pressed", self, "_on_Sample_size_toggle", [size])
+		if o.pressed:  wavetable_size = size
 
 	populate()
 
@@ -22,7 +30,7 @@ func populate():
 	$Items.clear()
 	var data = c.GetWave(ALL)
 	for i in data.size():
-		$Items.add_item("Bank %s" % i, make_icon(data[i]))
+		$Items.add_item("%s:  [%s]" % [i, data[i].size()], make_icon(data[i]))
 	
 func update_bank(which):
 	var c = get_node(chip_loc)
@@ -33,12 +41,14 @@ func update_bank(which):
 	$Items.set_item_icon(which, make_icon(c.GetWave(which)))
 
 
-onready var stride=global.WAVETABLE_SIZE/$Items.fixed_icon_size.x
+#onready var stride=global.WAVETABLE_SIZE/$Items.fixed_icon_size.x
 func make_icon(data):
 	if not (data is Array):
 		return load("res://gfx/ui/wave_preview_fail.png")
-	if data.size() != global.WAVETABLE_SIZE:
-		return load("res://gfx/ui/wave_preview_fail.png")
+#	if data.size() != global.WAVETABLE_SIZE:
+#		return load("res://gfx/ui/wave_preview_fail.png")
+
+	var stride = data.size()/$Items.fixed_icon_size.x
 	
 	var output = ImageTexture.new()
 	var w = $Items.fixed_icon_size.x
@@ -91,9 +101,11 @@ func _on_Add_pressed():
 	if not c:  
 		print("WaveformBanksTab.gd:  Can't find chip_loc!")
 		return
-	var input = c.AddWave()  #Grab the waveform from the sample we just added.
+	var input = c.AddWave(wavetable_size)  #Grab the waveform from the sample we just added.
 	
-	$Items.add_item("Bank %s" % $Items.get_item_count(), make_icon(input))
+#	var size_label = "1K" if input.size()==1024 else input.size()
+	var size_label = input.size()
+	$Items.add_item("%s:  [%s]" % [$Items.get_item_count(), size_label], make_icon(input))
 	global.emit_signal("wavebanks_changed")
 
 func _on_Remove_pressed():
@@ -111,7 +123,9 @@ func _on_Remove_pressed():
 
 	#Rename all of the banks after the one that was deleted.
 	for i in range(idx, $Items.get_item_count()):
-		$Items.set_item_text(i, "Bank %s" % i)
+		var sz = $Items.get_item_text(i)
+		sz = sz.substr(sz.find("["))  #Yoink the size info from the previous label.
+		$Items.set_item_text(i, "%s:  %s" % [i, sz])
 
 	global.emit_signal("wavebanks_changed", idx)
 
@@ -134,7 +148,7 @@ func finish_edit(bank, sender):
 	$Disabled.visible = false
 	
 	var c=get_node(chip_loc)
-	$Items.set_item_icon(bank, make_icon(c.GetWave(bank)))
+	if bank >=0:  $Items.set_item_icon(bank, make_icon(c.GetWave(bank)))
 	sender.queue_free()
 
 
@@ -153,7 +167,9 @@ func _on_Items_item_activated(index):
 	pass # Replace with function body.
 
 
-
+func _on_Sample_size_toggle(size):
+	wavetable_size = size
+	print ("Sample size changed to ", size)
 
 func _on_Edit_pressed():
 	$Edit.release_focus()

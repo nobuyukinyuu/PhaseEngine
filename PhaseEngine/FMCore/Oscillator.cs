@@ -55,13 +55,31 @@ namespace PhaseEngine
 
         public static ushort Wave(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
-            const ushort MASK = WaveTableData.TBL_SIZE -1;
-            const byte BITS = 10 - WaveTableData.TBL_BITS;
+            //TODO:  Change MASK to Tools.Ctz on auxdata2 to get the number of bits to shift by instead to support variable table sizes..
             var auxdata2 = __refvalue(auxdata, short[]);
+            // const ushort MASK = WaveTableData.TBL_SIZE -1;
+            // const byte BITS = 10 - WaveTableData.TBL_BITS;
+            ushort MASK = (ushort) (auxdata2.Length -1);
+            byte BITS = (byte) (10 - Tools.Ctz(auxdata2.Length));
+
             ushort phase = (ushort) unchecked((n>>BITS));  //Scale result to always be the same octave as other oscillators
             var volume = auxdata2[phase & MASK];
             volume |= 1;  //Chop a bit off the end; this is done to stop an overflow if the value is MinValue
-            var attenuation = Tables.vol2attenuation[Math.Abs(volume) >> 2]; //Convert sample to 14-bit and get attenuation.
+            var attenuation = Tables.vol2attenuation[Tools.Abs(volume) >> 2]; //Convert sample to 14-bit and get attenuation.
+
+            flip = volume < 0;
+            return attenuation;  //0x7F for tables of 128, or 0xFF for 256 if upped later....
+        }
+
+        public static ushort Wave2(ulong n, ref bool flip, short[] auxdata2)
+        {
+            ushort MASK = (ushort) (auxdata2.Length -1);
+            byte BITS = (byte) (10 - Tools.Ctz(auxdata2.Length));
+
+            ushort phase = (ushort) unchecked((n>>BITS));  //Scale result to always be the same octave as other oscillators
+            var volume = auxdata2[phase & MASK];
+            volume |= 1;  //Chop a bit off the end; this is done to stop an overflow if the value is MinValue
+            var attenuation = Tables.vol2attenuation[Tools.Abs(volume) >> 2]; //Convert sample to 14-bit and get attenuation.
 
             flip = volume < 0;
             return attenuation;  //0x7F for tables of 128, or 0xFF for 256 if upped later....

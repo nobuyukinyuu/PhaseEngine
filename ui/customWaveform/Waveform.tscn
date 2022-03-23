@@ -164,7 +164,6 @@ shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 
 [node name="CustomWaveform" type="WindowDialog"]
-visible = true
 margin_left = 8.0
 margin_top = 24.0
 margin_right = 304.0
@@ -506,7 +505,7 @@ __meta__ = {
 [node name="lblTitle" type="Label" parent="H"]
 margin_left = 31.0
 margin_top = 9.0
-margin_right = 149.0
+margin_right = 247.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
 custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
@@ -515,13 +514,13 @@ custom_constants/shadow_offset_x = 1
 custom_constants/shadow_offset_y = 1
 custom_constants/shadow_as_outline = 1
 custom_fonts/font = ExtResource( 13 )
-text = " Waveform"
+text = " Waveform 0  (1024 samples)"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Spacer2" type="Label" parent="H"]
-margin_left = 153.0
+margin_left = 251.0
 margin_top = 9.0
 margin_right = 272.0
 margin_bottom = 17.0
@@ -774,6 +773,7 @@ __meta__ = {
 }
 
 [node name="str" type="Button" parent="."]
+visible = false
 margin_left = 280.0
 margin_top = 360.0
 margin_right = 330.0

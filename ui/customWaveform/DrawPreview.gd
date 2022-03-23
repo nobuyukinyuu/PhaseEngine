@@ -62,7 +62,7 @@ func _ready():
 #	elementWidth = texture.get_width()
 	if elementWidth == null:  elementWidth = 5
 
-	for i in global.WAVETABLE_SIZE:
+	for i in owner.wavetable_size:
 		tbl.append(50)
 		smooth_tbl.append(50)
 		display_tbl.append(50)

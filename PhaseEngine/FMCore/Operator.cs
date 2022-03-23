@@ -158,8 +158,9 @@ namespace PhaseEngine
 
             //TODO:  Consider using this.CurrentTable to reduce fetch calls.
             //  This would also allow a Linear intent to create morphed tables during Clock() at a rate we can specify as a separate envelope
-            var tbl = this.wavetable?.GetTable(eg.wavetable_bank)?? Tables.defaultWavetable;  
-            var samp = (short) oscillator.Generate(phase, eg.duty, ref flip, __makeref(tbl));
+            var tbl = this.wavetable.GetTable(eg.wavetable_bank);  
+            // var samp = (short) oscillator.Generate(phase, eg.duty, ref flip, __makeref(tbl));
+            var samp = (short) Oscillator.Wave2(phase, ref flip, tbl);
    
             // get the attenuation from the envelope generator as a 4.6 value, shifted up to 4.8
             ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);
