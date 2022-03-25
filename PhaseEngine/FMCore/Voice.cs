@@ -76,8 +76,6 @@ namespace PhaseEngine
             return false;
         }
 
-
-
         // Called whenever the voice needs to change its operator count in the algorithm.
         public void SetOpCount(byte opTarget)
         {
@@ -143,13 +141,33 @@ namespace PhaseEngine
             return output;
         }
 
+        /// summary:  Will return True if the operator is directly connected to output, or indirectly via a filter, folder, or through a bypassed operator.
+        ///           Used to determine things like how much to scale the preview waveform, check when all ops are quiet, or determine priority score of all generator ops.
+        public bool OpReachesOutput(byte src_op)
+        {
+            if (alg.intent[src_op]!=OpBase.Intents.FILTER && alg.connections[src_op] == 0) return true;
+
+            //Determine if the op is connected to a filter that's connected to output or the child op is bypassed to output..
+            var c= alg.connections[src_op];
+            for (int child_op=0; c>0; child_op++)
+            {
+                //Check the child op for connections to output.
+                if ( (c&1)==1)
+                    if ( alg.connections[child_op]==0 && 
+                        (alg.intent[child_op]==OpBase.Intents.FILTER || egs[child_op].bypass==true ) )
+                        return true;
+                c >>=1;
+            }
+            return false;
+        }
+
+
 
         /// Called from EG controls to bus to the appropriate tuning properties.
         public void SetPG(int opTarget, string property, float val)
         {
             // Increments is a struct, so we need to update the canonical info from the Voice and grab a copy whenever notes turn on. 
             // A consequence of this is that values in Increments (pitch, mainly) can't be adjusted on the fly, only on a new note.
-            
             try
             {
                 pgs[opTarget].SetVal(property, val);
@@ -212,7 +230,7 @@ namespace PhaseEngine
         }    
 
 
-        //TODO:  Front-end IO that de/serializes the wiring grid configuration from an array (user-friendly) to processOrder and connections (code-friendly)
+        //////////////////////////////////////////////////  IO  //////////////////////////////////////////////////
         public void FromJSON(JSONObject data)
         {
             try
@@ -253,6 +271,9 @@ namespace PhaseEngine
             o.AddItem("algorithm", alg.ToJSONObject() );
 
             o.AddItem("lfo", lfo.ToJSONObject());
+
+            if (wavetable!=null && !wavetable.NotInUse)
+                o.AddItem("wavetable", wavetable.ToJSONObject() );
 
             var ops = new JSONArray();  //Operator array
             for (byte i=0; i<opCount; i++) 
@@ -334,26 +355,6 @@ namespace PhaseEngine
             public Godot.Collections.Dictionary GetEG(int opTarget) {return egs[opTarget >= opCount? 0:opTarget].GetDictionary();}
             public Godot.Collections.Dictionary GetPG(int opTarget) {return pgs[opTarget >= opCount? 0:opTarget].GetDictionary();}
         #endif
-
-        /// summary:  Will return True if the operator is directly connected to output, or indirectly via a filter, folder, or through a bypassed operator.
-        ///           Used to determine things like how much to scale the preview waveform, check when all ops are quiet, or determine priority score of all generator ops.
-        public bool OpReachesOutput(byte src_op)
-        {
-            if (alg.intent[src_op]!=OpBase.Intents.FILTER && alg.connections[src_op] == 0) return true;
-
-            //Determine if the op is connected to a filter that's connected to output or the child op is bypassed to output..
-            var c= alg.connections[src_op];
-            for (int child_op=0; c>0; child_op++)
-            {
-                //Check the child op for connections to output.
-                if ( (c&1)==1)
-                    if ( alg.connections[child_op]==0 && 
-                        (alg.intent[child_op]==OpBase.Intents.FILTER || egs[child_op].bypass==true ) )
-                        return true;
-                c >>=1;
-            }
-            return false;
-        }
 
 
     }

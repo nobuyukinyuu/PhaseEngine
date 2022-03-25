@@ -304,7 +304,6 @@ namespace PE_Json{
         }
     }
 
-
     public class JSONDataType{
         //TODO: Change to typesafe enum pattern? Performance issues, maybe?//
         public const int JSON_ERROR = -1;
@@ -317,32 +316,6 @@ namespace PE_Json{
         public const int JSON_NULL = 7;
         public const int JSON_OBJECT_MEMBER = 8;
         public const int JSON_NON_DATA = 9;
-    }
-
-    public abstract class JSONDataItem{
-
-        public int dataType = JSONDataType.JSON_NULL;
-
-        public virtual int ToInt(){
-            Debug.Print ("Unsupported conversion to Int for " + this.ToString());
-            return -1;
-        }
-
-        public virtual float ToFloat(){
-            Debug.Print ("Unsupported conversion to Float for " + this.ToString());
-            return -1.0f;
-        }
-
-        public virtual bool ToBool(){
-            Debug.Print ("Unsupported conversion to Bool for " + this.ToString());
-            return false;
-        }
-
-        //Method ToPrettyString() Abstract
-        public override abstract string ToString();
-        public virtual string ToJSONString(){ 
-            return ToString();
-        }
     }
 
     class JSONDataError : JSONDataItem{
@@ -371,127 +344,6 @@ namespace PE_Json{
         }
     }
 
-    public class JSONFloat : JSONDataItem {
-        float value;
-        string unparsedStr;
-        bool unparsed = false;
-        
-        public JSONFloat(float value){
-            dataType = JSONDataType.JSON_FLOAT ;
-            this.value = value;
-        }
-
-        //This constructor creates a float container that stores the unparsed
-        //value string. This is to spread the load of parsing the data
-        //as parsing floats is very expensive on Android.
-        public JSONFloat(string unparsedStr){
-            dataType = JSONDataType.JSON_FLOAT;
-            this.unparsedStr = unparsedStr;
-            this.unparsed = true;
-        }
-        
-        public void Parse(){
-            if (unparsed){
-                value = Convert.ToSingle(unparsedStr);
-                unparsed = false;
-            }
-        }
-        
-        public override int ToInt(){
-            Parse();
-            return (int)(value);
-        }
-
-        public override float ToFloat(){
-            Parse();
-            return value;
-        }
-
-        public override string ToString(){
-            Parse();
-            return Convert.ToString(value, InvariantCulture);
-        }
-    }
-
-    class JSONInteger : JSONDataItem {
-        int value;
-        
-        public JSONInteger(int value) {
-            dataType = JSONDataType.JSON_INTEGER;
-            this.value = value;
-        }
-
-        public override int ToInt(){
-            return value;
-        }
-
-        public override float ToFloat(){
-            return (float)(value);
-        }
-
-        public override string ToString(){
-            return Convert.ToString(value, InvariantCulture);
-        }
-    }
-
-    class JSONString : JSONDataItem {        
-        public string value;
-        string jsonReady = "";
-        
-        
-        public JSONString(string value, bool isMonkeyString = true) {
-            dataType = JSONDataType.JSON_STRING;
-            if (!isMonkeyString){
-                this.value = JSONData.UnEscapeJSON(value);
-                jsonReady = "\"" + value + "\"";
-            } else {
-                this.value = value;
-            }
-        }
-
-        public override string ToJSONString(){
-            if (jsonReady == ""){
-                jsonReady = "\"" + JSONData.EscapeJSON(value) + "\"";
-            }
-            return jsonReady;
-        }
-
-        public override string ToString(){
-            return value;
-        }
-
-    }
-
-    class JSONBool : JSONDataItem {
-        bool value;
-            
-        public JSONBool(bool value){
-            dataType = JSONDataType.JSON_BOOL;
-            this.value = value;
-        }
-
-        public override bool ToBool(){
-            return value;
-        }
-        
-        public override string ToString(){
-            if (value){
-                return "true";
-            } else {
-                return "false";
-            }
-        }
-
-        public override string ToJSONString(){
-            if (value){
-                return "true";
-            } else {
-                return "false";
-            }
-        }
-
-    }
-
     class JSONnull : JSONDataItem{
         // object value = null; //Necessary?
         
@@ -500,6 +352,8 @@ namespace PE_Json{
             return "NULL";
         }
     }
+
+
 
     public class JSONArray : JSONDataItem, IEnumerable<JSONDataItem>{
         List<JSONDataItem> values = new List<JSONDataItem>();
@@ -539,6 +393,11 @@ namespace PE_Json{
             
         }
         
+        public T[] AsArrayOf<T>()
+        {
+            return values.ConvertAll<T>( item => (T) Convert.ChangeType(item, typeof(T)) ).ToArray();
+        }
+
         public override string ToJSONString(){
             StringBuilder retString = new StringBuilder(values.Count*2+5);
             bool first = true;
@@ -604,36 +463,6 @@ namespace PE_Json{
         }
     }
 
-    class JSONObjectMember : JSONDataItem{
-        string name;
-        JSONDataItem dataItem;
-
-        JSONObjectMember(string name, JSONDataItem dataItem){
-            dataType = JSONDataType.JSON_OBJECT_MEMBER;
-            this.name = name;
-            this.dataItem = dataItem;
-        }
-
-        new bool ToBool(){
-            return dataItem.ToBool();
-        }
-        
-        new int ToInt(){
-            return dataItem.ToInt();
-        }
-        
-        new float ToFloat(){
-            return dataItem.ToFloat();
-        }
-        
-        public override string ToString(){
-            return dataItem.ToString();
-        }
-
-        public override string ToJSONString(){
-            return dataItem.ToJSONString();
-        }
-    }
 
     public class JSONObject : JSONDataItem, IEnumerable<KeyValuePair<String, JSONDataItem>>{
         Dictionary<String, JSONDataItem> values = new Dictionary<String, JSONDataItem>();

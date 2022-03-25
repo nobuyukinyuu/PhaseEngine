@@ -25,8 +25,8 @@ namespace PhaseEngine
         #if GODOT
             public WaveTableData(uint numBanks, Godot.Collections.Array input)
             {
-                var output= new short[TBL_SIZE];
-                for (int i=0; i<TBL_SIZE; i++)
+                var output= new short[input.Count];
+                for (int i=0; i<input.Count; i++)
                     output[i] = (short) input[i];
                 tbl = Tools.InitList(numBanks, output);
             }
@@ -76,12 +76,12 @@ namespace PhaseEngine
         {
             if (amt<=1 || NotInUse) return;
 
-            for (int i=0; i<TBL_SIZE; i+=amt)
+            for (int i=0; i<tbl[bank].Length; i+=amt)
             {
                 short val=tbl[bank][i];  //Get Quantize value for this portion.
 
                 //Set the next n indices to the value.
-                for (int j=0; j<amt && (i+j<TBL_SIZE); j++)
+                for (int j=0; j<amt && (i+j<tbl[bank].Length); j++)
                 {
                     tbl[bank][i+j] = val;
                 }
@@ -93,8 +93,54 @@ namespace PhaseEngine
         {
             if (amt<=0 || NotInUse) return;
 
-            for (int i=0; i<TBL_SIZE; i++)
+            for (int i=0; i<tbl[bank].Length; i++)
                 tbl[bank][i] >>= amt;
+        }
+
+
+        ///////////////////////////////////////////////  IO  ///////////////////////////////////////////////
+
+        public bool FromString(string input)
+        {
+            var P = JSONData.ReadJSON(input);
+            if (P is JSONDataError) return false;
+            var j = (JSONObject) P;
+            return FromJSON(j);
+        }
+        public bool FromJSON(JSONObject input)
+        {
+            var j=input;
+            try
+            {  //Test for empty object.  If so, don't do anything.
+                if (input.Names().Count==0) return false;
+                if (!input.HasItem("data")) throw new ArgumentException("Wavetable has no data.", "input[data]");
+                
+                //First, we must retrieve all of the table data from the input string. All samples are in one array, so afterward we must recreate the table.
+                var data = DeflatedZ85ToTable( input.GetItem("data").ToString() );
+
+                //The bankWidths value determines the size of each sample.  If its length is 1 then every sample has the same size.
+                var numBanks = input.GetItem("size", 0);
+                int[] bankWidths = ((JSONArray) input.GetItem("bankWidths")).AsArrayOf<int>();
+                var t = new List<short[]>(numBanks);  //The table that will eventually replace our own.
+                if(numBanks<=0) throw new ArgumentException("Invalid number of banks in wavetable.", "input[size]");
+
+                var dataStartPosition = 0;
+                for(int i=0; i<numBanks; i++)
+                {
+                    //Dimension the array based on the width we grab from the bankWidths value. Modulo to the length as a lazy hack to support 1-value arrays.
+                    var sample = new short[1 << bankWidths[i % bankWidths.Length]];
+                    Array.Copy(data, dataStartPosition, sample, 0, sample.Length);
+                    t.Add(sample);
+                    dataStartPosition += sample.Length;
+                }
+
+                tbl = t;
+
+            } catch (Exception e) {
+                System.Diagnostics.Debug.Fail("Wavetable fromJSON failed:  " + e.Message); 
+                return false;
+            }
+            return true;
         }
 
 
@@ -133,11 +179,10 @@ namespace PhaseEngine
             return o;
         }
 
-        public string TableAsString(short[] arr)
+        private string TableAsString(short[] arr)
         {
             // var arr = tbl?[bank];
             if (arr==null || arr.Length==0) return "";
-
             //  Wavetable banks are compressed using a few techniques. Each bank is encoded as a delta waveform which is then DEFLATEd and encoded in Z85.
             //  Variable bank sizes:  Use Tools.Ctz to find bit width for each bank, then add to a bankWidths field.  The field should have a format
             //  Where if the first value is 0, the next index is the width for ALL. 
@@ -162,6 +207,7 @@ namespace PhaseEngine
             GD.PrintS("compressed", input2.Length);
 
             var padAmt = 4 - (input2.Length % 4);
+            if (padAmt==4) padAmt = 0;
             if (padAmt > 0)
             {   //Pad the compressed array to a 4 byte multiple to meet Z85 spec
                 Array.Resize(ref input2, input2.Length + padAmt );
@@ -180,7 +226,7 @@ namespace PhaseEngine
             var padAmt = Convert.ToInt32(split[0]);
             var decoded = Z85.Decode(split[1]);
             Array.Resize(ref decoded, decoded.Length - padAmt);
-            var uncompressed = Z85.BytesToShorts(Glue.Deflate(decoded));
+            var uncompressed = Z85.BytesToShorts( Glue.Deflate(decoded, System.IO.Compression.CompressionMode.Decompress) );
             
 
 

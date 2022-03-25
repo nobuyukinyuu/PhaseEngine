@@ -89,7 +89,6 @@ namespace PhaseEngine
 
 
                 //NOTE:  This might be faster as a type-matching switch pattern, but this isn't supported in c# 7.2.  Consider changing it in the future if more efficient
-                //TODO:  Consider adding a case for FILTER intent to SetOscillatorType here so that it's not relied on user to change the intent of each channel manually.
                 switch(intent)
                 {
                 case OpBase.Intents.FM_OP:
@@ -142,8 +141,11 @@ namespace PhaseEngine
                     op.pg.Recalc();
                     op.NoteOn();
                     break;
+                
+                case OpBase.Intents.FILTER:
+                //TODO:  Consider adding a case for FILTER intent to SetOscillatorType here so that it's not relied on user to change the intent of each channel manually.
+                    break;
                 }
-
             }
             busy = BusyState.BUSY;                
         }
