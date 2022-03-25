@@ -109,7 +109,6 @@ namespace PhaseEngine
         }
         public bool FromJSON(JSONObject input)
         {
-            var j=input;
             try
             {  //Test for empty object.  If so, don't do anything.
                 if (input.Names().Count==0) return false;
