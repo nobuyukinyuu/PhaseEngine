@@ -12,8 +12,8 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 ## New
 * Fixed-point phase accumulator (utilizing 12.20 precision by default)
 * More modular, delegate-based oscillator and operator functionality (Operators can behave like filters or DSP in addition to FM)
-* * FM and Bitwise (AND/OR/XOR and Ring Modulation) operators
-* * Traditional analog-style filters and wave folding operators
+  * FM and Bitwise (AND/OR/XOR and Ring Modulation) operators
+  * Traditional analog-style filters and wave folding operators
 * Envelopes with target audio levels for each phase, more like DX-style synths
 * Envelope hold phase after initial attack and before initial decay, similar to the initial delay phase in gdsFM. Stays constant under rate scaling.
 * All FM operators support Reface-style operator feedback.
