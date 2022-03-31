@@ -49,3 +49,4 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 * Wider range of sampling options
 * Multitimbral operation (for now, multiple chip instances syncing their clocks should suffice)
 * LFO oscillator access to the wavetable
+* High-quality oscillator lookup table support (greater than 10-bit), for richer timbres
