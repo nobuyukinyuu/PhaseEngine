@@ -11,6 +11,7 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 # Features and differences to [gdsFM](https://github.com/nobuyukinyuu/gdsfm)
 ## New
 * Fixed-point phase accumulator (utilizing 12.20 precision by default)
+* Up to 8 operators per voice
 * More modular, delegate-based oscillator and operator functionality (Operators can behave like filters or DSP in addition to FM)
   * FM and Bitwise (AND/OR/XOR and Ring Modulation) operators
   * Traditional analog-style filters and wave folding operators
@@ -19,7 +20,7 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 * All FM operators support Reface-style operator feedback.
 * More traditional noise generators, including an LFSR-based generator with selectable periodicity (create more buzzing effects) similar to 2a03, etc.
 * Variable length wavetables from 32 samples up to 1024 samples per bank.  Selectable sample bank per-oscillator for FM and bitwise ops.
-
+* Automatic wiring of algorithms based on simpler descriptions, and 
 
 ## Different
 * Based on more traditional paradigms, comparable to most other FM synths under the hood
@@ -30,6 +31,7 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
   * Algorithm processing order is done iteratively from the "top-down" rather than recursively from the carrier.
 *  Fixed polyphony monotimbral chip layout, with operators allocated based on a chip/voice specification rather than dynamically per-note
   * Monotimbrality and fixed polyphony help simplify the design, allowing multiple instances to be specified and put on independent audio buses
+  * Automatic or manual note prioritization system
 * Fixed internal clock rate of 48 KHz
 * Operator parameter specification is separated from its implementation, allowing more tracker-like control over individual notes (temporarily override params)
 * More traditional LFO;  Reface-style rate table.
