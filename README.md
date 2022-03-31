@@ -12,11 +12,13 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 ## New
 * Fixed-point phase accumulator (utilizing 12.20 precision by default)
 * More modular, delegate-based oscillator and operator functionality (Operators can behave like filters or DSP in addition to FM)
-* Bitwise and wave-folding operators
+* * FM and Bitwise (AND/OR/XOR and Ring Modulation) operators
+* * Traditional analog-style filters and wave folding operators
 * Envelopes with target audio levels for each phase, more like DX-style synths
 * Envelope hold phase after initial attack and before initial decay, similar to the initial delay phase in gdsFM. Stays constant under rate scaling.
 * All FM operators support Reface-style operator feedback.
 * More traditional noise generators, including an LFSR-based generator with selectable periodicity (create more buzzing effects) similar to 2a03, etc.
+* Variable length wavetables from 32 samples up to 1024 samples per bank.  Selectable sample bank per-oscillator for FM and bitwise ops.
 
 
 ## Different
@@ -31,16 +33,19 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 * Fixed internal clock rate of 48 KHz
 * Operator parameter specification is separated from its implementation, allowing more tracker-like control over individual notes (temporarily override params)
 * More traditional LFO;  Reface-style rate table.
+* Variable-length microsample oscillator.
 
 ## To be implemented
 * Chip clocking to match various audio output rates, perhaps with optional sample interpolation
-* PCM Sample playback + Wavetable-based oscillators
+* Pure, arbitrary length PCM Sample playback
+* "Linear" wavetable morphing operator
 * Possible second LFO as well as OPZ waveforms for tx81z support
-* Voice format specification
+* Voice format specification  (almost complete!)
+* Arbitrary parameter envelopes  (Routing an envelope to a specific parameter)
 
 
 ## May or may not be implemented or come back
 * Pitch generator
-* Arbitrary parameter envelopes  (Routing an envelope to a specific parameter)
 * Wider range of sampling options
 * Multitimbral operation (for now, multiple chip instances syncing their clocks should suffice)
+* LFO oscillator access to the wavetable
