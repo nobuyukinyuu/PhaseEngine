@@ -20,7 +20,6 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 * All FM operators support Reface-style operator feedback.
 * More traditional noise generators, including an LFSR-based generator with selectable periodicity (create more buzzing effects) similar to 2a03, etc.
 * Variable length wavetables from 32 samples up to 1024 samples per bank.  Selectable sample bank per-oscillator for FM and bitwise ops.
-* Automatic wiring of algorithms based on simpler descriptions, and 
 
 ## Different
 * Based on more traditional paradigms, comparable to most other FM synths under the hood
@@ -36,6 +35,8 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 * Operator parameter specification is separated from its implementation, allowing more tracker-like control over individual notes (temporarily override params)
 * More traditional LFO;  Reface-style rate table.
 * Variable-length microsample oscillator.
+* Automatic wiring of algorithms based on simpler connection descriptions, with algorithm presets from several classic FM synths.
+
 
 ## To be implemented
 * Chip clocking to match various audio output rates, perhaps with optional sample interpolation
