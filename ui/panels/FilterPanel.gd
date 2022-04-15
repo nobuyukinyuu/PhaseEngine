@@ -66,11 +66,13 @@ func set_from_op(op:int):
 	$Mute.pressed = d["mute"]
 	$Bypass.pressed = d["bypass"]
 
+	get_node(chip_loc).RecalcFilter(operator, "all")
+
 
 func setEG(value, property, recalc=true):
 	get_node(chip_loc).SetEG(operator, property, value)
 	if recalc:  
-		get_node(chip_loc).RecalcFilter(operator)
+		get_node(chip_loc).RecalcFilter(operator, property)
 	global.emit_signal("op_tab_value_changed")
 
 

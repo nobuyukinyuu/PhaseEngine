@@ -449,8 +449,7 @@ custom_constants/vseparation = 8
 custom_constants/hseparation = 16
 columns = 3
 __meta__ = {
-"_edit_group_": true,
-"_edit_use_anchors_": false
+"_edit_group_": true
 }
 
 [node name="+Delay" parent="Rates" instance=ExtResource( 3 )]
@@ -471,8 +470,8 @@ margin_right = 208.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 custom_styles/slider = ExtResource( 22 )
-max_value = 63.0
-value = 63.0
+max_value = 31.0
+value = 31.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "ar"
@@ -497,8 +496,8 @@ margin_bottom = 48.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 custom_styles/slider = ExtResource( 22 )
-max_value = 63.0
-value = 63.0
+max_value = 31.0
+value = 31.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "dr"
@@ -511,7 +510,7 @@ margin_bottom = 48.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
 custom_styles/slider = ExtResource( 22 )
-max_value = 63.0
+max_value = 31.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "sr"

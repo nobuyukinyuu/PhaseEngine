@@ -198,8 +198,8 @@ namespace PhaseEngine
         }
 
         /// summary:  Returns a partial increment for use with phase-offset NoteOn events
-        public static long PhaseOffsetOf(Increments prototype, double percent)
-        {
+        public static long PhaseOffsetOf(in Increments prototype, double percent)
+        {//TODO: Profile the performance gain/penalty by flagging prototype as an IN parameter. Defensive copies may be used regardless of pass byRef due to mutability
             return (long)((Global.MixRate/prototype.hz) * prototype.increment * Math.Clamp(percent,0,1));
         }
 

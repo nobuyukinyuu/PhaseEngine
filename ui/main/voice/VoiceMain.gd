@@ -57,7 +57,7 @@ func _on_op_size_changed(opNum:int, oldSz):
 		col.populate(to_add, null)
 		
 	#Update FM preview.
-	$FMPreview.recalc()
+	$FMPreview.recalc(true)
 
 func _on_op_intent_changed(opNum:int, intent, sender=null):  #Default sender:  WiringGrid.  Updated itself already.
 	if sender!=$WiringGrid:  $WiringGrid/SlotIndicator.redraw_grid()

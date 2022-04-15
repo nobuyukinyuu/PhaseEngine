@@ -55,11 +55,13 @@ namespace PhaseEngine
             pg.Recalc(); 
         }
 
-        public void NoteOn()
+        public override void NoteOn()
         {
             delay_counter = 0;
             if (osc_sync) phase = 0;
         }
+        public override void NoteOff()=>            throw new NotImplementedException();
+
 
         public bool ClockOK {get=> cycle_counter == 0;} //Returns true if the clock event just fired last tick.
         public override void Clock()
@@ -268,6 +270,7 @@ namespace PhaseEngine
             AMD = (short) j.GetItem("amd", AMD);
             SyncType = j.GetItem("syncType", SyncType);
         }
+
 
     }
 

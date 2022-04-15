@@ -11,6 +11,8 @@ public class Test2 : Label
     AudioStreamGeneratorPlayback buf;
     AudioStreamPlayer player;
 
+    Vector2[] bufferPool;
+
     const int scopeLen = 256;
     const int scopeHeight = 128;
 
@@ -29,6 +31,8 @@ public class Test2 : Label
         buf = (AudioStreamGeneratorPlayback) player.GetStreamPlayback();
 
         stream.MixRate = Global.MixRate;
+
+        bufferPool = new Vector2[(int)Math.Max(stream.MixRate * stream.BufferLength +2, stream.MixRate)];
 
         player.Play();
 
@@ -75,22 +79,7 @@ public class Test2 : Label
             }
         }
  
-        if(Visible)
-        {
-            this.Text = c.channels[0].ToString();
-            if (c.channels[0].ops[0].pg.increment > int.MaxValue) 
-                // this.AddColorOverride("font_color", new Color("ff0000")); 
-                this.SelfModulate = new Color("ff0000"); 
-            else
-                // this.AddColorOverride("font_color", new Color("ffffff"));
-                this.SelfModulate = new Color("ffffff"); 
 
-
-            var info = GetNode<Label>("ChInfo");
-            info.Text = c.ToString();
-            // info.Text = FramesPerOscillation();
-            Update();            
-        }
 
 
         if (buf.GetSkips() > 0)
@@ -278,30 +267,77 @@ public class Test2 : Label
         {
             var op = c.channels[i].ops[opTarget] as Filter;
             if (op==null) continue;
+            op.eg.aux_func = (byte)val;
             op.SetOscillatorType((byte) val);
         }
 
-        RecalcFilter(opTarget);
+        var p = c.Voice.preview.ops[opTarget];
+        p.eg.aux_func = (byte)val;
+        p.SetOscillatorType((byte) val);
+
+        RecalcFilter(opTarget, "all");
     }
 
-    public void RecalcFilter(int opTarget)
-    {
-        for(int i=0; i<c.channels.Length; i++)
-        {
-            var op = c.channels[i].ops[opTarget] as Filter;
-            op.Recalc();
-        }
 
-        //Recalc preview.
+    public void RecalcPreviewFilters() {for(int i=0; i<c.Voice.opCount; i++)  RecalcPreviewFilter(i);}
+
+    public void RecalcPreviewFilter(int opTarget, System.Reflection.MethodInfo m=null)
+    {
         const double RATIO = 16.35 / Global.BASE_HZ;
         {
             var op = c.Voice.preview.ops[opTarget] as Filter;
-            op.eg = new Envelope(c.Voice.egs[opTarget]);  //Make copy.
+            if (op==null) return;
+            // op.eg = new Envelope(c.Voice.egs[opTarget]);  //Make copy.
+            op.eg.Configure(c.Voice.egs[opTarget]); 
+
             // op.SetOscillatorType(c.Voice.egs[opTarget].aux_func);
             op.eg.cutoff = Math.Max(2, op.eg.cutoff * RATIO);  //Preview note is midi_note 0!  Reduce cutoff a bunch to be more representative of A440.
             op.Reset();
-            op.Recalc();
-        } 
+            if(m==null) op.RecalcAll(); else m.Invoke(op, null);
+        }         
+    }
+
+
+    public void RecalcFilter(int opTarget, string property)
+    {
+        System.Reflection.MethodInfo m;
+        switch(property)
+        {
+            case "type":
+                m = typeof(Filter).GetMethod("RecalcCoefficientsOnly");  break;
+            case "cutoff":
+                m = typeof(Filter).GetMethod("RecalcFrequency");  break;
+            case "resonance":
+                m = typeof(Filter).GetMethod("RecalcQFactor");  break;
+            case "gain":
+                m = typeof(Filter).GetMethod("RecalcGain");  break;
+            case "all":  default:
+                m = typeof(Filter).GetMethod("RecalcAll");   break;
+        }
+
+        //Set up preview for a recalc.
+        RecalcPreviewFilter(opTarget, m);
+
+
+        //Recalculate all channels applicable (including preview)
+        for(int i=0; i<c.channels.Length; i++)
+        {
+            var op = c.channels[i].ops[opTarget] as Filter;
+            m.Invoke(op, null);
+        //     switch(property)
+        //     {
+        //         case "type":
+        //             op.RecalcCoefficientsOnly();  break;
+        //         case "cutoff":
+        //             op.RecalcFrequency();  break;
+        //         case "resonance":
+        //             op.RecalcQFactor();  break;
+        //         case "gain":
+        //             op.RecalcGain();  break;
+        //         case "all":  default:
+        //             op.RecalcAll();   break;
+        //     }
+        }
     }
 
     public void SetBypass(int opTarget, bool val) {c.Voice.egs[opTarget].bypass = val;}
@@ -483,30 +519,30 @@ public class Test2 : Label
     }
 
     ///////////////////////////////////    BUFFER    /////////////////////////////////////
+
+    float previousSample=0;
     void fill_buffer()
     {
         var frames= buf.GetFramesAvailable();
-        var output = new Vector2[frames];
-
+        // var output = new Vector2[frames];
+        var segment = new ArraySegment<Vector2>(bufferPool, 0, frames);
+        var output = segment.Array;
+        
         for (int i=0; i<frames;  i++)
         {
-            // output[i].x = Tables.short2float[ Oscillator.CrushedSine((ulong)accumulator, (ushort) bitCrush.Value) + Tables.SIGNED_TO_INDEX ];
             c.Clock();
 
 
-
-
-
-            // output[i].x = Tables.short2float[  (short) (op2.compute_fb( (ushort)(op.compute_fb(0)>>4))) + Tables.SIGNED_TO_INDEX ] ;
-            // output[i].x = Tables.short2float[  (short) (op2.RequestSample( (ushort)(op.RequestSample()>>2))) + Tables.SIGNED_TO_INDEX ] ;
-
-            output[i].x = c.RequestSampleF();
+            // output[i].x = c.RequestSampleF();
+            output[i].x = Tools.Lerp(c.RequestSampleF(), previousSample, 0.51f); //Filtered in an attempt to level off the high end
             output[i].y = output[i].x;
+            previousSample = output[i].x;
 
+            output[i] *= new Vector2(c.Voice.panL, c.Voice.panR);
 
         }
 
-
+        //Calculate scope
         for (int i=0; i < output.Length; i++)
         {
             if (pts.Count >= scopeLen)  break;
@@ -514,7 +550,7 @@ public class Test2 : Label
             pts.Enqueue(output[i].x * h + h);
         }
 
-        buf.PushBuffer(output);
+        buf.PushBuffer(segment.ToArray());
     }
 
 
@@ -522,11 +558,25 @@ public class Test2 : Label
     {
         base._PhysicsProcess(delta);
 
+        if(Visible)
+        {
+            this.Text = c.channels[0].ToString();
+            // if (c.channels[0].ops[0].pg.increment > int.MaxValue) 
+                // this.SelfModulate = new Color("ff0000"); 
+            // else
+                // this.SelfModulate = new Color("ffffff"); 
+
+
+            var info = GetNode<Label>("ChInfo");
+            info.Text = c.ToString();
+            // info.Text = FramesPerOscillation();
+            Update();            
+        }
     }
 
 
 
-
+    ///////////////////////////////////////////////// SCOPE /////////////////////////////////////////////////
     // Vector2[] pts=new Vector2[scopeLen];
     Queue<float> pts=new Queue<float>(scopeLen);
     Vector2[] drawCache = new Vector2[scopeLen];

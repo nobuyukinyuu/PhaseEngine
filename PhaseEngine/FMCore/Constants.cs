@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace PhaseEngine 
 {
-    public static class Global
+    internal static class Global
     {
         public const int VERSION = 10;
 

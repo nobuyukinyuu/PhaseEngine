@@ -1,10 +1,11 @@
 using System;
+using System.Collections.Generic;
 using PhaseEngine;
 
 namespace PhaseEngine 
 {
     
-    public abstract class OpBase  //Base for operator, LFO and filter classes
+    public abstract class OpBase : IBindableDataConsumer  //Base for operator, LFO and filter classes
     {
         public enum Intents { LFO=-1, NONE, FM_OP, FILTER, BITWISE, WAVEFOLDER };
         public Intents intent = Intents.NONE;
@@ -12,15 +13,17 @@ namespace PhaseEngine
 
         protected Oscillator oscillator = new Oscillator(Oscillator.Sine2);
         public Oscillator.oscTypes OscType{ get => oscillator.CurrentWaveform; }
-        public delegate short SampleOutputFunc(ushort modulation = 0, ushort am_offset=0); //Primary function of the oscillator
-        public SampleOutputFunc operatorOutputSample;
+        public Dictionary<string, CachedEnvelope> BindStates { get; set; } = new Dictionary<string, CachedEnvelope>();
+
+        protected delegate short SampleOutputFunc(ushort modulation = 0, ushort am_offset=0); //Primary function of the oscillator
+        protected SampleOutputFunc operatorOutputSample;
 
 
         protected long phase;  //Phase accumulator
         protected bool flip=false;  // Used by the oscillator to flip the waveform's values.  TODO:  User-specified waveform inversion
         protected int seed=1;  //LFSR state sent ByRef to oscillators which produce noise
 
-        public Envelope eg = new Envelope();
+        readonly public Envelope eg = new Envelope();  //Singleton for the lifetime of the operator. Use Envelope.configure() to replicate from a prototype
         public EGStatus egStatus = EGStatus.INACTIVE;
         public ushort egAttenuation = Envelope.L_MAX;  //5-bit value
         public Increments pg = Increments.Prototype();
@@ -33,7 +36,8 @@ namespace PhaseEngine
         public abstract void Clock();
 
         public abstract short RequestSample(ushort input, ushort am_offset);
-
+        public abstract void NoteOn();
+        public abstract void NoteOff();
     }
 
 
@@ -56,11 +60,13 @@ namespace PhaseEngine
 
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)] 
-            void ResetPhase() {if (eg.osc_sync) phase=0;  phase += Increments.PhaseOffsetOf(pg, eg.phase_offset);}
+            void ResetPhase() {if (eg.osc_sync) phase=0;  phase += Increments.PhaseOffsetOf(in pg, eg.phase_offset);}
 
         public void NoteOn(Increments increments){ pg = increments;  NoteOn(); }
-        public void NoteOn()
+        public override void NoteOn()
         {
+            //TODO:  CREATE BINDSTATES FROM THE IBINDABLE DATA SOURCES 
+
             ResetPhase();
             env_counter = 0;
             env_hold_counter = 0;
@@ -68,7 +74,7 @@ namespace PhaseEngine
             egAttenuation = Envelope.L_MAX;
             egStatus = EGStatus.DELAY;
         }
-        public void NoteOff()
+        public override void NoteOff()
         {
             egStatus = EGStatus.RELEASED;
         }
@@ -77,6 +83,12 @@ namespace PhaseEngine
         {
             phase += pg.increment;  
 
+            //Clock the cached envelopes.
+            // foreach(CachedEnvelope state in BindStates.Values)  state.Clock();
+            //If it's time to update call BindManager.Update().
+            BindManager.Update(this, eg, BindManager.NO_ACTION);
+
+            
 
             // increment the envelope count; low two bits are the subcount, which
             // only counts to 3, so if it reaches 3, count one more time
@@ -264,11 +276,10 @@ namespace PhaseEngine
                     target = eg.levels[(int)EGStatus.SUSTAINED];
                     //Skip the decay phase if we've already gone past the sustain level.
                     //Deals with situations where the decay is set to 0 but we want to move on.
-                    // egStatus = egAttenuation>=eg.sl? EGStatus.SUSTAINED: EGStatus.DECAY;
-                    // egStatus = egAttenuation==eg.sl? EGStatus.SUSTAINED : EGStatus.DECAY;
-                    if ( ((egAttenuation >= target) && !eg.rising[(int)EGStatus.DECAY]) | (eg.rising[(int)EGStatus.DECAY] && (egAttenuation <= target)))
-                        egStatus = EGStatus.SUSTAINED;
-                    else egStatus = EGStatus.DECAY;
+                    // if ( ((egAttenuation >= target) && !eg.rising[(int)EGStatus.DECAY]) | (eg.rising[(int)EGStatus.DECAY] && (egAttenuation <= target)))
+                    //     egStatus = EGStatus.SUSTAINED;
+                    // else egStatus = EGStatus.DECAY;
+                    egStatus = EGStatus.DECAY;
 
                     // target = eg.levels[(int)EGStatus.DECAY];
                 } else {

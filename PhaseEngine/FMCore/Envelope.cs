@@ -1,12 +1,14 @@
 using System;
 using PhaseEngine;
 using PE_Json;
+using System.Collections.Generic;
+using System.Reflection;
 
-    //Thoughts:  Rates probably need fixed integer math to work, then translated to a level at the very end, since increments are very small.
+//Thoughts:  Rates probably need fixed integer math to work, then translated to a level at the very end, since increments are very small.
 
 namespace PhaseEngine 
 {
-    public class Envelope
+    public class Envelope : IBindable
     {
         public bool mute;
         public bool bypass;
@@ -20,9 +22,9 @@ namespace PhaseEngine
         public byte dr{get=> rates[1]; set=> rates[1] = value;}
         public byte sr{get=> rates[2]; set=> rates[2] = value;}
         public byte rr{get=> rates[3]; set=> rates[3] = value;}
-        public byte[] rates = new byte[4];
-        public ushort[] levels = new ushort[5];
-        public bool[] rising= {true, false, false, false};  //Precalculates which way to increment the envelope based on the target state.
+        internal byte[] rates = new byte[4];
+        internal ushort[] levels = new ushort[5];
+        internal bool[] rising= {true, false, false, false};  //Precalculates which way to increment the envelope based on the target state.
 
         public ushort delay, hold;
         
@@ -36,6 +38,8 @@ namespace PhaseEngine
         public ushort dl{get=> levels[1]; set=>RecalcLevel(1, value);}
         public ushort sl{get=> levels[2]; set=>RecalcLevel(2, value);}
         public ushort rl{get=> levels[3]; set=>RecalcLevel(3, value);}
+
+        public Dictionary<string, TrackerEnvelope> BoundEnvelopes {get;set;} = new Dictionary<string, TrackerEnvelope>();
 
         public byte feedback = 0;
         public ushort duty=32767;
@@ -71,7 +75,6 @@ namespace PhaseEngine
             }
         }
 
-
         public Envelope() { Reset(); }
 
         //Copy constructor
@@ -96,7 +99,6 @@ namespace PhaseEngine
             }
             else Reset(); //Attempt copy.  If failure, reinit envelope.  This could happen in release mode... TODO:  Check and see what happens with a fuzz test
         }
-
         public bool Configure(Envelope prototype, bool deserializeRTables=false) 
         {
             var data = prototype.ToJSONString();
@@ -153,6 +155,7 @@ namespace PhaseEngine
             // rising[(int)EGStatus.RELEASED] = (sl > rl);            
         }
 
+#region IO
         public bool FromJSON(JSONObject input, bool deserializeRTables=true)
         {
             var j = input;
@@ -197,7 +200,6 @@ namespace PhaseEngine
             return true;
 
         }
-
         public bool FromString(string input, bool deserializeRTables=false)
         {
             var P = JSONData.ReadJSON(input);
@@ -205,8 +207,6 @@ namespace PhaseEngine
             var j = (JSONObject) P;
             return FromJSON(j, deserializeRTables);
         }
-
-
         internal JSONObject ToJSONObject(bool includeRTables=true)
         {
             var o = new JSONObject();
@@ -270,6 +270,7 @@ namespace PhaseEngine
             return o;
         }
         #endif 
+#endregion
 
         //Convenience function for setting any property or field by specifying its name.  Not efficient for realtime use!
         public void ChangeValue(string property, float val)
@@ -288,7 +289,70 @@ namespace PhaseEngine
         }
 
 
+/////////////////////////////////////////  BINDABLE INTERFACE  /////////////////////////////////////////
+        public bool Bind(string property)
+        {
+            int min=0,max=0;
+
+            //Set range values here.  wavetable_bank can't know max banks for a voice from here, so use Voice's bind method to specify it instead?
+            switch(property)
+            {
+                case "feedback":  case "ams":
+                    max=10;  break;
+                case "duty":  //Duty is represented internally by ushort but for UI purposes should be displayed as short
+                    min=short.MinValue; max=short.MaxValue; break;
+
+                case "tl": case "al": case "dl": case "sl": case "rl":
+                    max=L_MAX;  break;
+                case "ar": case "dr": case "sr": case "rr":
+                    max=R_MAX;  break;
+
+                case "cutoff":
+                    min=10; max=(int)(Global.MixRate/2); break;
+                case "resonance":
+                    min=1; max=10; break;
+
+                default:
+                    //Perhaps the data member specified doesn't exist.  Check first before attempting to go further.
+                    var members= new Dictionary<string, MemberInfo>();
+                    foreach(FieldInfo fieldInfo in typeof(Envelope).GetFields())  members.Add(fieldInfo.Name, fieldInfo);
+                    foreach(PropertyInfo propertyInfo in typeof(Envelope).GetProperties())  members.Add(propertyInfo.Name, propertyInfo);
+                    if (!members.ContainsKey(property)) throw new KeyNotFoundException(String.Format("Envelope.Bind:  Can't find data member {0}!", property));
+
+                   //Get default min/max values for the field if we can't determine the property is a Rate, Level or other common constraint.
+                    switch (members[property])
+                    {
+                        case FieldInfo f:
+                            min = Convert.ToInt32( f.FieldType.GetField("MinValue").GetRawConstantValue() );
+                            max = Convert.ToInt32( f.FieldType.GetField("MaxValue").GetRawConstantValue() );
+                            break;
+                        case PropertyInfo p:
+                            min = Convert.ToInt32( p.PropertyType.GetField("MinValue").GetRawConstantValue() );
+                            max = Convert.ToInt32( p.PropertyType.GetField("MaxValue").GetRawConstantValue() );
+                            break;
+                    }
+                    break;
+            }
+            return this.Bind(property, min, max);
+        }
+        public bool Bind(string property, int minValue, int maxValue)
+        {
+            TrackerEnvelope e = BindManager.Bind(this, property, minValue, maxValue); 
+            var bindAlreadyExists = !BoundEnvelopes.TryAdd("property", e);
+            if(bindAlreadyExists) return false;  //Binding failed.  User must Unbind the value first.
+
+            return true;
+        }
+
+        void IBindable.Unbind(string property)
+        {
+            BoundEnvelopes.Remove(property);
+        }
+
+
     }
+
+
 
     public class EnvelopePool : ObjectPool<Envelope>
     {

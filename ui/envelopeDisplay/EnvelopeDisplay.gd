@@ -73,7 +73,7 @@ func update_delay(val):
 	
 func update_ar(val):
 	Attack = val
-	ar = lerp(1, 0, val/64.0)
+	ar = lerp(1, 0, val/32.0)
 	update_env()
 func update_hold(val):
 	Hold = val
@@ -81,11 +81,11 @@ func update_hold(val):
 	update_env()
 func update_dr(val):
 	Decay = val
-	dr = lerp(2, 0, val/64.0) 
+	dr = lerp(2, 0, val/32.0) 
 	update_env()
 func update_sr(val):
 	Sustain = val
-	sr = lerp(1, 0, val/64.0) 
+	sr = lerp(1, 0, val/32.0) 
 	update_env()
 func update_rr(val):
 	Release = val

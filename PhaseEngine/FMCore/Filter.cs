@@ -47,9 +47,17 @@ namespace PhaseEngine
             //TODO:  Support recalculating filter envelopes?
             return;
         }
+        public override void NoteOff()
+        {
+            throw new NotImplementedException();
+        }
+        public override void NoteOn()
+        {
+            throw new NotImplementedException();
+        }
 
-        public override short RequestSample(ushort input, ushort am_offset) { return FilterToApply(input, am_offset); }
-        public short RequestBypass(ushort input, ushort am_offset)  { return (short)input; }
+        public override short RequestSample(ushort input, ushort am_offset) => FilterToApply(input, am_offset); 
+        public short RequestBypass(ushort input, ushort am_offset)  => (short)input; 
         // public short RequestFilteredSample2(ushort input, ushort am_offset)
         // {
         //     var output = Process(Tables.short2float[ (short)input + Tables.SIGNED_TO_INDEX]);
@@ -71,8 +79,8 @@ namespace PhaseEngine
         public override void SetOscillatorType(byte index)
         {
             if (index==0)  FilterToApply=RequestBypass; else FilterToApply=RequestFilteredSample;
-            eg.aux_func = index;
-            Recalc();
+            // eg.aux_func = index;
+            RecalcAll();
         }
 
         public int Process(int in0)
@@ -94,34 +102,65 @@ namespace PhaseEngine
 
         //TODO:  Consider splitting out some derived values like omega etc to its own update function or otherwise simplifying this so less processing is done on recalc!!
 
-        public void Recalc() {Recalc((FilterType)eg.aux_func, eg.cutoff, eg.resonance, eg.gain);}
+        public void RecalcAll() => Recalc((FilterType)eg.aux_func, eg.cutoff, eg.resonance, eg.gain);
+        public void RecalcCoefficientsOnly() => Recalc();
+        void Recalc() => Recalc((FilterType)eg.aux_func);  //Recalculate the coefficients for the given filter type only.
 
-        public void Recalc(FilterType type, double frequency, double q, double db_gain, bool q_is_bandwidth=false)
+        double omega, tsin, tcos, q=1.0;
+        double alpha;  //Derived from Q
+        double beta, gain;
+
+        public void RecalcFrequency() => RecalcFrequency(eg.cutoff);
+        void RecalcFrequency(double frequency)  //Use when frequency changes
         {
-            // temp pi
             const double PI=3.1415926535897932384626433832795;
-            // temp coef vars
-            double alpha=0,a0=0,a1=0,a2=0,b0=0,b1=0,b2=0;
+            omega=	2.0*PI*frequency/Global.MixRate;
+            tsin	=	Math.Sin(omega);
+            tcos	=	Math.Cos(omega);
 
-            double omega=	2.0*PI*frequency/Global.MixRate;
-            double tsin	=	Math.Sin(omega);
-            double tcos	=	Math.Cos(omega);
+            Recalc();
+        }
 
+        public void RecalcQFactor() => RecalcQFactor(eg.resonance);
+        void RecalcQFactor(double q, bool q_is_bandwidth=false)  //Use when Q factor changes
+        {
+            this.q=q;
             if(q_is_bandwidth)
                 alpha=tsin * Math.Sinh(Math.Log(2.0)/2.0*q*omega/tsin);
             else
                 alpha=tsin/(2.0*q);
 
-            double A=0, beta=0;
+            Recalc();
+        }
+        public void RecalcGain() => RecalcGain(eg.gain);
+        void RecalcGain(double input)
+        {
+                gain   	=	input;
+                beta	=	Math.Sqrt(input)/q;            
+
+            Recalc();
+        }
+
+        //Recalc everything
+        void Recalc(FilterType type, double frequency, double q, double db_gain, bool q_is_bandwidth=false)
+        {
+            RecalcFrequency(frequency);
+            RecalcQFactor(q, q_is_bandwidth);
+
             // for peaking, lowshelf and hishelf
             if((int)type>6)
-            {
                 // A   	=	Math.Pow(10.0,(db_gain/40.0));
-                A   	=	db_gain;
-                beta	=	Math.Sqrt(A)/q;
-            }
+                RecalcGain(db_gain);
 
-            switch((FilterType)eg.aux_func)
+            Recalc(type);
+        }
+
+        void Recalc(FilterType type)  //Recalc coefficients only after some other value changes
+        {
+            // temp coef vars
+            double a0=0,a1=0,a2=0,b0=0,b1=0,b2=0;
+
+            switch(type)
             {
                 case FilterType.NONE:
                     b0=1;
@@ -187,30 +226,30 @@ namespace PhaseEngine
                     break;
 
                 case FilterType.PEAKING:
-                    b0 = (float) (1.0+alpha*A);
+                    b0 = (float) (1.0+alpha*gain);
                     b1 = (float) (-2.0*tcos);
-                    b2 = (float) (1.0-alpha*A);
-                    a0 = (float) (1.0+alpha/A);
+                    b2 = (float) (1.0-alpha*gain);
+                    a0 = (float) (1.0+alpha/gain);
                     a1 = (float) (-2.0*tcos);
-                    a2 = (float) (1.0-alpha/A);
+                    a2 = (float) (1.0-alpha/gain);
                     break;
                 
                 case FilterType.LOWSHELF:
-                    b0 = (float) (A*((A+1.0)-(A-1.0)*tcos+beta*tsin));
-                    b1 = (float) (2.0*A*((A-1.0)-(A+1.0)*tcos));
-                    b2 = (float) (A*((A+1.0)-(A-1.0)*tcos-beta*tsin));
-                    a0 = (float) ((A+1.0)+(A-1.0)*tcos+beta*tsin);
-                    a1 = (float) (-2.0*((A-1.0)+(A+1.0)*tcos));
-                    a2 = (float) ((A+1.0)+(A-1.0)*tcos-beta*tsin);
+                    b0 = (float) (gain*((gain+1.0)-(gain-1.0)*tcos+beta*tsin));
+                    b1 = (float) (2.0*gain*((gain-1.0)-(gain+1.0)*tcos));
+                    b2 = (float) (gain*((gain+1.0)-(gain-1.0)*tcos-beta*tsin));
+                    a0 = (float) ((gain+1.0)+(gain-1.0)*tcos+beta*tsin);
+                    a1 = (float) (-2.0*((gain-1.0)+(gain+1.0)*tcos));
+                    a2 = (float) ((gain+1.0)+(gain-1.0)*tcos-beta*tsin);
                     break;
 
                 case FilterType.HISHELF:
-                    b0 = (float) (A*((A+1.0)+(A-1.0)*tcos+beta*tsin));
-                    b1 = (float) (-2.0*A*((A-1.0)+(A+1.0)*tcos));
-                    b2 = (float) (A*((A+1.0)+(A-1.0)*tcos-beta*tsin));
-                    a0 = (float) ((A+1.0)-(A-1.0)*tcos+beta*tsin);
-                    a1 = (float) (2.0*((A-1.0)-(A+1.0)*tcos));
-                    a2 = (float) ((A+1.0)-(A-1.0)*tcos-beta*tsin);
+                    b0 = (float) (gain*((gain+1.0)+(gain-1.0)*tcos+beta*tsin));
+                    b1 = (float) (-2.0*gain*((gain-1.0)+(gain+1.0)*tcos));
+                    b2 = (float) (gain*((gain+1.0)+(gain-1.0)*tcos-beta*tsin));
+                    a0 = (float) ((gain+1.0)-(gain-1.0)*tcos+beta*tsin);
+                    a1 = (float) (2.0*((gain-1.0)-(gain+1.0)*tcos));
+                    a2 = (float) ((gain+1.0)-(gain-1.0)*tcos-beta*tsin);
                     break;
             }
 

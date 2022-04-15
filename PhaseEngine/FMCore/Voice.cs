@@ -12,9 +12,42 @@ namespace PhaseEngine
     {
         ////// Metadata for file I/O and use in user implementations
         public string name, desc;
-        public float gain=1.0f;
-        public float pan=0;
 
+
+        float gain=1.0f;
+        float pan=0; const float C_PAN=0.5f;
+        internal float panL=0.5f, panR=0.5f; 
+
+        public float Gain {get=>gain;set=>gain=value;}
+        public float Pan {get=>pan;set=>SetPanning(value);}
+
+        public void SetPanning(float val)
+        {
+            pan=val;
+            var amt = Math.Abs(val);
+            float l,r;
+
+            if (val < 0) {  //Pan left channel
+                l = amt;
+                r = 1.0f-amt;
+
+                panL = Tools.Lerp(C_PAN, 1.0f, l);
+                panR = Tools.Lerp(0.0f, C_PAN, r);
+                return;
+
+            } else if (val > 0) {  //Pan right
+                l = 1.0f-amt;
+                r = amt;
+
+                panL = Tools.Lerp(0.0f, C_PAN, l);
+                panR = Tools.Lerp(C_PAN, 1.0f, r);
+                return;    
+            } else {  //Center channel.
+                panL = C_PAN;
+                panR = C_PAN;
+                return;
+            }
+        }
 
         public byte opCount = 6; 
 
@@ -117,12 +150,6 @@ namespace PhaseEngine
                     case OpBase.Intents.BITWISE:
                         var op = c.ops[i] as BitwiseOperator;
                         op.OpFuncType = egs[i].aux_func;  //Property has hidden side effect of setting func
-                        break;
-
-                    case OpBase.Intents.FILTER:
-                        var f = c.ops[i] as Filter;
-                        f.SetOscillatorType(egs[i].aux_func); //Sets the filter func
-                        f.Recalc();
                         break;
                 }
             }

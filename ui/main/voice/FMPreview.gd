@@ -40,10 +40,11 @@ func _on_Timer_timeout():
 func cache_recalc():
 	should_recalc = true
 
-func recalc():
+func recalc(op_size_changed=false):
 	if !should_be_visible:  return
 	var c = get_node(owner.chip_loc)
 	if !c:  return
+	if op_size_changed:  c.RecalcPreviewFilters()
 	pts = c.CalcPreview()
 	update()
 	should_recalc = false

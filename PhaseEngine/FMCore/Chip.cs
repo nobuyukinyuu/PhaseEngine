@@ -120,7 +120,7 @@ namespace PhaseEngine
             {
                 output += Tables.short2float[channels[i].RequestSample()+Tables.SIGNED_TO_INDEX];
             }
-            return output * voice.gain;
+            return output * voice.Gain;
         }
 
 

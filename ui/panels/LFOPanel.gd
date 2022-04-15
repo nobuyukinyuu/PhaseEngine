@@ -6,7 +6,8 @@ func _ready():
 	$Metadata/Desc.connect("text_changed", self, "set_meta", [null, "desc"])
 	
 	for o in [$Metadata/Gain, $Metadata/Pan]:
-		o.connect("value_changed", self, "set_meta", [o.name.to_lower()])
+#		o.connect("value_changed", self, "set_meta", [o.name.to_lower()])
+		o.connect("value_changed", self, "set_meta", [o.name])
 
 	#Set up LFO.
 	for o in $LFO.get_children():

@@ -110,13 +110,11 @@ script = ExtResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-note_off_indicator = false
 color = Color( 0.921569, 0.486275, 0.470588, 1 )
 thickness = 1.2
 curve = 0.5
 p1 = 1.0
 p2 = 0.0
-tl = 0.0
 
 [node name="1" type="TextureRect" parent="ADSR"]
 margin_left = 56.0
@@ -129,13 +127,9 @@ script = ExtResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-note_off_indicator = false
 color = Color( 0.858824, 0.67451, 0.231373, 1 )
 thickness = 1.2
-curve = 1.0
-p1 = 0.0
 p2 = 0.0
-tl = 0.0
 
 [node name="Label" type="Label" parent="ADSR/1"]
 modulate = Color( 1, 1, 1, 0.501961 )
@@ -165,13 +159,9 @@ script = ExtResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-note_off_indicator = false
 color = Color( 0.214233, 0.84375, 0.457726, 1 )
 thickness = 1.2
-curve = 1.0
-p1 = 0.0
 p2 = 0.0
-tl = 0.0
 
 [node name="3" type="TextureRect" parent="ADSR"]
 margin_left = 84.0
@@ -185,10 +175,7 @@ __meta__ = {
 note_off_indicator = true
 color = Color( 0.215686, 0.54902, 0.843137, 1 )
 thickness = 1.2
-curve = 1.0
-p1 = 0.0
 p2 = 0.0
-tl = 0.0
 
 [node name="4" type="TextureRect" parent="ADSR"]
 margin_left = 125.0
@@ -200,13 +187,9 @@ script = ExtResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-note_off_indicator = false
 color = Color( 0.515317, 0.238647, 0.71875, 1 )
 thickness = 1.2
 curve = 0.5
-p1 = 0.0
-p2 = 1
-tl = 0.0
 
 [node name="Spacer" type="TextureRect" parent="ADSR"]
 margin_left = 161.0
@@ -222,8 +205,8 @@ __meta__ = {
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-custom_styles/normal = SubResource( 3 )
 custom_fonts/font = ExtResource( 5 )
+custom_styles/normal = SubResource( 3 )
 text = "No Output
 (Infinite attack)"
 align = 1
@@ -231,4 +214,5 @@ valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
 [connection signal="resized" from="." to="." method="_on_EnvelopeDisplay_resized"]

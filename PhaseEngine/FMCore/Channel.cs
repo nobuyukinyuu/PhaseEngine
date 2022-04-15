@@ -71,8 +71,6 @@ namespace PhaseEngine
             return lastPriorityScore;
         }
 
-        //Convenience method which generates a new envelope every time.
-        // public void NoteOn(byte midi_note=Global.NO_NOTE_SPECIFIED, byte velocity=127) => NoteOn(null, midi_note, velocity);
 
         //Generates a Note on this channel by setting new properties from a Voice.
         public void NoteOn(byte midi_note=Global.NO_NOTE_SPECIFIED, byte velocity=127)
@@ -264,16 +262,6 @@ namespace PhaseEngine
 
             for(int i=0; i<voice.opCount; i++) ops[i].wavetable = voice.wavetable;
 
-            // for (int i=0; i<voice.opCount;  i++)
-            // {
-            //     //Initialize some values copied from the voice.  This only applies to FM_OPs currently.
-            //     //TODO:  Implement a switch statement if the values for Filter are different and need to be set
-            //     var op = ops[i] as Operator;
-            //     if (op==null) continue;
-            //     op.eg = voice.egs[i];
-            //     op.pg = voice.pgs[i];  //ByVal copy
-            // }
-
         }
 
         public void SetIntents(byte first, byte last, Voice voice=null)
@@ -293,10 +281,11 @@ namespace PhaseEngine
                             op.wavetable = voice.wavetable;
                             break;
                         case OpBase.Intents.FILTER:
-                            ops[i] = new Filter();
-                            ops[i].eg.Configure(voice.egs[i]);
-                            ops[i].SetOscillatorType(voice.egs[i].aux_func);  //TODO:  Check if values out of range cause the filter to freak out
-                            ops[i].wavetable = voice.wavetable;
+                            var f = new Filter();
+                            ops[i] = f;
+                            f.eg.Configure(voice.egs[i]);
+                            f.SetOscillatorType(f.eg.aux_func);  //TODO:  Check if values out of range cause the filter to freak out
+                            f.wavetable = voice.wavetable;
                             break;
                         case OpBase.Intents.BITWISE:  //Extends FM_OP
                             var op2 = new BitwiseOperator();

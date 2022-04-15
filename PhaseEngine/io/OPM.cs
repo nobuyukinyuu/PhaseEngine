@@ -145,7 +145,7 @@ namespace PhaseEngine
                                 break;
 
                             case "CH:":  //Voice configuration options.
-                                v.pan = Convert.ToByte(splitLine[1]) / 128.0f * 2 -1; //VOPM appears to set PAN to 64 by default, so we want to make sure 0 is our default
+                                v.Pan = Convert.ToByte(splitLine[1]) / 128.0f * 2 -1; //VOPM appears to set PAN to 64 by default, so we want to make sure 0 is our default
                                 v.egs[0].feedback = Convert.ToByte(splitLine[2]);  //Set operator 1 to the feedback level specified.
                                 var algNum=Convert.ToByte(splitLine[3]);
                                 v.alg = Algorithm.FromPreset(algNum, Algorithm.PresetType.OPM); 

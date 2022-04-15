@@ -111,9 +111,6 @@ margin_bottom = 304.0
 rect_min_size = Vector2( 320, 304 )
 custom_styles/panel = SubResource( 1 )
 script = ExtResource( 4 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="response_curve" type="TextureRect" parent="."]
 modulate = Color( 0.466667, 0.670588, 1, 1 )
