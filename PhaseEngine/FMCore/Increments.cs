@@ -15,7 +15,7 @@ namespace PhaseEngine
         //       separated back into requisite parts if necessary (for example in a tracked note structure).  During editing, moving
         //       the bend would take the relevant increment references and update it.
 
-        public double hz, base_hz;
+        internal double hz, base_hz;
         double tuned_hz; //Frequency of base_hz * coarse * fine + detune; the tuning without any external modifiers from lfo/controllers
 
         public long noteIncrement;  // Calculated from the base frequency

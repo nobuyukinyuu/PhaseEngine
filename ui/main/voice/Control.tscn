@@ -665,8 +665,7 @@ margin_right = 274.0
 margin_bottom = 592.0
 theme = ExtResource( 17 )
 __meta__ = {
-"_edit_group_": true,
-"_edit_use_anchors_": false
+"_edit_group_": true
 }
 
 [node name="ReloadBank" type="Button" parent="Btn"]

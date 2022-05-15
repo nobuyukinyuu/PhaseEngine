@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/numerics_5x8.png-6eda63c0042ab80b1420425f5e4adffd.stex"
+path="res://.import/bind_indicator.png-41d91e6e2495cc7a483c0582f50bc25e.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://gfx/fonts/numerics_5x8.png"
-dest_files=[ "res://.import/numerics_5x8.png-6eda63c0042ab80b1420425f5e4adffd.stex" ]
+source_file="res://gfx/ui/bind_indicator.png"
+dest_files=[ "res://.import/bind_indicator.png-41d91e6e2495cc7a483c0582f50bc25e.stex" ]
 
 [params]
 

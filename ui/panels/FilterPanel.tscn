@@ -371,7 +371,6 @@ max_value = 4.0
 step = 0.01
 value = 1.0
 exp_edit = true
-editable = false
 associated_property = "gain"
 
 [node name="Label" type="Label" parent="."]

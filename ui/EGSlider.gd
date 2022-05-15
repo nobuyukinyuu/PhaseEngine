@@ -10,6 +10,7 @@ onready var lblPos = Vector2(rect_size.x - len(name)*charw + text_offset, -2)
 onready var lblPos2 = Vector2(rect_size.x/2 - (len(str(value))+1)*charw/2.0, rect_size.y/2)
 
 export(String) var associated_property = ""  #Determines the envelope property this slider's supposed to modify.
+export(bool) var bindable
 
 export(bool) var useExpTicks
 enum SpecialDisplay {NONE, EG_HOLD, LFO_DELAY, LFO_SPEED, PERCENT, CUSTOM=0xFF}
@@ -24,6 +25,7 @@ var needs_recalc=false
 
 const grabber_disabled = preload("res://ui/hSlider_grabber_disabled.tres")
 const style_disabled = preload("res://ui/EGSliderDisabled.stylebox")
+const bind_icon = preload("res://gfx/ui/bind_indicator.png")
 
 func set_offset(val):
 	text_offset = val
@@ -44,12 +46,20 @@ func _ready():
 	connect("resized", self, "_on_Resize")
 	pass # Replace with function body.
 
+func _gui_input(event):
+	if event is InputEventMouseButton and event.button_index == BUTTON_RIGHT and !event.pressed:
+		prints(name, "right clicked....")
+	
+	pass
+
 
 func _draw():
 	if needs_recalc:  recalc()
 	var col = ColorN("yellow") if has_focus() and !disabled else ColorN("white")
 	
 	if useExpTicks:  draw_texture(expTicks, Vector2(0, 9), Color(1,1,1,0.35))
+	
+	if bindable:  draw_texture(bind_icon, Vector2(0,0))
 	
 	draw_string(font, lblPos, name, col)  #Draw name label
 

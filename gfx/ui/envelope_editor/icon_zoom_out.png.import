@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/numerics_5x8.png-6eda63c0042ab80b1420425f5e4adffd.stex"
+path="res://.import/icon_zoom_out.png-e224cd1f6e951151790d69c841d6dc61.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://gfx/fonts/numerics_5x8.png"
-dest_files=[ "res://.import/numerics_5x8.png-6eda63c0042ab80b1420425f5e4adffd.stex" ]
+source_file="res://gfx/ui/envelope_editor/icon_zoom_out.png"
+dest_files=[ "res://.import/icon_zoom_out.png-e224cd1f6e951151790d69c841d6dc61.stex" ]
 
 [params]
 

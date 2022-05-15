@@ -12,9 +12,18 @@ namespace PhaseEngine
 
 
         //Calls TrackerEnvelope.Create to add a TrackerEnvelope to BoundEnvelopes
-        //It's up to the implementation on how to specify min and max values
-        public bool Bind(string property, int minValue, int maxValue);  //This would have a default implementation in c# 8.0....
-        public void Unbind(string property); 
+        //It's up to each implementation on how to specify min and max values
+        public bool Bind(string property, int minValue, int maxValue)
+        {
+            TrackerEnvelope e = BindManager.Bind(this, property, minValue, maxValue); 
+            var bindAlreadyExists = !BoundEnvelopes.TryAdd("property", e);
+            if(bindAlreadyExists) return false;  //Binding failed.  User must Unbind the value first.
+
+            return true;
+        }
+
+        // FIXME:  Consider using BindManager instead to fix CachedEnvelopes to not carry these properties.  Or partial rebake on NoteOn?
+        void Unbind(string property) => BoundEnvelopes.Remove(property);
 
     }
     public interface IBindableDataConsumer  //Object which consumes data from an IBindable.  Typically an operator
@@ -25,7 +34,18 @@ namespace PhaseEngine
 
         //Methods used to signal the start and release of the bound envelopes so they can loop properly.
         public void NoteOn();
-        public void NoteOff();
+        void NoteOn(IBindable datasource)  //Called by the above method to set up general housekeeping functions
+        {
+            var data = datasource.BoundEnvelopes;
+            //Begin rebake
+            foreach(string property in BindStates.Keys)
+            {
+                if (!data.ContainsKey(property)) //Uh oh, data source was unbound at some point.  Remove the key from the cache
+                    BindStates.Remove(property);
+            }
+        }
+
+        void NoteOff();
 
         public void Clock();  //Where all the local caches are clocked and where the instance calls TrackerEnvelope.Update() to modify its bound members.
     }
@@ -105,6 +125,30 @@ namespace PhaseEngine
             action();
         }
 
+        //Used for resetting a consumer's target value to an initial value (Such as defined by TrackerEnvelope)
+        public static void ResetValue(IBindableDataConsumer target, IBindable dataSource, string key)
+        {
+            var envelope = dataSource.BoundEnvelopes;
+            var state = target.BindStates;
+            var initialValue = envelope[key].initialValue;
+            SetTargetValue(target, dataSource, key, initialValue);
+        }
+
+        public static void SetTargetValue(IBindableDataConsumer target, IBindable dataSource, string key, ValueType value)
+        {
+            var envelope = dataSource.BoundEnvelopes;
+                switch(envelope[key].associatedValue)
+                {
+                    case System.Reflection.PropertyInfo property:
+                        property.SetValue(target, value);
+                        break;
+                    case System.Reflection.FieldInfo field:
+                        field.SetValue(target, value);
+                        break;
+                }
+
+        }
+
     }
 
 
@@ -113,6 +157,7 @@ namespace PhaseEngine
     public class TrackerEnvelope
     {
         public readonly int minValue, maxValue; //Values used for clamping and maybe some other calcs. Assigned from bind invoker
+        public int initialValue;  //Used to reset values bound to us when starting 
 
         public System.Reflection.MemberInfo associatedValue;  //The field or property this envelope is bound to.
         public bool cached = false;  //Invalidate this whenever we are modified in some way.
@@ -141,6 +186,19 @@ namespace PhaseEngine
             cached = true;
         }
 
+        internal void SetPoint(int index, TrackerEnvelopePoint value) => pts[index] = value;
+        internal void SetPoint(int index, System.Numerics.Vector2 value) => pts[index] = new TrackerEnvelopePoint(value);
+
+        public void SetPoint(int index, ValueTuple<float, float> value) => pts[index] = new TrackerEnvelopePoint(value);
+
+        #if GODOT
+        public void SetPoint(int index, Godot.Vector2 value)
+        {
+            var pt = new TrackerEnvelopePoint();
+            pt.Millisecs = value.x;  pt.Value = value.y;
+            pts[index] = pt;
+        } 
+        #endif
 
         public void Start() {}
 
@@ -157,6 +215,10 @@ namespace PhaseEngine
         public CachedEnvelope(int capacity) : base(capacity) {}
 
         public CachedEnvelopePoint currentPoint;
+        int idx = 0;  public int EnvelopePosition => idx;
+        int currentValue;
+
+        public bool Finished => idx >= Count;
 
         void Start() {}  //TODO:  reset 
         void Restart() {}
@@ -167,12 +229,31 @@ namespace PhaseEngine
             for(int i=0; i<src.pts.Count-1; i++)
                 Add(CachedEnvelopePoint.Create(src.pts[i], src.pts[i+1]));
 
-            if(Count>0) currentPoint = this[0];
+            if(Count>0) 
+            {
+                currentPoint = this[0];
+                idx=0;
+            }
         }
 
         //TODO:  Rebake methods for individual points?
 
-        public void Clock() {}
+        public int Clock() 
+        {
+            System.Diagnostics.Debug.Assert(Count>0);
+            if(Finished) return currentValue;
+
+            //TODO:  Stuff here to handle clocking at rates lower than the mix rate
+            //TODO:  Stuff here to handle lööps
+            currentPoint = this[idx];
+            var output = currentValue = currentPoint.Clock();
+            if (currentPoint.Finished)  //Next point
+            {
+                currentPoint.Reset();  //May not be necessary if we're not using copy constructors but baking new envelopes each time
+                idx++;
+            }
+            return output;
+        }
 
     }
 
@@ -182,10 +263,10 @@ namespace PhaseEngine
         System.Numerics.Vector2 vec;
         // public static readonly TrackerEnvelopePoint INITIAL = new TrackerEnvelopePoint(0);
 
-
-        TrackerEnvelopePoint(float n) => vec=new System.Numerics.Vector2(n);
-        TrackerEnvelopePoint(float n, float m) => vec=new System.Numerics.Vector2(n,m);
-
+        public TrackerEnvelopePoint(float n) => vec=new System.Numerics.Vector2(n);
+        public TrackerEnvelopePoint(System.Numerics.Vector2 n) => vec=n;
+        public TrackerEnvelopePoint(float n, float m) => vec=new System.Numerics.Vector2(n,m);
+        public TrackerEnvelopePoint(ValueTuple<float, float> t) => vec=new System.Numerics.Vector2(t.Item1, t.Item2);
 
         public float Millisecs {get=>vec.X; set=>vec.X = value;}
         public float Value {get=>vec.Y; set=>vec.Y = value;}
@@ -228,7 +309,7 @@ namespace PhaseEngine
         public int Clock()
         {
             c++;
-            if (c>=cycles)
+            if (c>=cycles)  //Tick
             {
                 c=0;
                 currentValue += tweakAmt;
@@ -244,5 +325,10 @@ namespace PhaseEngine
             totalProgress = 0;
         }
     }
+
+[Flags]
+enum EnvelopePtMarker {None=0, LoopStart=1, LoopEnd=2, SustainStart=4, SustainEnd=8}
+
+
 
 }

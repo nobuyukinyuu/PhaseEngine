@@ -333,22 +333,8 @@ namespace PhaseEngine
                     }
                     break;
             }
-            return this.Bind(property, min, max);
+            return ((IBindable)this).Bind(property, min, max);  //Call the default bind implementation to handle the rest.
         }
-        public bool Bind(string property, int minValue, int maxValue)
-        {
-            TrackerEnvelope e = BindManager.Bind(this, property, minValue, maxValue); 
-            var bindAlreadyExists = !BoundEnvelopes.TryAdd("property", e);
-            if(bindAlreadyExists) return false;  //Binding failed.  User must Unbind the value first.
-
-            return true;
-        }
-
-        void IBindable.Unbind(string property)
-        {
-            BoundEnvelopes.Remove(property);
-        }
-
 
     }
 

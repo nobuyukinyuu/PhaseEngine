@@ -1,0 +1,320 @@
+[gd_scene load_steps=26 format=2]
+
+[ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=1]
+[ext_resource path="res://gfx/fonts/numerics_5x8.tres" type="BitmapFont" id=2]
+[ext_resource path="res://gfx/fonts/NoteFont.tres" type="BitmapFont" id=3]
+[ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=4]
+[ext_resource path="res://gfx/ui/godot_icons/Load.svg" type="Texture" id=5]
+[ext_resource path="res://gfx/ui/godot_icons/Add.svg" type="Texture" id=6]
+[ext_resource path="res://gfx/ui/godot_icons/Remove.svg" type="Texture" id=7]
+[ext_resource path="res://gfx/ui/vu/ruler16.png" type="Texture" id=8]
+[ext_resource path="res://ui/envelope_editor/ValueRuler.gd" type="Script" id=9]
+[ext_resource path="res://ui/FileDialog.theme" type="Theme" id=10]
+[ext_resource path="res://gfx/ui/vu/minmax_slider_label.png" type="Texture" id=11]
+[ext_resource path="res://ui/envelope_editor/EnvelopeEditorWindow.gd" type="Script" id=12]
+[ext_resource path="res://gfx/ui/godot_icons/icon_action_paste.svg" type="Texture" id=13]
+[ext_resource path="res://gfx/ui/godot_icons/icon_action_copy.svg" type="Texture" id=14]
+[ext_resource path="res://gfx/ui/envelope_editor/icon_scale.png" type="Texture" id=15]
+[ext_resource path="res://gfx/ui/envelope_editor/icon_squash.png" type="Texture" id=16]
+[ext_resource path="res://gfx/ui/envelope_editor/icon_zoom_in.png" type="Texture" id=17]
+[ext_resource path="res://gfx/ui/envelope_editor/icon_zoom_out.png" type="Texture" id=18]
+[ext_resource path="res://ui/envelope_editor/Display.gd" type="Script" id=19]
+[ext_resource path="res://ui/envelope_editor/TimeRuler.gd" type="Script" id=20]
+[ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=21]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0, 0, 0, 0.878431 )
+border_width_left = 1
+border_width_top = 20
+border_width_right = 1
+border_width_bottom = 8
+border_color = Color( 0.0196078, 0.490196, 0.568627, 1 )
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 6.0
+expand_margin_right = 4.0
+expand_margin_top = 20.0
+expand_margin_bottom = 6.0
+shadow_size = 10
+
+[sub_resource type="StyleBoxFlat" id=13]
+bg_color = Color( 0, 0, 0, 0.776471 )
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="AtlasTexture" id=14]
+atlas = ExtResource( 11 )
+region = Rect2( 0, 0, 13, 5 )
+
+[sub_resource type="AtlasTexture" id=15]
+atlas = ExtResource( 11 )
+region = Rect2( 13, 0, 12, 5 )
+
+[node name="CustomEnvelope" type="WindowDialog"]
+visible = true
+margin_right = 448.0
+margin_bottom = 352.0
+custom_styles/panel = SubResource( 1 )
+script = ExtResource( 12 )
+
+[node name="H" type="HBoxContainer" parent="."]
+anchor_right = 1.0
+margin_top = -21.0
+margin_right = -24.0
+margin_bottom = 6.0
+custom_constants/separation = 4
+
+[node name="MenuButton" type="MenuButton" parent="H"]
+visible = false
+margin_right = 27.0
+margin_bottom = 27.0
+custom_colors/font_color = Color( 0, 0, 0, 0.513726 )
+custom_colors/font_color_hover = Color( 0, 0, 0, 1 )
+custom_colors/font_color_pressed = Color( 0, 0.403922, 0.509804, 1 )
+custom_fonts/font = ExtResource( 2 )
+text = ":::"
+align = 2
+items = [ "Add", ExtResource( 6 ), 0, false, false, 0, 0, null, "", false, "", null, 0, false, false, 1, 0, null, "", true, "Delete", ExtResource( 7 ), 0, false, false, 5, 0, null, "", false, "", null, 0, false, true, 3, 0, null, "", true, "import...", ExtResource( 5 ), 0, false, false, 4, 0, null, "", false ]
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="lblTitle" type="Label" parent="H"]
+margin_top = 9.0
+margin_right = 210.0
+margin_bottom = 17.0
+size_flags_horizontal = 3
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 1
+custom_constants/shadow_offset_y = 1
+custom_constants/shadow_as_outline = 1
+custom_fonts/font = ExtResource( 4 )
+text = "[ Op3 ] RESONANCE Envelope"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Spacer2" type="Label" parent="H"]
+margin_left = 214.0
+margin_top = 9.0
+margin_right = 424.0
+margin_bottom = 17.0
+size_flags_horizontal = 3
+custom_fonts/font = ExtResource( 1 )
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Banks" type="OptionButton" parent="H"]
+visible = false
+margin_left = 224.0
+margin_right = 272.0
+margin_bottom = 27.0
+rect_min_size = Vector2( 48, 0 )
+custom_fonts/font = ExtResource( 3 )
+custom_styles/hover = SubResource( 13 )
+custom_styles/pressed = SubResource( 13 )
+custom_styles/focus = SubResource( 13 )
+custom_styles/normal = SubResource( 13 )
+text = "0"
+align = 2
+items = [ "0", null, false, 0, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="lblBank" type="Label" parent="H"]
+visible = false
+margin_left = 165.0
+margin_top = 5.0
+margin_right = 220.0
+margin_bottom = 13.0
+size_flags_horizontal = 3
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 1
+custom_constants/shadow_offset_y = 1
+custom_fonts/font = ExtResource( 4 )
+text = "Bank:"
+align = 2
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Display" type="ColorRect" parent="."]
+margin_left = 28.0
+margin_top = 16.0
+margin_right = 436.0
+margin_bottom = 272.0
+color = Color( 0.00392157, 0.0313726, 0.0470588, 1 )
+script = ExtResource( 19 )
+
+[node name="TimeRuler" type="Control" parent="Display"]
+margin_left = 4.0
+margin_top = 260.0
+margin_right = 408.0
+margin_bottom = 280.0
+script = ExtResource( 20 )
+
+[node name="ValueRuler" type="TextureRect" parent="."]
+margin_left = 16.0
+margin_top = 16.0
+margin_right = 26.0
+margin_bottom = 273.0
+texture = ExtResource( 8 )
+stretch_mode = 2
+script = ExtResource( 9 )
+
+[node name="lblValue" type="Label" parent="."]
+margin_left = 6.0
+margin_top = 14.0
+margin_right = 16.0
+margin_bottom = 286.0
+grow_horizontal = 0
+custom_constants/line_spacing = 0
+custom_fonts/font = ExtResource( 2 )
+text = "63
+
+
+
+56
+
+
+
+48
+
+
+
+40
+
+
+
+32
+
+
+
+24
+
+
+
+16
+
+
+
+8
+
+
+
+"
+align = 2
+
+[node name="minn" type="SpinBox" parent="lblValue"]
+margin_left = 266.0
+margin_top = 298.0
+margin_right = 340.0
+margin_bottom = 322.0
+min_value = -32768.0
+max_value = 65535.0
+
+[node name="maxx" type="SpinBox" parent="lblValue"]
+margin_left = 354.0
+margin_top = 298.0
+margin_right = 428.0
+margin_bottom = 322.0
+min_value = -32768.0
+max_value = 65535.0
+
+[node name="MinmaxSliderLabel" type="TextureRect" parent="."]
+margin_left = 16.0
+margin_top = 274.0
+margin_right = 29.0
+margin_bottom = 282.0
+texture = SubResource( 14 )
+stretch_mode = 4
+
+[node name="MinmaxSliderLabel2" type="TextureRect" parent="."]
+margin_left = 11.0
+margin_top = 6.0
+margin_right = 29.0
+margin_bottom = 14.0
+texture = SubResource( 15 )
+stretch_mode = 4
+
+[node name="Zoom" parent="." instance=ExtResource( 21 )]
+margin_left = 16.0
+margin_top = 296.0
+margin_right = 248.0
+margin_bottom = 316.0
+min_value = 1.0
+max_value = 10000.0
+value = 1000.0
+exp_edit = true
+
+[node name="Offset" parent="." instance=ExtResource( 21 )]
+margin_left = 16.0
+margin_top = 320.0
+margin_right = 248.0
+margin_bottom = 340.0
+max_value = 10000.0
+exp_edit = true
+
+[node name="Btn" type="HBoxContainer" parent="."]
+margin_left = 16.0
+margin_top = 368.0
+margin_right = 240.0
+margin_bottom = 386.0
+theme = ExtResource( 10 )
+
+[node name="0" type="Button" parent="Btn"]
+margin_right = 24.0
+margin_bottom = 18.0
+icon = ExtResource( 17 )
+
+[node name="1" type="Button" parent="Btn"]
+margin_left = 30.0
+margin_right = 54.0
+margin_bottom = 18.0
+icon = ExtResource( 18 )
+
+[node name="VSeparator" type="VSeparator" parent="Btn"]
+margin_left = 60.0
+margin_right = 64.0
+margin_bottom = 18.0
+
+[node name="2" type="Button" parent="Btn"]
+margin_left = 70.0
+margin_right = 94.0
+margin_bottom = 18.0
+icon = ExtResource( 14 )
+
+[node name="3" type="Button" parent="Btn"]
+margin_left = 100.0
+margin_right = 124.0
+margin_bottom = 18.0
+icon = ExtResource( 13 )
+
+[node name="VSeparator2" type="VSeparator" parent="Btn"]
+margin_left = 130.0
+margin_right = 134.0
+margin_bottom = 18.0
+
+[node name="4" type="Button" parent="Btn"]
+margin_left = 140.0
+margin_right = 164.0
+margin_bottom = 18.0
+icon = ExtResource( 15 )
+
+[node name="5" type="Button" parent="Btn"]
+margin_left = 170.0
+margin_right = 194.0
+margin_bottom = 18.0
+icon = ExtResource( 16 )
+
+[connection signal="value_changed" from="Zoom" to="Display" method="_on_Zoom_value_changed"]
+[connection signal="value_changed" from="Offset" to="Display" method="_on_Offset_value_changed"]

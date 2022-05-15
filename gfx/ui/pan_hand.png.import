@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/numerics_5x8.png-6eda63c0042ab80b1420425f5e4adffd.stex"
+path="res://.import/pan_hand.png-5bb8392b35efe4fc8a343ea1aabc9b37.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://gfx/fonts/numerics_5x8.png"
-dest_files=[ "res://.import/numerics_5x8.png-6eda63c0042ab80b1420425f5e4adffd.stex" ]
+source_file="res://gfx/ui/pan_hand.png"
+dest_files=[ "res://.import/pan_hand.png-5bb8392b35efe4fc8a343ea1aabc9b37.stex" ]
 
 [params]
 
@@ -20,7 +20,7 @@ compress/hdr_mode=0
 compress/bptc_ldr=0
 compress/normal_map=0
 flags/repeat=0
-flags/filter=false
+flags/filter=true
 flags/mipmaps=false
 flags/anisotropic=false
 flags/srgb=2

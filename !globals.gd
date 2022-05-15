@@ -151,7 +151,7 @@ func swap_scene(src, target, free_src=true):
 func notenum_from_hz(hz):
 	return round( (12*log(hz/440.0))/log(2) + NOTE_A4)
 
-func swap32(x):
+func swap32(x):  #Swap the endianness of a 32-bit value
 	return (((x << 24) & 0xFF000000) |
 			((x <<  8) & 0x00FF0000) |
 			((x >>  8) & 0x0000FF00) |

@@ -446,6 +446,7 @@ public class Test2 : Label
     }
 
 
+    ///////////////////////////////////  PREVIEW  ///////////////////////////////////
     public float[] CalcPreview() {return c.Voice.CalcPreview();}
 
     public bool is_quiet() {return c.ChannelsAreFree;}
@@ -505,18 +506,6 @@ public class Test2 : Label
     }
 
 
-    public string TableStr(int bank)
-    {
-    //     //DEBUG FUNCTION:  TEST TABLE COMPRESSION AND DECOMPRESSION ROUTINES.
-    //     var compressed = c.Voice.wavetable.TableAsString( bank );
-
-    //     var decompressed = c.Voice.wavetable.DeflatedZ85ToTable(compressed);
-
-    //     //Pop the decompressed table back into the bank.  Let the UI reload it
-    //     c.Voice.wavetable.SetTable(bank, decompressed);
-        
-        return c.Voice.wavetable.ToJSONString();
-    }
 
     ///////////////////////////////////    BUFFER    /////////////////////////////////////
 

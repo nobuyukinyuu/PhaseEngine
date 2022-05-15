@@ -34,6 +34,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://ui/envelopeDisplay/EnvelopeDisplay.gd"
 }, {
+"base": "WindowDialog",
+"class": "EnvelopeEditorWindow",
+"language": "GDScript",
+"path": "res://ui/envelope_editor/EnvelopeEditorWindow.gd"
+}, {
 "base": "EGTooltip",
 "class": "FilterTooltip",
 "language": "GDScript",
@@ -70,6 +75,7 @@ _global_script_class_icons={
 "EGSlider": "",
 "EGTooltip": "",
 "EnvelopeDisplay": "",
+"EnvelopeEditorWindow": "res://gfx/ui/bind_indicator.png",
 "FilterTooltip": "",
 "KanbanColumn": "",
 "Knob": "res://ui/knob/icon_knob.svg",
