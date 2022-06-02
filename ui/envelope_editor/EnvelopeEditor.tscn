@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=2]
+[gd_scene load_steps=33 format=2]
 
 [ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=1]
 [ext_resource path="res://gfx/fonts/numerics_5x8.tres" type="BitmapFont" id=2]
@@ -14,13 +14,17 @@
 [ext_resource path="res://ui/envelope_editor/EnvelopeEditorWindow.gd" type="Script" id=12]
 [ext_resource path="res://gfx/ui/godot_icons/icon_action_paste.svg" type="Texture" id=13]
 [ext_resource path="res://gfx/ui/godot_icons/icon_action_copy.svg" type="Texture" id=14]
-[ext_resource path="res://gfx/ui/envelope_editor/icon_scale.png" type="Texture" id=15]
-[ext_resource path="res://gfx/ui/envelope_editor/icon_squash.png" type="Texture" id=16]
+[ext_resource path="res://gfx/ui/envelope_editor/icon_new_point_inverted.png" type="Texture" id=15]
+[ext_resource path="res://gfx/ui/envelope_editor/icon_remove_point.png" type="Texture" id=16]
 [ext_resource path="res://gfx/ui/envelope_editor/icon_zoom_in.png" type="Texture" id=17]
 [ext_resource path="res://gfx/ui/envelope_editor/icon_zoom_out.png" type="Texture" id=18]
 [ext_resource path="res://ui/envelope_editor/Display.gd" type="Script" id=19]
 [ext_resource path="res://ui/envelope_editor/TimeRuler.gd" type="Script" id=20]
 [ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=21]
+[ext_resource path="res://gfx/ui/hSlider.theme" type="Theme" id=22]
+[ext_resource path="res://gfx/ui/envelope_editor/icon_sustain.png" type="Texture" id=23]
+[ext_resource path="res://gfx/ui/envelope_editor/icon_loop.png" type="Texture" id=24]
+[ext_resource path="res://gfx/ui/point_crosshair.png" type="Texture" id=25]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0, 0, 0, 0.878431 )
@@ -39,10 +43,50 @@ expand_margin_top = 20.0
 expand_margin_bottom = 6.0
 shadow_size = 10
 
+[sub_resource type="GDScript" id=16]
+script/source = "extends VSlider
+var pressed
+const font = preload(\"res://gfx/fonts/numerics_7seg.tres\")
+const offset=Vector2(8,-8)
+
+func _gui_input(event):
+	if event is InputEventMouseButton:
+		pressed = event.pressed
+		update()
+		get_tree().set_input_as_handled()
+
+func _draw():
+	if pressed:
+		var s = \"z:%s\" % [owner.get_node(\"Display/TimeRuler\").format_secs(value, \"ms\", \" s\")]
+		var pos = Vector2(max(20, get_local_mouse_position().x), get_local_mouse_position().y) + offset
+		draw_string(font, pos+Vector2.ONE, s, ColorN(\"black\"))
+		draw_string(font, pos, s)
+"
+
 [sub_resource type="StyleBoxFlat" id=13]
 bg_color = Color( 0, 0, 0, 0.776471 )
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+
+[sub_resource type="GDScript" id=18]
+script/source = "extends Sprite
+
+var target = 0
+var should_display = false
+
+func _ready():
+	get_tree().create_timer(0.5).connect(\"timeout\", self, \"timeout\")
+
+
+func timeout():
+	target = 2 - target
+	frame=target
+	
+	yield(get_tree().create_timer(0.04),\"timeout\")
+	frame += 1
+	
+	get_tree().create_timer(0.5).connect(\"timeout\", self, \"timeout\")
+"
 
 [sub_resource type="AtlasTexture" id=14]
 atlas = ExtResource( 11 )
@@ -52,12 +96,60 @@ region = Rect2( 0, 0, 13, 5 )
 atlas = ExtResource( 11 )
 region = Rect2( 13, 0, 12, 5 )
 
+[sub_resource type="StyleBoxFlat" id=17]
+content_margin_left = 4.0
+content_margin_right = 4.0
+bg_color = Color( 0, 0, 0, 0.305882 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 1, 1, 0.33, 0.75 )
+corner_radius_top_left = 5
+corner_radius_bottom_right = 5
+expand_margin_left = 2.0
+expand_margin_right = 2.0
+expand_margin_top = 2.0
+expand_margin_bottom = 2.0
+anti_aliasing_size = 0.6
+
 [node name="CustomEnvelope" type="WindowDialog"]
 visible = true
-margin_right = 448.0
-margin_bottom = 352.0
+margin_right = 464.0
+margin_bottom = 344.0
+rect_min_size = Vector2( 448, 0 )
 custom_styles/panel = SubResource( 1 )
 script = ExtResource( 12 )
+
+[node name="ZoomBar" type="VBoxContainer" parent="."]
+margin_left = 444.0
+margin_top = 8.0
+margin_right = 460.0
+margin_bottom = 296.0
+
+[node name="img0" type="TextureRect" parent="ZoomBar"]
+margin_right = 16.0
+margin_bottom = 16.0
+texture = ExtResource( 18 )
+
+[node name="Slider" type="VSlider" parent="ZoomBar"]
+margin_top = 20.0
+margin_right = 16.0
+margin_bottom = 268.0
+rect_min_size = Vector2( 16, 0 )
+size_flags_vertical = 3
+theme = ExtResource( 22 )
+min_value = 1.0
+max_value = 10000.0
+value = 1200.0
+tick_count = 11
+script = SubResource( 16 )
+
+[node name="img1" type="TextureRect" parent="ZoomBar"]
+margin_top = 272.0
+margin_right = 16.0
+margin_bottom = 288.0
+texture = ExtResource( 17 )
 
 [node name="H" type="HBoxContainer" parent="."]
 anchor_right = 1.0
@@ -83,7 +175,7 @@ __meta__ = {
 
 [node name="lblTitle" type="Label" parent="H"]
 margin_top = 9.0
-margin_right = 210.0
+margin_right = 218.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
 custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
@@ -98,9 +190,9 @@ __meta__ = {
 }
 
 [node name="Spacer2" type="Label" parent="H"]
-margin_left = 214.0
+margin_left = 222.0
 margin_top = 9.0
-margin_right = 424.0
+margin_right = 440.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 1 )
@@ -162,6 +254,14 @@ margin_right = 408.0
 margin_bottom = 280.0
 script = ExtResource( 20 )
 
+[node name="PointCrosshair" type="Sprite" parent="Display"]
+visible = false
+modulate = Color( 0.75, 0.5, 1, 1 )
+position = Vector2( 316, 104 )
+texture = ExtResource( 25 )
+hframes = 4
+script = SubResource( 18 )
+
 [node name="ValueRuler" type="TextureRect" parent="."]
 margin_left = 16.0
 margin_top = 16.0
@@ -216,19 +316,20 @@ align = 2
 
 [node name="minn" type="SpinBox" parent="lblValue"]
 margin_left = 266.0
-margin_top = 298.0
+margin_top = 354.0
 margin_right = 340.0
-margin_bottom = 322.0
+margin_bottom = 378.0
 min_value = -32768.0
 max_value = 65535.0
 
 [node name="maxx" type="SpinBox" parent="lblValue"]
 margin_left = 354.0
-margin_top = 298.0
+margin_top = 354.0
 margin_right = 428.0
-margin_bottom = 322.0
+margin_bottom = 378.0
 min_value = -32768.0
 max_value = 65535.0
+value = 63.0
 
 [node name="MinmaxSliderLabel" type="TextureRect" parent="."]
 margin_left = 16.0
@@ -247,40 +348,45 @@ texture = SubResource( 15 )
 stretch_mode = 4
 
 [node name="Zoom" parent="." instance=ExtResource( 21 )]
-margin_left = 16.0
-margin_top = 296.0
-margin_right = 248.0
-margin_bottom = 316.0
+visible = false
+margin_left = 232.0
+margin_top = 312.0
+margin_right = 432.0
+margin_bottom = 332.0
 min_value = 1.0
 max_value = 10000.0
 value = 1000.0
-exp_edit = true
 
 [node name="Offset" parent="." instance=ExtResource( 21 )]
-margin_left = 16.0
-margin_top = 320.0
-margin_right = 248.0
-margin_bottom = 340.0
+margin_left = 224.0
+margin_top = 308.0
+margin_right = 456.0
+margin_bottom = 328.0
 max_value = 10000.0
 exp_edit = true
 
 [node name="Btn" type="HBoxContainer" parent="."]
-margin_left = 16.0
-margin_top = 368.0
-margin_right = 240.0
-margin_bottom = 386.0
+margin_left = 12.0
+margin_top = 312.0
+margin_right = 206.0
+margin_bottom = 330.0
 theme = ExtResource( 10 )
+__meta__ = {
+"_edit_group_": true
+}
 
 [node name="0" type="Button" parent="Btn"]
 margin_right = 24.0
 margin_bottom = 18.0
-icon = ExtResource( 17 )
+hint_tooltip = "Add a new point to the envelope."
+icon = ExtResource( 15 )
 
 [node name="1" type="Button" parent="Btn"]
 margin_left = 30.0
 margin_right = 54.0
 margin_bottom = 18.0
-icon = ExtResource( 18 )
+hint_tooltip = "Removes selected point from the envelope."
+icon = ExtResource( 16 )
 
 [node name="VSeparator" type="VSeparator" parent="Btn"]
 margin_left = 60.0
@@ -291,12 +397,15 @@ margin_bottom = 18.0
 margin_left = 70.0
 margin_right = 94.0
 margin_bottom = 18.0
+hint_tooltip = "Copies a normalized version 
+of this envelope to the clipboard."
 icon = ExtResource( 14 )
 
 [node name="3" type="Button" parent="Btn"]
 margin_left = 100.0
 margin_right = 124.0
 margin_bottom = 18.0
+hint_tooltip = "Paste a previously copied envelope."
 icon = ExtResource( 13 )
 
 [node name="VSeparator2" type="VSeparator" parent="Btn"]
@@ -308,13 +417,23 @@ margin_bottom = 18.0
 margin_left = 140.0
 margin_right = 164.0
 margin_bottom = 18.0
-icon = ExtResource( 15 )
+hint_tooltip = "Enable loop points.  Envelope will loop 
+between specified points until NoteOff."
+custom_styles/pressed = SubResource( 17 )
+toggle_mode = true
+icon = ExtResource( 24 )
 
 [node name="5" type="Button" parent="Btn"]
 margin_left = 170.0
 margin_right = 194.0
 margin_bottom = 18.0
-icon = ExtResource( 16 )
+hint_tooltip = "Enables sustain loop.
+Envelope will transition
+to this loop on NoteOff."
+custom_styles/pressed = SubResource( 17 )
+toggle_mode = true
+icon = ExtResource( 23 )
 
+[connection signal="value_changed" from="ZoomBar/Slider" to="Display" method="_on_Zoom_value_changed"]
 [connection signal="value_changed" from="Zoom" to="Display" method="_on_Zoom_value_changed"]
 [connection signal="value_changed" from="Offset" to="Display" method="_on_Offset_value_changed"]

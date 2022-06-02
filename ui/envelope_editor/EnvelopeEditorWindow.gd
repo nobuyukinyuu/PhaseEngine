@@ -2,10 +2,23 @@ extends WindowDialog
 class_name EnvelopeEditorWindow, "res://gfx/ui/bind_indicator.png"
 
 var lo=0
-var hi=0
+var hi=63
 
 var data=[]  #Intermediate point data.  Vec2 where x=ms, y=0-1.
 var cached_display_bounds = {}
+
+var last_clicked_position = Vector2.ZERO
+
+var susStart:int = -1
+var susEnd:int = -1
+var loopStart:int= -1
+var loopEnd:int = -1
+var has_loop=false
+var has_sustain=false
+
+var selected = -1  #Selected point (or area between points, if Vector2) -- for add/remove pts
+
+enum{NEW_PT, REMOVE_PT, COPY, PASTE, SET_LOOP, SET_SUSTAIN}
 
 func compare(a:Vector2,b:Vector2):  #Compares 2 vec2's in the data block for bsearch_custom
 	return a.x < b.x
@@ -21,17 +34,32 @@ func _ready():
 		o.connect("value_changed", self, "up", [o])
 
 	randomize()
-	for i in 10:
+	for i in 40:
 		data.append(Vector2(500*i, randf()))
 #		data.append(Vector2(500*i, i/10.0))
 	sort()
+	#END DEBUG
+	
+	#Associate the buttons.
+	for o in $Btn.get_children():
+		if not o is Button:  continue
+		if o.toggle_mode == false:
+			o.connect("pressed", self, "_on_ToolButton_pressed", [false, int(o.name)] )
+		else:
+			o.connect("toggled", self, "_on_ToolButton_pressed", [int(o.name)] )
 
-	recalc_display_bounds()
+	recalc_display_bounds()  #Determine how to draw the points visible in the display window.
+
+
+#DEBUG, REMOVE.  Used by the debug minmax spinners to update the label
+func up(val, which):
+	if which==$lblValue/minn:  lo = val 
+	else: hi = val
+	set_minmax(lo, hi)
 
 
 func get_display_bounds():
 	return cached_display_bounds
-	
 func recalc_display_bounds():
 	var output = {}
 	
@@ -84,20 +112,12 @@ func search_closest(arr, val, first=false):
 	return max(low,high)+0.1 if first else min(low,high)+0.1
 
 
-
-#DEBUG, REMOVE
-func up(val, which):
-	if which==$lblValue/minn:  lo = val 
-	else: hi = val
-	set_minmax(lo, hi)
-
-
 func setup(input):
 	#TODO:  Receive data packet from core, set up minmax, translate core data to intermediate data.
 	pass
 
 
-
+#Sets the bound labels of the Y-Axis.
 func set_minmax(lowest, highest):
 	var s = ""#format_val(highest)
 	for i in range(0,8):
@@ -110,6 +130,7 @@ func set_minmax(lowest, highest):
 		
 	$lblValue.text = s
 
+#Formats the value labels on the Y-axis.
 func format_val(val):
 	var mids = str(abs(val))
 	if abs(val) > 1024: mids = mids.substr(0,len(mids)-3) + "k"
@@ -118,7 +139,7 @@ func format_val(val):
 	elif mids.begins_with("102"): mids = repl_first(mids, "102", "[}")
 	if sign(val) == -1:  mids = "-" + mids
 	return mids
-
+#Cheap Replace the first instance of what in input with replacement for format_val()
 func repl_first(input:String, what, replacement):
 	var l=len(what)
 	var found = input.find(what)
@@ -127,6 +148,25 @@ func repl_first(input:String, what, replacement):
 		return replacement + slice
 	return input
 
+#Perform various actions.
+func _on_ToolButton_pressed(toggled=false, which_button=-1):
+	match which_button:
+		NEW_PT:
+			pass
+		REMOVE_PT:
+			pass
+		COPY:
+			pass
+		PASTE:
+			pass
+		SET_LOOP:
+			has_loop=toggled
+			if loopStart < 0 or loopStart >= data.size():  loopStart = data.size()-1
+			if loopEnd < 0 or loopEnd >= data.size():  loopEnd = data.size()-1
+			$Display.update()
 
-
-
+		SET_SUSTAIN:
+			has_sustain=toggled
+			if susStart == -1 or susStart >= data.size():  susStart = 0
+			if susEnd == -1 or susEnd >= data.size():  susEnd = 0
+			$Display.update()

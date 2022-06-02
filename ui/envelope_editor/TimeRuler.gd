@@ -77,18 +77,26 @@ func _draw():
 
 #	draw_string(font2, Vector2(0, 24), str(subticks))
 
-func format_secs(input):
-	if input==0: return "0ms"
-	var in_seconds = input >= 1000
-	var output = str(input if not in_seconds else input/1000.0)
-	if in_seconds or input < 10:
-		output = output.pad_decimals(2)
-	else:
-		output = output.pad_decimals(0)
-	if output.ends_with(".00"):  output = output.substr(0, len(output)-3)
+#Formats input in millisecs to a nice readable label
+func format_secs(input, ms_lbl="ms", s_lbl="s", m_lbl="m"):
+	if input==0: return "0" + ms_lbl
+	if input > 60000:  #Position is over a minute long.  Use 0m00s format.
+		var minutes = int(input/60000)
+		var seconds = (int(input) % 60000) / 1000
+		
+		return str(minutes) + m_lbl + str(seconds).pad_zeros(2) + s_lbl
+	else:  #60 seconds or under.
+		var in_seconds = input >= 1000
+		var output = str(input if not in_seconds else input/1000.0)
+		if in_seconds or input < 10:
+			output = output.pad_decimals(2)
+		else:
+			output = output.pad_decimals(0)
+		if output.ends_with(".00"):  output = output.substr(0, len(output)-3) #Near integer. No pad needed.
+		
+		output += s_lbl if in_seconds else ms_lbl
 	
-	output += "s" if in_seconds else "ms"
-	return output
+		return output
 
 func order(n):  return ceil(log10(n))
 func log10(n):  return log(n) / log(10)

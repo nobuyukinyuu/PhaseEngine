@@ -283,23 +283,7 @@ func _draw():
 					x = $"ADSR/4".rect_position.x + 16  #Release start
 
 			
-			draw_arrow(Vector2(x, h),Vector2(rect_size.x, h), color)
+			draw.arrow(self, Vector2(x, h),Vector2(rect_size.x, h), color)
 			draw_string(font, Vector2(rect_size.x-sz.x-4, h-sz.y-2), text, color  )
 		else:
 			draw_string(font, Vector2(rect_size.x-sz.x-4, rect_size.y-sz.y-4), text, color  )
-
-func draw_arrow(a, b, color=Color(1,1,1,1), width=1.0):
-	var arrow_spread= PI/6
-	var arrow_length = 4
-	var pts:PoolVector2Array
-	pts.resize(3)
-	pts[1] = a
-
-	var angle = atan2(a.y-b.y, a.x-b.x) + PI
-	
-	pts[0] = Vector2(a.x + arrow_length*cos(angle+arrow_spread), a.y + arrow_length*sin(angle+arrow_spread))
-	pts[2] = Vector2(a.x + arrow_length*cos(angle-arrow_spread), a.y + arrow_length*sin(angle-arrow_spread))
-
-	draw_line(a,b,color,width, true)
-	draw_line(a,pts[0],color,width, true)
-	draw_line(a,pts[2],color,width, true)

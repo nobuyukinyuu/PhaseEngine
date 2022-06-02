@@ -102,6 +102,7 @@ mix_rate=48000
 
 global="*res://!globals.gd"
 Riff="*res://PhaseEngine/!RiffWave.gd"
+draw="*res://!Drawing.gd"
 
 [debug]
 

@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/numerics_16x20.png-9b34e16ae92ce89aa7a6a98e2bd22572.stex"
+path="res://.import/tick_h.png-b92542e82cdd3830e76f5c519254289e.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://gfx/fonts/numerics_16x20.png"
-dest_files=[ "res://.import/numerics_16x20.png-9b34e16ae92ce89aa7a6a98e2bd22572.stex" ]
+source_file="res://gfx/ui/tick_h.png"
+dest_files=[ "res://.import/tick_h.png-b92542e82cdd3830e76f5c519254289e.stex" ]
 
 [params]
 
@@ -20,7 +20,7 @@ compress/hdr_mode=0
 compress/bptc_ldr=0
 compress/normal_map=0
 flags/repeat=0
-flags/filter=false
+flags/filter=true
 flags/mipmaps=false
 flags/anisotropic=false
 flags/srgb=2
