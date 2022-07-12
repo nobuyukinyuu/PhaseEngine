@@ -34,7 +34,7 @@ func _ready():
 		o.connect("value_changed", self, "up", [o])
 
 	randomize()
-	for i in 40:
+	for i in 4:
 		data.append(Vector2(500*i, randf()))
 #		data.append(Vector2(500*i, i/10.0))
 	sort()
@@ -67,17 +67,10 @@ func recalc_display_bounds():
 	
 	#Find the first point that would be visible in our drawing window.
 	#Assume data is sorted.  update() should NOT be called if data is not sorted.
-
-
 	output["first"] = search_closest(data, $Display/TimeRuler.offset, true )
 	output["last"] = search_closest(data, ($Display/TimeRuler.offset + $Display/TimeRuler.zoom) )
 
-	#Add crop indicators.  Draw routine for display will check if these exist and work accordingly.
-#	if output["first"] > 0:  output["crop_left"] = true
-#	if output["last"] >= data.size():  
-#		output["crop_right"] = true
-#		output["last"] = min(data.size()-1, output["last"])
-
+	#Append crop indicators if either the first or last point is off-screen.
 	if typeof(output["first"]) == TYPE_REAL:  output["clip_left"] = true
 	if typeof(output["last"]) == TYPE_REAL:  output["clip_right"] = true
 
@@ -152,9 +145,31 @@ func repl_first(input:String, what, replacement):
 func _on_ToolButton_pressed(toggled=false, which_button=-1):
 	match which_button:
 		NEW_PT:
+			if !$Display/PointCrosshair.should_display:  return
+			if $Display.last_closest_pt<0 or $Display.last_closest_pt>data.size():  return
+			data.insert($Display.last_closest_pt+1, last_clicked_position)
+			$Display.last_closest_pt +=1  #Select the newly created point.
+			$Display/PointCrosshair.should_display=false
+			$Display/PointCrosshair.visible=false
+			recalc_display_bounds()
+			$Display.update()
+
 			pass
 		REMOVE_PT:
-			pass
+			if data.size() == 1:  return
+			if $Display/PointCrosshair.should_display:  return
+			if $Display.last_closest_pt<0 or $Display.last_closest_pt>=data.size():  return
+			data.remove($Display.last_closest_pt)
+			
+			#Make sure the new point 0 is always at 0ms.
+			data[0].x = 0
+			clamp_loops()
+			
+#			$Display.last_closest_pt = -1
+			$Display.last_closest_pt = min(data.size()-1, $Display.last_closest_pt)
+			recalc_display_bounds()
+			$Display.update()
+			
 		COPY:
 			pass
 		PASTE:
@@ -170,3 +185,9 @@ func _on_ToolButton_pressed(toggled=false, which_button=-1):
 			if susStart == -1 or susStart >= data.size():  susStart = 0
 			if susEnd == -1 or susEnd >= data.size():  susEnd = 0
 			$Display.update()
+
+func clamp_loops():
+	loopStart = clamp(loopStart, 0, data.size()-1)
+	loopEnd = clamp(loopEnd, 0, data.size()-1)
+	susStart = clamp(susStart, 0, data.size()-1)
+	susEnd = clamp(susEnd, 0, data.size()-1)

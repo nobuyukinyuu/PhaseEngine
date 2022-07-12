@@ -2,12 +2,14 @@
 extends ColorRect
 const QUAD_ROOT_OF_2 = 1.189207115
 const hand_icon = preload("res://gfx/ui/pan_hand.png")
+const grab_handles = preload("res://gfx/ui/envelope_editor/grab_handles.png")
 const note_off = preload("res://gfx/ui/note_off.png")
 
 var panning = false
 const PICK_DISTANCE = 160.0  #Squared value so that we don't have to do a sqrt operation
 var dragging = false
 var drag_pt = -1
+var last_closest_pt = -1
 var drag_value = Vector2.ZERO  #Last value at dragged mouse position
 var upper_bound = 0  #Drag bounds
 var lower_bound = 0
@@ -21,8 +23,14 @@ const LOOP_INDICATOR_OFFSET=PT_BOX_SIZE.x/2
 const LOOP_COLOR1 = Color(1,1,0.6, 0.5)
 const LOOP_COLOR2 = Color(1,1,0.6, 0.7)
 const SUSTAIN_COLOR1 = Color(0.8,1,1, 0.5)
-const SUSTAIN_COLOR2 = Color(0.8,1,1, 0.7)
+const SUS_H = 48  #Sustain handle bar height
+const SUSTAIN_COLOR2 = Color(0,0.5,1, 0.4)
 
+
+var loop_handle_pos:Vector2 = Vector2.ONE * -1  #X and Y specifiy the start and end of the loop, in screen px.
+var sus_handle_pos:Vector2 = Vector2.ONE * -1  
+var can_drag_loop = false
+var can_drag_sustain = false
 
 func _ready():
 	pass # Replace with function body.
@@ -49,6 +57,7 @@ func _gui_input(event):
 					owner.last_clicked_position = pos
 					#Detect proximity to a point.
 					var closest_idx=int(owner.search_closest(owner.data, pos.x))
+					last_closest_pt = closest_idx
 					var closest_dist=0xFFFFFF
 					for i in range(max(closest_idx-1, 0), min(closest_idx+2, owner.data.size())):
 						var pixel_pos = pt_to_display_coords(owner.data[i])
@@ -59,6 +68,7 @@ func _gui_input(event):
 							if dist < closest_dist:  #This point is the closest among the ones in the range.
 								closest_dist = dist
 								drag_pt = i
+								last_closest_pt = i
 
 					#Determine the valid X-range of the drag point. If the pt is 0, only a range of 0 is valid.
 					if drag_pt > 0:
@@ -93,7 +103,7 @@ func _gui_input(event):
 				
 				update()
 	
-	if event is InputEventMouseMotion:
+	elif event is InputEventMouseMotion:
 		#Update the value ruler ticks.
 		owner.get_node("ValueRuler").update()
 		if panning:
@@ -110,7 +120,17 @@ func _gui_input(event):
 			owner.data[drag_pt] = pos
 
 			update()
-			pass
+		else:
+			#Check if we're near a loop handle.
+			if !can_drag_sustain and owner.has_loop and not dragging:
+				var mouseX = get_local_mouse_position().x
+				var dist = PT_BOX_SIZE.x * 0.75
+				if abs(mouseX-loop_handle_pos.x) <= dist or abs(mouseX-loop_handle_pos.y) <= dist:
+					Input.set_custom_mouse_cursor(grab_handles, 0, Vector2(12,12))
+					can_drag_loop = true
+				else: 
+					Input.set_custom_mouse_cursor(null)
+					can_drag_loop = false
 
 	accept_event()
 
@@ -125,11 +145,25 @@ func _draw():
 	#Grab the drawable area chunk from owner.
 	var d = owner.get_display_bounds()
 	if d.empty():  return
+	#Set bounds for what lines we draw.
+	var first_pt = int(max(0, d["first"]))
+	var last_pt = int(min(owner.data.size(), d["last"]))
+
 
 	if $PointCrosshair.should_display:
 		$PointCrosshair.position = pt_to_display_coords(owner.last_clicked_position)
 		var posx = $PointCrosshair.position.x
 		$PointCrosshair.visible = posx > 0 and posx < rect_size.x
+
+		#Draw dotted lines to indicate potential addition of a new point.
+		var c = $PointCrosshair.modulate / 2
+#		var c2 = Color(c.r,c.g,c.b, 0.5)
+		if last_closest_pt >= first_pt:
+			draw.dotted_line(self, $PointCrosshair.position, pt_to_display_coords(owner.data[last_closest_pt]),
+					c , 1, true, 2,2)
+		if last_closest_pt < last_pt:
+			draw.dotted_line(self, $PointCrosshair.position, pt_to_display_coords(owner.data[last_closest_pt+1]),
+					c , 1, true, 2,2)
 
 	#Draw the loop and sustain lines.
 	if owner.has_loop:
@@ -139,38 +173,42 @@ func _draw():
 		if firstX >= 0 and firstX <= rect_size.x:
 			draw.dotted_line(self, Vector2(firstX, 0), Vector2(firstX, rect_size.y), 
 					LOOP_COLOR1, 1, true, 2, 2)
+			loop_handle_pos.x = firstX
 		if lastX >= 0 and lastX <= rect_size.x:
 			draw.dotted_line(self, Vector2(lastX, 0), Vector2(lastX, rect_size.y), 
 					LOOP_COLOR1, 1, true, 2, 2)
+			loop_handle_pos.y = lastX
 
 		#Draw the loop arrow indicator?
 		firstX = clamp(firstX, 0, rect_size.x)
 		lastX = clamp(lastX, 0, rect_size.x)
 		draw.arrow(self, Vector2(firstX, rect_size.y), Vector2(lastX, rect_size.y), LOOP_COLOR2)
 	if owner.has_sustain:
-		var firstX = pt_to_display_coords(owner.data[owner.susStart]).x - LOOP_INDICATOR_OFFSET
-		var lastX = pt_to_display_coords(owner.data[owner.susEnd]).x + LOOP_INDICATOR_OFFSET
+		var first = pt_to_display_coords(owner.data[owner.susStart])
+		first.x -= LOOP_INDICATOR_OFFSET
+		var last = pt_to_display_coords(owner.data[owner.susEnd])
+		last.x += LOOP_INDICATOR_OFFSET
 		
-		if firstX >= 0 and firstX <= rect_size.x:
-			draw.dotted_line(self, Vector2(firstX, 0), Vector2(firstX, rect_size.y), 
-					SUSTAIN_COLOR1, 1, true, 1, 2)
-		if lastX >= 0 and lastX <= rect_size.x:
-			draw.dotted_line(self, Vector2(lastX, 0), Vector2(lastX, rect_size.y), 
-					SUSTAIN_COLOR1, 1, true, 1, 2)
-			if lastX - note_off.get_width() <= rect_size.x:  
-				draw_texture(note_off, Vector2(lastX+2, 0), SUSTAIN_COLOR2)
+		if first.x >= 0 and first.x <= rect_size.x:
+			draw.dotted_line(self, Vector2(first.x, max(0, first.y-SUS_H)), 
+									Vector2(first.x, min(first.y+SUS_H, rect_size.y)), 
+									SUSTAIN_COLOR1, 1, true, 1, 2, SUSTAIN_COLOR2)
+		if last.x >= 0 and last.x <= rect_size.x:
+			var top = max(0, first.y-SUS_H)
+			draw.dotted_line(self, Vector2(last.x, top), 
+									Vector2(last.x, min(first.y+SUS_H, rect_size.y)), 
+									SUSTAIN_COLOR1, 1, true, 1, 2, SUSTAIN_COLOR2)
+			if last.x - note_off.get_width() <= rect_size.x:  
+				draw_texture(note_off, Vector2(last.x+2, 0), SUSTAIN_COLOR1)
 
 		#Draw the sustain arrow indicator?
-		firstX = clamp(firstX, 4, rect_size.x)
-		lastX = clamp(lastX, 4, rect_size.x)
-		draw.arrow(self, Vector2(lastX, 0), Vector2(firstX, 0), SUSTAIN_COLOR2)
+		first.x = clamp(first.x, 4, rect_size.x)
+		last.x = clamp(last.x, 4, rect_size.x)
+		draw.arrow(self, Vector2(last.x, 0), Vector2(first.x, 0), SUSTAIN_COLOR2)
 
 
-	#Set bounds for what lines we draw.
-	var first_pt = int(max(0, d["first"]))
-	var last_pt = int(min(owner.data.size(), d["last"]))
-
-	#Uh oh, both points are out of bounds.  CALCULATE A LINE SEGMENT
+	#Attempt to draw the lines in the display bounds.
+	#Check if both points are out of bounds.  CALCULATE A LINE SEGMENT IF SO
 	if first_pt==0 and last_pt==0:  first_pt = min(1, owner.data.size()-1)
 	if last_pt < first_pt: 
 		if first_pt >= owner.data.size():  return
@@ -185,13 +223,13 @@ func _draw():
 		
 		draw_line(pt, pt2, ColorN("yellow", 0.5))
 		return 
-	else:
+	else:  #At least one point is in bounds.  Draw the points in bounds.
 		#Draw the lines inside the window borders.
 		for i in range(first_pt, last_pt):
 			#Draw the point.
 			var pt:Vector2 = pt_to_display_coords(owner.data[i])
 			var pt2:Vector2 = pt_to_display_coords(owner.data[i+1])
-			draw_pt(pt2, drag_pt==i+1)
+			draw_pt(pt2, drag_pt==i+1 or (!$PointCrosshair.should_display and last_closest_pt==i+1))
 			
 			#Draw the line that connects to the next point.
 			draw_line(pt, pt2, ColorN("white", 0.5))
@@ -200,9 +238,8 @@ func _draw():
 		if d.has("clip_left") and first_pt <= owner.data.size()-1:
 			var origin = pt_to_display_coords(owner.data[first_pt])
 			var dest = pt_to_display_coords(owner.data[first_pt-1])
-			draw_pt(origin, drag_pt==first_pt)
+			draw_pt(origin, drag_pt==first_pt or (!$PointCrosshair.should_display and last_closest_pt==first_pt))
 
-			#tan(angle) = y/x
 			var angle = (origin-dest).angle()
 			var x = -origin.x
 			var y = tan(angle) * x
@@ -215,7 +252,6 @@ func _draw():
 			var origin = pt_to_display_coords(owner.data[last_pt])
 			var dest = pt_to_display_coords(owner.data[last_pt+1])
 			
-			#tan(angle) = y/x
 			var angle = (dest-origin).angle()
 			var x = float(rect_size.x - origin.x)
 			var y = tan(angle) * x
@@ -224,7 +260,8 @@ func _draw():
 	#			draw_line(origin, origin+Vector2(x,y), ColorN("magenta", 0.5))
 				draw_line(origin, origin+Vector2(x,y), ColorN("white", 0.5))
 		else:
-			draw_pt(pt_to_display_coords(owner.data[last_pt]), drag_pt==last_pt)
+			draw_pt(pt_to_display_coords(owner.data[last_pt]), 
+					drag_pt==last_pt or (!$PointCrosshair.should_display and last_closest_pt==last_pt))
 
 	#Draw the Overlay if dragging
 	if dragging and drag_pt >=0:

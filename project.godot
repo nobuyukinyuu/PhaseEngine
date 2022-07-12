@@ -132,6 +132,28 @@ debug1={
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777255,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
+envelope_new_pt={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777223,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
+ ]
+}
+envelope_remove_pt={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777224,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
+ ]
+}
+envelope_copy={
+"deadzone": 0.5,
+"events": [  ]
+}
+envelope_paste={
+"deadzone": 0.5,
+"events": [  ]
+}
+
+[mono]
+
+debugger_agent/wait_for_debugger=false
 
 [rendering]
 

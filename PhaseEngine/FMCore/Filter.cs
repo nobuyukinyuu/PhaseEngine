@@ -261,6 +261,8 @@ namespace PhaseEngine
             a2a0 = (float) (a2/a0);
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static float Undenormalize(float f)  {if(Single.IsSubnormal(f)) return 0.0f; else return f;}
 
     }
 
