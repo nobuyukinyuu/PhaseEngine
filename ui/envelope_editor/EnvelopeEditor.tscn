@@ -126,6 +126,7 @@ expand_margin_bottom = 2.0
 anti_aliasing_size = 0.6
 
 [node name="CustomEnvelope" type="WindowDialog"]
+visible = true
 margin_right = 464.0
 margin_bottom = 344.0
 rect_min_size = Vector2( 448, 0 )
@@ -454,5 +455,6 @@ shortcut_in_tooltip = false
 icon = ExtResource( 23 )
 
 [connection signal="value_changed" from="ZoomBar/Slider" to="Display" method="_on_Zoom_value_changed"]
+[connection signal="mouse_exited" from="Display" to="Display" method="_on_Display_mouse_exited"]
 [connection signal="value_changed" from="Zoom" to="Display" method="_on_Zoom_value_changed"]
 [connection signal="value_changed" from="Offset" to="Display" method="_on_Offset_value_changed"]

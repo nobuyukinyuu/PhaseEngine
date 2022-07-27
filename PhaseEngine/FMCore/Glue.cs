@@ -9,7 +9,7 @@ using System.IO.Compression;
 
 namespace PhaseEngine
 {
-    public static class Glue
+    public static partial class Glue
     {
         /// [Stand-in for] Property indexer.  Used to talk to/from Godot for convenience.  
         /// In GDScript you can use obj.set(prop, val) or obj.get(prop); this is a similar feature for c#.

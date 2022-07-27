@@ -1,5 +1,5 @@
 // From Cornucopia.Net,  MIT License
-// Some parts also lifted and adapted from dotnet core......
+// Some parts also lifted and adapted from dotnet core's BitOperations.cs......
 
 
 using System.Runtime.CompilerServices;
@@ -97,6 +97,24 @@ namespace System.Numerics
             return LeadingZeroCount(hi);
         }
 
+        /// <summary>
+        /// Returns the population count (number of bits set) of a mask.
+        /// Similar in behavior to the x86 instruction POPCNT.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int PopCount(uint value)
+        {
+            const uint c1 = 0x_55555555u;
+            const uint c2 = 0x_33333333u;
+            const uint c3 = 0x_0F0F0F0Fu;
+            const uint c4 = 0x_01010101u;
 
+            value -= (value >> 1) & c1;
+            value = (value & c2) + ((value >> 2) & c2);
+            value = (((value + (value >> 4)) & c3) * c4) >> 24;
+
+            return (int)value;
+        }
     }
 }

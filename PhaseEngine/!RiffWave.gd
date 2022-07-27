@@ -8,7 +8,7 @@ var formats = {
 	4: "Compaq Computer's VSELP",
 	5: "IBM CVSD",
 	6: "Microsoft ALAW",
-	7: "Microsoft MULAW",
+	7: "Microsoft MuLAW",
 	16: "OKI ADPCM",
 	17: "Intel's DVI ADPCM",
 	18: "Videologic's MediaSpace ADPCM",

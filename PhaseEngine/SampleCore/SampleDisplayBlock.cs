@@ -20,12 +20,7 @@ namespace PhaseEngine
 
         delegate T MinMaxFunction(T A, T B);
         MinMaxFunction Min = (x,y) => x.CompareTo(y) < 0? x:y;
-        // MinMaxFunction Max = (x,y) => x.CompareTo(y) > 0? x:y;
-        MinMaxFunction Max = delegate (T x,T y) 
-        {
-            return x.CompareTo(y) > 0? x:y;
-        } 
-;
+        MinMaxFunction Max = (x,y) => x.CompareTo(y) > 0? x:y;
         readonly T MIN_VALUE, MAX_VALUE;
 
         SampleBlock()  //Called no matter what

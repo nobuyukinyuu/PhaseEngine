@@ -18,8 +18,8 @@ var drag_font = preload("res://gfx/fonts/numerics_7seg.tres")
 
 const STEP_X = 25  #Quantize
 const STEP_Y = 0.125  #Fidelity
-const PT_BOX_SIZE=Vector2.ONE * 7
-const LOOP_INDICATOR_OFFSET=PT_BOX_SIZE.x/2
+const PT_BOX_SIZE=Vector2.ONE * 7  #Size of a box representing an envelope point
+const LOOP_INDICATOR_OFFSET=PT_BOX_SIZE.x/2  #How far from a box we should draw loop indicators
 const LOOP_COLOR1 = Color(1,1,0.6, 0.5)
 const LOOP_COLOR2 = Color(1,1,0.6, 0.7)
 const SUSTAIN_COLOR1 = Color(0.8,1,1, 0.5)
@@ -28,9 +28,12 @@ const SUSTAIN_COLOR2 = Color(0,0.5,1, 0.4)
 
 
 var loop_handle_pos:Vector2 = Vector2.ONE * -1  #X and Y specifiy the start and end of the loop, in screen px.
-var sus_handle_pos:Vector2 = Vector2.ONE * -1  
-var can_drag_loop = false
-var can_drag_sustain = false
+var sus_handle_pos1:Vector2 = Vector2.ONE * -1  #First sustain loop handle pos, in screen px.
+var sus_handle_pos2:Vector2 = Vector2.ONE * -1  #Last sustain loop handle pos, in screen px.
+enum CanDrag {NO, FIRST, LAST}
+var can_drag_loop = CanDrag.NO
+var can_drag_sustain = CanDrag.NO
+var loop_dragging = CanDrag.NO  #Active loop dragging handle.  Sustain values are << 2; Rsh to extract
 
 func _ready():
 	pass # Replace with function body.
@@ -55,9 +58,14 @@ func _gui_input(event):
 				if event.pressed:  
 					var pos = value_at(get_local_mouse_position())
 					owner.last_clicked_position = pos
+					var dragging_handle = (can_drag_sustain << 2) + can_drag_loop
+
 					#Detect proximity to a point.
 					var closest_idx=int(owner.search_closest(owner.data, pos.x))
-					last_closest_pt = closest_idx
+					
+					if dragging_handle == 0:
+						last_closest_pt = closest_idx #Used to determine origin when setting point crosshair
+#					last_closest_pt = -1
 					var closest_dist=0xFFFFFF
 					for i in range(max(closest_idx-1, 0), min(closest_idx+2, owner.data.size())):
 						var pixel_pos = pt_to_display_coords(owner.data[i])
@@ -69,6 +77,8 @@ func _gui_input(event):
 								closest_dist = dist
 								drag_pt = i
 								last_closest_pt = i
+								#Reset the cursor in case we're on loop handles.
+								set_grab_handles(false)
 
 					#Determine the valid X-range of the drag point. If the pt is 0, only a range of 0 is valid.
 					if drag_pt > 0:
@@ -83,17 +93,29 @@ func _gui_input(event):
 						lower_bound = 0
 						upper_bound = 0
 
-					$PointCrosshair.should_display = drag_pt == -1
+					#If not within range, detect proximity to a loop point (Y-axis).
+					if dragging_handle == 0:  #We're not dragging a loop handle.  Set crosshair point.
+						#Set a "potential point" for New Point.
+						$PointCrosshair.should_display = drag_pt == -1
+					else:  #We clicked on one of the loop handles.  Drag it.
+						if drag_pt == -1: 
+							loop_dragging = dragging_handle
+						else:
+							loop_dragging = CanDrag.NO
+							
+						# If the crosshair was displaying, the last_closest point only refers to the crosshair's
+						# origin.  It's not valid anymore for any other context (ins/del pts), so clear it.
+						if $PointCrosshair.should_display:
+							last_closest_pt = -1
+							$PointCrosshair.should_display = false
+							
 					$PointCrosshair.visible = visible and $PointCrosshair.should_display
-
 					drag_value = owner.data[drag_pt]  #Initialize the displayed drag value.
 
-					#TODO:
-					#If not within range, detect proximity to a loop point (Y-axis).
-					#If not near a loop or sustain point either, then set a "potential point" for New Point.
 					
 				else:  #MouseUp
 					drag_pt = -1  #Reset drag point.
+					loop_dragging = CanDrag.NO
 					#TODO:  Process change in Chip
 					#Resize view window bounds.
 					var newmax = int(max(10000, owner.data[owner.data.size()-1].x))
@@ -110,7 +132,7 @@ func _gui_input(event):
 			#Pan the offset relative to the number of pixels moved.
 			var one_px = $TimeRuler.ms_per_px()
 			owner.get_node("Offset").value -= one_px * event.relative.x
-		elif dragging and drag_pt>=0:
+		elif dragging and drag_pt>=0:  #Dragging a point around
 			var pos = value_at(get_local_mouse_position())
 			if Input.is_key_pressed(KEY_CONTROL):  pos.x = stepify(pos.x, STEP_X)
 			if Input.is_key_pressed(KEY_SHIFT):  pos.y = stepify(pos.y, STEP_Y)
@@ -120,22 +142,56 @@ func _gui_input(event):
 			owner.data[drag_pt] = pos
 
 			update()
+		elif dragging and loop_dragging > 0:  #Dragging a loop handle.
+			var pos = value_at(get_local_mouse_position())
+			var closest_idx=int(owner.search_closest(owner.data, pos.x))
+#			prints("Loop drag", closest_idx)
+			owner.set_loop_pt(loop_dragging, closest_idx)
+			update()
+
 		else:
+			#Check if we're near a sustain handle.
+			if owner.has_sustain and not dragging:
+				var mouse = get_local_mouse_position()
+				var dist = PT_BOX_SIZE.x * 0.75				
+				#First check the X position.  If we're in distance of either of these, check Y position.
+				if abs(mouse.x-sus_handle_pos1.x) <= dist:
+					if abs(mouse.y-sus_handle_pos1.y) <= SUS_H:
+						set_grab_handles(true)
+						can_drag_sustain = CanDrag.FIRST
+				elif abs(mouse.x-sus_handle_pos2.x) <= dist:
+					if abs(mouse.y-sus_handle_pos2.y) <= SUS_H:
+						set_grab_handles(true)
+						can_drag_sustain = CanDrag.LAST
+				else:
+					set_grab_handles(false)
+					can_drag_sustain = CanDrag.NO
+		
 			#Check if we're near a loop handle.
 			if !can_drag_sustain and owner.has_loop and not dragging:
 				var mouseX = get_local_mouse_position().x
 				var dist = PT_BOX_SIZE.x * 0.75
-				if abs(mouseX-loop_handle_pos.x) <= dist or abs(mouseX-loop_handle_pos.y) <= dist:
-					Input.set_custom_mouse_cursor(grab_handles, 0, Vector2(12,12))
-					can_drag_loop = true
+				if abs(mouseX-loop_handle_pos.x) <= dist:
+					set_grab_handles(true)
+					can_drag_loop = CanDrag.FIRST
+				elif abs(mouseX-loop_handle_pos.y) <= dist:
+					set_grab_handles(true)
+					can_drag_loop = CanDrag.LAST
 				else: 
-					Input.set_custom_mouse_cursor(null)
-					can_drag_loop = false
+					set_grab_handles(false)
+					can_drag_loop = CanDrag.NO
 
 	accept_event()
 
-func _draw():
 
+func set_grab_handles(enabled=true):
+	if enabled and drag_pt==-1:
+		Input.set_custom_mouse_cursor(grab_handles, 0, Vector2(12,12))
+	else:
+		Input.set_custom_mouse_cursor(null)
+
+	
+func _draw():
 	#Draw reference lines.
 	for i in 8:
 		var v = rect_size.y * (i/8.0)
@@ -170,14 +226,15 @@ func _draw():
 		var firstX = pt_to_display_coords(owner.data[owner.loopStart]).x - LOOP_INDICATOR_OFFSET
 		var lastX = pt_to_display_coords(owner.data[owner.loopEnd]).x + LOOP_INDICATOR_OFFSET
 		
-		if firstX >= 0 and firstX <= rect_size.x:
-			draw.dotted_line(self, Vector2(firstX, 0), Vector2(firstX, rect_size.y), 
+		loop_handle_pos.x = firstX
+		loop_handle_pos.y = lastX
+		if firstX >= -LOOP_INDICATOR_OFFSET and firstX <= rect_size.x:
+			var x = max(0.5, firstX) #Account for point 0 offset annoyances
+			draw.dotted_line(self, Vector2(x, 0), Vector2(x, rect_size.y), 
 					LOOP_COLOR1, 1, true, 2, 2)
-			loop_handle_pos.x = firstX
 		if lastX >= 0 and lastX <= rect_size.x:
 			draw.dotted_line(self, Vector2(lastX, 0), Vector2(lastX, rect_size.y), 
 					LOOP_COLOR1, 1, true, 2, 2)
-			loop_handle_pos.y = lastX
 
 		#Draw the loop arrow indicator?
 		firstX = clamp(firstX, 0, rect_size.x)
@@ -189,14 +246,17 @@ func _draw():
 		var last = pt_to_display_coords(owner.data[owner.susEnd])
 		last.x += LOOP_INDICATOR_OFFSET
 		
-		if first.x >= 0 and first.x <= rect_size.x:
-			draw.dotted_line(self, Vector2(first.x, max(0, first.y-SUS_H)), 
-									Vector2(first.x, min(first.y+SUS_H, rect_size.y)), 
+		sus_handle_pos1 = first
+		sus_handle_pos2 = last
+		if first.x >= -LOOP_INDICATOR_OFFSET and first.x <= rect_size.x:
+			var x = max(0.5, first.x) #Account for point 0 offset annoyances
+			draw.dotted_line(self, Vector2(x, max(0, first.y-SUS_H)), 
+									Vector2(x, min(first.y+SUS_H, rect_size.y)), 
 									SUSTAIN_COLOR1, 1, true, 1, 2, SUSTAIN_COLOR2)
 		if last.x >= 0 and last.x <= rect_size.x:
-			var top = max(0, first.y-SUS_H)
+			var top = max(0.5, last.y-SUS_H)
 			draw.dotted_line(self, Vector2(last.x, top), 
-									Vector2(last.x, min(first.y+SUS_H, rect_size.y)), 
+									Vector2(last.x, min(last.y+SUS_H, rect_size.y)), 
 									SUSTAIN_COLOR1, 1, true, 1, 2, SUSTAIN_COLOR2)
 			if last.x - note_off.get_width() <= rect_size.x:  
 				draw_texture(note_off, Vector2(last.x+2, 0), SUSTAIN_COLOR1)
@@ -210,7 +270,7 @@ func _draw():
 	#Attempt to draw the lines in the display bounds.
 	#Check if both points are out of bounds.  CALCULATE A LINE SEGMENT IF SO
 	if first_pt==0 and last_pt==0:  first_pt = min(1, owner.data.size()-1)
-	if last_pt < first_pt: 
+	if last_pt < first_pt:  #BOTH POINTS OUT OF BOUNDS
 		if first_pt >= owner.data.size():  return
 		var pt:Vector2 = pt_to_display_coords(owner.data[first_pt])
 		var pt2:Vector2 = pt_to_display_coords(owner.data[last_pt])
@@ -311,3 +371,8 @@ func _on_Offset_value_changed(value):
 	$TimeRuler.update()
 	owner.recalc_display_bounds()
 	update()
+
+
+func _on_Display_mouse_exited():
+	if not dragging:
+		set_grab_handles(false)

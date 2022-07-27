@@ -8,10 +8,9 @@ using System.Collections.Generic;
 
 namespace PhaseEngine 
 {
-    public static class Tools
+    public static partial class Tools
     {
         public static double SincN(double x) { if(x==0) return 1; x*=Math.PI; return Math.Sin(x)/x; }
-
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Lerp(float value1, float value2, float amount) { return value1 + (value2 - value1) * amount; }
@@ -34,9 +33,9 @@ namespace PhaseEngine
         public static int Lerp16(int A, int B, int x) { return ((A*(65535-x)+B*x+65535) >> 16); }
 
 
+        //NOTE:  Slow but accurate log2. For fast log2, use BitOperations.Log2 (we use from cornucopia.NET)
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double Log2(double n){ return Math.Log(n) / Math.Log(2); }
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double Log10(double n){ return Math.Log(n) / Math.Log(10); }
-
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,7 +79,6 @@ namespace PhaseEngine
 
             return whole+frac;
         }
-
        public static double FromFixedPoint(ulong n, byte decimalBitPrecision=Global.FRAC_PRECISION_BITS)
         {
             uint fracSize = (1u << decimalBitPrecision) - 1u;
@@ -214,44 +212,7 @@ namespace PhaseEngine
         public static bool ToBool(this byte x) {return x>0;}
 
 
-        //-------------------------------------------------
-        //  linear_to_fp - given a 32-bit signed input
-        //  value, convert it to a signed 10.3 floating-
-        //  point value
-        //-------------------------------------------------
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static short linear_to_fp(Int32 value)
-        {
-            // start with the absolute value
-            Int32 avalue = Math.Abs(value);
-
-            // compute shift to fit in 9 bits (bit 10 is the sign)
-            int shift = (32 - 9) - BitOperations.LeadingZeroCount((uint) avalue);
-
-            // if out of range, just return maximum; note that YM3012 DAC does
-            // not support a shift count of 7, so we clamp at 6
-            if (shift >= 7)
-                {shift = 6; avalue = 0x1ff;}
-            else if (shift > 0)
-                avalue >>= shift;
-            else
-                shift = 0;
-
-            // encode with shift in low 3 bits and signed mantissa in upper
-            return (short) (shift | (((value < 0) ? -avalue : avalue) << 3));
-        }
-        //-------------------------------------------------
-        //  fp_to_linear - given a 10.3 floating-point
-        //  value, convert it to a signed 16-bit value,
-        //  clamping
-        //-------------------------------------------------
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int32 fp_to_linear(short value)
-        {
-            return (value >> 3) << BIT(value, 0, 3);
-        }
 
 
 
@@ -284,12 +245,35 @@ namespace PhaseEngine
         //     return output.ToArray();
         // }
 
+
         //Branchless absolute value and sign methods
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static short Abs(short n) {int o=n; int s=(short)(n>>31); o^=s; o-=s; return (short)(o);}
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static int Abs(int n) {int s=(n>>31); n^=s; n-=s; return n;}
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static long Abs(long n) {long s=(n>>63); n^=s; n-=s; return n;}
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static int Sign(int value) => (value >> 31) | (int)((uint)(-value) >> 31);
+
+
+        //Modulus function where the values are always positive (`%%` operator in Python)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Mod(int a, int b)
+        {   int c = a % b;
+            if ((c < 0 && b > 0) || (c > 0 && b < 0))  c += b;
+            return c;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float Mod(float a, float b)
+        {   float c = a % b;
+            if ((c < 0 && b > 0) || (c > 0 && b < 0))  c += b;
+            return c;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Mod(double a, double b)
+        {   double c = a % b;
+            if ((c < 0 && b > 0) || (c > 0 && b < 0))  c += b;
+            return c;
+        }
+
 
 
         // Count trailing zeroes based on de bruijn sequence and multiply operation.....  For values up to 32-bit
@@ -300,6 +284,26 @@ namespace PhaseEngine
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static int Ctz(int v) =>
             MultiplyDeBruijnBitPosition[ Convert.ToInt32((UInt32)((v & -v) * 0x077CB531U) >> 27) ];
 
+
+        //Find nearest power of 2
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static int Pow2Ceil(int n)
+        {
+            n--;
+            n |= n >> 1;
+            n |= n >> 2;
+            n |= n >> 4;
+            n |= n >> 8;
+            n |= n >> 16;
+            n++; 
+            return n;           
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] static int NearestPow2(int n)
+        {
+            int next = Pow2Ceil(n);
+            int prev = next >> 1;
+            return next-n < n-prev?  next:prev;
+        }
 
         //Returns the least common multiple of the arguments.
         public static ulong LCM(long[] args)

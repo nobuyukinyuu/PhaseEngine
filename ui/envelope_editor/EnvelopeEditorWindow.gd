@@ -9,6 +9,7 @@ var cached_display_bounds = {}
 
 var last_clicked_position = Vector2.ZERO
 
+enum LoopHandle {None, LoopStart, LoopEnd, SusStart = 4, SusEnd = 8}
 var susStart:int = -1
 var susEnd:int = -1
 var loopStart:int= -1
@@ -146,15 +147,25 @@ func _on_ToolButton_pressed(toggled=false, which_button=-1):
 	match which_button:
 		NEW_PT:
 			if !$Display/PointCrosshair.should_display:  return
-			if $Display.last_closest_pt<0 or $Display.last_closest_pt>data.size():  return
-			data.insert($Display.last_closest_pt+1, last_clicked_position)
-			$Display.last_closest_pt +=1  #Select the newly created point.
+			var last_closest = $Display.last_closest_pt
+			if last_closest<0 or last_closest>data.size():  return
+			data.insert(last_closest+1, last_clicked_position)
+			$Display.last_closest_pt += 1 #Select the newly created point.
+			last_closest +=1  
 			$Display/PointCrosshair.should_display=false
 			$Display/PointCrosshair.visible=false
+
+			#Readjust the loop bounds to account for the change.
+			if loopEnd >= last_closest: shift_loop_pt(LoopHandle.LoopEnd, +1)
+			if loopStart >= last_closest: shift_loop_pt(LoopHandle.LoopStart, +1)
+			if susEnd >= last_closest: shift_loop_pt(LoopHandle.SusEnd, +1)
+			if susStart >= last_closest: shift_loop_pt(LoopHandle.SusStart, +1)
+#			clamp_loops()
+
 			recalc_display_bounds()
 			$Display.update()
 
-			pass
+
 		REMOVE_PT:
 			if data.size() == 1:  return
 			if $Display/PointCrosshair.should_display:  return
@@ -163,10 +174,17 @@ func _on_ToolButton_pressed(toggled=false, which_button=-1):
 			
 			#Make sure the new point 0 is always at 0ms.
 			data[0].x = 0
-			clamp_loops()
-			
+
 #			$Display.last_closest_pt = -1
 			$Display.last_closest_pt = min(data.size()-1, $Display.last_closest_pt)
+			var last_closest = $Display.last_closest_pt
+			#Readjust the loop bounds to account for the change.
+			if loopStart > last_closest: shift_loop_pt(LoopHandle.LoopStart, -1)
+			if loopEnd > last_closest: shift_loop_pt(LoopHandle.LoopEnd, -1)
+			if susStart > last_closest: shift_loop_pt(LoopHandle.SusStart, -1)
+			if susEnd > last_closest: shift_loop_pt(LoopHandle.SusEnd, -1)
+#			clamp_loops()
+
 			recalc_display_bounds()
 			$Display.update()
 			
@@ -176,15 +194,48 @@ func _on_ToolButton_pressed(toggled=false, which_button=-1):
 			pass
 		SET_LOOP:
 			has_loop=toggled
-			if loopStart < 0 or loopStart >= data.size():  loopStart = data.size()-1
-			if loopEnd < 0 or loopEnd >= data.size():  loopEnd = data.size()-1
+			var closest = $Display.last_closest_pt if $Display.last_closest_pt!=-1 else data.size()-1
+			if loopStart < 0 or loopStart >= data.size():  loopStart = closest
+			if loopEnd < 0 or loopEnd >= data.size():  loopEnd = closest
 			$Display.update()
 
 		SET_SUSTAIN:
 			has_sustain=toggled
-			if susStart == -1 or susStart >= data.size():  susStart = 0
-			if susEnd == -1 or susEnd >= data.size():  susEnd = 0
+			var closest = $Display.last_closest_pt if $Display.last_closest_pt!=-1 else 0
+			if susStart == -1 or susStart >= data.size():  susStart = closest
+			if susEnd == -1 or susEnd >= data.size():  susEnd = closest
 			$Display.update()
+
+func shift_loop_pt(handle, amt):
+	#Shift a loop point forward or backward. Used when adding or removing points to preserve user intent.
+	match handle:
+		LoopHandle.LoopStart:
+			loopStart += amt
+			loopEnd = max(loopStart, loopEnd)
+		LoopHandle.LoopEnd:
+			loopEnd += amt
+			loopStart = min(loopStart, loopEnd)
+		LoopHandle.SusStart:
+			susStart += amt
+			susEnd = max(susStart, susEnd)
+		LoopHandle.SusEnd:
+			susEnd += amt
+			susStart = min(susStart, susEnd)
+
+func set_loop_pt(handle, value):  #Sets a loop point based on a handle value from the display.
+	match handle:
+		LoopHandle.LoopStart:
+			loopStart = value
+			loopEnd = max(loopStart, loopEnd)
+		LoopHandle.LoopEnd:
+			loopEnd = value
+			loopStart = min(loopStart, loopEnd)
+		LoopHandle.SusStart:
+			susStart = value
+			susEnd = max(susStart, susEnd)
+		LoopHandle.SusEnd:
+			susEnd = value
+			susStart = min(susStart, susEnd)
 
 func clamp_loops():
 	loopStart = clamp(loopStart, 0, data.size()-1)
