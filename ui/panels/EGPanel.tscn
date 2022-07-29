@@ -250,9 +250,6 @@ margin_right = -682.0
 margin_bottom = -224.0
 rect_min_size = Vector2( 342, 384 )
 script = ExtResource( 9 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Frequency" type="GridContainer" parent="."]
 visible = false

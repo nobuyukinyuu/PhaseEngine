@@ -4,7 +4,7 @@ class_name EnvelopeEditorWindow, "res://gfx/ui/bind_indicator.png"
 var lo=0
 var hi=63
 
-var data=[]  #Intermediate point data.  Vec2 where x=ms, y=0-1.
+var data=[Vector2.ZERO]  #Intermediate point data.  Vec2 where x=ms, y=0-1.
 var cached_display_bounds = {}
 
 var last_clicked_position = Vector2.ZERO
@@ -19,14 +19,20 @@ var has_sustain=false
 
 var selected = -1  #Selected point (or area between points, if Vector2) -- for add/remove pts
 
+#Toolbar selector enum
 enum{NEW_PT, REMOVE_PT, COPY, PASTE, SET_LOOP, SET_SUSTAIN}
 
 func compare(a:Vector2,b:Vector2):  #Compares 2 vec2's in the data block for bsearch_custom
 	return a.x < b.x
 func sort():  data.sort_custom(self, "compare")
 
-func _ready():
+func setup(title, value):
+	#TODO:  Receive data packet from core, set up minmax, translate core data to intermediate data.
+	if title is String:  $H/lblTitle.text = title
+	data[0].y = value
 
+
+func _ready():
 	#DEBUG, REMOVE
 	visible = true
 	rect_position += Vector2.ONE * 32
@@ -34,11 +40,11 @@ func _ready():
 	for o in $lblValue.get_children():
 		o.connect("value_changed", self, "up", [o])
 
-	randomize()
-	for i in 4:
-		data.append(Vector2(500*i, randf()))
-#		data.append(Vector2(500*i, i/10.0))
-	sort()
+#	randomize()
+#	for i in 4:
+#		data.append(Vector2(500*i, randf()))
+##		data.append(Vector2(500*i, i/10.0))
+#	sort()
 	#END DEBUG
 	
 	#Associate the buttons.
@@ -62,10 +68,7 @@ func up(val, which):
 func get_display_bounds():
 	return cached_display_bounds
 func recalc_display_bounds():
-	var output = {}
-	
-#	if data.empty():  return output
-	
+	var output = {}	
 	#Find the first point that would be visible in our drawing window.
 	#Assume data is sorted.  update() should NOT be called if data is not sorted.
 	output["first"] = search_closest(data, $Display/TimeRuler.offset, true )
@@ -78,6 +81,7 @@ func recalc_display_bounds():
 	cached_display_bounds = output
 	return output
 
+#Find the closest value in the data array to the value given.  Expects sorted array
 func search_closest(arr, val, first=false):
 	var low = 0
 	var high = arr.size() - 1
@@ -105,15 +109,9 @@ func search_closest(arr, val, first=false):
 #	prints("First: " if first else "Last: ", low,mid,high)
 	return max(low,high)+0.1 if first else min(low,high)+0.1
 
-
-func setup(input):
-	#TODO:  Receive data packet from core, set up minmax, translate core data to intermediate data.
-	pass
-
-
 #Sets the bound labels of the Y-Axis.
 func set_minmax(lowest, highest):
-	var s = ""#format_val(highest)
+	var s = ""
 	for i in range(0,8):
 #		s += "\n\n\n\n"
 		var midval = round(lerp(highest+0.5, lowest, i/8.0))

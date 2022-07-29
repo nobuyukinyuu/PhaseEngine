@@ -205,7 +205,7 @@ func _draw():
 	var first_pt = int(max(0, d["first"]))
 	var last_pt = int(min(owner.data.size(), d["last"]))
 
-
+	#Draw the crosshair.
 	if $PointCrosshair.should_display:
 		$PointCrosshair.position = pt_to_display_coords(owner.last_clicked_position)
 		var posx = $PointCrosshair.position.x
@@ -270,6 +270,7 @@ func _draw():
 	#Attempt to draw the lines in the display bounds.
 	#Check if both points are out of bounds.  CALCULATE A LINE SEGMENT IF SO
 	if first_pt==0 and last_pt==0:  first_pt = min(1, owner.data.size()-1)
+	if first_pt < 0:  return  #Data envelope is empty!! Abort!!
 	if last_pt < first_pt:  #BOTH POINTS OUT OF BOUNDS
 		if first_pt >= owner.data.size():  return
 		var pt:Vector2 = pt_to_display_coords(owner.data[first_pt])

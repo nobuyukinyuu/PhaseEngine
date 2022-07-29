@@ -656,6 +656,7 @@ margin_bottom = 351.0
 [node name="IO" parent="." instance=ExtResource( 5 )]
 margin_top = 600.0
 margin_bottom = 600.0
+mouse_filter = 2
 chip_loc = NodePath("../Channels")
 
 [node name="Btn" type="HBoxContainer" parent="."]

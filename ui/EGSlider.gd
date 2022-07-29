@@ -49,8 +49,16 @@ func _ready():
 func _gui_input(event):
 	if event is InputEventMouseButton and event.button_index == BUTTON_RIGHT and !event.pressed:
 		prints(name, "right clicked....")
-	
-	pass
+		var p = preload("res://ui/envelope_editor/BindableMenu.tscn").instance()
+		add_child(p)
+		p.owner = self
+		p.preview_paste_value =  special_display == SpecialDisplay.NONE
+		p.setup(self, bindable)
+		p.set_item_text(0, name)
+		
+		p.popup(Rect2(get_global_mouse_position(), p.rect_size))
+		
+		accept_event()
 
 
 func _draw():

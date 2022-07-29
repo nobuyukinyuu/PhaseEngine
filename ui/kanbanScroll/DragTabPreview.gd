@@ -42,10 +42,10 @@ func set_desc(intent, osc_type):
 		_:
 			return "?"
 
-func set_text(t):
-	print("okiki ", $P/D.text)
+func set_text(t):  #Sets the main label to whatever specified
+#	print("okiki ", $P/D.text)
 	$P/D.text = t
-	print("now ", $P/D.text)
+#	print("now ", $P/D.text)
 
 func set_icon(intent, osc_type):
 	var style = $PanelBG.get_stylebox("panel")
