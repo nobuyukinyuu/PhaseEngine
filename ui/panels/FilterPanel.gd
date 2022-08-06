@@ -52,10 +52,11 @@ func set_from_op(op:int):
 	$G.get_child(type).pressed = true
 	select(type)
 	
+#	$Frequency.value = d["cutoff"]
+#	$"Q [Resonance]".value = d["resonance"]
+	$Frequency.value = d.get("cutoff", 22050)
+	$"Q [Resonance]".value = d.get("resonance", 1.0)
 	
-#	$Filter.value = d[""]
-	$Frequency.value = d["cutoff"]
-	$"Q [Resonance]".value = d["resonance"]
 	$"Dry Mix".value = d["duty"]
 	$Gain.value = d["gain"]
 

@@ -11,6 +11,7 @@ onready var lblPos2 = Vector2(rect_size.x/2 - (len(str(value))+1)*charw/2.0, rec
 
 export(String) var associated_property = ""  #Determines the envelope property this slider's supposed to modify.
 export(bool) var bindable
+var is_bound:bool = false
 
 export(bool) var useExpTicks
 enum SpecialDisplay {NONE, EG_HOLD, LFO_DELAY, LFO_SPEED, PERCENT, CUSTOM=0xFF}
@@ -26,6 +27,13 @@ var needs_recalc=false
 const grabber_disabled = preload("res://ui/hSlider_grabber_disabled.tres")
 const style_disabled = preload("res://ui/EGSliderDisabled.stylebox")
 const bind_icon = preload("res://gfx/ui/bind_indicator.png")
+
+
+var envelope_editor:NodePath  #Used to hold the envelope editor node active 
+signal bind_requested
+signal unbind_requested
+
+const ENV_POPUP_NAME = "Op%s %s Env"  #Example:  "Op1 tl Env"
 
 func set_offset(val):
 	text_offset = val
@@ -60,6 +68,45 @@ func _gui_input(event):
 		
 		accept_event()
 
+#Used for binds.  Use the proper context depending on what tab it's used in.
+func request_envelope_editor(title:String, data:Dictionary, context=global.Contexts.NONE, context2:int=-1):
+	if Engine.editor_hint:  return
+	
+	var existing_popup = global.get_modeless_popup(title, context)
+	
+	if not existing_popup and !envelope_editor.is_empty():  #Try the node path instead.
+		existing_popup = get_node_or_null(envelope_editor)
+	
+	print("Requesting env editor; path is ", envelope_editor,". existing popup is ", existing_popup)
+	if not existing_popup:  #The editor was closed and freed.  Make a new one.
+		var p = global.ENV_EDITOR_SCENE.instance()
+		p.name = title
+		var new_owner = global.add_modeless_popup(p, context) #Add node to scene tree.
+		p.owner = get_node(new_owner)  #TODO:  Determine whether it's better to use self or owner
+		envelope_editor = p.get_path()  #Set this so where we know where to get it to update stuff later
+
+		p.setup(title, data, get_path())
+#		p.set_minmax(data.get("minValue", min_value), data.get("maxValue", max_value))
+	
+		p.rect_position = local_popup_pos(p.rect_size)
+		p.show()
+	else:  #Popup still exists.  Show it.
+		print("Requesting existing popup for ", name)
+		existing_popup.rect_position = local_popup_pos(existing_popup.rect_size)
+		envelope_editor = existing_popup.get_path()
+		existing_popup.show()
+#	else:
+#		var p = get_node(envelope_editor)
+#		p.rect_position = local_popup_pos(p.rect_size)
+#		p.show()
+#	pass
+
+func local_popup_pos(size:Vector2=Vector2.ZERO, buffer:Vector2=Vector2(16,16)):
+	var pos = rect_global_position
+	var vp = get_viewport_rect().size
+	pos.x = clamp(pos.x, 0, vp.x - size.x - buffer.x)
+	pos.y = clamp(pos.y, 0, vp.y - size.y - buffer.y)
+	return pos
 
 func _draw():
 	if needs_recalc:  recalc()
@@ -67,7 +114,7 @@ func _draw():
 	
 	if useExpTicks:  draw_texture(expTicks, Vector2(0, 9), Color(1,1,1,0.35))
 	
-	if bindable:  draw_texture(bind_icon, Vector2(0,0))
+	if is_bound:  draw_texture(bind_icon, Vector2(-1,-1))
 	
 	draw_string(font, lblPos, name, col)  #Draw name label
 
@@ -125,7 +172,7 @@ func _draw():
 			pos2 = calc_pos2(vStr)
 	
 	
-	draw_string(drawFont, pos2, vStr, col )
+	draw_string(drawFont, pos2, vStr, col)
 	
 
 

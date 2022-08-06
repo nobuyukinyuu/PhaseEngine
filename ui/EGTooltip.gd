@@ -77,15 +77,18 @@ func set_from_op(op:int):
 	$V/H/Op.bbcode_text = OPTEXT % (op+1)
 	$V/H/Level.text = "%*.*f%%" % [0, 1, (1.0-$V/EnvelopeDisplay.tl) * 100]
 	
-	if d2["fixedFreq"]:  #Show hz.
-		var freq = d2["base_hz"]  #tuned_hz might also work here but only detune is applied (too small to represent), so...
+	var is_fixed = d2.get("fixedFreq", false)
+	if is_fixed:  #Show hz.
+		# tuned_hz might also work here but only detune is applied (too small to represent), so...
+		var freq = d2.get("base_hz", 440)
 		if freq >= 1000:
 			$V/H/Hz.text = "%shz" % int(freq) 
 		else: 
 			$V/H/Hz.text = "%*.*fhz" % [3, 1, freq]
 
 	else:  #Show multiplier.
-		var mult = d2["tuned_hz"] / float(d2["base_hz"])  #Detune is not considered here since we only have 2 sigdigs..
+		#Detune is not considered here since we only have 2 sigdigs..
+		var mult = d2["tuned_hz"] / d2.get("base_hz", 440.0)
 		$V/H/Hz.text = "%*.*fx" % [3, 2, mult]
 
 

@@ -528,7 +528,7 @@ namespace PE_Json{
                     break;
                 default:
                     // throw new NotSupportedException(String.Format("Arrays of type {0} not supported", typeof(T).ToString()));
-                    Debug.Print(String.Format("Arrays of type {0} not supported. Target: {1}", typeof(T).ToString(), name));
+                    Debug.Print( $"Arrays of type {typeof(T).ToString()} not supported. Target: {name}" );
                     return;
             }
             values[name] = v;

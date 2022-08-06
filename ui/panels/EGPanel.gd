@@ -5,7 +5,7 @@ class_name EGPanel
 #export(int,0,8) var operator = 0
 
 onready var rTables = [$KSR, $Velocity, $KSL]
-
+enum {TYPE_EG, TYPE_PG}
 signal changed
 
 func _ready():
@@ -19,20 +19,29 @@ func _ready():
 		o.connect("value_changed", self, "setEG", [o.associated_property])
 		o.connect("value_changed", self, "update_env", [o])
 
-#	for o in $Tweak.get_children():
-#		if !o is Slider:  continue
-#		o.connect("value_changed", self, "setEG", [o.associated_property])
-
+	var fb
 	if $Tweak.has_node("Feedback"):  #Done manually to trigger the oscillator function check
-		$Tweak/Feedback.connect("value_changed", self, "setFeedback")
+		fb = $Tweak/Feedback
 	elif $More/P/V.has_node("Feedback"):  #Panel is a BitwiseOpPanel
-		$More/P/V/Feedback.connect("value_changed", self, "setFeedback")
+		fb = $More/P/V/Feedback
+	if fb:
+		fb.connect("value_changed", self, "setFeedback")
+		#FIXME:  Binding to FB won't update the delegate. If initial value is 0, it will stay that way!
+		fb.connect("bind_requested", self, "bindEG", [fb, "feedback", true])
+		fb.connect("unbind_requested", self, "bindEG", [fb, "feedback", false])
+		
 		
 	if $Tweak.has_node("Func Type"):  #BitwiseOpPanels only
 		$"Tweak/Func Type".connect("value_changed", self, "setBitwiseFunc")
 
-	$Tweak/AMS.connect("value_changed", self, "setEG", [$Tweak/AMS.associated_property])
+	$Tweak/AMS.connect("value_changed", self, "setEG", ["ams"])
+	$Tweak/AMS.connect("bind_requested", self, "bindEG", [$Tweak/AMS, "duty", true])
+	$Tweak/AMS.connect("unbind_requested", self, "bindEG", [$Tweak/AMS, "duty", false])
+
 	$Duty.connect("value_changed", self, "setEG", ["duty"])
+	$Duty.connect("bind_requested", self, "bindEG", [$Duty, "duty", true])
+	$Duty.connect("unbind_requested", self, "bindEG", [$Duty, "duty", false])
+
 	
 	$"More/P/V/Phase Offset".connect("value_changed", self, "setEG", ["phase_offset"])
 	$"More/P/V/Increment Offset".connect("value_changed", self, "setPG", ["increment_offset"])
@@ -44,7 +53,8 @@ func _ready():
 		if !o is Slider:  continue
 		o.connect("value_changed", self, "setEG", [o.associated_property])
 		o.connect("value_changed", self, "update_env", [o])
-
+		o.connect("bind_requested", self, "bindEG", [o, o.associated_property, true])
+		o.connect("unbind_requested", self, "bindEG", [o, o.associated_property, false])
 
 	$WavePanel/Wave.connect("value_changed", self, "set_oscillator")
 
@@ -59,20 +69,6 @@ func _ready():
 	if !chip_loc.is_empty():
 		set_from_op(operator)
 
-##Used as a helper for the KanbanScroll control element.
-#onready var limiter:SceneTreeTimer = get_tree().create_timer(0)
-#func _gui_input(_event):
-#	if limiter.time_left > 0:  return
-#	var vp = get_viewport()
-#	if !vp.gui_is_dragging():  return
-#	#Since we're detecting a drag, might as well update the owner column's preview rect...
-##	$"..".ownerColumn.update_preview_rect($"..".ownerColumn.get_local_mouse_position())
-#	$"..".ownerColumn.reset_drop_preview()
-#	$"..".set_drop_preview(false)
-#	limiter = get_tree().create_timer(0.2)
-
-
-
 #Bus operator values from the C# Chip handler.  
 func set_from_op(op:int):
 	var eg = get_node(chip_loc)
@@ -86,10 +82,12 @@ func set_from_op(op:int):
 	$Tune/Fine.value = d2["fine"]
 	$Tune/Detune.value = d2["detune"]
 
-#	$Frequency/H/Detune.value = d2["detune"]
-	$FixedRatio.pressed = !d2["fixedFreq"]
-	_on_FixedRatio_toggled(!d2["fixedFreq"], false)
-	$Frequency/Frequency.value = d2["base_hz"]
+#	$FixedRatio.pressed = !d2["fixedFreq"]
+#	_on_FixedRatio_toggled(!d2["fixedFreq"], false)
+#	$Frequency/Frequency.value = d2["base_hz"]
+	$FixedRatio.pressed = !d2.get("fixedFreq", false)
+	_on_FixedRatio_toggled(!d2.get("fixedFreq", false), false)
+	$Frequency/Frequency.value = d2.get("base_hz", 440)
 	
 	#Get dictionary of rTable values and populate the tbl_placeholder in ResponseButtons
 	for btn in rTables:
@@ -135,7 +133,42 @@ func set_from_op(op:int):
 	$Mute.pressed = d["mute"]
 	$Bypass.pressed = d["bypass"]
 
+	check_binds()
 	refresh_envelope_preview()
+
+func check_binds():  #Goes through all bindable controls and rebinds them if necessary.
+	for o in $Tune.get_children():  #Phase Generator
+		if !o is EGSlider:  continue
+		if !o.bindable:  continue
+		rebind(o, TYPE_PG)
+	for o in $Rates.get_children():
+		if !o is EGSlider:  continue
+		if !o.bindable:  continue
+		rebind(o, TYPE_EG)
+	for o in $Levels.get_children():
+		if !o is Slider:  continue
+		if !o.bindable:  continue
+		rebind(o, TYPE_EG)
+
+	if $Tweak.has_node("Feedback"):  #Done manually to trigger the oscillator function check
+		rebind($Tweak/Feedback, TYPE_EG)
+	elif $More/P/V.has_node("Feedback"):  #Panel is a BitwiseOpPanel
+		rebind($More/P/V/Feedback, TYPE_EG)
+
+	rebind($Tweak/AMS, TYPE_EG)
+	rebind($Duty, TYPE_EG)
+
+
+#Do we need this?  Probably not, I don't think this parameter should be bindable.
+#	if $Tweak.has_node("Func Type"):  #BitwiseOpPanels only
+#		rebind($"Tweak/Func Type", TYPE_EG)
+
+#	rebind($"More/P/V/Phase Offset", TYPE_EG)
+#	rebind($"More/P/V/Increment Offset", TYPE_PG)
+#	rebind($"More/P/V/Detune Randomness", TYPE_PG)
+
+#	$WavePanel/Wave.connect("value_changed", self, "set_oscillator")
+#
 
 func refresh_envelope_preview():
 	var d = get_node(chip_loc).GetOpValues(0, operator)
@@ -200,10 +233,22 @@ func setFeedback(value):
 	get_node(chip_loc).SetFeedback(operator, value)
 	global.emit_signal("op_tab_value_changed")
 
-func setDuty(value):
-	get_node(chip_loc).SetDuty(operator, value)
-	global.emit_signal("op_tab_value_changed")
-	
+func bindEG(sender:EGSlider, value, set_bound=true):
+	if set_bound:
+		var success = get_node(chip_loc).BindEG(operator, value)
+		if success:  
+			sender.is_bound = true
+			sender.update()
+			request_envelope_editor(sender, get_bind_values(TYPE_EG, value))
+		elif bind_exists(TYPE_EG, value):  #Value is already bound.  Request editor.
+			request_envelope_editor(sender, get_bind_values(TYPE_EG, value))
+
+		prints("Bind", value, "returned", success)
+		return success
+	else:
+		#TODO:  UNBIND HERE
+		pass
+
 
 onready var ab = [$Tune, $Frequency]
 func _on_FixedRatio_toggled(button_pressed, update_chip=true):
@@ -219,7 +264,7 @@ func setFreq(val):
 	var freq = $Frequency/Frequency.value + $"Frequency/H/Fine Tune".value
 	get_node(chip_loc).SetFrequency(operator, freq)
 	
-	$Frequency/H/Presets.select(global.notenum_from_hz(freq))
+	$Frequency/H/Presets.select(clamp(global.notenum_from_hz(freq), 0, 127))
 	global.emit_signal("op_tab_value_changed")
 
 

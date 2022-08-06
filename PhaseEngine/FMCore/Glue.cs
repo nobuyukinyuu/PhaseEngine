@@ -100,23 +100,26 @@ namespace PhaseEngine
 
     }
 
-    public class ObjectPool<T>
+    public class ObjectPool<T> where T: new()
     {
         readonly ConcurrentBag<T> _objects;
         readonly Func<T> _objectGenerator;
 
-        // //Generates a warning.......
-        // public static ObjectPool<T> Prototype<T>() where T: new()  //Default ctor convenience func
-        // { return new ObjectPool<T>( () => new T() ); }
+        //Returns an ObjectPool of the specified type in T.
+        // public static ObjectPool<T> Prototype()  //Default ctor convenience func
+        // { return new ObjectPool<T>( () => new T()); }
 
-       public ObjectPool(Func<T> objectGenerator)
+        internal static Func<T> DefaultGenerator() {return () => new T(); }
+        public ObjectPool() : this(DefaultGenerator()) {}
+
+        public ObjectPool(Func<T> objectGenerator)
         {
-            _objectGenerator = objectGenerator ?? throw new ArgumentNullException(nameof(objectGenerator));
+            _objectGenerator = objectGenerator ?? throw new ArgumentNullException($"{nameof(objectGenerator)} can't be null");
             _objects = new ConcurrentBag<T>();
         }
 
         public void Clear() => _objects.Clear();
-        public T Get() => _objects.TryTake(out T item) ? item : _objectGenerator();
+        public T Get() => _objects.TryTake(out T item) ? item : _objectGenerator();  //Grab item from the bag if one exists, otherwise make a new one from the generator.
         public void Return(T item) => _objects.Add(item);
 
 

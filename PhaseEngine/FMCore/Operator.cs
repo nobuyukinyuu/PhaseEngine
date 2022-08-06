@@ -144,9 +144,9 @@ namespace PhaseEngine
                 SetOscillatorType((Oscillator.oscTypes)waveform_index);
             } catch(IndexOutOfRangeException e) {
                 #if GODOT
-                Godot.GD.Print(String.Format("Waveform {0} not implemented: {1}", waveform_index, e.ToString()));
+                Godot.GD.Print($"Oscillator {waveform_index} not implemented: {e.ToString()}");
                 #else
-                System.Diagnostics.Debug.Print(String.Format("Waveform {0} not implemented: {1}", waveform_index, e.ToString()));
+                System.Diagnostics.Debug.Print($"Oscillator {waveform_index} not implemented: {e.ToSTring()}");
                 #endif
             }
         }

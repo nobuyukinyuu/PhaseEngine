@@ -320,7 +320,7 @@ namespace PhaseEngine
                 if (op.egStatus>=0 && (int)op.egStatus < op.eg.rising.Length)
                     rising = op.eg.rising[(int)op.egStatus] ? "Rising" : "Falling";
                 else rising= "Doing nothing";
-                sb.Append( String.Format("Op{0}: {1} and {2} ({3})",  i+1, op.egStatus.ToString(), rising, op.egAttenuation) );
+                sb.Append( $"Op{i+1}: {op.egStatus} and {rising} ({op.egAttenuation})"  );
                 // sb.Append(String.Format("\nOp{0}: {1}", i+1, ops[i].pg.increment));
                 sb.Append(nl);
                 i++;

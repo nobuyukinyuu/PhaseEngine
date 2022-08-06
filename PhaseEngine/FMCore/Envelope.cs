@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace PhaseEngine 
 {
-    public class Envelope : IBindable
+    public class Envelope : IBindableDataSrc
     {
         public bool mute;
         public bool bypass;
@@ -240,35 +240,35 @@ namespace PhaseEngine
 
             return o;
         }
-        public string ToJSONString(){ return ToJSONObject().ToJSONString(); }
+        public string ToJSONString() => ToJSONObject().ToJSONString();
 
         #if GODOT
-        public Godot.Collections.Dictionary GetDictionary()
-        {
-            var o = new Godot.Collections.Dictionary();
-            o.Add("rates", rates);
-            int[] lv = {al,dl,sl,rl,tl}; //Bussing ushort[] returns null
-            o.Add("levels", lv);
-            o.Add("ams", ams);
-            // o.Add("rising", rising);
+        // public Godot.Collections.Dictionary GetGodotDictionary()
+        // {
+        //     var o = new Godot.Collections.Dictionary();
+        //     o.Add("rates", rates);
+        //     int[] lv = {al,dl,sl,rl,tl}; //Bussing ushort[] returns null
+        //     o.Add("levels", lv);
+        //     o.Add("ams", ams);
+        //     // o.Add("rising", rising);
 
-            o.Add("delay", delay);
-            o.Add("hold", hold);
-            o.Add("feedback", feedback);
-            o.Add("duty", duty);
-            o.Add("osc_sync", osc_sync);
-            o.Add("phase_offset", phase_offset);
-            o.Add("cutoff", cutoff);
-            o.Add("resonance", resonance);
+        //     o.Add("delay", delay);
+        //     o.Add("hold", hold);
+        //     o.Add("feedback", feedback);
+        //     o.Add("duty", duty);
+        //     o.Add("osc_sync", osc_sync);
+        //     o.Add("phase_offset", phase_offset);
+        //     o.Add("cutoff", cutoff);
+        //     o.Add("resonance", resonance);
 
-            o.Add("mute", mute);
-            o.Add("bypass", bypass);
-            o.Add("aux_func", aux_func);
-            o.Add("gain", gain);
+        //     o.Add("mute", mute);
+        //     o.Add("bypass", bypass);
+        //     o.Add("aux_func", aux_func);
+        //     o.Add("gain", gain);
 
-            o.Add("wavetable_bank", wavetable_bank);
-            return o;
-        }
+        //     o.Add("wavetable_bank", wavetable_bank);
+        //     return o;
+        // }
         #endif 
 #endregion
 
@@ -278,12 +278,11 @@ namespace PhaseEngine
             try
             {
                 this.SetVal(property, unchecked(val));
-                // GD.Print(String.Format("Set op{0}.eg.{1} to {2}.", opTarget, property, val));
             } catch(NullReferenceException) {
                 #if GODOT
-                    Godot.GD.PrintErr(String.Format("No property handler for eg.{0}.", property));
+                    Godot.GD.PrintErr($"No property handler for eg.{property}.");
                 #else
-                    System.Diagnostics.Debug.Print(String.Format("No property handler for eg.{0}.", property));
+                    System.Diagnostics.Debug.Print($"No property handler for eg.{property}.");
                 #endif
             }            
         }
@@ -293,14 +292,16 @@ namespace PhaseEngine
         public bool Bind(string property)
         {
             int min=0,max=0;
-
+            var val = Convert.ToInt32(this.GetVal(property));
             //Set range values here.  wavetable_bank can't know max banks for a voice from here, so use Voice's bind method to specify it instead?
             switch(property)
             {
                 case "feedback":  case "ams":
                     max=10;  break;
-                case "duty":  //Duty is represented internally by ushort but for UI purposes should be displayed as short
-                    min=short.MinValue; max=short.MaxValue; break;
+                case "duty":  
+                    //FIXME:  Duty is represented internally by ushort but for UI purposes should be displayed as short
+                    // min=short.MinValue; max=short.MaxValue; break;
+                    min=ushort.MinValue; max=ushort.MaxValue; break;
 
                 case "tl": case "al": case "dl": case "sl": case "rl":
                     max=L_MAX;  break;
@@ -317,45 +318,49 @@ namespace PhaseEngine
                     var members= new Dictionary<string, MemberInfo>();
                     foreach(FieldInfo fieldInfo in typeof(Envelope).GetFields())  members.Add(fieldInfo.Name, fieldInfo);
                     foreach(PropertyInfo propertyInfo in typeof(Envelope).GetProperties())  members.Add(propertyInfo.Name, propertyInfo);
-                    if (!members.ContainsKey(property)) throw new KeyNotFoundException(String.Format("Envelope.Bind:  Can't find data member {0}!", property));
+                    if (!members.ContainsKey(property)) throw new KeyNotFoundException($"Envelope.Bind:  Can't find data member {property}!");
 
-                   //Get default min/max values for the field if we can't determine the property is a Rate, Level or other common constraint.
+                    //The member exists, but we still don't know if it is sane.  Check for valuetype first, then
+                    //Get default min/max values for the field if we can't determine the property is a Rate, Level or other common constraint.
                     switch (members[property])
                     {
                         case FieldInfo f:
+                            if(!f.FieldType.IsValueType) throw new ArgumentException(
+                                $"Unsupported type {f.FieldType.Name}. `{property}` must be a value type!");
                             min = Convert.ToInt32( f.FieldType.GetField("MinValue").GetRawConstantValue() );
                             max = Convert.ToInt32( f.FieldType.GetField("MaxValue").GetRawConstantValue() );
                             break;
                         case PropertyInfo p:
+                            if(!p.PropertyType.IsValueType) throw new ArgumentException(
+                                $"Unsupported type {p.PropertyType.Name}. `{property}` must be a value type!");
                             min = Convert.ToInt32( p.PropertyType.GetField("MinValue").GetRawConstantValue() );
                             max = Convert.ToInt32( p.PropertyType.GetField("MaxValue").GetRawConstantValue() );
                             break;
                     }
                     break;
             }
-            return ((IBindable)this).Bind(property, min, max);  //Call the default bind implementation to handle the rest.
+            // return ((IBindableDataSrc)this).Bind(property, min, max, (int)val);  //Call the default bind implementation to handle the rest.
+            return ((IBindableDataSrc)this).Bind(property, min, max, val);  //Call the default bind implementation to handle the rest.
         }
 
     }
 
 
 
+    //  TODO: Incompleted concept of holding a concurrent bag of envelopes which could be re-used by chips and channels at NoteOn to reduce GC thrash...
     public class EnvelopePool : ObjectPool<Envelope>
     {
-        public static EnvelopePool Prototype() {
-            // ObjectPool<Envelope>(() => new Envelope());
-            return (EnvelopePool) new ObjectPool<Envelope>( () => new Envelope() );
-        }
-
-        //These static functions provide constructor routines which satisfy the base ctor requirement of passing in a generator func.
         internal static Func<Envelope> Generator() {return () => new Envelope(); }
-        internal static Func<Envelope> Generator(Envelope prototype) {return () => new Envelope(prototype); }
+        //Returns a generator that always generates a new envelope like the specified prototype
+        internal static Func<Envelope> Generator(Envelope prototype) {return () => new Envelope(prototype); }  
     
+        //Inherit the same constructors as the base class here
         public EnvelopePool() : base(Generator()) {}
-        public EnvelopePool(Envelope prototype, bool deserializeRTables=false) : base(Generator(prototype)) {}
-
+        public EnvelopePool(Envelope prototype) : base(Generator(prototype)) {}
         public EnvelopePool(Func<Envelope> generator) : base(generator){}
 
+
+        //Grabs an envelope from the object pool and reconfigures it to match the prototype specified.
         public Envelope Get(Envelope prototype, bool deserializeRTables=false)
         {
             var output = Get();  //Only performs Envelope's default ctor if there's nothing in the pool. Otherwise we get an old Envelope needing reconfig...
@@ -363,6 +368,7 @@ namespace PhaseEngine
             return output;
         } 
     }
+
 
     public enum EGStatus
     {

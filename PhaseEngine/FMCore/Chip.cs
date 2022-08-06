@@ -30,7 +30,7 @@ namespace PhaseEngine
         }
         public bool ChannelIsFree(byte chNum) 
         {
-            System.Diagnostics.Debug.Assert(chNum>=0 && chNum<channels.Length, String.Format("Invalid channel {0}!", chNum));
+            System.Diagnostics.Debug.Assert(chNum>=0 && chNum<channels.Length, $"Invalid channel {chNum}!");
             channels[chNum].CalcPriorityScore();
             if (channels[chNum].busy != BusyState.FREE) return false;
             return true;
@@ -234,7 +234,7 @@ namespace PhaseEngine
                 var ch = channels[channel];
                 return ch.busy==BusyState.FREE?  ch : null;
             } catch {
-                System.Diagnostics.Debug.Print(String.Format("RequestChannel:  Invalid channel number {0}.",channel));
+                System.Diagnostics.Debug.Print($"RequestChannel:  Invalid channel number {channel}.");
                 return null;
             }
         }
@@ -293,7 +293,7 @@ namespace PhaseEngine
             for (int i=0; i<channels.Length; i++)
             {
                 var ch= channels[i];
-                sb.Append(String.Format("Ch.{0} (ID: {1}): {2} (Priority {3})", i, ch.eventID, ch.busy.ToString(), ch.lastPriorityScore));
+                sb.Append( $"Ch.{i} (ID: {ch.eventID}): {ch.busy} (Priority {ch.lastPriorityScore})" );
                 sb.Append(nl);
             }
             return sb.ToString();

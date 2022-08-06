@@ -90,7 +90,7 @@ namespace PhaseEngine
                         values = ValuesFromBase64( j.GetItem("tbl", "") );
                     } catch (Exception e) {  //Catch any exceptions that ValuesFromBase64() might've thrown trying to parse the table.
                         #if DEBUG
-                        System.Diagnostics.Debug.Fail(String.Format("{1}: Value table copy failed: {0}", e.Message, GetType().Name)); 
+                        System.Diagnostics.Debug.Fail( $"{GetType().Name}: Value table copy failed: {e.Message}" );
                         System.Diagnostics.Debugger.Break();
                         throw e;
                         #endif
@@ -98,7 +98,7 @@ namespace PhaseEngine
                     }
 
             } catch (Exception e) {
-                System.Diagnostics.Debug.Fail(String.Format("{1} copy failed: {0}", e.Message, GetType().Name)); //DEBUG, REMOVE ME?
+                System.Diagnostics.Debug.Fail( $"{GetType().Name}: Copy failed: {e.Message}" ); //DEBUG, REMOVE ME?
                 
                 return false;
             }
@@ -118,7 +118,7 @@ namespace PhaseEngine
         {
             // if (values==null) throw new InvalidOperationException("Table values are not initialized.");  //Should never be null....
             if( !(values[0] is ValueType) ) throw new NotSupportedException(
-                    String.Format("{0}s not supported for base TableAsBytes(). Override this method!", values.GetType().Name) );
+                    $"{values.GetType().Name}s not supported for base TableAsBytes(). Override this method!" );
 
             var output = new byte[values.Length * 2]; 
             for(int i=0; i<values.Length; i++)
@@ -134,7 +134,7 @@ namespace PhaseEngine
             var width = System.Runtime.InteropServices.Marshal.SizeOf<T>();
             #if DEBUG
             if( !(values[0] is ValueType) ) throw new NotSupportedException(
-                    String.Format("Can't store the values from this data to a {0} table. Override this method!", values.GetType().Name) );
+                    $"Can't store the values from this data to a {values.GetType().Name} table. Override this method!" );
             #endif
 
             var b = Convert.FromBase64String(bstr);

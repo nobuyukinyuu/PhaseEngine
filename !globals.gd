@@ -45,6 +45,44 @@ signal op_intent_changed  #Emitted by the op intent menu to signal refreshing ta
 signal request_op_intent_menu  #Emitted by a tab or context menu from wiring grid
 signal wavebanks_changed #Emitted by the Waveform bank tab to signal panels to update their bank spinner.
 
+#Some node and scene locations needed to prevent cyclic dependency, ensure window management, etc.
+const ENV_EDITOR_SCENE = preload("res://ui/envelope_editor/EnvelopeEditor.tscn")
+enum Contexts {NONE, GENERAL, ORDERS, PATTERN, VOICE, PHRASE, INSTRUMENT, TOPLEVEL=0xFFFF}
+var MODELESS_VOICE_POPUPS_PATH:NodePath  #Updated by the current valid voice tab
+
+#Adds a control to a specified popup context
+func add_modeless_popup(prototype:CanvasItem, context=Contexts.VOICE):
+	var path:NodePath
+	match context:
+		Contexts.VOICE:
+			path = MODELESS_VOICE_POPUPS_PATH
+
+	if !path.is_empty():
+		var p = get_node_or_null(path)
+		if p:
+			p.add_child(prototype)
+			return path
+		else:
+			printerr("Unable to resolve context path to a node! ", path)
+	else:
+		printerr("Couldn't find a proper context! ", path)
+func get_modeless_popup(name:String, context=Contexts.VOICE):
+	var path:NodePath
+	match context:
+		Contexts.VOICE:
+			path = MODELESS_VOICE_POPUPS_PATH
+
+	if !path.is_empty():
+		var p = get_node_or_null(path)
+		if p:
+			var found = p.find_node(name, false, false)
+			return found
+		else:
+			printerr("Unable to resolve context path to a node! ", path)
+	else:
+		printerr("Couldn't find a proper context! ", path)
+
+
 func _ready():
 	# Generate the period frequencies of every note based on center tuning (A-4) at 440hz
 	# Calculated from the equal temperment note ratio (12th root of 2).

@@ -143,7 +143,7 @@ namespace PhaseEngine
         }
 
 
-        public string ToJSONString(){ return ToJSONObject().ToJSONString(); }
+        public string ToJSONString() => ToJSONObject().ToJSONString();
         public JSONObject ToJSONObject()
         {
             var o = new JSONObject();
@@ -214,7 +214,7 @@ namespace PhaseEngine
 
             //Finally, convert the data to a Z85-encoded string.
             var output = Z85.Encode(input2);
-            return String.Format("{0},{1}", padAmt, output);
+            return $"{padAmt},{output}";  //Format string
         }
 
         //DEBUG:  Convert a compressed string back into a table.  Currently assumes only one bank is in the compressed string.

@@ -194,7 +194,7 @@ namespace PhaseEngine
             try{
                 SetOscillatorType( (Oscillator.oscTypes)waveform_index );
             } catch(IndexOutOfRangeException e) {
-                System.Diagnostics.Debug.Print(String.Format("Waveform {0} not implemented: {1}", waveform_index, e.ToString()));
+                System.Diagnostics.Debug.Print($"Waveform {waveform_index} not implemented: {e}");
             }
         }
 
@@ -237,7 +237,7 @@ namespace PhaseEngine
             // return flip? (short)-result : (short)result;
         }
 
-        public string ToJSONString() {return ToJSONObject().ToJSONString();}
+        public string ToJSONString() => ToJSONObject().ToJSONString();
         public JSONObject ToJSONObject()
         {
             var o = new JSONObject();

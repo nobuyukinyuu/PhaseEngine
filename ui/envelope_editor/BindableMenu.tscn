@@ -24,7 +24,7 @@ margin_bottom = 138.0
 theme = ExtResource( 6 )
 custom_colors/font_color_separator = Color( 0.878431, 0.878431, 0.878431, 0.372549 )
 custom_constants/vseparation = 8
-items = [ "Value", null, 0, false, true, 0, 0, null, "", true, "Copy", ExtResource( 3 ), 0, false, false, 10, 0, null, "", false, "Paste", ExtResource( 2 ), 0, false, true, 20, 0, null, "", false, "Automation", null, 0, false, true, 3, 0, null, "", true, "Bind...", ExtResource( 4 ), 0, false, true, 40, 0, null, "", false, "Remove", ExtResource( 1 ), 0, false, true, 50, 0, null, "", false ]
+items = [ "Value", null, 0, false, true, 0, 0, null, "", true, "Copy", ExtResource( 3 ), 0, false, false, 10, 0, null, "", false, "Paste", ExtResource( 2 ), 0, false, true, 20, 0, null, "", false, "Automation", null, 0, false, true, 3, 0, null, "", true, "Bind...", ExtResource( 4 ), 0, false, false, 40, 0, null, "", false, "Remove", ExtResource( 1 ), 0, false, true, 50, 0, null, "", false ]
 script = ExtResource( 5 )
 
 [node name="Shadow" type="Panel" parent="."]

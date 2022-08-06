@@ -375,8 +375,7 @@ custom_constants/vseparation = 8
 custom_constants/hseparation = 16
 columns = 2
 __meta__ = {
-"_edit_group_": true,
-"_edit_use_anchors_": false
+"_edit_group_": true
 }
 
 [node name="Total Level" parent="Levels" instance=ExtResource( 3 )]
@@ -387,6 +386,7 @@ exp_edit = true
 tick_count = 0
 ticks_on_borders = false
 associated_property = "tl"
+bindable = true
 useExpTicks = true
 
 [node name="Attack Level" parent="Levels" instance=ExtResource( 3 )]
@@ -398,6 +398,7 @@ exp_edit = true
 tick_count = 0
 ticks_on_borders = false
 associated_property = "al"
+bindable = true
 useExpTicks = true
 
 [node name="Decay Level" parent="Levels" instance=ExtResource( 3 )]
@@ -410,6 +411,7 @@ exp_edit = true
 tick_count = 0
 ticks_on_borders = false
 associated_property = "dl"
+bindable = true
 useExpTicks = true
 
 [node name="Sustain Level" parent="Levels" instance=ExtResource( 3 )]
@@ -424,6 +426,7 @@ exp_edit = true
 tick_count = 0
 ticks_on_borders = false
 associated_property = "sl"
+bindable = true
 useExpTicks = true
 
 [node name="Rates" type="GridContainer" parent="."]
@@ -528,6 +531,7 @@ size_flags_horizontal = 3
 max_value = 10.0
 tick_count = 0
 associated_property = "feedback"
+bindable = true
 
 [node name="AMS" parent="Tweak" instance=ExtResource( 3 )]
 margin_left = 112.0
@@ -538,6 +542,7 @@ max_value = 10.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "ams"
+bindable = true
 
 [node name="WavePanel" type="Panel" parent="."]
 margin_left = 216.0
@@ -806,6 +811,7 @@ margin_bottom = 284.0
 size_flags_horizontal = 3
 max_value = 65535.0
 associated_property = "duty"
+bindable = true
 
 [node name="More" type="Button" parent="."]
 anchor_top = 0.0106383

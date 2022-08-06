@@ -1,6 +1,7 @@
 extends WindowDialog
 class_name EnvelopeEditorWindow, "res://gfx/ui/bind_indicator.png"
 
+var invoker:NodePath  #The control that spawned us.  Typically an EGSlider.  References invalidate when tab's moved
 var lo=0
 var hi=63
 
@@ -26,26 +27,55 @@ func compare(a:Vector2,b:Vector2):  #Compares 2 vec2's in the data block for bse
 	return a.x < b.x
 func sort():  data.sort_custom(self, "compare")
 
-func setup(title, value):
+func setup(title:String, d:Dictionary, invoker:NodePath=""):
 	#TODO:  Receive data packet from core, set up minmax, translate core data to intermediate data.
 	if title is String:  $H/lblTitle.text = title
-	data[0].y = value
+	else:  $H/lblTitle.text = "Envelope editor"
+
+	set_minmax(d.get("minValue", 0), d.get("maxValue", 63))
+
+	var pts = d.get("pts", [0,0])
+	assert(pts.size() % 2 == 0)
+
+	for i in range(0, pts.size(), 2):
+		data = []
+		data.append( Vector2(scale_down(pts[i]), scale_down(pts[i+1])) )
+	recalc_display_bounds()  #Determine how to draw the points visible in the display window.
+
+	#Check if we should be attaching to an invoker
+	var success = rebind_to(invoker)
+	if success:  set_initial_value(pts[1], true)
 
 
+#Set up a bind such that changing the value of the slider updates the first data point.
+func rebind_to(invoker:NodePath) -> bool:
+	self.invoker = invoker
+	if !invoker.is_empty():
+		var p:Slider = get_node(invoker)
+		if p:
+			#Set up the invoker to update our initial value.
+			p.connect("value_changed", self, "set_initial_value", [true])
+			return true
+	else:
+		printerr("EnvelopeEditor: Can't find invoker path! ", invoker)
+	return false
+	
 func _ready():
-	#DEBUG, REMOVE
-	visible = true
-	rect_position += Vector2.ONE * 32
-
-	for o in $lblValue.get_children():
-		o.connect("value_changed", self, "up", [o])
-
+#	#DEBUG, REMOVE
+#	visible = true
+#	rect_position += Vector2.ONE * 32
+#
+#	for o in $lblValue.get_children():
+#		o.connect("value_changed", self, "up", [o])
+#
 #	randomize()
-#	for i in 4:
+#	for i in range(1,5):
 #		data.append(Vector2(500*i, randf()))
 ##		data.append(Vector2(500*i, i/10.0))
 #	sort()
-	#END DEBUG
+#
+##	print(to_json(inst2dict(self)))
+#	#END DEBUG
 	
 	#Associate the buttons.
 	for o in $Btn.get_children():
@@ -55,14 +85,17 @@ func _ready():
 		else:
 			o.connect("toggled", self, "_on_ToolButton_pressed", [int(o.name)] )
 
+	#Hacky workaround to our modeless show() call not triggering the popup_hide signal
+	get_close_button().connect("pressed", self, "_on_CustomEnvelope_popup_hide")
+	
 	recalc_display_bounds()  #Determine how to draw the points visible in the display window.
 
 
-#DEBUG, REMOVE.  Used by the debug minmax spinners to update the label
-func up(val, which):
-	if which==$lblValue/minn:  lo = val 
-	else: hi = val
-	set_minmax(lo, hi)
+##DEBUG, REMOVE.  Used by the debug minmax spinners to update the label
+#func up(val, which):
+#	if which==$lblValue/minn:  lo = val 
+#	else: hi = val
+#	set_minmax(lo, hi)
 
 
 func get_display_bounds():
@@ -111,6 +144,8 @@ func search_closest(arr, val, first=false):
 
 #Sets the bound labels of the Y-Axis.
 func set_minmax(lowest, highest):
+	lo = lowest
+	hi = highest
 	var s = ""
 	for i in range(0,8):
 #		s += "\n\n\n\n"
@@ -240,3 +275,42 @@ func clamp_loops():
 	loopEnd = clamp(loopEnd, 0, data.size()-1)
 	susStart = clamp(susStart, 0, data.size()-1)
 	susEnd = clamp(susEnd, 0, data.size()-1)
+
+
+
+func set_initial_value(val, from_invoker=false):
+	#TODO:  If this func was called from the invoker slider, then we simply update our value.
+	#		If not, then our display wants to update the invoker instead.
+	
+	if not from_invoker:
+		if !invoker.is_empty():
+			var p:Slider = get_node(invoker)
+			if p:
+				p.value = val
+		#TODO:  CHECK IF THIS EMITS A SIGNAL FROM THE SLIDER
+	else:
+		data[0].y = scale_down(val)
+		$Display.update()
+
+#Scales raw data down to 0-1 display values.
+func scale_down(val):
+	return range_lerp(val, lo, hi, 0, 1)
+func scale_up(val):
+	return range_lerp(val, 0, 1, lo, hi)
+
+func _on_CustomEnvelope_popup_hide():
+	print("Closing ", name)
+	queue_free()
+	pass # Replace with function body.
+
+
+
+func _on_CustomEnvelope_gui_input(event):
+	if event is InputEventMouseButton and event.pressed:
+		#Move to top of node list
+		prints($"H/lblTitle".text, "clicked")
+		var parent = get_parent()
+		parent.move_child(self, parent.get_child_count()-1)
+
+
+

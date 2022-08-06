@@ -50,7 +50,7 @@ namespace PhaseEngine
                     //     break;
                     // }
     
-                    throw new NotSupportedException(String.Format("Display blocks using type {0} are not supported.", typeof(T).Name));
+                    throw new NotSupportedException($"Generic classes of WaveformDisplay<{typeof(T).Name}> are not supported.");
             }
         }
 

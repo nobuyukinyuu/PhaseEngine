@@ -5,8 +5,6 @@ using System.Collections.Generic;
 
 public class Test2 : Label
 {
-    // Called when the node enters the scene tree for the first time.
-
     AudioStreamGenerator stream;
     AudioStreamGeneratorPlayback buf;
     AudioStreamPlayer player;
@@ -16,6 +14,7 @@ public class Test2 : Label
     const int scopeLen = 256;
     const int scopeHeight = 128;
 
+    public short testValue = 69;
 
     Chip c = new Chip(6,4);
     long[] lastID = new long[128];  //Keeps track of the last ID pressed on a specified note, to turn it off when a noteOff event is detected.
@@ -80,12 +79,38 @@ public class Test2 : Label
         }
  
 
-
-
         if (buf.GetSkips() > 0)
             fill_buffer();
+    }
 
+    public bool BindExists(int whichKind, int opTarget, string property) {
+        switch (whichKind){
+            case 0:  return c.Voice.egs[opTarget].BoundEnvelopes.ContainsKey(property);
+            // case 1:  return c.Voice.pgs[opTarget].BoundEnvelopes.ContainsKey(property);
+        } return false;
+    }
 
+    public bool BindEG(int opTarget, string property) => c.Voice.egs[opTarget].Bind(property);
+    public bool UnbindEG(int opTarget, string property) => c.Voice.egs[opTarget].Bind(property);
+    // public bool BindPG(int opTarget, string property) => c.Voice.pgs[opTarget].Bind(property);
+
+    
+    public Godot.Collections.Dictionary GetBindValues(int whichKind, int opTarget, string property)
+    {
+        //Return an empty dictionary if the bind doesn't exist, otherwise get the serialized version of the envelope we requested.
+        TrackerEnvelope e;
+        switch(whichKind)
+        {
+            case 0: default:  //EG
+                if (c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e))
+                    return (Godot.Collections.Dictionary) Godot.JSON.Parse(e.ToJSONString()).Result;
+                break;
+            case 1:  //PG
+                // if (c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e))
+                //     return (Godot.Collections.Dictionary) Godot.JSON.Parse(e.ToJSONString()).Result;
+                break;
+        }
+        return new Godot.Collections.Dictionary();;
     }
 
     //Used by Op panels to populate the UI elements.  
@@ -95,9 +120,13 @@ public class Test2 : Label
         switch(whichKind)
         {
             case 0: default:  //EG
-                return c.Voice.GetEG(opTarget);
+                return (Godot.Collections.Dictionary) Godot.JSON.Parse(c.Voice.egs[opTarget].ToJSONString()).Result;
+                // return c.Voice.GetEG(opTarget);
             case 1:  //PG
-                return c.Voice.GetPG(opTarget);
+                var output = (Godot.Collections.Dictionary) Godot.JSON.Parse(c.Voice.pgs[opTarget].ToJSONString()).Result;
+                output.Add("tuned_hz", (float)c.Voice.pgs[opTarget].tuned_hz);  //Needed by egTooltips in frontend to calculate an accurate multiplier
+                return output;
+                // return c.Voice.GetPG(opTarget);
         }
     }
 
@@ -412,17 +441,8 @@ public class Test2 : Label
         return Error.Ok;
     }
 
-    public Godot.Collections.Array GetSupportedFormats()
-    {
-        var output = new Godot.Collections.Array();
+    public Godot.Collections.Array GetSupportedFormats() => PE_ImportServer.GetSupportedFormats();
 
-        foreach (VoiceBankImporter v in PE_ImportServer.loaders.Values)
-        {
-            output.Add(String.Format("*.{0}; {1}", v.fileFormat, v.description));
-        }
-
-        return output;
-    }
 
     //Requests the import server to load a bank with specified voice import format and return 
     public Godot.Collections.Array RequestVoiceImport(string path)

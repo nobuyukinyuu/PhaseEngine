@@ -4,6 +4,7 @@ enum {COPY=10, PASTE=20, BIND=40, UNBIND=50}
 
 var preview_paste_value = true
 
+
 func _ready():
 	connect("hide", self, "queue_free")
 
@@ -49,7 +50,7 @@ func _on_PopupMenu_id_pressed(id):
 			if OS.clipboard.is_valid_float():
 				owner.value = OS.clipboard.to_float()
 		BIND:
-			print("Bind!")
-			pass
+			$"..".emit_signal("bind_requested")
+
 		UNBIND:
-			pass
+			$"..".emit_signal("unbind_requested")

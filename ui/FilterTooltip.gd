@@ -57,9 +57,9 @@ func set_from_op(op:int):
 
 	#Set the labels.
 	$V/H/Op.bbcode_text = OPTEXT % (op+1)
-	$V/H/Q.text = "%*.*fx" % [0, 2, d["resonance"]]
+	$V/H/Q.text = "%*.*fx" % [0, 2, d.get("resonance", 1)]
 	
-	var freq = d["cutoff"] 
+	var freq = d.get("cutoff", 22050)
 	if freq >= 1000:
 		$V/H/Hz.text = "%shz" % int(freq) 
 	else: 

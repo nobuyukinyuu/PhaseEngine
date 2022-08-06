@@ -128,8 +128,9 @@ anti_aliasing_size = 0.6
 [node name="CustomEnvelope" type="WindowDialog"]
 margin_right = 464.0
 margin_bottom = 344.0
-rect_min_size = Vector2( 448, 0 )
+rect_min_size = Vector2( 464, 344 )
 custom_styles/panel = SubResource( 1 )
+popup_exclusive = true
 script = ExtResource( 12 )
 
 [node name="ZoomBar" type="VBoxContainer" parent="."]
@@ -326,6 +327,7 @@ text = "63
 align = 2
 
 [node name="minn" type="SpinBox" parent="lblValue"]
+visible = false
 margin_left = 266.0
 margin_top = 354.0
 margin_right = 340.0
@@ -334,6 +336,7 @@ min_value = -32768.0
 max_value = 65535.0
 
 [node name="maxx" type="SpinBox" parent="lblValue"]
+visible = false
 margin_left = 354.0
 margin_top = 354.0
 margin_right = 428.0
@@ -453,6 +456,8 @@ toggle_mode = true
 shortcut_in_tooltip = false
 icon = ExtResource( 23 )
 
+[connection signal="gui_input" from="." to="." method="_on_CustomEnvelope_gui_input"]
+[connection signal="popup_hide" from="." to="." method="_on_CustomEnvelope_popup_hide"]
 [connection signal="value_changed" from="ZoomBar/Slider" to="Display" method="_on_Zoom_value_changed"]
 [connection signal="mouse_exited" from="Display" to="Display" method="_on_Display_mouse_exited"]
 [connection signal="value_changed" from="Zoom" to="Display" method="_on_Zoom_value_changed"]

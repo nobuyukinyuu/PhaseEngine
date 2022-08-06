@@ -28,7 +28,7 @@ func _enter_tree():
 
 func _replace():
 	#HACKY METHOD TO AVOID EDITORPLUGINS. WE REPLACE OURSELVES WITH A NEW KNOB AND DISAPPEAR
-	#This is not -exactly- compatible with UndoRedo! No scene binds to class_name, so this is what u get.	
+	#This is not -exactly- compatible with UndoRedo! No scene binds to class_name, so this is what u get.
 	if !Engine.editor_hint:  
 		print("Knob.gd:  Something is seriously wrong with %s. Instance a scene instead!" % name)
 		return

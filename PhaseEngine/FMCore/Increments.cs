@@ -16,7 +16,7 @@ namespace PhaseEngine
         //       the bend would take the relevant increment references and update it.
 
         internal double hz, base_hz;
-        double tuned_hz; //Frequency of base_hz * coarse * fine + detune; the tuning without any external modifiers from lfo/controllers
+        internal double tuned_hz; //Frequency of base_hz * coarse * fine + detune; the tuning without any external modifiers from lfo/controllers
 
         public long noteIncrement;  // Calculated from the base frequency
         public long tunedIncrement;  //increment of tuned_hz
@@ -125,24 +125,24 @@ namespace PhaseEngine
         }
 
         #if GODOT
-            public Godot.Collections.Dictionary GetDictionary()
-            {
-                var o = new Godot.Collections.Dictionary();
+            // public Godot.Collections.Dictionary GetGodotDictionary()
+            // {
+            //     var o = new Godot.Collections.Dictionary();
 
-                o.Add("hz", hz);
-                o.Add("base_hz", base_hz);
-                o.Add("tuned_hz", tuned_hz);
-                o.Add("fixedFreq", fixedFreq);
+            //     o.Add("hz", hz);
+            //     o.Add("base_hz", base_hz);
+            //     o.Add("tuned_hz", tuned_hz);
+            //     o.Add("fixedFreq", fixedFreq);
 
-                o.Add("mult", mult);
-                o.Add("coarse", coarse);
-                o.Add("fine", fine);
-                o.Add("detune", Detune);  //NOT the raw value, but the value PhaseEngine UI expects to map the raw value from -1 to 1.
-                o.Add("detune_randomness", detune_randomness);
-                o.Add("increment_offset", increment_offset);
+            //     o.Add("mult", mult);
+            //     o.Add("coarse", coarse);
+            //     o.Add("fine", fine);
+            //     o.Add("detune", Detune);  //NOT the raw value, but the value PhaseEngine UI expects to map the raw value from -1 to 1.
+            //     o.Add("detune_randomness", detune_randomness);
+            //     o.Add("increment_offset", increment_offset);
 
-                return o;
-            }
+            //     return o;
+            // }
         #endif 
 
         internal JSONObject ToJSONObject()
@@ -166,6 +166,7 @@ namespace PhaseEngine
 
             return o;
         }
+        public string ToJSONString() => ToJSONObject().ToJSONString();
 #endregion
 
         // Recalculates the total increment given our current tuning settings.

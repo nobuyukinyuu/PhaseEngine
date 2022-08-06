@@ -203,9 +203,9 @@ namespace PhaseEngine
                 // GD.Print(String.Format("Set op{0}.eg.{1} to {2}.", opTarget, property, val));
             } catch(NullReferenceException) {
                 #if GODOT
-                    GD.PrintErr(String.Format("No property handler for op{0}.pg.{1}.", opTarget, property, val));
+                    GD.PrintErr($"No property handler for op{opTarget}.pg.{property}.");
                 #else
-                    System.Diagnostics.Debug.Print(String.Format("No property handler for op{0}.pg.{1}.", opTarget, property, val));
+                    System.Diagnostics.Debug.Print($"No property handler for op{opTarget}.pg.{property}.");
                 #endif
             }            
         }
@@ -284,7 +284,7 @@ namespace PhaseEngine
             }
         }
 
-        public string ToJSONString() {return ToJSONObject().ToJSONString();}
+        public string ToJSONString() => ToJSONObject().ToJSONString();
         public JSONObject ToJSONObject()
         {
             var o = new JSONObject();
@@ -334,7 +334,7 @@ namespace PhaseEngine
             bool success = egs[idx].FromJSON(e);
             if (!success)
             {
-                System.Diagnostics.Debug.Print(String.Format("Voice.FromJSON:  Problem parsing envelope {0}", idx));
+                System.Diagnostics.Debug.Print( $"Voice.FromJSON:  Problem parsing envelope {idx}" );
                 return;
             }
             
@@ -379,8 +379,8 @@ namespace PhaseEngine
 
                 return d;
             }
-            public Godot.Collections.Dictionary GetEG(int opTarget) {return egs[opTarget >= opCount? 0:opTarget].GetDictionary();}
-            public Godot.Collections.Dictionary GetPG(int opTarget) {return pgs[opTarget >= opCount? 0:opTarget].GetDictionary();}
+            // public Godot.Collections.Dictionary GetEG(int opTarget) {return egs[opTarget >= opCount? 0:opTarget].GetDictionary();}
+            // public Godot.Collections.Dictionary GetPG(int opTarget) {return pgs[opTarget >= opCount? 0:opTarget].GetDictionary();}
         #endif
 
 

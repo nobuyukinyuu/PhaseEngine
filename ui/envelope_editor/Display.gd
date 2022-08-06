@@ -141,6 +141,7 @@ func _gui_input(event):
 			drag_value = pos
 			owner.data[drag_pt] = pos
 
+			if drag_pt == 0:  owner.set_initial_value(owner.scale_up(pos.y))
 			update()
 		elif dragging and loop_dragging > 0:  #Dragging a loop handle.
 			var pos = value_at(get_local_mouse_position())
@@ -299,7 +300,8 @@ func _draw():
 		if d.has("clip_left") and first_pt <= owner.data.size()-1:
 			var origin = pt_to_display_coords(owner.data[first_pt])
 			var dest = pt_to_display_coords(owner.data[first_pt-1])
-			draw_pt(origin, drag_pt==first_pt or (!$PointCrosshair.should_display and last_closest_pt==first_pt))
+			draw_pt(origin, drag_pt==first_pt or 
+				(!$PointCrosshair.should_display and last_closest_pt==first_pt) )
 
 			var angle = (origin-dest).angle()
 			var x = -origin.x

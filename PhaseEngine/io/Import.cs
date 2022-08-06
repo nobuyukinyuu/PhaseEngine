@@ -5,6 +5,7 @@ using System.Reflection;
 
 namespace PhaseEngine 
 {
+    //summary:  Abstract class describing an import extension PhaseEngine can use to set up a voice for import.
     public abstract class VoiceBankImporter
     {
         public string metadata;
@@ -28,12 +29,7 @@ namespace PhaseEngine
         public PE_ImportException(IOErrorFlags flags) {this.flags = flags;}
     }
 
-    // public class IOVoiceData
-    // {
-    //     public IOVoiceData() {}
 
-        
-    // }
 
     public static class PE_ImportServer
     {
@@ -87,6 +83,19 @@ namespace PhaseEngine
             }
             return output;
         }
+
+        #if GODOT
+            public static Godot.Collections.Array GetSupportedFormats()
+            {
+                var output = new Godot.Collections.Array();
+
+                foreach (VoiceBankImporter v in loaders.Values)
+                    output.Add( $"*.{v.fileFormat}; {v.description}" );
+
+                return output;
+            }
+        #endif
+
     }
 
 }

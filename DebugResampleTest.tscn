@@ -18,13 +18,12 @@ func _on_LOD_value_changed(value):
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Control
+var ts = [Vector2(5,10)]
 
 func _ready():
-	var output = \"\"
-	for i in 256:
-		output += char(i)
-	
-	OS.clipboard = output
+	var a = str2var(\"[\\\"Vector2 ( 2, 4 )]\\\"]\")
+	print (a)
+	ts = a
 
 func _on_Button_pressed():
 	$FileDialog.popup_centered()

@@ -207,7 +207,7 @@ namespace PhaseEngine
                 return y<<4 | x;  // 0bYYYYXXXX encoded grid position
             }
             #if DEBUG
-                throw new ArgumentException(String.Format("No free slot found at {0}!", y));
+                throw new ArgumentException($"No free slot found at {y}!");
             #else
                 return -1;
             #endif            
@@ -239,7 +239,7 @@ namespace PhaseEngine
             }
 
             System.Diagnostics.Debug.Assert(preset>=0 && preset < presets.Length, 
-                    String.Format("Algorithm preset {0} outside expected range of {2}'s {1} presets!", preset, presets.Length, type.ToString()));
+                    $"Algorithm preset {preset} outside expected range of {type.ToString()}'s {presets.Length} presets!");
 
             var output = new Algorithm(length);
             
@@ -301,7 +301,7 @@ namespace PhaseEngine
 
         }
 
-        public string ToJSONString() { return ToJSONObject().ToJSONString(); }
+        public string ToJSONString() => ToJSONObject().ToJSONString();
         internal JSONObject ToJSONObject()
         {
             var o=new JSONObject();
