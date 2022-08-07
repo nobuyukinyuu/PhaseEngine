@@ -9,19 +9,36 @@ var dropZone = Rect2(Vector2.ZERO, Vector2(rect_size.x, 16))
 
 func _ready():
 	set_tabs_rearrange_group(global.OPERATOR_TAB_GROUP)
-	connect("tab_changed", self, "_on_tab_changed")	
+	connect("tab_changed", self, "_on_tab_changed")
+	connect("tab_selected", self, "_on_tab_selected")
 	connect("mouse_exited", self, "set_drop_preview", [false])
 	hint_tooltip = "-"
 
+func _on_tab_selected(idx):
+	var tab = get_tab_control(current_tab)
+	prints(name,tab.name, ownerColumn.dirty)
+	if ownerColumn.dirty:
+		if tab is VoicePanel:  
+#			yield(get_tree(), "idle_frame")
+			tab.check_binds()
 
 func _on_tab_changed(idx):
-#	print("%s: tab changed? to %s" % [name, idx])
+#	print("%s/%s: tab changed? to %s" % [ownerColumn.name, name, idx])
 #	if get_tab_count() == 0:  print("uh oh, empty.  Time to go away...")
-	if ownerColumn.dirty:  ownerColumn.cleanup()
+	if ownerColumn.dirty:  
+		ownerColumn.cleanup()
+	else:  
+		#Owner column isn't dirty; this can happen when dragging from one TabGroup in between other tabs in another.
+		#This could move a tab from another group without flagging the bind checks in ScrollContainer.  Check.
+		print("Should check binds on ", get_tab_control(current_tab).name) 
+		var tab = get_tab_control(current_tab)
+		if tab is VoicePanel:  
+#			yield(get_tree(), "idle_frame")
+			tab.check_binds()
+
 	set_drop_preview(false)
 
 func _gui_input(event):
-
 	#This check overrides the drag preview, since we can't override TabContainers' get_drag_data().
 	if event is InputEventMouseButton: 
 		if event.button_index == BUTTON_LEFT:
@@ -53,6 +70,7 @@ func _gui_input(event):
 
 		#Also set the drop preview
 		set_drop_preview(true)
+
 
 #Called by the tab group -and- child tabs at times when dragging.
 func __set_drag_preview(var tab):

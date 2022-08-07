@@ -208,7 +208,7 @@ func _on_Arrange_pressed(type=ArrangeType.TILE):
 
 
 	for column in $Kanban.get_children():
-		if column is KanbanColumn:  column.cleanup()
+		if column is KanbanColumn:  column.cleanup(true)
 
 
 func depopulate_kanban():
@@ -219,7 +219,8 @@ func depopulate_kanban():
 		for tabgroup in column.get_node("V").get_children():
 			if !(tabgroup is TabContainer):  continue
 			last_queued_to_free = tabgroup.queue_free()
-			
+		
+		#Wait until the last node has freed before cleaning up the columns
 		if is_instance_valid(last_queued_to_free):  yield(last_queued_to_free, "tree_exited")
 		column.cleanup()
 

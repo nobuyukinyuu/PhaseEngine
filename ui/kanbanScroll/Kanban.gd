@@ -85,6 +85,12 @@ func resettle_tab_group(group, dest_column_vbox, src_column_vbox=null):
 	group.ownerColumn = dest_column_vbox.get_parent()
 	if !group.owner:  group.owner = owner  #Give the orphans a valid parent.
 
+#	prints("Resettling", group.name, "to", dest_column_vbox.get_parent().name)
+	#Bind node locations have changed for open envelope editors.  Move them.
+	for o in group.get_children():
+		if !o is VoicePanel:  continue
+		o.check_binds()
+
 #Fills the kanban with scroll columns.
 func _fill(target_width:float):
 	var new_columns_added = false

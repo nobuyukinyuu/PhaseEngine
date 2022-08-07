@@ -137,6 +137,7 @@ func set_from_op(op:int):
 	refresh_envelope_preview()
 
 func check_binds():  #Goes through all bindable controls and rebinds them if necessary.
+	if chip_loc.is_empty():  return
 	for o in $Tune.get_children():  #Phase Generator
 		if !o is EGSlider:  continue
 		if !o.bindable:  continue

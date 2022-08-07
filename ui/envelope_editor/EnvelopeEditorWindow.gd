@@ -54,7 +54,8 @@ func rebind_to(invoker:NodePath) -> bool:
 		var p:Slider = get_node(invoker)
 		if p:
 			#Set up the invoker to update our initial value.
-			p.connect("value_changed", self, "set_initial_value", [true])
+			if !p.is_connected("value_changed", self, "set_initial_value"):
+				p.connect("value_changed", self, "set_initial_value", [true])
 			return true
 	else:
 		printerr("EnvelopeEditor: Can't find invoker path! ", invoker)
@@ -308,9 +309,8 @@ func _on_CustomEnvelope_popup_hide():
 func _on_CustomEnvelope_gui_input(event):
 	if event is InputEventMouseButton and event.pressed:
 		#Move to top of node list
-		prints($"H/lblTitle".text, "clicked")
 		var parent = get_parent()
 		parent.move_child(self, parent.get_child_count()-1)
-
+#		prints($"H/lblTitle".text, "clicked")
 
 

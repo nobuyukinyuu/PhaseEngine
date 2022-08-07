@@ -54,7 +54,7 @@ func check_if_dirty(source=null):
 #	elif source == self and dirty:  cleanup()
 
 
-func cleanup():
+func cleanup(total_rearrange=false):
 	#Clean up empty tab groups and rearrange existing ones.
 #	print("Cleaning up!")
 
@@ -75,11 +75,26 @@ func cleanup():
 		var o = $V.get_child(i)
 		if !o is TabContainer:  continue
 		o.name = "TabGroup" + str(i)
-
+			
+	
 	#Add prototype empty tab group.
 	add_tab_group()
 	
 	dirty = false
+
+	if total_rearrange:
+		yield(get_tree(), "idle_frame")
+		#Arrange button hit, meaning all tabs with binds will have locations invalidated.
+		#Node names probably have changed, meaning the nodepaths from child panels have changed.
+		#For each panel in a TabGroup, have it re-check its connections to bound envelope editors.
+#		yield(get_tree(), "idle_frame")
+		for o in $V.get_children():
+			if !o is TabContainer:  continue
+			for panel in o.get_children():
+				if not is_instance_valid(panel):  continue
+				if not panel is VoicePanel:  continue
+				print("Checking binds on ", panel.name, ": ", panel.get_path())
+				panel.check_binds()
 
 
 
@@ -161,11 +176,15 @@ func drop_data(position, data):
 		target.add_child(tab)
 		
 		
-		
 		target.current_tab = target.get_tab_count()-1
 		src.ownerColumn.dirty=true  #Flag src column as dirty.
 		dirty = true  #Flag self as dirty.
 		target.emit_signal("tab_changed", target.current_tab)  #Forces cleanup check.  Is this done automatically?
+
+		#Check the binds inside the Modeless popups to point to the new location if they're still open.
+		if tab is VoicePanel:
+#			print("ScrollContainer:  checking binds on %s." % tab.name)
+			tab.check_binds()
 	
 	
 func reset_drop_preview():

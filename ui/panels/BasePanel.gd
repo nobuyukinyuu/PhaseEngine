@@ -11,6 +11,9 @@ func _ready():
 func set_from_op(op:int):
 	printerr("BasePanel.gd:  set_from_op() not defined for derived panel type! Op", op+1)
 
+func check_binds():
+	printerr("BasePanel.gd:  check_binds() not defined for derived panel type! Op", operator+1)
+
 #Used as a helper for the KanbanScroll control element.
 onready var limiter:SceneTreeTimer = get_tree().create_timer(0)
 func _gui_input(_event):
