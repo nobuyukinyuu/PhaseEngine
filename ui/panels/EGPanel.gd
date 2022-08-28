@@ -237,7 +237,7 @@ func setFeedback(value):
 func bindEG(sender:EGSlider, value, set_bound=true):
 	if set_bound:
 		var success = get_node(chip_loc).BindEG(operator, value)
-		if success:  
+		if success:  #Bind succeeded.  Show editor and tell EGSlider it's bound already
 			sender.is_bound = true
 			sender.update()
 			request_envelope_editor(sender, get_bind_values(TYPE_EG, value))

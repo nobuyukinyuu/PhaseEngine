@@ -41,6 +41,9 @@ namespace PhaseEngine
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Remap(double value, double inFrom, double inTo, double outFrom, double outTo)
         { return Lerp(outFrom, outTo, InverseLerp(inFrom, inTo, value)); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float Remap(float value, float inFrom, float inTo, float outFrom, float outTo)
+        { return Lerp(outFrom, outTo, InverseLerp(inFrom, inTo, value)); }
 
 
         // public static double RoundToSignificantDigits(double d, int digits)

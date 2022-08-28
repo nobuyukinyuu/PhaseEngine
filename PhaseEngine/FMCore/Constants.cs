@@ -14,18 +14,20 @@ namespace PhaseEngine
             set
             {
                 mixRate = value;
-                FracMixRate = 1/mixRate;
-                ClockMult = 48000.0f/mixRate;
+                fracMixRate = 1/mixRate;
+                clockMult = 48000.0f/mixRate;
             }
         }
 
-        public static float FracMixRate = 1/MixRate;
+        public static float FracMixRate{get => fracMixRate;}
+        static float fracMixRate = 1/MixRate;
 
         // Number of times clock should be updated per sample. Fixed-point frac balancing may be complicated here.
         // 32-bit precision drift over the course of 60 secs is about 42402 samples slow at 44100hz.
         // TODO:  Speed tests using double-precision clocking to determine how much slower it would be (how much more strain on CPU).
         // Clock multipliers for some different chips are provided for compatibility purposes when translating envelope timings.
-        public static float ClockMult = 48000.0f/MixRate; 
+        public static float ClockMult{get => clockMult;} 
+        static float clockMult = 48000.0f/MixRate; 
 
         // // Number of clock cycles needed for each clock of PhaseEngine to have compatible timing
         // public static double ClockMult_OPN = 53267.0/MixRate*ClockMult;  

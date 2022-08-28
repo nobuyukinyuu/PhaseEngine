@@ -45,6 +45,10 @@ namespace PhaseEngine
         public override void Clock()
         {
             //TODO:  Support recalculating filter envelopes?
+            //      Actions are void delegates.  As an IBindableDataConsumer, we can check our valid BindStates at tick time to determine
+            //      the action to take.  A full recalc need not be done every audio frame.  Also consider adding a user-customizable clock divider factor.
+            //      More likely, to begin with, we can experiment with a coef recalc value as low as 100fps (divider of 480) to judge quality.
+            // BindManager.Update(this, eg, Recalc);
             return;
         }
         public override void NoteOff()
@@ -52,7 +56,7 @@ namespace PhaseEngine
             throw new NotImplementedException();
         }
         public override void NoteOn()
-        {
+        {  //TODO:  Consider re-using an rTable from EG (KSL?) to implement key follow for the frequency value.
             throw new NotImplementedException();
         }
 
@@ -100,7 +104,6 @@ namespace PhaseEngine
 
 
 
-        //TODO:  Consider splitting out some derived values like omega etc to its own update function or otherwise simplifying this so less processing is done on recalc!!
 
         public void RecalcAll() => Recalc((FilterType)eg.aux_func, eg.cutoff, eg.resonance, eg.gain);
         public void RecalcCoefficientsOnly() => Recalc();

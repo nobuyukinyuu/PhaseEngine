@@ -53,6 +53,9 @@ namespace PhaseEngine
             cached = true;
         }
 
+        internal void Insert(int index, ValueTuple<float, float> value) {pts.Insert(index, new TrackerEnvelopePoint(value)); cached = false;}
+        internal void Remove(int index) {pts.RemoveAt(index); cached = false;}
+
         internal void SetPoint(int index, TrackerEnvelopePoint value) {pts[index] = value; cached = false;}
         internal void SetPoint(int index, System.Numerics.Vector2 value) {pts[index] = new TrackerEnvelopePoint(value); cached = false;}
         public void SetPoint(int index, ValueTuple<float, float> value) {pts[index] = new TrackerEnvelopePoint(value); cached = false;}
@@ -66,6 +69,7 @@ namespace PhaseEngine
             cached = false;
         } 
         #endif
+
 
         public static TrackerEnvelope FromJSON(JSONObject j)
         {

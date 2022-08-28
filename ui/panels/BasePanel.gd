@@ -35,6 +35,7 @@ func _on_Mute_toggled(button_pressed, bypass:bool):
 	global.emit_signal("op_tab_value_changed")
 
 
+#Pulls bind values from Chip
 func get_bind_values(type, property) -> Dictionary:
 	return get_node(chip_loc).GetBindValues(type, operator, property)
 func bind_exists(type, property):

@@ -37,7 +37,7 @@ func setup(title:String, d:Dictionary, invoker:NodePath=""):
 	var pts = d.get("pts", [0,0])
 	assert(pts.size() % 2 == 0)
 
-	for i in range(0, pts.size(), 2):
+	for i in range(0, pts.size(), 2):  #Set initial value
 		data = []
 		data.append( Vector2(scale_down(pts[i]), scale_down(pts[i+1])) )
 	recalc_display_bounds()  #Determine how to draw the points visible in the display window.
@@ -308,7 +308,7 @@ func _on_CustomEnvelope_popup_hide():
 
 func _on_CustomEnvelope_gui_input(event):
 	if event is InputEventMouseButton and event.pressed:
-		#Move to top of node list
+		#Move to top of node list so this window displays over the others.
 		var parent = get_parent()
 		parent.move_child(self, parent.get_child_count()-1)
 #		prints($"H/lblTitle".text, "clicked")

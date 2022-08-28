@@ -308,6 +308,8 @@ namespace PhaseEngine
                 case "ar": case "dr": case "sr": case "rr":
                     max=R_MAX;  break;
 
+
+                //TODO:  Create reusable recalc actions which can be called when appropriate by Operator
                 case "cutoff":
                     min=10; max=(int)(Global.MixRate/2); break;
                 case "resonance":

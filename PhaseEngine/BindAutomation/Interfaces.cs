@@ -32,7 +32,7 @@ namespace PhaseEngine
         }
 
         // FIXME:  Consider using BindManager instead to fix CachedEnvelopes to not carry these properties.  Or partial rebake on NoteOn?
-        void Unbind(string property) => BoundEnvelopes.Remove(property);
+        bool Unbind(string property) => BoundEnvelopes.Remove(property);
 
     }
 

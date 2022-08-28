@@ -30,7 +30,7 @@ func _on_tab_changed(idx):
 	else:  
 		#Owner column isn't dirty; this can happen when dragging from one TabGroup in between other tabs in another.
 		#This could move a tab from another group without flagging the bind checks in ScrollContainer.  Check.
-		print("Should check binds on ", get_tab_control(current_tab).name) 
+#		print("Should check binds on ", get_tab_control(current_tab).name) 
 		var tab = get_tab_control(current_tab)
 		if tab is VoicePanel:  
 #			yield(get_tree(), "idle_frame")
@@ -42,7 +42,6 @@ func _gui_input(event):
 	#This check overrides the drag preview, since we can't override TabContainers' get_drag_data().
 	if event is InputEventMouseButton: 
 		if event.button_index == BUTTON_LEFT:
-			
 			#This delays the function long enough to catch a drag even if we hovered off the control.
 			yield(get_tree().create_timer(0.15), "timeout")
 			pass

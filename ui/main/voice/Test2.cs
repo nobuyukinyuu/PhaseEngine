@@ -78,10 +78,11 @@ public class Test2 : Label
             }
         }
  
-
-        if (buf.GetSkips() > 0)
-            fill_buffer();
+        if (buf.GetSkips() > 0)  fill_buffer();
     }
+
+#region BINDS
+    //////////////////////////////    BINDS    ////////////////////////////////////
 
     public bool BindExists(int whichKind, int opTarget, string property) {
         switch (whichKind){
@@ -91,10 +92,90 @@ public class Test2 : Label
     }
 
     public bool BindEG(int opTarget, string property) => c.Voice.egs[opTarget].Bind(property);
-    public bool UnbindEG(int opTarget, string property) => c.Voice.egs[opTarget].Bind(property);
+    public bool UnbindEG(int opTarget, string property) {
+        IBindableDataSrc target = (IBindableDataSrc)(c.Voice.egs[opTarget]); 
+        return target.Unbind(property);
+        }
     // public bool BindPG(int opTarget, string property) => c.Voice.pgs[opTarget].Bind(property);
 
-    
+    public enum BindPointReturnCode {OK, BindNotFound, IndexOutOfRange, ValueOutOfRange, ERROR=-1}
+    public BindPointReturnCode SetBindValue(int whichKind, int opTarget, string property, int ptIndex, Godot.Vector2 pt)
+    {
+        try{
+            TrackerEnvelope e;
+            switch(whichKind)
+            {
+                case 0:
+                    if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    if (pt.y<0 || pt.y>1) return BindPointReturnCode.ValueOutOfRange;
+                    var val = Tools.Remap(pt.y, 0, 1, e.minValue, e.maxValue);  //Remap the input value from 0-1 to our binds bounds
+                    e.SetPoint(ptIndex, (pt.x, val));
+                    break;
+                case 1:
+                    // TODO:  IMPLEMENT
+                    return BindPointReturnCode.BindNotFound;
+                    // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+            }
+        } catch (IndexOutOfRangeException exception) {
+            System.Diagnostics.Debug.Print(exception.Message);
+            return BindPointReturnCode.IndexOutOfRange;
+        } catch (Exception exception) {
+            System.Diagnostics.Debug.Print(exception.Message);
+            return BindPointReturnCode.ERROR;
+        }
+        return BindPointReturnCode.OK;
+    }    
+    public BindPointReturnCode AddBindEnvelopePoint(int whichKind, int opTarget, string property, int ptIndex, Godot.Vector2 pt)
+    {
+        try{
+            TrackerEnvelope e;
+            switch(whichKind)
+            {
+                case 0:
+                    if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    if (pt.y<0 || pt.y>1) return BindPointReturnCode.ValueOutOfRange;
+                    var val = Tools.Remap(pt.y, 0, 1, e.minValue, e.maxValue);  //Remap the input value from 0-1 to our binds bounds
+                    e.Insert(ptIndex, (pt.x, val));
+                    break;
+                case 1:
+                    // TODO:  IMPLEMENT
+                    // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    return BindPointReturnCode.BindNotFound;
+            }
+        } catch (IndexOutOfRangeException exception) {
+            System.Diagnostics.Debug.Print(exception.Message);
+            return BindPointReturnCode.IndexOutOfRange;
+        } catch (Exception exception) {
+            System.Diagnostics.Debug.Print(exception.Message);
+            return BindPointReturnCode.ERROR;
+        }
+        return BindPointReturnCode.OK;
+    }
+    public BindPointReturnCode RemoveBindEnvelopePoint(int whichKind, int opTarget, string property, int ptIndex)
+    {
+        try{
+            TrackerEnvelope e;
+            switch(whichKind)
+            {
+                case 0:
+                    if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    e.Remove(ptIndex);
+                    break;
+                case 1:
+                    // TODO:  IMPLEMENT
+                    // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    return BindPointReturnCode.BindNotFound;
+            }
+        } catch (IndexOutOfRangeException exception) {
+            System.Diagnostics.Debug.Print(exception.Message);
+            return BindPointReturnCode.IndexOutOfRange;
+        } catch (Exception exception) {
+            System.Diagnostics.Debug.Print(exception.Message);
+            return BindPointReturnCode.ERROR;
+        }
+        return BindPointReturnCode.OK;
+    }
+
     public Godot.Collections.Dictionary GetBindValues(int whichKind, int opTarget, string property)
     {
         //Return an empty dictionary if the bind doesn't exist, otherwise get the serialized version of the envelope we requested.
@@ -110,11 +191,10 @@ public class Test2 : Label
                 //     return (Godot.Collections.Dictionary) Godot.JSON.Parse(e.ToJSONString()).Result;
                 break;
         }
-        return new Godot.Collections.Dictionary();;
+        return new Godot.Collections.Dictionary();
     }
 
     //Used by Op panels to populate the UI elements.  
-    //TODO:  Consider having these convert from JSON to dict here and get rid of dupe methods in Envelope and Increments...
     public Godot.Collections.Dictionary GetOpValues(int whichKind, int opTarget)
     {
         switch(whichKind)
@@ -129,6 +209,7 @@ public class Test2 : Label
                 // return c.Voice.GetPG(opTarget);
         }
     }
+#endregion
 
     public byte GetOpIntent(int opTarget){ if(opTarget >= c.OpCount) return 0; else return (byte)c.Voice.alg.intent[opTarget]; }
     public byte GetOscType(int opTarget){if(opTarget >= c.OpCount) return 0; else if (opTarget==-1) return (byte)c.Voice.lfo.OscType; else return c.Voice.oscType[opTarget];}
