@@ -10,10 +10,10 @@ namespace PhaseEngine
         public scaleFunc ScaleProcess;  //FIXME:  Is this necessary?  We could consolidate this into operatorOutputSample maybe.....
 
 
+        const int divider_max_count=6; //How often the LFO clocks.  The clock counter counts up to this number before recalculating the increment.
         byte cycle_counter;
         long delay_counter;
 
-        const int divider_max_count=6; //How often the LFO clocks.  The clock counter counts up to this number before recalculating the increment.
         
         short lastClockedVolume = 0;
         public ushort lastAMVolume = 0;
@@ -36,8 +36,8 @@ namespace PhaseEngine
 
         internal int SyncType {get=> delay_sync? 2: osc_sync? 1:0; set{ osc_sync=value>0;  delay_sync=value>1;} }  //For serialization
 
-        public LFO()  {Init();}
-        public LFO(byte speed)  {Init(speed);}
+        // public LFO()  {Init();}
+        public LFO(byte speed=19)  {Init(speed);}
 
         void Init(byte speed=19)  //Speed of LFO defaults to ~1.25s
         {
@@ -60,7 +60,7 @@ namespace PhaseEngine
             delay_counter = 0;
             if (osc_sync) phase = 0;
         }
-        public override void NoteOff()=>            throw new NotImplementedException();
+        public override void NoteOff() => throw new NotImplementedException();
 
 
         public bool ClockOK {get=> cycle_counter == 0;} //Returns true if the clock event just fired last tick.
@@ -77,7 +77,6 @@ namespace PhaseEngine
             if (cycle_counter == divider_max_count)
             {
                 cycle_counter = 0;
-
                 UpdateOscillator();
 
                 //TODO:  Clock logic here updating increment of the input frequency (not the same as the LFO's frequency)
@@ -85,7 +84,7 @@ namespace PhaseEngine
             }
         }
         public void UpdateOscillator()  //Updates the status of the oscillator output.
-            { lastClockedVolume = (short)ScaleProcess(operatorOutputSample()); lastAMVolume = RequestAM();} 
+            { lastClockedVolume = operatorOutputSample(); lastAMVolume = RequestAM();} 
 
 
  
@@ -100,7 +99,7 @@ namespace PhaseEngine
             return (short)ou;
         }
 
-        public override short RequestSample(ushort input, ushort am_offset){return (short)RequestAM();} //Not currently used
+        public override short RequestSample(ushort input, ushort am_offset){return (short)RequestAM();} //Not currently used. Channels will never call this
         public ushort RequestAM()  //Returns an attenuation value from 0-TL.
         {
             if (amd==Envelope.L_MAX) return 0;
@@ -142,11 +141,11 @@ namespace PhaseEngine
             //      Figure out where to apply this so end users can still modify hz themselves and not clobber the LFO state.
 
             //Grab a sample volume from the oscillator, then grab the float from the float table.  This value can be 0 to 8192 (technically 8168 from exp table).
-            int volume = lastClockedVolume; 
+            int volume = (int)(lastClockedVolume * pmd); 
             var ratio = flip ^ invert?  Tables.vol2pitchUp[volume] : Tables.vol2pitchDown[volume];
 
             //Apply ratio to the input.
-            input.lfoMult = Tools.Lerp(1.0f, ratio, pmd);
+            input.lfoMult = ratio;
             input.Recalc();
             return true;
         }
@@ -173,19 +172,24 @@ namespace PhaseEngine
                     ScaleProcess = PMScaleNoise;
                     return;
                 }
+                // case "Wave":
+                // {
+                //     operatorOutputSample = ComputeWavetable;
+                //     return;
+                // }
+
             }
 
             operatorOutputSample = OperatorType_LogOutput;
             ScaleProcess = PMScaleLog;
         }
 
-        int PMScaleLog(int input) { return Tables.attenuation_to_volume((ushort) input); }
+        int PMScaleLog(int input) => Tables.attenuation_to_volume((ushort) input);
         int PMScaleNoise(int input) 
         {
             var output=Tables.attenuation_to_volume((ushort) (input>>3));  //Scale the input from 0-8192 like a normal osc before feeding in.
             // var output=Tables.vol2attenuation[(ushort) input >>3];
             flip = !invert && Tools.BIT((short)input, 9).ToBool();  //Make the LFO more melodic with invert OFF.  Invert ON holds the state open.
-            // flip = false;
             return (int)output;
         }
 
@@ -206,18 +210,16 @@ namespace PhaseEngine
             var samp = (short) oscillator.Generate(phase, duty, ref flip, __makeref(this.seed));
             // ushort env_attenuation = (ushort) (envelope_attenuation() << 2);
 
-            // const float SCALE = 1.0f / 8192;
+            // short result = (short) (samp >> 1);  //Half vol
 
-            // ushort logScale = (ushort)(Tables.attenuation_to_volume(0)); //TODO:  Add AMS here?
+            var result=Tables.attenuation_to_volume((ushort) (samp>>3));  //Scale the input from 0-8192 like a normal osc before feeding in.
+            // var output=Tables.vol2attenuation[(ushort) input >>3];
+            flip = !invert && Tools.BIT((short)samp, 9).ToBool();  //Make the LFO more melodic with invert OFF.  Invert ON holds the state open.
 
-            // short result = (short) (samp * (logScale * SCALE) );
-
-            short result = (short) (samp >> 1);  //Half vol
-
-            return result;
+            return (short)result;
         }
 
-        public short OperatorType_LogOutput(ushort modulation, ushort auxdata=0)   //LFO VERSION RETURNS ATTENUATION, NOT VOLUME  (up to L_MAX units)
+        public short OperatorType_LogOutput(ushort modulation, ushort auxdata=0)
         {
             // start with the upper 10 bits of the phase value plus modulation
             // the low 10 bits of this result represents a full 2*PI period over
@@ -225,16 +227,14 @@ namespace PhaseEngine
             ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + modulation);
 
             // get the absolute value of the sin, as attenuation, as a 4.8 fixed point value
-            // ushort sin_attenuation = Tables.abs_sin_attenuation(phase);
             ushort sin_attenuation = oscillator.Generate(phase, duty, ref flip, __makeref(pg.increment));
 
-            return (short)sin_attenuation;
-
             // // combine into a 5.8 value, then convert from attenuation to 13-bit linear volume
-            // int result = Tables.attenuation_to_volume((ushort)(sin_attenuation ));  //TODO:  Add AMS here?
+            ushort result = Tables.attenuation_to_volume((ushort)sin_attenuation);
 
             // // negate if in the negative part of the sin wave (sign bit gives 14 bits)
             // return flip? (short)-result : (short)result;
+            return (short)result;  //We don't need to flip the result because this is handled in the respective ApplyPM / ApplyAM?
         }
 
         public string ToJSONString() => ToJSONObject().ToJSONString();

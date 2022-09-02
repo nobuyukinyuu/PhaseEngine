@@ -15,7 +15,7 @@ namespace PhaseEngine
         byte opCount = 6;  //Probably should be moved to a voice class, then the chip given a unitimbral description of the voice. Realloc on major change
         public byte OpCount{get=>opCount;}  //Use SetOpCount to set opCount outside of Chip.
 
-        public byte polyphony = 6;
+        public byte polyphony = 3;
         public Channel[] channels;
 
         //Used to determine if a chip is "Silent" so it can be put to sleep. Does
@@ -36,40 +36,25 @@ namespace PhaseEngine
             return true;
         }
 
-        #region Constructors
-        public Chip()
-        {
-            channels = new Channel[polyphony];
-            voice = new Voice(opCount);
-            InitChannels();
-        }
-
-        public Chip(byte polyphony) 
-        {
-            this.polyphony = polyphony;
-            channels = new Channel[polyphony];
-            voice = new Voice(opCount);
-            InitChannels();
-        }
-
-        public Chip(byte polyphony, byte opCount)
-        {
-            this.opCount = opCount;            
-            this.polyphony = polyphony;
-            voice = new Voice(opCount);
-            channels = new Channel[polyphony];
-            InitChannels();
-        }
-#endregion
+#region Constructors
+        public Chip() {InitChannels();}
+        public Chip(byte polyphony): this(polyphony, true) {}
+        private Chip(byte polyphony, bool initChannels)  { this.polyphony = polyphony; if (initChannels)  InitChannels(); }
+        public Chip(byte polyphony, byte opCount) : this(polyphony, false)
+            { this.opCount = opCount;  InitChannels(); }
 
         void InitChannels()
         {
-            for(int i=0; i<channels.Length; i++) 
+            channels = new Channel[polyphony];
+            voice = new Voice(opCount);
+
+            for(int i=0; i < polyphony; i++) 
             {
                 channels[i] = new Channel(opCount);
                 channels[i].SetVoice(voice);
             }
         }
+#endregion
 
 
         public void Clock()

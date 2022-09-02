@@ -650,7 +650,9 @@ public class Test2 : Label
 
         if(Visible)
         {
-            this.Text = c.channels[0].ToString();
+            // this.Text = c.channels[0].ToString();
+            this.Text = buf.GetSkips().ToString();
+
             // if (c.channels[0].ops[0].pg.increment > int.MaxValue) 
                 // this.SelfModulate = new Color("ff0000"); 
             // else

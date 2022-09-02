@@ -215,7 +215,6 @@ namespace PhaseEngine
 
             // get the attenuation from the envelope generator as a 4.6 value, shifted up to 4.8
             ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);
-            // ushort env_attenuation = envelope_attenuation(am_offset) << 2;
 
             // combine into a 5.8 value, then convert from attenuation to 13-bit linear volume
             int result = Tables.attenuation_to_volume((ushort)(sin_attenuation + env_attenuation));

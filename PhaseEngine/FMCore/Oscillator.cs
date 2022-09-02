@@ -18,10 +18,8 @@ namespace PhaseEngine
         public oscTypes CurrentWaveform {get =>_current; set {_current = (oscTypes)value; wf=waveFuncs[(byte)value]; }}
 
 
-        public ushort Generate(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
-        {
-            return wf(n, duty, ref flip, auxdata);
-        }
+        public ushort Generate(ulong n, ushort duty, ref bool flip, TypedReference auxdata) =>
+            wf(n, duty, ref flip, auxdata);
 
 
         //We'd want to apply these impulses from the blep over a scaled -1.0-1.0 sample. We sample every time there's a discontinuity in the oscillator waveform.

@@ -105,8 +105,10 @@ namespace PhaseEngine
             //LFOs, 16kb tables etc
             for (int i=1; i<8192; i++)
             {
-                vol2pitchDown[i] = Tools.Lerp(1, 0.5f, i/8192.0f);
-                vol2pitchUp[i]   = Tools.Lerp(1, 2, i/8192.0f);
+                // vol2pitchDown[i] = Tools.Lerp(1, 0.5f, i/8192.0f);
+                // vol2pitchUp[i]   = Tools.Lerp(1, 2, i/8192.0f);
+                vol2pitchDown[i] = (float)Math.Pow(2, -i/8192.0);
+                vol2pitchUp[i]   = (float)Math.Pow(2,  i/8192.0);
             }
 
             for (int i=0; i<amdScaleRatio.Length; i++)
