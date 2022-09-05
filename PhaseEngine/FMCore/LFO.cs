@@ -136,10 +136,6 @@ namespace PhaseEngine
             if (cycle_counter!=0) return false;  //Don't bother recalculating the pitch if we're not clock-ready.  Lowers recalc cost.
             if (delay_counter < delay) return false;
 
-            //TODO:  Recalc increments of the input based on the current state of our oscillator.  Output is mapped to short values;
-            //      Needs to be mapped to a multiplier, 0.5 to 2.0 depending on status of flip bit, then applied to input frequency.
-            //      Figure out where to apply this so end users can still modify hz themselves and not clobber the LFO state.
-
             //Grab a sample volume from the oscillator, then grab the float from the float table.  This value can be 0 to 8192 (technically 8168 from exp table).
             int volume = (int)(lastClockedVolume * pmd); 
             var ratio = flip ^ invert?  Tables.vol2pitchUp[volume] : Tables.vol2pitchDown[volume];
@@ -166,7 +162,7 @@ namespace PhaseEngine
                 case "Noise2":
                 // case "Sine3":
                 {
-                    seed = 1;  //Reset the seed.
+                    seed = Global.DEFAULT_SEED;  //Reset the seed.
                     //Set the operator's sample output function to work in the linear domain.
                     operatorOutputSample = OperatorType_Noise;
                     ScaleProcess = PMScaleNoise;

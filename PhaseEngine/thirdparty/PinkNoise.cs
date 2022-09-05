@@ -25,13 +25,13 @@ using System;
 
 public class P_URand
 {
-    int _seed=1;
+    internal int _seed=1;
 
-    public P_URand(){this.seed=0;}
-    public P_URand(int seed){this.seed = seed;}
+    public P_URand(){this.Seed=0;}
+    public P_URand(int seed){this.Seed = seed;}
 
-    public int seed
-    {
+    public int Seed
+    {  //Setting negative or 0 values of seed create a new seed based on the system time and salted with the negative value (if any).
         get => _seed;
         set {if (value<=0) reseed(value);  else _seed = value;}
     }
@@ -65,11 +65,14 @@ public class PinkNoise {
     Int32   accum;        // combined generators
 
     // Include a UNoise component
-    public P_URand     ugen = new P_URand();
+    P_URand     ugen = new P_URand(1);
+    public int Seed {get=> ugen.Seed; set{ugen._seed = value; if(value==1) Clear();}}
 
     // Constructor. Guarantee that initial state is cleared
     // and uniform generator scrambled.
-    public PinkNoise( ){ internal_clear(); }
+    public PinkNoise( ){ ClearAndRandomize(); }
+    public PinkNoise(int seed){Clear(); ugen._seed = seed;} //Updates the internal seed without incurring the branch penalty
+
     // Copy constructor. Preserve generator state from the source
     // object, including the uniform generator seed.
     public PinkNoise( PinkNoise Source )
@@ -77,7 +80,7 @@ public class PinkNoise {
         int  i;
         for (i=0; i<5; ++i)  contrib[i]=Source.contrib[i];
         accum = Source.accum;
-        ugen.seed = Source.ugen.seed ;
+        ugen.Seed = Source.ugen.Seed;
     }
 
     // Clear generator to a zero state.
@@ -88,13 +91,9 @@ public class PinkNoise {
         accum = 0;
     }
 
-    // PRIVATE, clear generator and also scramble the internal
-    // uniform generator seed.
-    void internal_clear( )
-    {
-        Clear();
-        ugen.seed=0;    // Randomizes the seed!
-    }
+    // PRIVATE, clear generator and also scramble the internal uniform generator seed.
+    // Randomizes the seed to system time as a property side effect!
+    void ClearAndRandomize() { Clear(); ugen.Seed=0; }
 
     // Evaluate next randomized 'pink' number with uniform CPU loading.
     public short Next( )

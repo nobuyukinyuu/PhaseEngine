@@ -276,19 +276,14 @@ namespace PhaseEngine
                 var seed = __refvalue(auxdata, int);
 
                 if (phase > duty) return 0;  // Comment this out if you don't want the "buzzing" duty behavior and instead would rather use the counter
-
                 {
                     seed ^= (ushort)(seed << 7);
                     seed ^= (ushort)(seed >> 9);
                     seed ^= (ushort)(seed << 8);
-                    __refvalue(auxdata, int) = seed;
+                    __refvalue(auxdata, int) = seed;  //Return the seed back to the method that requested it, so we can hold the state of multiple oscillators
                 }
-
-                // flip = Tools.BIT(seed, 15).ToBool();
-
                 
-                return (ushort)((seed>>1) | (seed & 0x8000));  
-                // return (ushort)(Tables.logVol[seed & 0xFF]); 
+                return (ushort)((seed>>1) | (seed & 0x8000));  //The OR (seed & 0x8000) bit preserves the sign.
             }
         }
 
@@ -305,11 +300,9 @@ namespace PhaseEngine
                     seed ^= (ushort)(seed << 7);
                     seed ^= (ushort)(seed >> 9);
                     seed ^= (ushort)(seed << 8);
-                    __refvalue(auxdata, int) = seed;
+                    __refvalue(auxdata, int) = seed;  //Return the seed back to the method that requested it, so we can hold the state of multiple oscillators
                 }
 
-                // flip = Tools.BIT(seed, 15).ToBool();
-                
                 return (ushort)((seed>>1) | (seed & 0x8000));  //The OR (seed & 0x8000) bit preserves the sign.
             }
         }
@@ -318,26 +311,49 @@ namespace PhaseEngine
         static PinkNoise pgen = new PinkNoise();
         public static ushort Pink(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
+            //TODO:  Grab the seed and set it to pgen;  then return the __refvalue back to its owner!
+            var seed = __refvalue(auxdata, int);
+            pgen.Seed = seed;
             short v = pgen.Next();
-
+            __refvalue(auxdata, int) = pgen.Seed;  //Return the seed back to the method that requested it, so we can hold the state of multiple oscillators
+ 
             // flip = Tools.BIT(v, 14).ToBool();
             return unchecked((ushort)( v >> 1));
         }
 
-        static P_URand bgen = new P_URand();
+        static P_URand bgen = new P_URand(Global.DEFAULT_SEED);
         static int bval = 0x1A500;
         public static ushort Brown(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
+            //TODO:  Consider rewriting the brown noise generator to use a 16-bit LFSR (period of 65535; 1.36s)
+            //      and storing the bval state in the high bits of the seed.  This may introduce artifacting; test it.
+            //      if the period becomes too short by filtering the results in this manner, consider using a custom bit-shift
+            //      based on the input of n, which should give us many unique (albeit sequential) values.......
+            //      We may also be able to salt the reference output with some value of n, which would produce different sequences at different pitches...
+            //      For potential examples, see https://en.wikipedia.org/wiki/Xorshift#xorwow
+
+            //      For maximum range, consider the high 16 bits of n as salt:  a 12.4 fixed point value, (this would be a raw saw), rotated around
+            //      with XOR to produce a predictable value which shifts at a slower rate to overlay on the seed before adding to the filtered value.
+            //      Modifying the pitch should cause the waveform across the life of the oscillator's period to drift over time, creating interference patterns
+            //      that could ring semi-randomly like a typical oscillator would.  We might even be able to change the base frequency distribution
+            //      this way, to move it from the fundamental of ~350hz closer to that of other noise types, without filtering.
+
+            // var seed = __refvalue(auxdata, int);
+            // bgen.Seed = seed;
+
             bval +=  ( (ushort)bgen.urand() ) >> 5 ;
             bval = (int) (bval * 0.99);
             var output = (bval - 0x7FFF);
+
+            //TODO:  Detect if the seed is the global default -- if so, clear bval maybe???
+            // __refvalue(auxdata, int) = bgen.Seed;  //Return the seed back to the method that requested it, so we can hold the state of multiple oscillators
             return (ushort) (output);
         }
 
         public static APU_Noise gen2 = new APU_Noise();
         public static ushort Noise2(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
-            gen2.ModeBit = unchecked((byte)(duty >>12));  //Sets the mode to a value 0-15 from high 4 bits.
+            gen2.ModeBit = unchecked((byte)(duty >>12));  //Sets the mode to a value 0-15 from high 4 bits. 
             gen2.pLen = (ushort)(((duty<<2) & 0x7F) +((duty>>5) & 0x7F) );  //Sets counter len to to bits 0-4 * 4, plus bits 5-11.
             ushort gen = gen2.Current((uint)n );
             return gen;
@@ -356,41 +372,45 @@ public class APU_Noise
     readonly static ushort[] ntsc_periods = {4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068};
     readonly static ushort[] pal_periods = {4, 8, 14, 30, 60, 88, 118, 148, 188, 236, 354, 472, 708,  944, 1890, 3778};
 
+    //The mode bit is used to determine which bit of the seed is fed back into the register.  Set to 1 for normal operation, 6 for traditional metallic noise.
     public byte ModeBit{get=> mode_bit;  set=> mode_bit = (byte)((value & 0xF)+1); }
     byte mode_bit = 1;  //1-8, determines the periodicity of the waveform.
 
-    ushort seed = 1;
+    ushort seed = Global.DEFAULT_SEED;
     ushort counter=0;
 
-    public void SetPeriod(byte pos) { pLen = periods[pos & 0xF]; }
+    //Converts a midi note value such that this generator's wait period before shifting output values runs at one of 16 given rates.
+    //See https://www.nesdev.org/wiki/APU_Noise for more details
+    public void SetPeriod(byte pos) { pLen = periods[pos & 0xF]; }  
     public ushort pLen = 4068;
 
 
-    void Clock()
+    void Clock() //Cycles the shift register to the next value in the sequence.
     {
-        while (counter>0){
-        var fb = ( Tools.BIT(seed, 0) ^ Tools.BIT(seed, mode_bit) );
-        seed = (ushort)(seed>>1);
+        while (counter>0)
+        {
+            var fb = ( Tools.BIT(seed, 0) ^ Tools.BIT(seed, mode_bit) );
+            // seed = (ushort)(seed>>1);
+            seed >>= 1;
 
-        seed = (ushort) (seed | (fb << 14));
+            seed = (ushort) (seed | (fb << 14));
 
-        counter--;
+            counter--;
         }
     }
 
+    //Pulls a number from the LFSR based on the provided phase
     public ushort Current(uint phase)
     {
-        if (counter > pLen)  Clock();
+        if (counter > pLen)  Clock();  //Empty the accumulator
         counter++;
 
-        ushort output = (ushort)((seed & 0xff));
+        ushort output = (ushort)((seed & 0xff));  //Get an value representing the low 8-bits in the shift register.
         output = (ushort)((output<<7) | ((seed & 0x80) << 8)); 
 
         return output;
     }
 
-    public override string ToString()
-    {
-        return Tools.ToBinStr(unchecked((short)seed)) + "\npLen: " + pLen.ToString() + " mode: " + mode_bit.ToString();
-    }
+    public override string ToString() =>
+        Tools.ToBinStr(unchecked((short)seed)) + "\npLen: " + pLen.ToString() + " mode: " + mode_bit.ToString();
 }

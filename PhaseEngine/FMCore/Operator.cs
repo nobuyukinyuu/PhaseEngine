@@ -21,7 +21,7 @@ namespace PhaseEngine
 
         protected long phase;  //Phase accumulator
         protected bool flip=false;  // Used by the oscillator to flip the waveform's values.  TODO:  User-specified waveform inversion
-        protected int seed=1;  //LFSR state sent ByRef to oscillators which produce noise
+        protected int seed = Global.DEFAULT_SEED;  //LFSR state sent ByRef to oscillators which produce noise
 
         readonly public Envelope eg = new Envelope();  //Singleton for the lifetime of the operator. Use Envelope.configure() to replicate from a prototype
         public EGStatus egStatus = EGStatus.INACTIVE;
@@ -60,7 +60,7 @@ namespace PhaseEngine
 
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)] 
-            void ResetPhase() {if (eg.osc_sync) phase=0;  phase += Increments.PhaseOffsetOf(in pg, eg.phase_offset);}
+            void ResetPhase() {if (eg.osc_sync) {phase=0; seed=Global.DEFAULT_SEED;};  phase += Increments.PhaseOffsetOf(in pg, eg.phase_offset);}
 
         public void NoteOn(Increments increments){ pg = increments;  NoteOn(); }
         public override void NoteOn()
@@ -68,6 +68,7 @@ namespace PhaseEngine
             //TODO:  CREATE BINDSTATES FROM THE IBINDABLE DATA SOURCES 
 
             ResetPhase();
+            
             env_counter = 0;
             env_hold_counter = 0;
 
@@ -120,7 +121,6 @@ namespace PhaseEngine
                 case "Noise2":
                 // case "Sine3":
                 {
-                    seed = 1;  //Reset the seed.
                     //Set the operator's sample output function to work in the linear domain.
                     operatorOutputSample = OperatorType_Noise;
                     return;
@@ -188,7 +188,9 @@ namespace PhaseEngine
         public short OperatorType_Noise(ushort modulation, ushort am_offset)
         {
             ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + modulation);
-            var samp = (short) oscillator.Generate(phase, eg.duty, ref flip, __makeref(this.seed));
+            var seedRef = __makeref(this.seed);
+            var samp = (short) oscillator.Generate(phase, eg.duty, ref flip, seedRef);
+            // seed = __refvalue(seedRef, int);
             ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);
 
             const float SCALE = 1.0f / 8192;
