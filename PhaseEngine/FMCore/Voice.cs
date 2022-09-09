@@ -290,7 +290,7 @@ namespace PhaseEngine
             var o = new JSONObject();
 
             // Don't add the OpCount here.  Rely on the Algorithm for that.
-            o.AddPrim("FORMAT", Global.VERSION);
+            o.AddPrim("FORMAT", Global.FORMAT_VERSION);
             if(name!=null && name!=String.Empty) o.AddPrim("name", name);
             if(desc!=null && desc!=String.Empty) o.AddPrim("desc", desc);
             o.AddPrim("gain", gain);
