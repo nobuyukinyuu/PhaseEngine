@@ -7,8 +7,9 @@
 
     string commitVersion = GitCommands.CommitHash();
     const string templateLine = $"        public const string BUILD_VERSION";
-    string replaceLine = $"        public const string BUILD_VERSION = \"{commitVersion.TrimEnd()}\";";
-    const string fileName = "PhaseEngine/FMCore/Constants.cs";
+    string replaceLine = $"        public const string BUILD_VERSION = \"{commitVersion.TrimEnd()}\"; //Generated at: {comment}";
+    string comment = DateTime.Now.ToLocalTime().ToString("d MMM yyyy, hh:mm tt");
+    const string fileName = "PhaseEngine/Constants.cs";
 
     string[] arrLine = File.ReadAllLines(fileName);
 
