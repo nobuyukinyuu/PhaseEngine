@@ -151,10 +151,6 @@ envelope_paste={
 "events": [  ]
 }
 
-[mono]
-
-debugger_agent/wait_for_debugger=false
-
 [rendering]
 
 quality/driver/driver_name="GLES2"

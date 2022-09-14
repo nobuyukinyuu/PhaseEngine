@@ -1,6 +1,6 @@
 {
   "script": {
-    "enableScriptNuGetReferences": true,
+    "enableScriptNuGetReferences": false,
     "defaultTargetFramework": "net6.0"
   }
 }

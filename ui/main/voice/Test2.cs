@@ -650,8 +650,8 @@ public class Test2 : Label
 
         if(Visible)
         {
-            // this.Text = c.channels[0].ToString();
-            this.Text = buf.GetSkips().ToString();
+            this.Text = c.channels[0].ToString();
+            // this.Text = buf.GetSkips().ToString();  //Skips increases as a constant, it is not reset when buffer is filled
 
             // if (c.channels[0].ops[0].pg.increment > int.MaxValue) 
                 // this.SelfModulate = new Color("ff0000"); 
