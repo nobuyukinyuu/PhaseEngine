@@ -12,7 +12,7 @@ func _ready():
 	global.connect("op_tab_value_changed", self, "cache_recalc")
 	global.connect("algorithm_changed", self, "cache_recalc")
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	if should_recalc:  recalc()
 
 func _draw():

@@ -134,8 +134,6 @@ mode = 0
 access = 2
 filters = PoolStringArray( "*.wav; RIFF WAVE" )
 show_hidden_files = true
-current_dir = "/music/samples"
-current_path = "/music/samples/"
 
 [node name="Pause" type="Button" parent="."]
 margin_left = 88.0
