@@ -46,12 +46,28 @@ public class P_URand
         return _seed;
     }    
 
+    public int urand16()
+    {
+        _seed ^= (_seed & 0x07ff) << 5;
+        _seed ^= _seed >> 7;
+        _seed ^= (_seed & 0x0003) << 14;
+        _seed &= 0xFFFF;
+        return _seed;
+    }
+
     public int urand(ref int externalSeed)
     {
         _seed = externalSeed;
         externalSeed = urand();
         return externalSeed;
     }    
+
+    public int urand16(ref int externalSeed)
+    {
+        _seed = externalSeed;
+        externalSeed = urand16();
+        return externalSeed;
+    }
 }
 
 

@@ -338,17 +338,29 @@ namespace PhaseEngine
             //      that could ring semi-randomly like a typical oscillator would.  We might even be able to change the base frequency distribution
             //      this way, to move it from the fundamental of ~350hz closer to that of other noise types, without filtering.
 
-            // var seed = __refvalue(auxdata, int);
-            // bgen.Seed = seed;
+            var seed = __refvalue(auxdata, int);
+            bval = (seed >> 16);  //Get the high 16 bits of the auxdata.  This was our previous output value, according to the oscillator.
+            seed &= 0xFFFF;  //Set the seed to the 16 low bits.
+            int nextValue = (bgen.urand16(ref seed)-0x7FFF)>>5;  //Get a value between -1024-1023.  This is our "walk" value.  
+            int output = bval + nextValue;  //This value can overflow by ~1%, so we have to do an operation to reduce the value.
+            output = (int)(output*0.992f);
 
+            //Shove the values back into the seed.  First move our 16-bit output value to the high bits again, then mask with the seed.
+            seed = (output<<16) | bgen._seed;
+            __refvalue(auxdata, int) = seed;  //Return the seed back to the method that requested it, so we can hold the state of multiple oscillators
+
+            return (ushort) (output);
+        }
+        public static ushort Brown_OLD(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
+        {
             bval +=  ( (ushort)bgen.urand() ) >> 5 ;
             bval = (int) (bval * 0.99);
             var output = (bval - 0x7FFF);
 
-            //TODO:  Detect if the seed is the global default -- if so, clear bval maybe???
-            // __refvalue(auxdata, int) = bgen.Seed;  //Return the seed back to the method that requested it, so we can hold the state of multiple oscillators
             return (ushort) (output);
         }
+
+
 
         public static APU_Noise gen2 = new APU_Noise();
         public static ushort Noise2(ulong n, ushort duty, ref bool flip, TypedReference auxdata)

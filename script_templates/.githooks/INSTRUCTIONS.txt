@@ -1,0 +1,7 @@
+How to automate version numbering using these scripts:
+
+1.  dotnet tool install -g dotnet-script
+2.  navigate to /.git/hooks
+3.  mklink post-commit ..\..\script_templates\.githooks\post-commit.csx
+
+👍
