@@ -166,7 +166,7 @@ namespace PhaseEngine
             // sw.Stop();
             // Console.WriteLine("Saw2 Elapsed={0}ms",sw.Elapsed.Milliseconds);
 
-            System.Diagnostics.Debug.Print("Shornlf");
+            // System.Diagnostics.Debug.Print("Shornlf");
 
         }
 
