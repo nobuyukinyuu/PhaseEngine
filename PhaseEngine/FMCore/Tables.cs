@@ -103,6 +103,8 @@ namespace PhaseEngine
 
 
             //LFOs, 16kb tables etc
+            vol2pitchDown[0] = 1;
+            vol2pitchUp[0]   = 1;
             for (int i=1; i<8192; i++)
             {
                 // vol2pitchDown[i] = Tools.Lerp(1, 0.5f, i/8192.0f);
@@ -164,7 +166,7 @@ namespace PhaseEngine
             // sw.Stop();
             // Console.WriteLine("Saw2 Elapsed={0}ms",sw.Elapsed.Milliseconds);
 
-            // System.Diagnostics.Debug.Print("Shornlf");
+            System.Diagnostics.Debug.Print("Shornlf");
 
         }
 
