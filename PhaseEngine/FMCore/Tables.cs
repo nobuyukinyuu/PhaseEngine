@@ -23,7 +23,7 @@ namespace PhaseEngine
         public static readonly float[] vol2pitchUp = new float[8192];  //Converts an LFO's oscillator output to float mapping from 1-2
         public static readonly ushort[] vol2attenuation = new ushort[8192+1];  //Converts a 12-bit (positive) volume to an attenuation value.
 
-
+        public static readonly ushort[] brownDutyPreservationFactor = new ushort[8192];  //Fixed point magic numbers used to keep brownian motion in 16-bit range
 
 
         //HQ Sine table  (probably unused)
@@ -61,22 +61,15 @@ namespace PhaseEngine
         static Tables()
         {
             for(int i=0; i<short2float.Length; i++)
-            {
                 short2float[i] = (float) (i / 32767.5) - 1;
-            }
-
 
             for(int i=1; i<dutyRatio.Length; i++)  //Start at 1 to avoid divide by zero!
-            {
                 dutyRatio[i] = (float) (0xFFFF / (double)i) ;
-            }
 
 
             //Transpose
             for(int i=0; i<transpose.Length; i++)
-            {
                 transpose[i] = Math.Pow(2, (i * 0.01)/12.0);
-            }
 
             //sin
             for(int i=0; i<sin.Length; i++)
@@ -105,12 +98,16 @@ namespace PhaseEngine
             //LFOs, 16kb tables etc
             vol2pitchDown[0] = 1;
             vol2pitchUp[0]   = 1;
-            for (int i=1; i<8192; i++)
+            brownDutyPreservationFactor[0] = ushort.MaxValue; //(ushort) ((1<<16) - 1);  //Set to max.  This is a value of 1 in 16.16 fixed-point format
+            for (int i=1; i<8192; i++)  //12-bit tables
             {
-                // vol2pitchDown[i] = Tools.Lerp(1, 0.5f, i/8192.0f);
+                // vol2pitchDown[i] = Tools.Lerp(1, 0.5f, i/8192.0f);  //Linear scaling pitch
                 // vol2pitchUp[i]   = Tools.Lerp(1, 2, i/8192.0f);
-                vol2pitchDown[i] = (float)Math.Pow(2, -i/8192.0);
+                vol2pitchDown[i] = (float)Math.Pow(2, -i/8192.0);  //Logarithmic scaling pitch
                 vol2pitchUp[i]   = (float)Math.Pow(2,  i/8192.0);
+
+                var lin = (32768/(32767.5f+i));  //Log scale used to preserve relative volume at lower brownian walk values
+                brownDutyPreservationFactor[i] = (ushort) Tools.ToFixedPoint((float)lin, 16);
             }
 
             for (int i=0; i<amdScaleRatio.Length; i++)

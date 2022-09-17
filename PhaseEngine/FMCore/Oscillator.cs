@@ -322,16 +322,9 @@ namespace PhaseEngine
         }
 
         static P_URand bgen = new P_URand(Global.DEFAULT_SEED);
-        static int bval = 0x1A500;
+        static int bval; //= 0x1A500;
         public static ushort Brown(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
-            //TODO:  Consider rewriting the brown noise generator to use a 16-bit LFSR (period of 65535; 1.36s)
-            //      and storing the bval state in the high bits of the seed.  This may introduce artifacting; test it.
-            //      if the period becomes too short by filtering the results in this manner, consider using a custom bit-shift
-            //      based on the input of n, which should give us many unique (albeit sequential) values.......
-            //      We may also be able to salt the reference output with some value of n, which would produce different sequences at different pitches...
-            //      For potential examples, see https://en.wikipedia.org/wiki/Xorshift#xorwow
-
             //      For maximum range, consider the high 16 bits of n as salt:  a 12.4 fixed point value, (this would be a raw saw), rotated around
             //      with XOR to produce a predictable value which shifts at a slower rate to overlay on the seed before adding to the filtered value.
             //      Modifying the pitch should cause the waveform across the life of the oscillator's period to drift over time, creating interference patterns
@@ -340,10 +333,21 @@ namespace PhaseEngine
 
             var seed = __refvalue(auxdata, int);
             bval = (seed >> 16);  //Get the high 16 bits of the auxdata.  This was our previous output value, according to the oscillator.
+            seed += (int)(n&0xFFFFFFFF);
             seed &= 0xFFFF;  //Set the seed to the 16 low bits.
-            int nextValue = (bgen.urand16(ref seed)-0x7FFF)>>5;  //Get a value between -1024-1023.  This is our "walk" value.  
-            int output = bval + nextValue;  //This value can overflow by ~1%, so we have to do an operation to reduce the value.
-            output = (int)(output*0.992f);
+
+            //Get our walk value. We use duty as a max range of the value; to clamp the max number of our prng, we'll use fixed-point math.
+            duty >>=3;   //Make it so the duty can't walk more than an eighth of the length of the 16-bit range per frame.
+            int nextValue = (((bgen.urand16(ref seed)-0x7fff) * duty) >> 16) ;  //interpreted as 16.16 vales, the duty essentially serves as a percentage mult
+
+            int output = bval + nextValue;  //This value can overflow to 17-bits, so we have to do an operation to reduce the value next.
+
+            //Floating point representation.  The round trip here is expensive, so we do a fixed-point approximation.
+            // output = (int)(output* (32768/(32768f+duty))  ); //Output is reduced by a factor of the maximum possible overflow amount.
+
+            //Multiply by the duty's preservation factor. This precalculated value is the 16-bit fixed point decimal equivalent of the above 
+            output *= Tables.brownDutyPreservationFactor[duty];
+            output >>= 16;  //restore value to the now-reduced value.
 
             //Shove the values back into the seed.  First move our 16-bit output value to the high bits again, then mask with the seed.
             seed = (output<<16) | bgen._seed;
@@ -351,6 +355,7 @@ namespace PhaseEngine
 
             return (ushort) (output);
         }
+
         public static ushort Brown_OLD(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
             bval +=  ( (ushort)bgen.urand() ) >> 5 ;
