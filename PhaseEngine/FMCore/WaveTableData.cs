@@ -11,9 +11,9 @@ namespace PhaseEngine
 {
     public class WaveTableData
     {
-        internal const byte TBL_BITS=10;  //Can't be over 10
-        internal const ushort TBL_SIZE= 1<<TBL_BITS;  //Must be a power of 2
-        List<short[]> tbl;
+        // internal const byte TBL_BITS=10;  //Can't be over 10
+        internal const ushort TBL_SIZE= 1<<5;  //Must be a power of 2
+        List<short[]> tbl;  //Bank of all samples
 
         internal bool NotInUse {get => tbl==null || tbl.Count==0;}
         public int NumBanks {get => tbl==null? -1 : tbl.Count;}

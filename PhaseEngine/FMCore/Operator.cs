@@ -54,10 +54,7 @@ namespace PhaseEngine
         //Parameters specific to Operator
         public short[] fbBuf = new short[2];  //feedback buffer
 
-
         public Operator(){operatorOutputSample=ComputeVolume; intent=Intents.FM_OP; }
-        // public Operator(){ operatorOutputSample=OperatorType_ComputeLogOuput; }
-
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)] 
             void ResetPhase() {if (eg.osc_sync) {phase=0; seed=Global.DEFAULT_SEED;};  phase += Increments.PhaseOffsetOf(in pg, eg.phase_offset);}
@@ -128,7 +125,6 @@ namespace PhaseEngine
 
                 case "Wave":
                 {
-                    //TODO:  Set special functions for waveform, send auxdata with current bank
                     if (eg.feedback>0) operatorOutputSample = ComputeWavetableFeedback; else operatorOutputSample = ComputeWavetable;
                     return;
                 }
@@ -153,7 +149,6 @@ namespace PhaseEngine
 
 
         //=============Oscillator output types.  Either standard waveform (log domain), noise, or wavetable sample.=========================
-
 
         public short ComputeWavetableFeedback(ushort modulation, ushort am_offset)
         {
@@ -229,16 +224,8 @@ namespace PhaseEngine
 
 
         /// Summary:  Calculates the self feedback of the given input with the given modulation amount.
-        public short lBuf;  //Linear buffer?  FIXME / DEBUG
         public short ComputeFeedback(ushort modulation, ushort am_offset)
         {
-            // if (eg.feedback == 0) 
-            // {
-            //     // return (ComputeVolume(modulation, am_offset));
-            //     //Linear interpolation buffer;  Is this worth it?
-            //     lBuf = (short)((ComputeVolume(modulation, am_offset) + lBuf) >> 1);
-            //     return lBuf;
-            // }
             var avg = (fbBuf[0] + fbBuf[1]) >> (10 - eg.feedback);
             var output = ComputeVolume(unchecked((ushort)(avg+modulation)), am_offset);
             fbBuf[1] = fbBuf[0];

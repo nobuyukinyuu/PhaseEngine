@@ -230,6 +230,7 @@ namespace PhaseEngine
             voice = v;
             for (int i=0; i<channels.Length; i++)
                 channels[i].SetVoice(v);
+            
         }
 
         /// Updates all channels' operator count.  Will also update any attached voice specified, if requested.

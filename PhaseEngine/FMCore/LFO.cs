@@ -7,8 +7,6 @@ namespace PhaseEngine
     public class LFO : OpBase
     {
         public delegate int scaleFunc(int input = 0); //Used to process attenuation to volume scaling in PM
-        public scaleFunc ScaleProcess;  //FIXME:  Is this necessary?  We could consolidate this into operatorOutputSample maybe.....
-
 
         const int divider_max_count=6; //How often the LFO clocks.  The clock counter counts up to this number before recalculating the increment.
         byte cycle_counter;
@@ -28,7 +26,7 @@ namespace PhaseEngine
         short amd;  public short AMD {get => (short)(Envelope.L_MAX-amd); set => amd=(short)(Envelope.L_MAX-value);}  //User specified amplitude modulation depth.
         public bool osc_sync;  //Resets the phase of the LFO when NoteOn occurs.
         public bool delay_sync;  //Resets the phase of the LFO after the delay elapses.
-
+        public byte wavetable_bank;
 
         //Sets and returns the delay time in millisecs.
         public int Delay {get => (int)(delay / Global.MixRate * 1000); set => delay=(int)(value * Global.MixRate / 1000);}  
@@ -42,7 +40,6 @@ namespace PhaseEngine
         void Init(byte speed=19)  //Speed of LFO defaults to ~1.25s
         {
             intent = Intents.LFO;
-            ScaleProcess=PMScaleLog;
             operatorOutputSample = OperatorType_LogOutput;
             SetSpeed(speed);
         }
@@ -165,19 +162,16 @@ namespace PhaseEngine
                     seed = Global.DEFAULT_SEED;  //Reset the seed.
                     //Set the operator's sample output function to work in the linear domain.
                     operatorOutputSample = OperatorType_Noise;
-                    ScaleProcess = PMScaleNoise;
                     return;
                 }
-                // case "Wave":
-                // {
-                //     operatorOutputSample = ComputeWavetable;
-                //     return;
-                // }
-
+                case "Wave":
+                {
+                    operatorOutputSample = ComputeWavetable;
+                    return;
+                }
             }
 
             operatorOutputSample = OperatorType_LogOutput;
-            ScaleProcess = PMScaleLog;
         }
 
         int PMScaleLog(int input) => Tables.attenuation_to_volume((ushort) input);
@@ -199,8 +193,22 @@ namespace PhaseEngine
         }
 
 
+        public short ComputeWavetable(ushort modulation, ushort am_offset)
+        {
+            ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + modulation);
+            //TODO:  Consider using this.CurrentTable to reduce fetch calls.
+            //  This would also allow a Linear intent to create morphed tables during Clock() at a rate we can specify as a separate envelope
+            var tbl = this.wavetable.GetTable(eg.wavetable_bank);  
+            var samp = (short) Oscillator.Wave2(phase, ref flip, tbl);
+   
+            // combine into a 5.8 value, then convert from attenuation to 13-bit linear volume
+            var result = Tables.attenuation_to_volume((ushort)samp);
+
+            return (short)result;
+        }
+
         //Noise generators produce asymmetrical data.  Values must be translated to/from the log domain.
-        public short OperatorType_Noise(ushort modulation, ushort auxdata=0)
+        public short OperatorType_Noise2(ushort modulation, ushort auxdata=0)
         {
             ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + modulation);
             var samp = (short) oscillator.Generate(phase, duty, ref flip, __makeref(this.seed));
@@ -213,6 +221,19 @@ namespace PhaseEngine
             flip = !invert && Tools.BIT((short)samp, 9).ToBool();  //Make the LFO more melodic with invert OFF.  Invert ON holds the state open.
 
             return (short)result;
+        }
+
+        public short OperatorType_Noise(ushort modulation, ushort auxdata=0)
+        {
+            ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + modulation);
+            var seedRef = __makeref(this.seed);
+            var samp = oscillator.Generate(phase, duty, ref flip, seedRef);
+
+            short result = (short)(samp>>3);
+                        
+            flip = !invert && Tools.BIT((short)samp, 9).ToBool();  //Make the LFO more melodic with invert OFF.  Invert ON holds the state open.
+
+            return result;
         }
 
         public short OperatorType_LogOutput(ushort modulation, ushort auxdata=0)
@@ -241,6 +262,7 @@ namespace PhaseEngine
             o.AddPrim("oscillator", oscillator.CurrentWaveform);
            
             if (duty!=32767) o.AddPrim("duty", duty);
+            if (wavetable_bank>0) o.AddPrim("wavetable_bank", wavetable_bank);
             o.AddPrim("delay", Delay);  //Delay is tied to MixRate so we should get the independent value.
             o.AddPrim("speed", Speed);  //Speed is tied to MixRate so we should get the independent value.
             o.AddPrim("invert", invert);
@@ -257,7 +279,8 @@ namespace PhaseEngine
             if (j.Assign("oscillator", ref osc))  SetOscillatorType(osc);
             else System.Diagnostics.Debug.Fail("LFO.FromJSON: Can't parse osc");
            
-            j.Assign("duty", ref duty);
+            if (j.HasItem("duty")) j.Assign("duty", ref duty); else duty=32767;
+            wavetable_bank = (byte) j.GetItem("wavetable_bank", 0); //Reset if the tag doesn't exist so a channel doesn't reuse a previous value.
             Delay = j.GetItem("delay", Delay);  //Convert delay and speed values to reflect our mix rate.
             Speed = (byte) j.GetItem("speed", Speed);
             j.Assign("invert", ref invert);

@@ -45,6 +45,9 @@ signal op_intent_changed  #Emitted by the op intent menu to signal refreshing ta
 signal request_op_intent_menu  #Emitted by a tab or context menu from wiring grid
 signal wavebanks_changed #Emitted by the Waveform bank tab to signal panels to update their bank spinner.
 
+const wavebank_tooltip_text= "No sample banks defined for the voice.\nAdd from the Waveform panel, or select a new oscillator."
+
+
 #Some node and scene locations needed to prevent cyclic dependency, ensure window management, etc.
 const ENV_EDITOR_SCENE = preload("res://ui/envelope_editor/EnvelopeEditor.tscn")
 enum Contexts {NONE, GENERAL, ORDERS, PATTERN, VOICE, PHRASE, INSTRUMENT, TOPLEVEL=0xFFFF}

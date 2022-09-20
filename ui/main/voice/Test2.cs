@@ -572,7 +572,8 @@ public class Test2 : Label
 
     public void SetWaveBank(int opNum, int bank) 
     {
-        c.Voice.egs[opNum].wavetable_bank = (byte) bank;
+        if (opNum==-1) c.Voice.lfo.wavetable_bank = (byte) bank;
+        else c.Voice.egs[opNum].wavetable_bank = (byte) bank;
     }
 
     public Godot.Collections.Array GetWave(int bank)

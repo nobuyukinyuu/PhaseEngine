@@ -241,35 +241,6 @@ namespace PhaseEngine
             return o;
         }
         public string ToJSONString() => ToJSONObject().ToJSONString();
-
-        #if GODOT
-        // public Godot.Collections.Dictionary GetGodotDictionary()
-        // {
-        //     var o = new Godot.Collections.Dictionary();
-        //     o.Add("rates", rates);
-        //     int[] lv = {al,dl,sl,rl,tl}; //Bussing ushort[] returns null
-        //     o.Add("levels", lv);
-        //     o.Add("ams", ams);
-        //     // o.Add("rising", rising);
-
-        //     o.Add("delay", delay);
-        //     o.Add("hold", hold);
-        //     o.Add("feedback", feedback);
-        //     o.Add("duty", duty);
-        //     o.Add("osc_sync", osc_sync);
-        //     o.Add("phase_offset", phase_offset);
-        //     o.Add("cutoff", cutoff);
-        //     o.Add("resonance", resonance);
-
-        //     o.Add("mute", mute);
-        //     o.Add("bypass", bypass);
-        //     o.Add("aux_func", aux_func);
-        //     o.Add("gain", gain);
-
-        //     o.Add("wavetable_bank", wavetable_bank);
-        //     return o;
-        // }
-        #endif 
 #endregion
 
         //Convenience function for setting any property or field by specifying its name.  Not efficient for realtime use!

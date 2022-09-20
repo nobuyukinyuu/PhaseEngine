@@ -92,7 +92,7 @@ namespace PhaseEngine
   
             preview = new Channel(opCount);
             preview.SetVoice(this);
-  
+            lfo.wavetable = this.wavetable;
         }
 
         public bool SetPresetAlgorithm(byte preset)

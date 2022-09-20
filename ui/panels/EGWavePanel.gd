@@ -69,7 +69,6 @@ func _on_Bank_value_changed(value):
 	global.emit_signal("op_tab_value_changed")
 
 
-const tooltip_text= "No sample banks defined for the voice.\nAdd from the Waveform panel, or select a new oscillator."
 func check_banks(removed_idx=-1):
 	if !$Bank.visible:  return  #Bank state not relevant because the oscillator is set to something else.
 	
@@ -81,7 +80,7 @@ func check_banks(removed_idx=-1):
 	$Bank.max_value = max(0, numBanks)
 	$Bank.editable = numBanks > 0
 
-	bankline.hint_tooltip = "" if $Bank.editable else tooltip_text
+	bankline.hint_tooltip = "" if $Bank.editable else global.wavebank_tooltip_text
 
 	if removed_idx >=0:  #Uh oh.  Banks may have shifted. Determine if we need to find the new index.
 		if removed_idx == old_idx:  #Consider setting bank to 0 or an invalid value to default it out.

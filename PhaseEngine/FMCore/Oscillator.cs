@@ -322,23 +322,16 @@ namespace PhaseEngine
         }
 
         static P_URand bgen = new P_URand(Global.DEFAULT_SEED);
-        static int bval; //= 0x1A500;
         public static ushort Brown(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
-            //      For maximum range, consider the high 16 bits of n as salt:  a 12.4 fixed point value, (this would be a raw saw), rotated around
-            //      with XOR to produce a predictable value which shifts at a slower rate to overlay on the seed before adding to the filtered value.
-            //      Modifying the pitch should cause the waveform across the life of the oscillator's period to drift over time, creating interference patterns
-            //      that could ring semi-randomly like a typical oscillator would.  We might even be able to change the base frequency distribution
-            //      this way, to move it from the fundamental of ~350hz closer to that of other noise types, without filtering.
-
             var seed = __refvalue(auxdata, int);
-            bval = (seed >> 16);  //Get the high 16 bits of the auxdata.  This was our previous output value, according to the oscillator.
-            seed += (int)(n&0xFFFFFFFF);
+            int bval = (seed >> 16);  //Get the high 16 bits of the auxdata.  This was our previous output value, according to the oscillator.
+            seed += (int)(n&0xFFFFFFFF);  //"Salt" the seed with the phase accumulator. This mitigates oscillating noise from our PRNG's limited period.
             seed &= 0xFFFF;  //Set the seed to the 16 low bits.
 
-            //Get our walk value. We use duty as a max range of the value; to clamp the max number of our prng, we'll use fixed-point math.
+            //Get our walk value. We use duty as a max range of the value; to scale the value of our prng down to the duty range, we'll use fixed-point math.
             duty >>=3;   //Make it so the duty can't walk more than an eighth of the length of the 16-bit range per frame.
-            int nextValue = (((bgen.urand16(ref seed)-0x7fff) * duty) >> 16) ;  //interpreted as 16.16 vales, the duty essentially serves as a percentage mult
+            int nextValue = (((bgen.urand16(ref seed)-0x7fff) * duty) >> 16) ;  //interpreted as 16.16 values, the duty essentially serves as a percentage mult
 
             int output = bval + nextValue;  //This value can overflow to 17-bits, so we have to do an operation to reduce the value next.
 
@@ -356,6 +349,7 @@ namespace PhaseEngine
             return (ushort) (output);
         }
 
+        static int bval = 0x1A500;
         public static ushort Brown_OLD(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
             bval +=  ( (ushort)bgen.urand() ) >> 5 ;

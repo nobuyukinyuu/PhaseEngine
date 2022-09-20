@@ -2,7 +2,7 @@
 
 [ext_resource path="res://ui/FileDialog.theme" type="Theme" id=1]
 [ext_resource path="res://ui/voice_io/VoiceIODialogs.gd" type="Script" id=2]
-[ext_resource path="res://ui/voice_io/BankSelect.gd" type="Script" id=4]
+[ext_resource path="res://ui/voice_io/VoiceBankSelect.gd" type="Script" id=4]
 
 [sub_resource type="Theme" id=1]
 
