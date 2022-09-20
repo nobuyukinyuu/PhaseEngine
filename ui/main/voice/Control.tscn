@@ -1,4 +1,4 @@
-[gd_scene load_steps=53 format=2]
+[gd_scene load_steps=54 format=2]
 
 [ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=1]
 [ext_resource path="res://ui/kanbanScroll/Column.tscn" type="PackedScene" id=2]
@@ -12,6 +12,7 @@
 [ext_resource path="res://gfx/fonts/numerics_5x8.tres" type="BitmapFont" id=10]
 [ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=11]
 [ext_resource path="res://ui/main/voice/Test2.cs" type="Script" id=12]
+[ext_resource path="res://ui/panels/WaveBankSpinBox.tscn" type="PackedScene" id=13]
 [ext_resource path="res://ui/main/voice/MIDI.gd" type="Script" id=14]
 [ext_resource path="res://ui/EGCheckBox.tres" type="Theme" id=15]
 [ext_resource path="res://ui/TabContainer.theme" type="Theme" id=16]
@@ -423,6 +424,12 @@ rect_min_size = Vector2( 64, 20 )
 max_value = 65535.0
 value = 32767.0
 associated_property = "duty"
+
+[node name="Bank" parent="LTab/LFO/WavePanel" instance=ExtResource( 13 )]
+margin_left = 71.0
+margin_top = 13.0
+margin_right = 201.0
+margin_bottom = 27.0
 
 [node name="Preview" type="TextureRect" parent="LTab/LFO/WavePanel"]
 margin_left = 219.0

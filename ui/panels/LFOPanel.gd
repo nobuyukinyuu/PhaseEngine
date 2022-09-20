@@ -1,4 +1,6 @@
 extends TabContainer
+const CUSTOM=9  #Microsample oscillator index
+
 
 func _ready():
 	#Set up Metadata.
@@ -94,5 +96,10 @@ func _on_Popup_button_pressed(idx):
 	get_node(owner.chip_loc).SetOscillator(global.OpIntent.LFO, idx)
 	$LFO/WavePanel/Preview.texture = global.wave_img[idx]
 	$LFO/WavePanel/Popup.hide()
-	pass
+	switch_bank_ui(idx==CUSTOM)
 
+func switch_bank_ui(on):
+	$LFO/WavePanel/Duty.visible = !on
+	$LFO/WavePanel/Bank.visible = on
+
+	if on:  $LFO/WavePanel/Bank.check_banks()
