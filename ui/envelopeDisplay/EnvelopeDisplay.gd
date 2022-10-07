@@ -2,7 +2,7 @@
 class_name EnvelopeDisplay
 extends Panel
 
-export (float, 0.5, 5, 0.1) var thickness = 1 setget update_thickness
+export (float, 0.5, 5, 0.1) var thickness = 1.0 setget update_thickness
 #export (float, -2, 5, 0.1) var ac=-2 setget update_ac
 #export (float, -2, 5, 0.1) var dc=-1 setget update_dc 
 #export (float, -2, 5, 0.1) var sc= 1 setget update_sc

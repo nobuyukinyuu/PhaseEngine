@@ -11,6 +11,7 @@ onready var lblPos2 = Vector2(rect_size.x/2 - (len(str(value))+1)*charw/2.0, rec
 
 export(String) var associated_property = ""  #Determines the envelope property this slider's supposed to modify.
 export(bool) var bindable
+export(int, FLAGS, "Envelope", "Key Follow", "Velocity Table") var bind_abilities
 var is_bound:bool = false
 
 export(bool) var useExpTicks
@@ -32,8 +33,6 @@ const bind_icon = preload("res://gfx/ui/bind_indicator.png")
 var envelope_editor:NodePath  #Used to hold the envelope editor node active 
 signal bind_requested
 signal unbind_requested
-
-const ENV_POPUP_NAME = "Op%s %s Env"  #Example:  "Op1 tl Env"
 
 func set_offset(val):
 	text_offset = val
@@ -69,7 +68,7 @@ func _gui_input(event):
 		accept_event()
 
 #Used for binds.  Use the proper context depending on what tab it's used in.
-func request_envelope_editor(title:String, data:Dictionary, context=global.Contexts.NONE, context2:int=-1):
+func request_envelope_editor(title:String, data:Dictionary, context=global.Contexts.NONE, op:int=-1):
 	if Engine.editor_hint:  return
 	
 	var existing_popup = global.get_modeless_popup(title, context)

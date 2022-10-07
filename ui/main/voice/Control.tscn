@@ -212,6 +212,7 @@ anims/NoteOn = SubResource( 1 )
 script = ExtResource( 14 )
 
 [node name="FMPreview" type="Label" parent="."]
+unique_name_in_owner = true
 self_modulate = Color( 1, 1, 1, 0.568627 )
 margin_left = 12.0
 margin_top = 256.0
@@ -219,9 +220,6 @@ margin_right = 268.0
 margin_bottom = 384.0
 text = "Output:"
 script = ExtResource( 40 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Timer" type="Timer" parent="FMPreview"]
 wait_time = 0.25
@@ -236,9 +234,6 @@ margin_bottom = 400.0
 custom_colors/font_color = Color( 0.952941, 0.952941, 0.952941, 0.552941 )
 text = "WAVEFORM DISPLAY"
 script = ExtResource( 12 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Player" type="AudioStreamPlayer" parent="Channels"]
 stream = SubResource( 2 )
@@ -290,7 +285,6 @@ tab_align = 0
 script = ExtResource( 39 )
 
 [node name="Metadata" type="Control" parent="LTab"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 1.0
@@ -385,6 +379,7 @@ title_align = Vector2( 0.3, -0.1 )
 value_font = ExtResource( 7 )
 
 [node name="LFO" type="Control" parent="LTab"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 1.0

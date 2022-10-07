@@ -40,8 +40,6 @@ func set_from_op(op:int):
 	var eg = get_node(chip_loc)
 	var d = eg.GetOpValues(0, op)  #EG dictionary
 
-	var type = d["aux_func"]
-		
 	#Get dictionary of rTable values and populate the tbl_placeholder in ResponseButtons
 	for btn in rTables:
 		var intent = btn.intent

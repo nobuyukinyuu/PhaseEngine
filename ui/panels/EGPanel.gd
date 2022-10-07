@@ -249,7 +249,8 @@ func bindEG(sender:EGSlider, value, set_bound=true):
 	else:
 		#TODO:  UNBIND HERE
 		pass
-
+#TODO:
+#func bindPG(sender:EGSlider, value, set_bound=true):
 
 onready var ab = [$Tune, $Frequency]
 func _on_FixedRatio_toggled(button_pressed, update_chip=true):

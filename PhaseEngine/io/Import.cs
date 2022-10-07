@@ -20,13 +20,17 @@ namespace PhaseEngine
     }
 
     [Flags]
-    public enum IOErrorFlags {OK=0, Failed=1, UnrecognizedFormat=2, NotFound=4, AccessDenied=8, Corrupt=16, }
+    public enum IOErrorFlags {OK=0, Failed=1, UnrecognizedFormat=2, NotFound=4, AccessDenied=8, Corrupt=16, TooLarge=32, Unsupported=64}
 
     //Stub
     public class PE_ImportException : Exception
     {
         public IOErrorFlags flags;
-        public PE_ImportException(IOErrorFlags flags) {this.flags = flags;}
+
+        public PE_ImportException(string message): base(message){}
+        public PE_ImportException(string message, Exception inner): base(message, inner){}
+        public PE_ImportException(IOErrorFlags flags) => this.flags = flags;
+        public PE_ImportException(IOErrorFlags flags, string message) : base(message) => this.flags = flags;
     }
 
 

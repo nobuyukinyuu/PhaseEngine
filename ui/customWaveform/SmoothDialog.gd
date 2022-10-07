@@ -36,9 +36,8 @@ func smooth():
 	$V/TextureRect.update()
 	
 
-func _on_Amount_value_changed(value):
+func _on_Amount_value_changed(_value):
 	smooth()
-	pass # Replace with function body.
 
 
 func _on_Wrap_toggled(button_pressed):

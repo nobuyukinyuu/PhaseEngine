@@ -2,6 +2,7 @@ using Godot;
 using System;
 using PhaseEngine;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public class Test2 : Label
 {
@@ -18,8 +19,11 @@ public class Test2 : Label
 
     Chip c = new Chip(6,4);
     long[] lastID = new long[128];  //Keeps track of the last ID pressed on a specified note, to turn it off when a noteOff event is detected.
+    public int[] channel_ttl = new int[]{0,0,0,0,0,0};  //Used to keep track of positions of active notes
 
     Node fromMidi;
+
+    enum Src {LFO=-1, EG, PG}; //References to locations in Voice when targeting eg or pg locations in methods containing `whichKind`
 
     public override void _Ready()
     {
@@ -48,8 +52,10 @@ public class Test2 : Label
 
     public void TryNoteOn(int midi_note, int velocity)
     {
-        lastID[midi_note] = c.NoteOn((byte)midi_note, (byte) velocity);
-        GD.Print("On?  ", midi_note, " at ", velocity, ";  id=", lastID[midi_note]);
+        byte to_reset;  //Channel whose TTL should be reset
+        lastID[midi_note] = c.NoteOn(out to_reset, (byte)midi_note, (byte) velocity);
+        // GD.Print("On?  ", midi_note, " at ", velocity, ";  id=", lastID[midi_note]);
+        channel_ttl[to_reset] = -1;
     }
 
     public void TryNoteOff(int midi_note)
@@ -85,8 +91,8 @@ public class Test2 : Label
     //////////////////////////////    BINDS    ////////////////////////////////////
 
     public bool BindExists(int whichKind, int opTarget, string property) {
-        switch (whichKind){
-            case 0:  return c.Voice.egs[opTarget].BoundEnvelopes.ContainsKey(property);
+        switch ((Src)whichKind){
+            case Src.EG:  return c.Voice.egs[opTarget].BoundEnvelopes.ContainsKey(property);
             // case 1:  return c.Voice.pgs[opTarget].BoundEnvelopes.ContainsKey(property);
         } return false;
     }
@@ -103,24 +109,24 @@ public class Test2 : Label
     {
         try{
             TrackerEnvelope e;
-            switch(whichKind)
+            switch((Src)whichKind)
             {
-                case 0:
+                case Src.EG:
                     if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
                     if (pt.y<0 || pt.y>1) return BindPointReturnCode.ValueOutOfRange;
                     var val = Tools.Remap(pt.y, 0, 1, e.minValue, e.maxValue);  //Remap the input value from 0-1 to our binds bounds
                     e.SetPoint(ptIndex, (pt.x, val));
                     break;
-                case 1:
+                case Src.PG:
                     // TODO:  IMPLEMENT
                     return BindPointReturnCode.BindNotFound;
                     // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
             }
         } catch (IndexOutOfRangeException exception) {
-            System.Diagnostics.Debug.Print(exception.Message);
+            Debug.Print(exception.Message);
             return BindPointReturnCode.IndexOutOfRange;
         } catch (Exception exception) {
-            System.Diagnostics.Debug.Print(exception.Message);
+            Debug.Print(exception.Message);
             return BindPointReturnCode.ERROR;
         }
         return BindPointReturnCode.OK;
@@ -129,24 +135,25 @@ public class Test2 : Label
     {
         try{
             TrackerEnvelope e;
-            switch(whichKind)
+            switch((Src)whichKind)
             {
-                case 0:
+                case Src.EG:
                     if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
                     if (pt.y<0 || pt.y>1) return BindPointReturnCode.ValueOutOfRange;
                     var val = Tools.Remap(pt.y, 0, 1, e.minValue, e.maxValue);  //Remap the input value from 0-1 to our binds bounds
                     e.Insert(ptIndex, (pt.x, val));
                     break;
-                case 1:
+                case Src.PG:
                     // TODO:  IMPLEMENT
                     // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
                     return BindPointReturnCode.BindNotFound;
             }
         } catch (IndexOutOfRangeException exception) {
-            System.Diagnostics.Debug.Print(exception.Message);
+            GD.PrintErr(exception.Message);
             return BindPointReturnCode.IndexOutOfRange;
         } catch (Exception exception) {
-            System.Diagnostics.Debug.Print(exception.Message);
+            throw exception;
+            GD.PrintErr(exception.Message);
             return BindPointReturnCode.ERROR;
         }
         return BindPointReturnCode.OK;
@@ -155,22 +162,22 @@ public class Test2 : Label
     {
         try{
             TrackerEnvelope e;
-            switch(whichKind)
+            switch((Src)whichKind)
             {
-                case 0:
+                case Src.EG:
                     if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
                     e.Remove(ptIndex);
                     break;
-                case 1:
+                case Src.PG:
                     // TODO:  IMPLEMENT
                     // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
                     return BindPointReturnCode.BindNotFound;
             }
         } catch (IndexOutOfRangeException exception) {
-            System.Diagnostics.Debug.Print(exception.Message);
+            Debug.Print(exception.Message);
             return BindPointReturnCode.IndexOutOfRange;
         } catch (Exception exception) {
-            System.Diagnostics.Debug.Print(exception.Message);
+            Debug.Print(exception.Message);
             return BindPointReturnCode.ERROR;
         }
         return BindPointReturnCode.OK;
@@ -180,13 +187,14 @@ public class Test2 : Label
     {
         //Return an empty dictionary if the bind doesn't exist, otherwise get the serialized version of the envelope we requested.
         TrackerEnvelope e;
-        switch(whichKind)
+        switch((Src)whichKind)
         {
-            case 0: default:  //EG
-                if (c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e))
-                    return (Godot.Collections.Dictionary) Godot.JSON.Parse(e.ToJSONString()).Result;
-                break;
-            case 1:  //PG
+            case Src.EG: default:  //EG
+                var success = c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e);
+                Debug.Assert(success);
+                var d = (Godot.Collections.Dictionary) Godot.JSON.Parse(e.ToJSONString()).Result;
+                return d;
+            case Src.PG:  //PG
                 // if (c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e))
                 //     return (Godot.Collections.Dictionary) Godot.JSON.Parse(e.ToJSONString()).Result;
                 break;
@@ -197,12 +205,12 @@ public class Test2 : Label
     //Used by Op panels to populate the UI elements.  
     public Godot.Collections.Dictionary GetOpValues(int whichKind, int opTarget)
     {
-        switch(whichKind)
+        switch((Src)whichKind)
         {
-            case 0: default:  //EG
+            case Src.EG: default:
                 return (Godot.Collections.Dictionary) Godot.JSON.Parse(c.Voice.egs[opTarget].ToJSONString()).Result;
                 // return c.Voice.GetEG(opTarget);
-            case 1:  //PG
+            case Src.PG:  //PG
                 var output = (Godot.Collections.Dictionary) Godot.JSON.Parse(c.Voice.pgs[opTarget].ToJSONString()).Result;
                 output.Add("tuned_hz", (float)c.Voice.pgs[opTarget].tuned_hz);  //Needed by egTooltips in frontend to calculate an accurate multiplier
                 return output;
@@ -212,7 +220,10 @@ public class Test2 : Label
 #endregion
 
     public byte GetOpIntent(int opTarget){ if(opTarget >= c.OpCount) return 0; else return (byte)c.Voice.alg.intent[opTarget]; }
-    public byte GetOscType(int opTarget){if(opTarget >= c.OpCount) return 0; else if (opTarget==-1) return (byte)c.Voice.lfo.OscType; else return c.Voice.oscType[opTarget];}
+    public byte GetOscType(int opTarget)
+    {   if(opTarget >= c.OpCount) return 0; 
+        else if (opTarget==(int)Src.LFO) return (byte)c.Voice.lfo.OscType;
+        else return c.Voice.oscType[opTarget];}
 
     public byte GetOscTypeOrFunction(int opTarget)  //Returns a value corresponding to the primary function of the operator.  For determining preview icons, etc...
     {
@@ -314,6 +325,9 @@ public class Test2 : Label
     {
         c.Voice.SetEG(opTarget, property, val);
 
+        if (c.Voice.egs[opTarget].BoundEnvelopes.ContainsKey(property))  //Update the initial value
+            SetBindValue((int)Src.EG, opTarget, property, 0, new Vector2(0, val));
+
         //For live feedback of changes in the EG value.  Inefficient;  DON'T use this in production!
         if (opTarget >= c.Voice.opCount) return;
 
@@ -362,7 +376,7 @@ public class Test2 : Label
 
     public void SetOscillator(int opTarget, float val)
     {
-        if (opTarget==-1) //LFO
+        if (opTarget==(int)Src.LFO) //LFO
         {
             c.Voice.lfo.SetOscillatorType((byte)val);
             return;
@@ -499,7 +513,7 @@ public class Test2 : Label
         var o = PE_Json.JSONData.ReadJSON(data) as PE_Json.JSONObject;
         if (o == null)
         {
-            System.Diagnostics.Debug.Print("PasteJSONData:  Failed to parse");
+            Debug.Print("PasteJSONData:  Failed to parse");
             return Error.ParseError;
         }
 
@@ -532,7 +546,11 @@ public class Test2 : Label
         VoiceBankImporter v;
         var err = PE_ImportServer.TryLoad(path, out v);
 
-        if (err !=IOErrorFlags.OK) return output;
+        if (err !=IOErrorFlags.OK) 
+        {
+            GD.Print($"Import failed.  (Code {err})");
+            return output;
+        }
 
         for(int i=0; i<v.bank.Length; i++)
         {  //Get the names of all the instruments in the bank and return them.
@@ -572,7 +590,7 @@ public class Test2 : Label
 
     public void SetWaveBank(int opNum, int bank) 
     {
-        if (opNum==-1) c.Voice.lfo.wavetable_bank = (byte) bank;
+        if (opNum==(int)Src.LFO) c.Voice.lfo.wavetable_bank = (byte) bank;
         else c.Voice.egs[opNum].wavetable_bank = (byte) bank;
     }
 
@@ -665,8 +683,16 @@ public class Test2 : Label
             // info.Text = FramesPerOscillation();
             Update();            
         }
-    }
 
+
+        //Calculate the ttl on the active channels
+        for(int i=0; i<c.channels.Length; i++)
+        {
+            if (c.channels[i].busy==BusyState.FREE) channel_ttl[i] = -1;
+            else channel_ttl[i] +=1;
+        }
+
+    }
 
 
     ///////////////////////////////////////////////// SCOPE /////////////////////////////////////////////////

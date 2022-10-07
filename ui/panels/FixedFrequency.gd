@@ -20,7 +20,7 @@ func _ready():
 	#Populate the preset dropdown with note names
 	
 	for i in range(128):
-		var octave = "?" if i < 12 else floor((i-12)/12)
+		var octave = "-" if i < 12 else floor((i-12)/12)
 		var note = note_names[(i+3) % 12]
 		
 		var tex = AtlasTexture.new()

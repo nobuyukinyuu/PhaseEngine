@@ -2,7 +2,7 @@ extends Control
 
 var zoom = 1200  #Number of millisecs to display on ruler at once
 var offset = 0  #Offset from 0ms to start with
-var e = exp(1)
+#var e = exp(1)
 
 var col = Color("#185160")
 var col2 = Color("#40d6ff")

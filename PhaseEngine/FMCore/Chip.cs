@@ -124,6 +124,12 @@ namespace PhaseEngine
             return NoteOn(ch, midi_note, velocity);
         }
 
+        public long NoteOn(out byte channel_selected, byte midi_note, byte velocity=127)
+        {
+            Channel ch = RequestChannel(out channel_selected, midi_note);
+            return NoteOn(ch, midi_note, velocity);
+        }
+
         /// Turns off the specified channel.  Returns false if the channel is invalid.
         public bool NoteOff(Channel ch)
         {
@@ -160,15 +166,19 @@ namespace PhaseEngine
         //TODO:  Channel request methods for flipping a note on.  Each channel is enumerated for PriorityScore unless one is found free (score of 0?)
         //      Manual requested channel is nullable and should catch out-of-bounds number requests, print an error out and return null.
         //      Auto requested channel should probably never return null....
-        public Channel RequestChannel(byte midi_note=Global.NO_NOTE_SPECIFIED) 
+        public Channel RequestChannel(out byte ch_idx, byte midi_note=Global.NO_NOTE_SPECIFIED) 
         {
             Channel best_candidate = channels[0];
+            ch_idx = 0;
             var score = 0;
-            for(int i=0; i<channels.Length; i++)
+            for(byte i=0; i<channels.Length; i++)
             {
                 var ch=channels[i];
                 if (ch.busy==BusyState.FREE) 
+                {
+                    ch_idx = i;
                     return ch;
+                }
                 if (ch.midi_note == midi_note) //The channel we're peeking is the same note! Turn off. Might be best candidate
                 {
                     ch.NoteOff();
@@ -180,10 +190,12 @@ namespace PhaseEngine
                 {
                     score = chScore;
                     best_candidate = ch;
+                    ch_idx = i;
                 }
             }
             return best_candidate;
         }
+        public Channel RequestChannel(byte midi_note=Global.NO_NOTE_SPECIFIED) => RequestChannel(out byte discarded, midi_note);
 
         // //Immediately grabs a channel whether it's busy or not.
         // public Channel GrabChannel(byte channel) 

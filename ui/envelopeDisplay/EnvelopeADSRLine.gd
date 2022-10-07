@@ -6,12 +6,12 @@ const LINE_OPACITY = [0.1, 0.4]
 export(bool) var note_off_indicator
 #export (bool) var reverse
 export (Color) var color = ColorN("white")
-export (float, 0.5, 5, 0.5) var thickness = 1
-export (float, -2, 5, 0.1) var curve=1 setget update_curve
+export (float, 0.5, 5, 0.5) var thickness = 1.0
+export (float, -2, 5, 0.1) var curve=1.0 setget update_curve
 
-export(float,0,1) var p1=0  
-export(float,0,1) var p2=1  
-export(float,0,1) var tl=0  
+export(float,0,1) var p1=0.0
+export(float,0,1) var p2=1.0
+export(float,0,1) var tl=0.0
 
 func update_curve(val):
 	curve = val

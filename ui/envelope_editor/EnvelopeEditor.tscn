@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=2]
+[gd_scene load_steps=38 format=2]
 
 [ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=1]
 [ext_resource path="res://gfx/fonts/numerics_5x8.tres" type="BitmapFont" id=2]
@@ -25,6 +25,7 @@
 [ext_resource path="res://gfx/ui/envelope_editor/icon_sustain.png" type="Texture" id=23]
 [ext_resource path="res://gfx/ui/envelope_editor/icon_loop.png" type="Texture" id=24]
 [ext_resource path="res://gfx/ui/point_crosshair.png" type="Texture" id=25]
+[ext_resource path="res://ui/envelope_editor/NotePositions.gd" type="Script" id=26]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0, 0, 0, 0.878431 )
@@ -126,6 +127,7 @@ expand_margin_bottom = 2.0
 anti_aliasing_size = 0.6
 
 [node name="CustomEnvelope" type="WindowDialog"]
+visible = true
 margin_right = 464.0
 margin_bottom = 344.0
 rect_min_size = Vector2( 464, 344 )
@@ -273,6 +275,12 @@ position = Vector2( 316, 104 )
 texture = ExtResource( 25 )
 hframes = 4
 script = SubResource( 18 )
+
+[node name="NotePositions" type="Control" parent="Display"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource( 26 )
 
 [node name="ValueRuler" type="TextureRect" parent="."]
 margin_left = 16.0

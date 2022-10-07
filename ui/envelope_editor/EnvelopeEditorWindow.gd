@@ -2,14 +2,15 @@ extends WindowDialog
 class_name EnvelopeEditorWindow, "res://gfx/ui/bind_indicator.png"
 
 var invoker:NodePath  #The control that spawned us.  Typically an EGSlider.  References invalidate when tab's moved
-var lo=0
-var hi=63
+var lo=0  #Minimum value of env output
+var hi=63 #Max value of env output
 
 var data=[Vector2.ZERO]  #Intermediate point data.  Vec2 where x=ms, y=0-1.
 var cached_display_bounds = {}
 
 var last_clicked_position = Vector2.ZERO
 
+#Loop stuff
 enum LoopHandle {None, LoopStart, LoopEnd, SusStart = 4, SusEnd = 8}
 var susStart:int = -1
 var susEnd:int = -1
@@ -18,10 +19,17 @@ var loopEnd:int = -1
 var has_loop=false
 var has_sustain=false
 
+#Data source stuff
+var DataSource = {"Envelope": 0, "Increments": 1}  #Used for knowing where to set points. Based on c# class names.
+var data_source_type:int
+var associated_value:String
+var operator = -1
+
 var selected = -1  #Selected point (or area between points, if Vector2) -- for add/remove pts
 
 #Toolbar selector enum
 enum{NEW_PT, REMOVE_PT, COPY, PASTE, SET_LOOP, SET_SUSTAIN}
+
 
 func compare(a:Vector2,b:Vector2):  #Compares 2 vec2's in the data block for bsearch_custom
 	return a.x < b.x
@@ -34,13 +42,20 @@ func setup(title:String, d:Dictionary, invoker:NodePath=""):
 
 	set_minmax(d.get("minValue", 0), d.get("maxValue", 63))
 
+	#Set the source location so we know where to chooch edits
+	data_source_type = DataSource[ d["dataSource"] ]
+	associated_value = d["associatedValue"]
+	operator = get_node(invoker).owner.operator
+
+	#Grab the point data from the dict
 	var pts = d.get("pts", [0,0])
 	assert(pts.size() % 2 == 0)
 
+	data = []
 	for i in range(0, pts.size(), 2):  #Set initial value
-		data = []
-		data.append( Vector2(scale_down(pts[i]), scale_down(pts[i+1])) )
+		data.append( Vector2(pts[i], scale_down(pts[i+1])) )
 	recalc_display_bounds()  #Determine how to draw the points visible in the display window.
+	$Display.update()
 
 	#Check if we should be attaching to an invoker
 	var success = rebind_to(invoker)
@@ -97,6 +112,14 @@ func _ready():
 #	if which==$lblValue/minn:  lo = val 
 #	else: hi = val
 #	set_minmax(lo, hi)
+
+func _physics_process(_delta):
+	if !visible:  return
+	if !owner.owner.get_node("%FMPreview").should_be_visible:  #Notes are active, update the visual overlay
+		$Display/NotePositions.visible = true
+		$Display/NotePositions.update()
+	else:
+		$Display/NotePositions.visible = false
 
 
 func get_display_bounds():
@@ -178,6 +201,10 @@ func repl_first(input:String, what, replacement):
 
 #Perform various actions.
 func _on_ToolButton_pressed(toggled=false, which_button=-1):
+	if not is_in_front():  
+		bring_to_front()
+		return  #Ignore shortcut input from windows not in front.
+	
 	match which_button:
 		NEW_PT:
 			if !$Display/PointCrosshair.should_display:  return
@@ -198,6 +225,10 @@ func _on_ToolButton_pressed(toggled=false, which_button=-1):
 
 			recalc_display_bounds()
 			$Display.update()
+			
+			var c = get_node(owner.owner.chip_loc)
+			var success = c.AddBindEnvelopePoint(data_source_type, operator, associated_value, 
+									last_closest, last_clicked_position)
 
 
 		REMOVE_PT:
@@ -208,6 +239,10 @@ func _on_ToolButton_pressed(toggled=false, which_button=-1):
 			
 			#Make sure the new point 0 is always at 0ms.
 			data[0].x = 0
+
+			var c = get_node(owner.owner.chip_loc)
+			c.RemoveBindEnvelopePoint(data_source_type, operator, associated_value, $Display.last_closest_pt)
+
 
 #			$Display.last_closest_pt = -1
 			$Display.last_closest_pt = min(data.size()-1, $Display.last_closest_pt)
@@ -278,20 +313,27 @@ func clamp_loops():
 	susEnd = clamp(susEnd, 0, data.size()-1)
 
 
-
+#Called from display or egslider to move both values at once
 func set_initial_value(val, from_invoker=false):
-	#TODO:  If this func was called from the invoker slider, then we simply update our value.
-	#		If not, then our display wants to update the invoker instead.
-	
-	if not from_invoker:
+	# If this func was called from the invoker slider, then we simply update our value.
+	# If not, then our display wants to update the invoker instead.
+
+	if not from_invoker:  #We were called from the display
 		if !invoker.is_empty():
 			var p:Slider = get_node(invoker)
 			if p:
 				p.value = val
+				
+			set_bind_value(0, data[0])  #This is ignored for point 0 in Display.gd so do it here.
 		#TODO:  CHECK IF THIS EMITS A SIGNAL FROM THE SLIDER
-	else:
+	else:  #The invoker slider called us
 		data[0].y = scale_down(val)
 		$Display.update()
+
+func set_bind_value(index, pt):  #Update the data structure on the c# end
+	var c = get_node(owner.owner.chip_loc)
+	c.SetBindValue(data_source_type, operator, associated_value, index, pt)
+
 
 #Scales raw data down to 0-1 display values.
 func scale_down(val):
@@ -299,18 +341,22 @@ func scale_down(val):
 func scale_up(val):
 	return range_lerp(val, 0, 1, lo, hi)
 
+####################### Window Management #######################
 func _on_CustomEnvelope_popup_hide():
 	print("Closing ", name)
 	queue_free()
-	pass # Replace with function body.
 
-
+func is_in_front():  #Returns true if we're at the front of the modeless window manager.
+	var parent = get_parent()
+	return get_position_in_parent() == parent.get_child_count()-1
+func bring_to_front():
+	var parent = get_parent()
+	parent.move_child(self, parent.get_child_count()-1)
 
 func _on_CustomEnvelope_gui_input(event):
 	if event is InputEventMouseButton and event.pressed:
 		#Move to top of node list so this window displays over the others.
-		var parent = get_parent()
-		parent.move_child(self, parent.get_child_count()-1)
-#		prints($"H/lblTitle".text, "clicked")
+		bring_to_front()
+		#Don't accept_event() here, it'll lock input
 
 

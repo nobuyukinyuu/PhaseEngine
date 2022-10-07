@@ -14,7 +14,7 @@ func _ready():
 	connect("mouse_exited", self, "set_drop_preview", [false])
 	hint_tooltip = "-"
 
-func _on_tab_selected(idx):
+func _on_tab_selected(_idx):
 	var tab = get_tab_control(current_tab)
 	prints(name,tab.name, ownerColumn.dirty)
 	if ownerColumn.dirty:
@@ -22,7 +22,7 @@ func _on_tab_selected(idx):
 #			yield(get_tree(), "idle_frame")
 			tab.check_binds()
 
-func _on_tab_changed(idx):
+func _on_tab_changed(_idx):
 #	print("%s/%s: tab changed? to %s" % [ownerColumn.name, name, idx])
 #	if get_tab_count() == 0:  print("uh oh, empty.  Time to go away...")
 	if ownerColumn.dirty:  
@@ -105,7 +105,7 @@ func set_drop_preview(dragging:bool):
 		if get_child_count()==0:
 			drop_preview = Rect2(Vector2.ZERO, rect_size)
 		else:
-			var idx = get_tab_idx_at_point(get_local_mouse_position())
+#			var idx = get_tab_idx_at_point(get_local_mouse_position())
 			drop_preview = Rect2(
 						 Vector2(get_closest_tab_pos(get_local_mouse_position()), 0),
 						 Vector2(4, 26))

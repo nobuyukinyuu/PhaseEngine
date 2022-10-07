@@ -35,6 +35,13 @@ var can_drag_loop = CanDrag.NO
 var can_drag_sustain = CanDrag.NO
 var loop_dragging = CanDrag.NO  #Active loop dragging handle.  Sustain values are << 2; Rsh to extract
 
+#signal point_moved   # [idx:int, pos:Vector2]
+#signal point_added   # [idx:int, pos:Vector2]
+#signal point_removed # [idx:int]
+#signal loop_enabled  # [which
+#signal loop_moved
+
+
 func _ready():
 	pass # Replace with function body.
 
@@ -44,6 +51,14 @@ func _ready():
 
 func _gui_input(event):
 	if event is InputEventMouseButton:
+		
+		#First, check if the window is in the background.  If so, move the window up.
+		var parent = owner.get_parent()
+		if event.pressed and not owner.is_in_front():
+			print("window out of focus.  Refocusing!")
+			owner._on_CustomEnvelope_gui_input(event)
+#			return  #Uncomment this line if you'd rather input not propagate input to unfocused windows
+		
 		match event.button_index:
 			BUTTON_WHEEL_DOWN:
 				owner.get_node("ZoomBar/Slider").value *= QUAD_ROOT_OF_2
@@ -114,9 +129,13 @@ func _gui_input(event):
 
 					
 				else:  #MouseUp
+					if drag_pt>0:  #Don't update 1st point; handled in owner.set_initial_value() and in SetEG().
+						owner.set_bind_value(drag_pt, drag_value)
+					
 					drag_pt = -1  #Reset drag point.
 					loop_dragging = CanDrag.NO
-					#TODO:  Process change in Chip
+					
+					
 					#Resize view window bounds.
 					var newmax = int(max(10000, owner.data[owner.data.size()-1].x))
 					owner.get_node("ZoomBar/Slider").max_value = newmax
