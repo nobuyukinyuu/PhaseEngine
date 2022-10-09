@@ -123,7 +123,7 @@ namespace PhaseEngine
             Channel ch = RequestChannel(midi_note);
             return NoteOn(ch, midi_note, velocity);
         }
-
+        // Like the above, but indicates which channel was selected with the channel_selected var
         public long NoteOn(out byte channel_selected, byte midi_note, byte velocity=127)
         {
             Channel ch = RequestChannel(out channel_selected, midi_note);

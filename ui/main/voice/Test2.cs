@@ -152,7 +152,7 @@ public class Test2 : Label
             GD.PrintErr(exception.Message);
             return BindPointReturnCode.IndexOutOfRange;
         } catch (Exception exception) {
-            throw exception;
+            // throw exception;
             GD.PrintErr(exception.Message);
             return BindPointReturnCode.ERROR;
         }
@@ -557,7 +557,7 @@ public class Test2 : Label
             // PE_Json.JSONObject o = (PE_Json.JSONObject) PE_Json.JSONData.ReadJSON(v.bank[i]);
             // var alg = (PE_Json.JSONObject) o.GetItem("algorithm");
             // output.Add( String.Format("{0}: {1}", i, o.GetItem("name", "unnamed")), alg.GetItem("compatiblePreset", -1) );
-
+            
             output.Add( v.bank[i] );
         }
 

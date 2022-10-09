@@ -26,22 +26,25 @@ func populate(bank):
 	for i in bank.size():
 #		$V/List.add_item(bank[i], preload("res://gfx/ui/ops/icon_fm.svg"))
 		
-		#TODO:  VALIDATE JSON
-		var p = parse_json(bank[i])
-
-		var alg:Dictionary = p["algorithm"]
 		var preset=-1
-		if alg.has("compatiblePreset"): preset=alg["compatiblePreset"]
-		
-		var name = "no Name"
-		if p.has("name"):  name = p["name"]
-		
-		#Check for validity of a bank.  We ignore banks that have a default name in OPM files, etc.
 		var is_valid = true
-		if name.ends_with("no Name") and preset == 0:  
+		var name = "-"
+
+		#TODO:  VALIDATE JSON
+		var p = parse_json(bank[i]) if bank[i] != null else null
+		if typeof(p) == TYPE_DICTIONARY:  
+			var alg:Dictionary = p["algorithm"]
+			if alg.has("compatiblePreset"): preset=alg["compatiblePreset"]
+			
+			if p.has("name"):  name = p["name"]
+			
+			#Check for validity of a bank.  We ignore banks that have a default name in OPM files, etc.
+			if name.ends_with("no Name") and preset == 0:  
+				is_valid = false
+				preset=-1
+		else:  #Probably a null entry in this bank.  Set validity to false.
 			is_valid = false
-			preset=-1
-		
+			
 		$V/List.add_item("%s: %s" % [i, name], alg_icons[preset] if preset >=0 else alg_custom, is_valid)
 		$V/List.set_item_disabled(i, !is_valid)
 

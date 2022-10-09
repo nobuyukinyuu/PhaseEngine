@@ -24,6 +24,8 @@ func _ready():
 	#Connect to the bank selector.
 	$BankSelect.connect("voice_selected", self, "load_bank")
 
+	#DEBUG:  REMOVE ME
+	$Open.current_path = "d:/music/mod/nerd/bambooTracker/"
 
 func open():
 	$Open.popup_centered()
