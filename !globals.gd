@@ -194,3 +194,34 @@ func swap32(x):  #Swap the endianness of a 32-bit value
 			((x <<  8) & 0x00FF0000) |
 			((x >>  8) & 0x0000FF00) |
 			((x >> 24) & 0x000000FF))
+
+
+#Exponential interpolation functions
+func xerp(A,B,percent):
+	var exp_min = 0 if  A == 0 else log(A) / log(2.0)
+	var exp_max = log(B) / log(2.0)
+	return pow(2, exp_min + (exp_max - exp_min) * percent)
+
+#func rev_xerp(A,B,percent):  #Displays the scale in reverse
+#	return B - xerp(A, 1/B, percent) * B
+
+#func inv_xerp(A,B,value):  #Used to convert a value back to a percentage from the xerp function
+#	if A==0:  A=0.0001
+#	if B/A==1:  return value
+#	return log(value/A)/log(B/A)
+
+func inv_xerp(A,B,min_value, max_value, value):  #Proper inv_xerp from godot
+	if A==B:  #Prevent divide by zero
+		return 1.0
+		
+	if A >= 0:
+		var exp_min = 0 if A==0 else log(A) / log(2.0)
+		var exp_max = log(B) / log(2.0)
+		value = clamp(value, min_value, max_value)
+		var v = log(value) / log(2.0)
+
+		return clamp((v - exp_min) / (exp_max - exp_min), 0, 1)
+
+	else:
+		value = clamp(value, min_value, max_value)
+		return clamp((value - A) / (B - A), 0, 1)

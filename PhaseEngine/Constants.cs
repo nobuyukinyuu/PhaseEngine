@@ -7,7 +7,7 @@ namespace PhaseEngine
 {
     internal static class Global
     {
-        public const string BUILD_VERSION = "3db1d55"; //Generated on 7 Oct 2022, 06:23 PM
+        public const string BUILD_VERSION = "77d3509"; //Generated on 8 Oct 2022, 11:47 PM
         public const int FORMAT_VERSION = 10;
         public const byte DEFAULT_SEED = 1;  //Default reset state for most noise generators; used when the phase is reset on an oscillator with sync enabled
 

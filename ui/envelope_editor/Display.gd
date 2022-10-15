@@ -25,7 +25,7 @@ const LOOP_COLOR2 = Color(1,1,0.6, 0.7)
 const SUSTAIN_COLOR1 = Color(0.8,1,1, 0.5)
 const SUS_H = 48  #Sustain handle bar height
 const SUSTAIN_COLOR2 = Color(0,0.5,1, 0.4)
-
+const value_rulers = ["ValueRuler", "ValueRulerLog"]
 
 var loop_handle_pos:Vector2 = Vector2.ONE * -1  #X and Y specifiy the start and end of the loop, in screen px.
 var sus_handle_pos1:Vector2 = Vector2.ONE * -1  #First sustain loop handle pos, in screen px.

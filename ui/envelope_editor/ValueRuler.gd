@@ -1,4 +1,4 @@
-extends TextureRect
+extends Control
 
 func _draw():
 	var mPos = get_local_mouse_position()

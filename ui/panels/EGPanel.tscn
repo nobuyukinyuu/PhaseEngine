@@ -247,8 +247,7 @@ custom_constants/vseparation = 8
 custom_constants/hseparation = 16
 columns = 2
 __meta__ = {
-"_edit_group_": true,
-"_edit_use_anchors_": false
+"_edit_group_": true
 }
 
 [node name="Mult" parent="Tune" instance=ExtResource( 3 )]
@@ -315,9 +314,10 @@ __meta__ = {
 [node name="Total Level" parent="Levels" instance=ExtResource( 3 )]
 margin_right = 152.0
 size_flags_horizontal = 3
+theme_type_variation = "EGSliderExpH"
 max_value = 1023.0
 exp_edit = true
-tick_count = 0
+tick_count = 32
 ticks_on_borders = false
 associated_property = "tl"
 bindable = true
@@ -327,9 +327,10 @@ useExpTicks = true
 margin_left = 168.0
 margin_right = 320.0
 size_flags_horizontal = 3
+theme_type_variation = "EGSliderExpH"
 max_value = 1023.0
 exp_edit = true
-tick_count = 0
+tick_count = 32
 ticks_on_borders = false
 associated_property = "al"
 bindable = true
@@ -340,9 +341,10 @@ margin_top = 28.0
 margin_right = 152.0
 margin_bottom = 48.0
 size_flags_horizontal = 3
+theme_type_variation = "EGSliderExpH"
 max_value = 1023.0
 exp_edit = true
-tick_count = 0
+tick_count = 32
 ticks_on_borders = false
 associated_property = "dl"
 bindable = true
@@ -354,10 +356,11 @@ margin_top = 28.0
 margin_right = 320.0
 margin_bottom = 48.0
 size_flags_horizontal = 3
+theme_type_variation = "EGSliderExpH"
 max_value = 1023.0
 value = 1023.0
 exp_edit = true
-tick_count = 0
+tick_count = 32
 ticks_on_borders = false
 associated_property = "sl"
 bindable = true

@@ -149,7 +149,7 @@ void fragment(){
 	if ( uv2.x > 1.0 || uv2.y > 1.0 || uv2.x < 0.0 || uv2.y < 0.0 )
 	{
 		c = vec4(0);
-		return;
+//		return;
 	} else {
 		 c = textureLod(TEXTURE, uv2, 0.0f).rgba
 	}
@@ -160,12 +160,12 @@ void fragment(){
 [sub_resource type="ShaderMaterial" id=8]
 shader = SubResource( 7 )
 shader_param/xSkew = 0.0
-shader_param/ySkew = -0.4
+shader_param/ySkew = -0.5
 
 [sub_resource type="ShaderMaterial" id=9]
 shader = SubResource( 7 )
-shader_param/xSkew = -1.0
-shader_param/ySkew = 1.0
+shader_param/xSkew = 0.0
+shader_param/ySkew = 0.0
 
 [sub_resource type="GDScript" id=10]
 script/source = "extends VBoxContainer
@@ -189,8 +189,43 @@ func _draw():
 		pass
 		draw_string(font, o.rect_position - Vector2(0, 4), str(o.value))
 
-	draw_string(font, rect_size + Vector2(-128, 32), str(slerp16($A.value, $B.value, $C.value)))
 
+	#Scale screen value to a level
+	var v = xerp($A.value, $B.value, $C.value/float($C.max_value))
+	draw_string(font, rect_size + Vector2(-128, 32), str(v))
+	#Prove that the input value can be scaled back to original
+	draw_string(font, rect_size + Vector2(-128, 64), str(rrxerp($A.value, $B.value, v)*$C.max_value))
+	
+	
+
+
+func xerp(A,B,percent):
+	var exp_min = 0 if  A == 0 else log(A) / log(2.0)
+	var exp_max = log(B) / log(2.0)
+	return pow(2, exp_min + (exp_max - exp_min) * percent)
+
+func rev_xerp(A,B,percent):  #Displays the scale in reverse
+	return B - xerp(A, 1/B, percent) * B
+
+func inv_xerp(A,B,value):  #Used to convert a value back to a percentage from the xerp function
+	if B/A==1:  return value
+	return log(value/A)/log(B/A)
+
+func rrxerp(A,B,value):
+	if A==B:  #Prevent divide by zero
+		return 1.0
+		
+	if (A >= 0):
+		var exp_min = 0 if A==0 else log(A) / log(2.0);
+		var exp_max = log(B) / log(2.0)
+		value = clamp(value, $A.value, $B.value)
+		var v = log(value) / log(2.0);
+
+		return clamp((v - exp_min) / (exp_max - exp_min), 0, 1);
+
+	else:  #Linear
+		value = clamp(value, $A.value, $B.value);
+		return clamp((value - A) / (B - A), 0, 1);
 
 
 func lerp8(A,B,x):
@@ -226,8 +261,8 @@ margin_left = 356.0
 margin_top = 270.0
 margin_right = 371.0
 margin_bottom = 278.0
-custom_fonts/font = ExtResource( 3 )
 custom_colors/font_color = Color( 0.188235, 0.631373, 0.752941, 1 )
+custom_fonts/font = ExtResource( 3 )
 text = "00/[]"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -249,8 +284,8 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = -14.0
-custom_fonts/font = ExtResource( 4 )
 custom_colors/font_color = Color( 0.188235, 0.631373, 0.752941, 1 )
+custom_fonts/font = ExtResource( 4 )
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false
@@ -305,9 +340,9 @@ margin_left = 167.0
 margin_top = 135.0
 margin_right = 207.0
 margin_bottom = 151.0
-custom_styles/normal = SubResource( 4 )
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.352941, 0.878431, 0.878431, 1 )
+custom_fonts/font = ExtResource( 1 )
+custom_styles/normal = SubResource( 4 )
 text = "0ff"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -321,18 +356,17 @@ margin_right = 384.0
 margin_bottom = 512.0
 custom_styles/panel = ExtResource( 16 )
 __meta__ = {
-"_edit_group_": true,
-"_edit_use_anchors_": false
+"_edit_group_": true
 }
 
 [node name="Label" type="Label" parent="Label2"]
 use_parent_material = true
 anchor_right = 1.0
 anchor_bottom = 1.0
-custom_fonts/font = ExtResource( 4 )
 custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
 custom_constants/shadow_offset_x = 1
 custom_constants/shadow_offset_y = 1
+custom_fonts/font = ExtResource( 4 )
 text = "Test 123
 SAMPLE TEXT"
 align = 1
@@ -363,15 +397,15 @@ margin_bottom = 413.0
 custom_constants/separation = 30
 script = SubResource( 10 )
 __meta__ = {
-"_edit_group_": true,
-"_edit_use_anchors_": false
+"_edit_group_": true
 }
 
 [node name="A" type="HSlider" parent="VBoxContainer"]
 margin_right = 332.0
 margin_bottom = 16.0
-min_value = -32768.0
-max_value = 32767.0
+min_value = 1.0
+max_value = 1023.0
+value = 1.0
 tick_count = 9
 __meta__ = {
 "_edit_use_anchors_": false
@@ -381,8 +415,9 @@ __meta__ = {
 margin_top = 46.0
 margin_right = 332.0
 margin_bottom = 62.0
-min_value = -32768.0
-max_value = 32767.0
+min_value = 1.0
+max_value = 1023.0
+value = 1023.0
 tick_count = 9
 __meta__ = {
 "_edit_use_anchors_": false
@@ -392,7 +427,9 @@ __meta__ = {
 margin_top = 92.0
 margin_right = 332.0
 margin_bottom = 108.0
-max_value = 65535.0
+max_value = 255.0
+step = 0.01
+value = 1.0
 tick_count = 9
 __meta__ = {
 "_edit_use_anchors_": false

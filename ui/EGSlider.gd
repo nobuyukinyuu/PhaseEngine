@@ -14,7 +14,7 @@ export(bool) var bindable
 export(int, FLAGS, "Envelope", "Key Follow", "Velocity Table") var bind_abilities
 var is_bound:bool = false
 
-export(bool) var useExpTicks
+export(bool) var useExpTicks setget set_exp_tick_display
 enum SpecialDisplay {NONE, EG_HOLD, LFO_DELAY, LFO_SPEED, PERCENT, CUSTOM=0xFF}
 export(SpecialDisplay) var special_display 
 export(PoolStringArray) var display_strings
@@ -34,6 +34,14 @@ var envelope_editor:NodePath  #Used to hold the envelope editor node active
 signal bind_requested
 signal unbind_requested
 
+func set_exp_tick_display(val):
+	useExpTicks = val
+	if useExpTicks:
+		
+		theme_type_variation = "EGSliderExpH"  #Variation in hSlider.theme blanks the default ticks
+	else:
+		theme_type_variation = ""
+
 func set_offset(val):
 	text_offset = val
 	needs_recalc = true
@@ -51,6 +59,8 @@ func set_disabled(val):
 
 func _ready():
 	connect("resized", self, "_on_Resize")
+	connect("changed", self, "_on_Resize")
+	recalc()
 	pass # Replace with function body.
 
 func _gui_input(event):
@@ -78,12 +88,13 @@ func request_envelope_editor(title:String, data:Dictionary, context=global.Conte
 	
 	print("Requesting env editor; path is ", envelope_editor,". existing popup is ", existing_popup)
 	if not existing_popup:  #The editor was closed and freed.  Make a new one.
-		var p = global.ENV_EDITOR_SCENE.instance()
+		var p:EnvelopeEditorWindow = global.ENV_EDITOR_SCENE.instance()
 		p.name = title
 		var new_owner = global.add_modeless_popup(p, context) #Add node to scene tree.
 		p.owner = get_node(new_owner)  #TODO:  Determine whether it's better to use self or owner
 		envelope_editor = p.get_path()  #Set this so where we know where to get it to update stuff later
-
+		
+		p.log_scale = useExpTicks
 		p.setup(title, data, get_path())
 #		p.set_minmax(data.get("minValue", min_value), data.get("maxValue", max_value))
 	
@@ -111,7 +122,19 @@ func _draw():
 	if needs_recalc:  recalc()
 	var col = ColorN("yellow") if has_focus() and !disabled else ColorN("white")
 	
-	if useExpTicks:  draw_texture(expTicks, Vector2(0, 9), Color(1,1,1,0.35))
+	if useExpTicks and tick_count>0:  
+#		draw_texture(expTicks, Vector2(0, 9), Color(1,1,1,0.35))
+		var top = max(32, tick_count)
+		for i in range(1, top):
+			var h = rect_size.x - xerp(0, rect_size.x, i/float(tick_count)) - 1
+#			var h = rev_xerp(0, rect_size.x, i/float(tick_count)) - 1
+#			var h = inv_xerp(1, rect_size.x, (i/float(tick_count)) * rect_size.x) * rect_size.x - 1
+#			draw_texture(preload("res://gfx/ui/tick.png"), Vector2(h, 9))
+			if i % 4 == 2:
+				draw_texture(preload("res://gfx/ui/tick2x.png"), Vector2(h, 9))
+			else:
+				draw_texture(preload("res://gfx/ui/tick.png"), Vector2(h, 9))
+		pass
 	
 	if is_bound:  draw_texture(bind_icon, Vector2(-1,-1))
 	
@@ -181,7 +204,20 @@ func _on_Resize():
 func recalc():
 	lblPos = Vector2(rect_size.x - len(name)*charw + text_offset, -2)
 	lblPos2 = Vector2(rect_size.x/2 - (len(str(value))+1)*charw/2.0, rect_size.y/2)
+	
+	#Calculate exponential limits
+	exp_min = 0 if  min_value == 0 else log(min_value) / log(2.0)
+	exp_max = log(rect_size.x) / log(2.0)
+	
 	needs_recalc = false
 	
 func calc_pos2(vStr):
 	return Vector2(rect_size.x*0.5 - (len(vStr)+1)*charw*0.5, lblPos2.y)
+
+
+
+#Exponential interpolation funcs....... 
+var exp_min=0  #Cached
+var exp_max=1
+func xerp(A,B,percent):  #Specizlied xerp specific to this control
+	return pow(2, exp_min + (exp_max - exp_min) * percent)

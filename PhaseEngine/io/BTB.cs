@@ -17,35 +17,9 @@ namespace PhaseEngine
         public ImportBTB(){fileFormat="btb"; description="BambooTracker Bank";}
 
         //Ratios used to convert an OPN detune value to a PhaseEngine one.
-        readonly static float[] dt1_ratios = { 0, 0.25f, 0.667f, 1.0f, 0, -0.25f, -0.667f, -1.0f };
-
         const double NATIVE_HZ_RATE = 55466.0;
         static double ClockMult = NATIVE_HZ_RATE/Global.MixRate * Global.ClockMult;  //Ratio needed to translate one OPNA clock to a PhaseEngine clock at current mixrate
 
-        //The below values are used to calculate ratios to translate values from the chips' defaults to PhaseEngine's level of precision.
-        const int TL_MAX = 127;
-        const int DL_MAX= 15;
-        const int AR_MAX= 31;
-        const int DR_MAX= 31;
-        const int SR_MAX= 31;
-        const int RR_MAX= 15;
-
-
-        // const float RATIO_TL = (Envelope.L_MAX) / (float)(TL_MAX+0);  //127<<3 = 1016; 1016/128 = ratio
-        const float RATIO_TL = 9.1f; 
-        // const float RATIO_DL = (Envelope.L_MAX) / (float)(DL_MAX+0);
-        const float RATIO_DL = RATIO_TL * 8.0f;
-
-
-        // const float RATIO_AR = (Envelope.R_MAX+1) / (float)(AR_MAX+1);
-        // const float RATIO_DR = Envelope.R_MAX / (float)DR_MAX;
-        // const float RATIO_SR = Envelope.R_MAX / (float)SR_MAX;
-        static double RATIO_RR = (Envelope.R_MAX+1) / (float)(RR_MAX+1) * ClockMult;
-
-        static double RATIO_AR = ClockMult;
-        static double RATIO_DR = ClockMult;
-        static double RATIO_SR = ClockMult;
-        // const float RATIO_RR = 1.0f;
 
 
         public override IOErrorFlags Load(string path)

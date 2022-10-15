@@ -33,9 +33,8 @@ namespace PhaseEngine
 
 
         // const float RATIO_TL = (Envelope.L_MAX) / (float)(TL_MAX+0);  //127<<3 = 1016; 1016/128 = ratio
-        const float RATIO_TL = 9.1f; 
-        // const float RATIO_DL = (Envelope.L_MAX) / (float)(DL_MAX+0);
-        const float RATIO_DL = RATIO_TL * 8.0f;
+        const float RATIO_TL = Envelope.L_MAX/(float)TL_MAX;
+        const float RATIO_DL = RATIO_TL * 8.0f; //Envelope.L_MAX / (float)(DL_MAX+0);
 
 
         // const float RATIO_AR = (Envelope.R_MAX+1) / (float)(AR_MAX+1);
@@ -141,26 +140,27 @@ namespace PhaseEngine
                                 {
                                     var e = v[idx].egs[i];
                                     var buf = br.ReadByte();  //First byte read packs AR in low nibble and enable flag in bit 5.
-                                    e.ar = (byte)((buf & 0x1F) * RATIO_AR);  //Get first 5 bits (AR up to 32)
+                                    // e.ar = (byte)((buf & 0x1F) * RATIO_AR);  //Get first 5 bits (AR up to 32)
+                                    e.ar = (byte)((buf & 0x1F));  //Get first 5 bits (AR up to 32)
                                     if (Tools.BIT(buf, 5) == 0)  v[idx].egs[i].mute = true;
 
                                     buf = br.ReadByte();  //KS/DR.  Bits 0-4 are DR.  Bits 5 and 6 are KSR.
                                     e.dr = (byte)((buf & 0x1F) * RATIO_DR);  //Get first 5 bits (DR up to 32)
+                                    // e.dr = (byte)((buf & 0x1F));  //Get first 5 bits (DR up to 32)
                                     //Assign envelope RateTable to a default preset and scale the max application.
                                     e.ksr = new RateTable();  e.ksr.ceiling = (float)(Convert.ToUInt16(buf>>5) * 25 / ClockMult); //FIXME:  Check accuracy
-                                    // e.ksr = new RateTable();  e.ksr.ceiling = (float)(Convert.ToUInt16(buf>>5) * 25); //FIXME:  Check accuracy
 
                                     buf = br.ReadByte();  //DT/SR.  Bits 0-4 are SR.  Bits 5-7 are detune.
                                     e.sr = (byte)((buf & 0x1F) * RATIO_SR);  //Get first 5 bits (SR up to 32)
-                                    v[idx].pgs[i].Detune = dt1_ratios[ (buf>>5) & 0x7 ];  //DT1 lookup
+                                    v[idx].pgs[i].Detune = dt1_ratios[ (buf>>5) & 0x7 ] * 0.6667f;  //DT1 lookup
 
                                     buf = br.ReadByte();  //SL/RR.  Low nibble:  Release, High nibble:  Sustain rate
                                     e.rr = (byte)(((buf & 0xF)<<0) * RATIO_RR);  buf >>= 4;
-                                    e.dl = (byte)((buf & 0xF) * RATIO_DL);
+                                    e.dl = (ushort)Math.Round((buf & 0xF) * RATIO_DL);
                                     e.sl = e.sr>0? Envelope.L_MAX: e.dl;
 
                                     // e.tl = (ushort)(br.ReadByte() << 3);  //Total level
-                                    e.tl = (ushort)(br.ReadByte() * RATIO_TL);  //Total level
+                                    e.tl = (ushort)Math.Round(br.ReadByte() * RATIO_TL);  //Total level
 
                                     buf = br.ReadByte();  //SSGEG/ML.  Low nibble:  Mult; High nibble:  SSGEG type (0x8 if disabled)
                                     v[idx].pgs[i].mult = buf & 0xF;  //Read only the Mult.  We don't use SSG for anything right now.

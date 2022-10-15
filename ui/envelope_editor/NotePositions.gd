@@ -3,6 +3,7 @@ extends Control
 var tickLen = 1.0 / ProjectSettings.get_setting("physics/common/physics_fps") * 1000
 
 func _draw():
+#	if owner.owner == null:  return
 	var c = get_node(owner.owner.owner.chip_loc)
 	if !c:  return
 	

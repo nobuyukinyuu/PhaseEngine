@@ -4,6 +4,7 @@ class_name EnvelopeEditorWindow, "res://gfx/ui/bind_indicator.png"
 var invoker:NodePath  #The control that spawned us.  Typically an EGSlider.  References invalidate when tab's moved
 var lo=0  #Minimum value of env output
 var hi=63 #Max value of env output
+var log_scale = false  #Used to configure this window for operating in the log domain.
 
 var data=[Vector2.ZERO]  #Intermediate point data.  Vec2 where x=ms, y=0-1.
 var cached_display_bounds = {}
@@ -20,7 +21,7 @@ var has_loop=false
 var has_sustain=false
 
 #Data source stuff
-var DataSource = {"Envelope": 0, "Increments": 1}  #Used for knowing where to set points. Based on c# class names.
+var DataSource = {"Envelope": 0, "Increments": 1}  #Used for knowing where to send points. Based on c# class names.
 var data_source_type:int
 var associated_value:String
 var operator = -1
@@ -41,6 +42,8 @@ func setup(title:String, d:Dictionary, invoker:NodePath=""):
 	else:  $H/lblTitle.text = "Envelope editor"
 
 	set_minmax(d.get("minValue", 0), d.get("maxValue", 63))
+	$ValueRuler/Log.visible = log_scale
+	$ValueRuler/Lin.visible = !log_scale
 
 	#Set the source location so we know where to chooch edits
 	data_source_type = DataSource[ d["dataSource"] ]
@@ -170,16 +173,22 @@ func search_closest(arr, val, first=false):
 func set_minmax(lowest, highest):
 	lo = lowest
 	hi = highest
-	var s = ""
-	for i in range(0,8):
-#		s += "\n\n\n\n"
-		var midval = round(lerp(highest+0.5, lowest, i/8.0))
+	$lblValue.lbls = []
+	$lblValue.vals = []
+	var top = 8.0 if !log_scale else 32.0
+	for i in range(0,top):
+		var midval = round(lerp(highest+0.5, lowest, i/top))
 		var mids = format_val(midval)
-		s += mids
-		s += "\n\n\n\n"
-	s += format_val(lowest)
+		$lblValue.vals.append(midval)
+		$lblValue.lbls.append(mids)
+	$lblValue.lbls.append(format_val(lowest))
+	$lblValue.vals.append(lowest)
+
 		
-	$lblValue.text = s
+#	if log_scale:
+#		$lblValue.vals.invert()
+#		$lblValue.lbls.invert()
+	$lblValue.update()
 
 #Formats the value labels on the Y-axis.
 func format_val(val):
