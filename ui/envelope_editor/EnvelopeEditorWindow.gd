@@ -174,20 +174,19 @@ func set_minmax(lowest, highest):
 	lo = lowest
 	hi = highest
 	$lblValue.lbls = []
-	$lblValue.vals = []
-	var top = 8.0 if !log_scale else 32.0
+#	$lblValue.vals = []
+	var top = 8.0 if !log_scale else $lblValue.vals.size()
+	if log_scale:  $lblValue.lbls.append(format_val(highest))
 	for i in range(0,top):
-		var midval = round(lerp(highest+0.5, lowest, i/top))
+		var midval = round(global.xerp(lowest, highest, $lblValue.vals[i]/256.0) if log_scale else 
+									lerp(highest+0.5, lowest, i/top))
 		var mids = format_val(midval)
-		$lblValue.vals.append(midval)
+#		$lblValue.vals.append(midval)
 		$lblValue.lbls.append(mids)
+	
 	$lblValue.lbls.append(format_val(lowest))
-	$lblValue.vals.append(lowest)
+#	$lblValue.vals.append(lowest)
 
-		
-#	if log_scale:
-#		$lblValue.vals.invert()
-#		$lblValue.lbls.invert()
 	$lblValue.update()
 
 #Formats the value labels on the Y-axis.
@@ -237,8 +236,9 @@ func _on_ToolButton_pressed(toggled=false, which_button=-1):
 			
 			var c = get_node(owner.owner.chip_loc)
 			var success = c.AddBindEnvelopePoint(data_source_type, operator, associated_value, 
-									last_closest, last_clicked_position)
+									last_closest, last_clicked_position, log_scale)
 
+			if success!=0:  printerr("Adding bind point failed!  Code ", success)
 
 		REMOVE_PT:
 			if data.size() == 1:  return
@@ -341,14 +341,20 @@ func set_initial_value(val, from_invoker=false):
 
 func set_bind_value(index, pt):  #Update the data structure on the c# end
 	var c = get_node(owner.owner.chip_loc)
-	c.SetBindValue(data_source_type, operator, associated_value, index, pt)
+	c.SetBindValue(data_source_type, operator, associated_value, index, pt, log_scale)
 
 
 #Scales raw data down to 0-1 display values.
 func scale_down(val):
-	return range_lerp(val, lo, hi, 0, 1)
+	if log_scale:
+		return 1.0-global.inv_xerp(lo, hi, lo, hi, val)
+	else:
+		return range_lerp(val, lo, hi, 0, 1)
 func scale_up(val):
-	return range_lerp(val, 0, 1, lo, hi)
+	if log_scale:
+		return round(global.xerp(lo, hi, 1.0-val))
+	else:
+		return range_lerp(val, 0, 1, lo, hi)
 
 ####################### Window Management #######################
 func _on_CustomEnvelope_popup_hide():

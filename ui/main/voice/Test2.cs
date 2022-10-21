@@ -105,7 +105,7 @@ public class Test2 : Label
     // public bool BindPG(int opTarget, string property) => c.Voice.pgs[opTarget].Bind(property);
 
     public enum BindPointReturnCode {OK, BindNotFound, IndexOutOfRange, ValueOutOfRange, ERROR=-1}
-    public BindPointReturnCode SetBindValue(int whichKind, int opTarget, string property, int ptIndex, Godot.Vector2 pt)
+    public BindPointReturnCode SetBindValue(int whichKind, int opTarget, string property, int ptIndex, Godot.Vector2 pt, bool log_scale)
     {
         try{
             TrackerEnvelope e;
@@ -114,7 +114,10 @@ public class Test2 : Label
                 case Src.EG:
                     if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
                     if (pt.y<0 || pt.y>1) return BindPointReturnCode.ValueOutOfRange;
-                    var val = Tools.Remap(pt.y, 0, 1, e.minValue, e.maxValue);  //Remap the input value from 0-1 to our binds bounds
+                    // var val = property.EndsWith("l",true, System.Globalization.CultureInfo.InvariantCulture)? 
+                    var val = log_scale? 
+                        (float)Tools.Xerp(e.minValue, e.maxValue, 1.0-pt.y): //Levels are exponential in nature, so remap them using exponential interpolation
+                        (float)Tools.Remap(pt.y, 0, 1, e.minValue, e.maxValue);  //Remap the input value from 0-1 to our binds bounds using linear interpolation
                     e.SetPoint(ptIndex, (pt.x, val));
                     break;
                 case Src.PG:
@@ -131,7 +134,34 @@ public class Test2 : Label
         }
         return BindPointReturnCode.OK;
     }    
-    public BindPointReturnCode AddBindEnvelopePoint(int whichKind, int opTarget, string property, int ptIndex, Godot.Vector2 pt)
+    public BindPointReturnCode SetBindInitialValue(int whichKind, int opTarget, string property, float val)  //Sets a bind's initial value raw
+    {
+        try{
+            TrackerEnvelope e;
+            switch((Src)whichKind)
+            {
+                case Src.EG:
+                    if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    if (val<e.minValue || val>e.maxValue) return BindPointReturnCode.ValueOutOfRange;
+                    e.SetPoint(0, (0, val));
+                    break;
+                case Src.PG:
+                    // TODO:  IMPLEMENT
+                    return BindPointReturnCode.BindNotFound;
+                    // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+            }
+        } catch (IndexOutOfRangeException exception) {
+            Debug.Print(exception.Message);
+            return BindPointReturnCode.IndexOutOfRange;
+        } catch (Exception exception) {
+            Debug.Print(exception.Message);
+            return BindPointReturnCode.ERROR;
+        }
+        return BindPointReturnCode.OK;
+    }    
+
+
+    public BindPointReturnCode AddBindEnvelopePoint(int whichKind, int opTarget, string property, int ptIndex, Godot.Vector2 pt, bool log_scale)
     {
         try{
             TrackerEnvelope e;
@@ -140,7 +170,9 @@ public class Test2 : Label
                 case Src.EG:
                     if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
                     if (pt.y<0 || pt.y>1) return BindPointReturnCode.ValueOutOfRange;
-                    var val = Tools.Remap(pt.y, 0, 1, e.minValue, e.maxValue);  //Remap the input value from 0-1 to our binds bounds
+                    var val = log_scale? 
+                        (float)Tools.Xerp(e.minValue, e.maxValue, 1.0-pt.y): //Levels are exponential in nature, so remap them using exponential interpolation
+                        (float)Tools.Remap(pt.y, 0, 1, e.minValue, e.maxValue);  //Remap the input value from 0-1 to our binds bounds using linear interpolation
                     e.Insert(ptIndex, (pt.x, val));
                     break;
                 case Src.PG:
@@ -326,7 +358,8 @@ public class Test2 : Label
         c.Voice.SetEG(opTarget, property, val);
 
         if (c.Voice.egs[opTarget].BoundEnvelopes.ContainsKey(property))  //Update the initial value
-            SetBindValue((int)Src.EG, opTarget, property, 0, new Vector2(0, val));
+            // SetBindValue((int)Src.EG, opTarget, property, 0, new Vector2(0, val));
+            SetBindInitialValue((int)Src.EG, opTarget, property, val);
 
         //For live feedback of changes in the EG value.  Inefficient;  DON'T use this in production!
         if (opTarget >= c.Voice.opCount) return;

@@ -35,7 +35,6 @@ namespace PhaseEngine
 
         //NOTE:  Slow but accurate log2. For fast log2, use BitOperations.Log2 (we use from cornucopia.NET)
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double Log2(double n){ return Math.Log(n) / Math.Log(2); }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public static double Log10(double n){ return Math.Log(n) / Math.Log(10); }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -44,6 +43,12 @@ namespace PhaseEngine
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Remap(float value, float inFrom, float inTo, float outFrom, float outTo)
         { return Lerp(outFrom, outTo, InverseLerp(inFrom, inTo, value)); }
+
+        public static double Xerp(double A, double B, double amount) {  //Exponential interpolation
+            var exp_min = A == 0? 0: Tools.Log2(A);
+            var exp_max = Tools.Log2(B);
+	        return Math.Pow(2, exp_min + (exp_max - exp_min) * amount);
+        }
 
 
         // public static double RoundToSignificantDigits(double d, int digits)

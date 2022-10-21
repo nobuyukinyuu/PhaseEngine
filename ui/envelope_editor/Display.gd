@@ -213,10 +213,16 @@ func set_grab_handles(enabled=true):
 	
 func _draw():
 	#Draw reference lines.
-	for i in 8:
-		var v = rect_size.y * (i/8.0)
-		draw_line(Vector2(0, v), Vector2(rect_size.x,v), color*2)
-		if i==4:  draw_line(Vector2(0, v), Vector2(rect_size.x,v), color*3)
+	if owner.log_scale:
+		for i in range(0, 32):
+			var v = rect_size.y - global.xerp(0, rect_size.y, (i/8.0))
+			draw_line(Vector2(0, v), Vector2(rect_size.x,v), color*2)
+			if i==4:  draw_line(Vector2(0, v), Vector2(rect_size.x,v), color*3)
+	else:
+		for i in 8:
+			var v = rect_size.y * (i/8.0)
+			draw_line(Vector2(0, v), Vector2(rect_size.x,v), color*2)
+			if i==4:  draw_line(Vector2(0, v), Vector2(rect_size.x,v), color*3)
 
 	#Grab the drawable area chunk from owner.
 	var d = owner.get_display_bounds()
@@ -348,7 +354,8 @@ func _draw():
 	#Draw the Overlay if dragging
 	if dragging and drag_pt >=0:
 		var secs = $TimeRuler.format_secs(drag_value.x, "ms", " s")
-		var true_val = int(lerp(owner.lo, owner.hi, drag_value.y))
+#		var true_val = int(lerp(owner.lo, owner.hi, drag_value.y))
+		var true_val = int(owner.scale_up(drag_value.y))
 		var c = ColorN("black")
 		draw_string(drag_font, get_local_mouse_position() - Vector2(-1, 39), "x:%s" % [secs],c)
 		draw_string(drag_font, get_local_mouse_position() - Vector2(-1, 23), "y:%s" % [true_val],c)
