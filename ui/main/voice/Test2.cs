@@ -20,6 +20,7 @@ public class Test2 : Label
     Chip c = new Chip(6,4);
     long[] lastID = new long[128];  //Keeps track of the last ID pressed on a specified note, to turn it off when a noteOff event is detected.
     public int[] channel_ttl = new int[]{0,0,0,0,0,0};  //Used to keep track of positions of active notes
+    public int[] channel_release_tick = new int[]{0,0,0,0,0,0};  //Used to keep track of positions of the ttl at the time of NoteOff
 
     Node fromMidi;
 
@@ -62,8 +63,13 @@ public class Test2 : Label
     {
         // GD.Print("Off?  ", midi_note, ";  id=", lastID[midi_note]);
         // c.NoteOff((byte)midi_note);  //Inefficient!! Consider NoteOff to the last event only.
-        c.NoteOff(lastID[midi_note]);  
+        var ch_idx =  //Channel whose noteOff tick time should be updated
+        c.NoteOff(lastID[midi_note]);
+
+        if (ch_idx>=0)  channel_release_tick[ch_idx] = channel_ttl[ch_idx];
     }
+
+    public int ChannelBusyState(int index) => (int)c.channels[index].busy;
 
     System.Collections.Concurrent.ConcurrentDictionary<int, byte> notes_queued = new System.Collections.Concurrent.ConcurrentDictionary<int, byte>();
     public void QueueNote(int midi_note, int velocity)  //Set Velocity to 0 to trigger noteOff

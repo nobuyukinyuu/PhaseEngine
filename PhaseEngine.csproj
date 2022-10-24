@@ -6,7 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- <Compile Include="**\*.cs" Exclude="script_templates/*.cs" /> -->
-    <Compile Include="./*.cs" Exclude="script_templates/*.cs" />
+    <Compile Include="./*.cs" Exclude="script_templates/*.cs;script_templates/.githooks/*.csx" />
     <Compile Include="PhaseEngine/**/*.cs" />
     <Compile Include="ui\main\voice\Test2.cs" />
   </ItemGroup>

@@ -78,27 +78,8 @@ namespace PhaseEngine
         public Envelope() { Reset(); }
 
         //Copy constructor
-        public Envelope(Envelope prototype, bool deserializeRTables=false) 
-        { 
-            var data = prototype.ToJSONString();
-            if(this.FromString(data,deserializeRTables)) //if importation of copy succeeded...
-            {
-                    RecalcLevelRisings();
-                    //Grab response table references from the prototype.  
-                    //We don't need to copy the actual response tables as we want to share them between all channels.
-                    //TODO:  Consider if each channel should have fully customizable RTables and remove the internal re-use option entirely....
+        public Envelope(Envelope prototype, bool deserializeRTables=false) => Configure(prototype, deserializeRTables);
 
-                    //Reuse the RTables from the prototype. Saves resources when copying the rest of the EG to a channel as an internal operation.
-                    //Otherwise,  this.FromString() should've already assigned these.
-                    if (!deserializeRTables) 
-                    {
-                        ksr = prototype.ksr;
-                        ksl = prototype.ksl;
-                        velocity = prototype.velocity;
-                    }
-            }
-            else Reset(); //Attempt copy.  If failure, reinit envelope.  This could happen in release mode... TODO:  Check and see what happens with a fuzz test
-        }
         public bool Configure(Envelope prototype, bool deserializeRTables=false) 
         {
             var data = prototype.ToJSONString();
@@ -116,6 +97,7 @@ namespace PhaseEngine
                         ksr = prototype.ksr;
                         ksl = prototype.ksl;
                         velocity = prototype.velocity;
+                        BoundEnvelopes = prototype.BoundEnvelopes;
                     }
                 return true;
             }

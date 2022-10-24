@@ -13,10 +13,10 @@ namespace PhaseEngine
         enum EnvelopePtMarker {None=0, LoopStart=1, LoopEnd=2, SustainStart=4, SustainEnd=8}
 
         public readonly int minValue, maxValue; //Values used for clamping and maybe some other calcs. Assigned from bind invoker
-        public int initialValue;  //Used to reset values bound to us when starting 
-        public int InitialValue{get=> initialValue; set 
+        // public int initialValue;  //Used to reset values bound to us when starting 
+        public int InitialValue{get=> (int)pts[0].Value; set 
         { 
-            initialValue = value;
+            // initialValue = value;
             pts[0] = new TrackerEnvelopePoint(0, value);
             cached = false;
         } }
@@ -39,13 +39,14 @@ namespace PhaseEngine
 
         private TrackerEnvelope()    {pts.Add(new TrackerEnvelopePoint(0)); cache=new CachedEnvelope(this);}
         public TrackerEnvelope(int minValue, int maxValue) : this()
-            {this.minValue = minValue; this.maxValue = maxValue;  this.initialValue = Math.Clamp(initialValue, minValue, maxValue);}
+            {this.minValue = minValue; this.maxValue = maxValue; }
         public TrackerEnvelope(int minValue, int maxValue, int initialValue) : this(minValue, maxValue)
             {InitialValue = initialValue; SetPoint(0, (0, initialValue));}
 
 
         //Convenient property to rebake a cached envelope
-        public CachedEnvelope CachedEnvelope{ get{if(!cached) Bake();  return cache;} }
+        // public CachedEnvelope CachedEnvelope{ get{if(!cached) Bake();  return cache;} }
+        public CachedEnvelope CachedEnvelopeCopy{ get{if(!cached) Bake();  return new CachedEnvelope(cache);} }
 
         public void Bake()
         {

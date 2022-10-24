@@ -151,14 +151,15 @@ namespace PhaseEngine
             return true;
         }
         /// Turns off the channel with the corresponding event ID.
-        public bool NoteOff(long eventID)
+        public int NoteOff(long eventID)
         {
-            if (eventID <= 0) return false;
-            Channel ch = FindChannel(eventID);
-            if (ch == null) return false;
+            if (eventID <= 0) return -1;
+            int ch_idx;
+            Channel ch = FindChannel(out ch_idx, eventID);
+            if (ch == null) return -1;
             ch.NoteOff();
             ch.CalcPriorityScore();
-            return true;
+            return ch_idx;
         }
 
 
@@ -213,16 +214,18 @@ namespace PhaseEngine
             }
             return output.ToArray();
         }
-        public Channel FindChannel(long eventID)
+        public Channel FindChannel(out int ch_idx, long eventID)
         {
+            ch_idx = -1;
             for(int i=0; i<channels.Length; i++)
             {
                 var ch=channels[i];
+                ch_idx = i;
                 if(ch.eventID == eventID) return ch;
             }
             return null;
-
         }
+        public Channel FindChannel(long eventID) => FindChannel(out int discarded, eventID);
 
         public Channel RequestChannelOrNull(byte channel) 
         {

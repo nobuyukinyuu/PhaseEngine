@@ -154,7 +154,7 @@ namespace PhaseEngine
                 }
             }
 
-            c.NoteOn(0, 64);
+            c.NoteOn(0, 64);  //preview.NoteOn
             for (int i=0; oc<size && i<period; i++)
             {
                 if (strideCount<1)  // Hit a point where we need to fill up output
@@ -163,6 +163,7 @@ namespace PhaseEngine
                     output[oc] = Tables.short2float[c.RequestSample()+Tables.SIGNED_TO_INDEX];  oc++;
                 }
                 strideCount--;
+                
                 c.Clock();
             }
             return output;

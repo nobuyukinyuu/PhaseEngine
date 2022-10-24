@@ -42,30 +42,32 @@ namespace PhaseEngine
         //BindStates below are used to cycle through the cached envelopes for 
         //When IBindableDataSrc invokes an update to one of its fields, these are used to determine how to update it.
         public Dictionary<string, CachedEnvelope> BindStates {get;} 
-
+        public ushort BindClockDivider {get;}
 
         //Methods used to signal the start and release of the bound envelopes so they can loop properly.
         public void NoteOn();
+        public void NoteOff();
         void NoteOn(IBindableDataSrc dataSource)  //Default method, Called by the NoteOn() in implementations to set up general housekeeping functions
         {
-            var data = dataSource.BoundEnvelopes;
-            //Begin rebake
-            foreach(string property in BindStates.Keys)
-            {
-                if (!data.ContainsKey(property)) //Uh oh, data source was unbound at some point.  Remove the key from the cache
-                    BindStates.Remove(property);
-                else{
-                    //TODO:  Consider options in the envelope editor to specify an action on how to deal with an rTable.
-                    //       Creating baked envelopes of scaled data could consist of an addition to only the first point, all points (clamped), or
-                    //       to all points save for the initial value multiplied by a ratio of the initial value to the rTable scaled value.
+            Rebake(dataSource);
+        }
 
-                    //FIXME:  Horribly inefficient.  Consider using a copy of the cache from TrackerEnvelope if properly baked!
-                    BindStates[property].Bake( data[property] );  
-                }
+        //Default method,  called by methods which need to update a data consumer to contain the latest data source's cached envelopes
+        internal void Rebake(IBindableDataSrc dataSource)  
+        {
+            //TODO:  Consider options in the envelope editor to specify an action on how to deal with an rTable.
+            //       Creating baked envelopes of scaled data could consist of an addition to only the first point, all points (clamped), or
+            //       to all points save for the initial value multiplied by a ratio of the initial value to the rTable scaled value.
+
+            //FIXME:  Horribly inefficient.  Consider using a copy of the cache from TrackerEnvelope if properly baked!
+            // BindStates[property].Bake( data[property] );  
+            BindStates.Clear();
+            foreach(string property in dataSource.BoundEnvelopes.Keys)
+            {
+                BindStates[property]= dataSource.BoundEnvelopes[property].CachedEnvelopeCopy;
             }
         }
 
-        void NoteOff();
-        public void Clock();  //Where all the local caches are clocked and where the instance calls TrackerEnvelope.Update() to modify its bound members.
+        public void Clock();  //Where all the local caches are clocked and where the instance calls BindManager.Update() to modify its bound members.
     }
 }

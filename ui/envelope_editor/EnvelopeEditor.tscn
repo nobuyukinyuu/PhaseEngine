@@ -156,7 +156,6 @@ expand_margin_bottom = 2.0
 anti_aliasing_size = 0.6
 
 [node name="CustomEnvelope" type="WindowDialog"]
-visible = true
 margin_right = 464.0
 margin_bottom = 344.0
 rect_min_size = Vector2( 464, 344 )
@@ -341,25 +340,6 @@ margin_right = 16.0
 margin_bottom = 286.0
 grow_horizontal = 0
 script = ExtResource( 28 )
-
-[node name="minn" type="SpinBox" parent="lblValue"]
-visible = false
-margin_left = 266.0
-margin_top = 354.0
-margin_right = 340.0
-margin_bottom = 378.0
-min_value = -32768.0
-max_value = 65535.0
-
-[node name="maxx" type="SpinBox" parent="lblValue"]
-visible = false
-margin_left = 354.0
-margin_top = 354.0
-margin_right = 428.0
-margin_bottom = 378.0
-min_value = -32768.0
-max_value = 65535.0
-value = 63.0
 
 [node name="MinmaxSliderLabel" type="TextureRect" parent="."]
 margin_left = 16.0

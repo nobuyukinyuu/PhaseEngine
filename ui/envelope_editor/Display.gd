@@ -86,7 +86,7 @@ func _gui_input(event):
 						var pixel_pos = pt_to_display_coords(owner.data[i])
 #						var dist = pos.distance_squared_to(owner.data[i])
 						var dist = get_local_mouse_position().distance_squared_to(pixel_pos)
-						print("Distance to %s: " % i, dist)
+#						print("Distance to %s: " % i, dist)
 						if dist <= PICK_DISTANCE:  #Point is close to cursor. Check if it's the closest one.
 							if dist < closest_dist:  #This point is the closest among the ones in the range.
 								closest_dist = dist

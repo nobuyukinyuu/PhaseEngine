@@ -80,22 +80,6 @@ func rebind_to(invoker:NodePath) -> bool:
 	return false
 	
 func _ready():
-#	#DEBUG, REMOVE
-#	visible = true
-#	rect_position += Vector2.ONE * 32
-#
-#	for o in $lblValue.get_children():
-#		o.connect("value_changed", self, "up", [o])
-#
-#	randomize()
-#	for i in range(1,5):
-#		data.append(Vector2(500*i, randf()))
-##		data.append(Vector2(500*i, i/10.0))
-#	sort()
-#
-##	print(to_json(inst2dict(self)))
-#	#END DEBUG
-	
 	#Associate the buttons.
 	for o in $Btn.get_children():
 		if not o is Button:  continue
@@ -107,14 +91,9 @@ func _ready():
 	#Hacky workaround to our modeless show() call not triggering the popup_hide signal
 	get_close_button().connect("pressed", self, "_on_CustomEnvelope_popup_hide")
 	
+	global.connect("algorithm_changed", self, "_on_algorithm_changed")  #Used to check if we need to close
+	
 	recalc_display_bounds()  #Determine how to draw the points visible in the display window.
-
-
-##DEBUG, REMOVE.  Used by the debug minmax spinners to update the label
-#func up(val, which):
-#	if which==$lblValue/minn:  lo = val 
-#	else: hi = val
-#	set_minmax(lo, hi)
 
 func _physics_process(_delta):
 	if !visible:  return
@@ -374,4 +353,8 @@ func _on_CustomEnvelope_gui_input(event):
 		bring_to_front()
 		#Don't accept_event() here, it'll lock input
 
-
+func _on_algorithm_changed():
+	var c = get_node(owner.owner.chip_loc)
+	if c==null:  _on_CustomEnvelope_popup_hide()
+	prints( c.GetOpCount(), operator)
+	if operator >= c.GetOpCount():  _on_CustomEnvelope_popup_hide()  #Invalidate window

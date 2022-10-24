@@ -63,24 +63,34 @@ namespace PhaseEngine
             var state = invoker.BindStates;
             // for(int i=0; i<envelope.Count; i++)
             foreach(string item in envelope.Keys)
-                switch(envelope[item].associatedProperty)
+            {
+                switch(envelope[item].associatedProperty)  //FIXME:  TYPE COERSION IS REALLY SLOW
                 {
                     case System.Reflection.PropertyInfo property:
-                        property.SetValue(dataSource, state[item].currentPoint.currentValue);
+                        property.SetValue(dataSource, CoerceValue(state[item].currentPoint.currentValue, property.PropertyType));
                         break;
                     case System.Reflection.FieldInfo field:
-                        field.SetValue(dataSource, state[item].currentPoint.currentValue);
+                        field.SetValue(dataSource, CoerceValue(state[item].currentPoint.currentValue, field.FieldType));
                         break;
                 }
+                state[item].Clock();
+            }
 
             action();
+        }
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static object CoerceValue(int input, Type type)
+        {
+            // input = input.Clamp(Convert.ToInt32(type.GetField("MinValue").GetValue(null)), Convert.ToInt32(type.GetField("MaxValue").GetValue(null)));
+            return Convert.ChangeType(input, type);
         }
 
         //Used for resetting a consumer's target field value to an initial value (Such as defined by TrackerEnvelope)
         public static void ResetValue(IBindableDataSrc dataSource, string key)
         {
             var envelope = dataSource.BoundEnvelopes;
-            var initialValue = envelope[key].initialValue;
+            var initialValue = envelope[key].InitialValue;
             SetTargetValue(dataSource, key, initialValue);
         }
 

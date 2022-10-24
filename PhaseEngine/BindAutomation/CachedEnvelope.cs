@@ -13,7 +13,7 @@ namespace PhaseEngine
 
         private CachedEnvelope(){}  //Can't call default ctor for us.  Create one from a TrackerEnvelope.
         public CachedEnvelope(TrackerEnvelope src) => Bake(src);
-        public CachedEnvelope(CachedEnvelope prototype) : base(prototype) {} //Copy constructor for when we don't need to rebake
+        public CachedEnvelope(CachedEnvelope prototype) => Bake(prototype); //Copy constructor for when we don't need to rebake
         public CachedEnvelope(int capacity) : base(capacity) {}
 
         public CachedEnvelopePoint currentPoint;
@@ -24,6 +24,21 @@ namespace PhaseEngine
 
         void Start() {}  //TODO:  reset 
         void Restart() {}
+
+        void Bake(CachedEnvelope prototype) //Rebakes itself using a prototype
+        {
+            Clear();
+            if (prototype.Count > 0) currentPoint = prototype[0];
+            else {currentValue = prototype.currentValue; currentPoint = prototype.currentPoint; return;}
+
+            Capacity = Math.Min(prototype.Count, 1);
+            for(int i=0; i<prototype.Count; i++)
+                Add(prototype[i]);  //ByVal copy
+
+            currentPoint = this[0];
+            idx=0;
+            currentValue = prototype[0].initialValue;
+        }
 
         public void Bake(TrackerEnvelope src)
         {
@@ -37,7 +52,10 @@ namespace PhaseEngine
                 idx=0;
             } else if (src.pts.Count == 1) {
                 //If there's only one TrackerEnvelopePoint,  then Finished will return True and the clock will always return whatever the initial value was.
+                currentPoint = CachedEnvelopePoint.CreatePlaceholder(src.InitialValue);
                 currentValue = src.InitialValue;
+            } else {  //There were no points in the TrackerEnvelope.  This shouldn't be possible
+                throw new InvalidOperationException("TrackerEnvelope size is 0!");
             }
         }
 
@@ -45,17 +63,21 @@ namespace PhaseEngine
 
         public int Clock() 
         {
-            System.Diagnostics.Debug.Assert(Count>0);
-            if(Finished) return currentValue;
+            // System.Diagnostics.Debug.Assert(Count>0);
+            if(Finished || Count==0) return currentValue;
 
             //TODO:  Stuff here to handle clocking at rates lower than the mix rate
             //TODO:  Stuff here to handle lööps
-            currentPoint = this[idx];
+            currentPoint = this[idx];  //Yoink a copy of the point at the current index
             currentValue = currentPoint.Clock();
             if (currentPoint.Finished)  //Next point
             {
-                currentPoint.Reset();  //May not be necessary if we're not using copy constructors but baking new envelopes each time
+                // currentPoint.Reset();  //May not be necessary if we're not using copy constructors but baking new envelopes each time
+                this[idx] = currentPoint;  //Shove the modified value back into our collection since it was copied locally by value
                 idx++;
+                currentValue = this[Math.Min(idx, Count-1)].initialValue;
+            } else {
+                this[idx] = currentPoint;  //Shove the modified value back into our collection since it was copied locally by value
             }
             return currentValue;
         }
@@ -78,16 +100,23 @@ namespace PhaseEngine
         int cycles, tweakCounter;  //Number of samples to count up to before adding ±1 and associated counter.  This value should probably be 1/frac.
         SByte tweakAmt;  //The amount to add or subtract from the current value in a TrackerEnvelope when the cycle counter resets.
 
+        //Used to create a placeholder point for CachedEnvelopes of length 0 or prototypes that don't have delta data
+        public static CachedEnvelopePoint CreatePlaceholder(int value)
+        {
+            var p = new CachedEnvelopePoint();
+            p.initialValue = p.currentValue = value;
+            return p;
+        }
         public static CachedEnvelopePoint Create(TrackerEnvelopePoint A, TrackerEnvelopePoint B)
         {
             var p = new CachedEnvelopePoint();
             p.currentValue = p.initialValue = (int) Math.Round(A.Value);
             p.length = B.Samples - A.Samples;
 
-            p.delta = (B.Value - A.Value) / p.length;
+            p.delta = p.length>1? (B.Value - A.Value) / p.length:  (B.Value - A.Value);
             p.whole = (int) Math.Truncate(p.delta);
             p.frac =  (p.delta % 1.0); //Remainder, not modulo. When adding frac+whole this results in the original delta
-            p.tweakAmt = (SByte) Math.Sign(p.whole); 
+            p.tweakAmt = (SByte) Math.Sign(p.delta); 
 
             if (p.frac != 0)  //Prefer longer rather than shorter cycle counts;  We'd rather undershoot any tweak amounts than overshoot.
                 p.cycles = (int) Math.Ceiling(1.0/Math.Abs(p.frac));  

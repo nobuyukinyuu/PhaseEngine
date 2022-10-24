@@ -84,6 +84,7 @@ namespace PhaseEngine
             for(byte i=0; i<opsToProcess; i++)
             {
                 var intent=ops[i].intent;
+                ((IBindableDataConsumer)ops[i]).Rebake(voice.egs[i]);  //Reset the cached envelopes
 
 
                 //NOTE:  This might be faster as a type-matching switch pattern, but this isn't supported in c# 7.2.  Consider changing it in the future if more efficient
@@ -94,6 +95,8 @@ namespace PhaseEngine
                 case OpBase.Intents.WAVEFOLDER:
                     var op = ops[i] as Operator;
                     op.eg.Configure(voice.egs[i]);
+                    // ((IBindableDataConsumer)op).Rebake(voice.egs[i]);  //Reset the cached envelopes
+                    // ((IBindableDataConsumer)op).Rebake(voice.pgs[i]);  //FIXME:  UNCOMMENT THIS ONCE IMPLEMENTED.  FILTERS DON'T USE THE PHASE ACCUMULATOR
 
                     //TODO:  Consider pooling envelope resources to reduce memory thrash
                     //No EG Source?  Generate a new envelope.
