@@ -13,13 +13,15 @@ namespace PhaseEngine
         enum EnvelopePtMarker {None=0, LoopStart=1, LoopEnd=2, SustainStart=4, SustainEnd=8}
 
         public readonly int minValue, maxValue; //Values used for clamping and maybe some other calcs. Assigned from bind invoker
-        // public int initialValue;  //Used to reset values bound to us when starting 
         public int InitialValue{get=> (int)pts[0].Value; set 
         { 
-            // initialValue = value;
             pts[0] = new TrackerEnvelopePoint(0, value);
             cached = false;
         } }
+
+        public int ClockDivider {get=>divider; set{if(value<1) throw new ArgumentOutOfRangeException("Clock divider must be >=1"); divider=value;}}
+        public int TicksPerSecond {get=> (int)(Global.MixRate/divider); set=> ClockDivider=(int)(Global.MixRate/value);}
+        int divider=1;
 
         //Helpers
         internal System.Type dataSourceType;  //The type of data source which wants its associated value to be automated by this envelope.
@@ -32,7 +34,8 @@ namespace PhaseEngine
         //TODO:  Method for UnboundCopy()
 
 
-        public List<TrackerEnvelopePoint> pts = new List<TrackerEnvelopePoint>();
+        public List<TrackerEnvelopePoint> Pts {get=>pts;}
+        private List<TrackerEnvelopePoint> pts = new List<TrackerEnvelopePoint>();
         private CachedEnvelope cache;
         public bool cached = false;  //Invalidate this whenever we are modified in some way.
 
@@ -72,6 +75,7 @@ namespace PhaseEngine
         #endif
 
 
+#region IO
         public static TrackerEnvelope FromJSON(JSONObject j)
         {
             try{
@@ -136,6 +140,7 @@ namespace PhaseEngine
             return o;
         }
         public string ToJSONString() => ToJSONObject().ToJSONString();
+#endregion
     }
 
 

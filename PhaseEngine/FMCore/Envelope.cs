@@ -244,29 +244,29 @@ namespace PhaseEngine
 /////////////////////////////////////////  BINDABLE INTERFACE  /////////////////////////////////////////
         public bool Bind(string property)
         {
-            int min=0,max=0;
+            int min=0,max=0, ticksPerSec=120;
             var val = Convert.ToInt32(this.GetVal(property));
             //Set range values here.  wavetable_bank can't know max banks for a voice from here, so use Voice's bind method to specify it instead?
             switch(property)
             {
                 case "feedback":  case "ams":
-                    max=10;  break;
+                    ticksPerSec=24; max=10;  break;
                 case "duty":  
                     //FIXME:  Duty is represented internally by ushort but for UI purposes should be displayed as short
                     // min=short.MinValue; max=short.MaxValue; break;
                     min=ushort.MinValue; max=ushort.MaxValue; break;
 
                 case "tl": case "al": case "dl": case "sl": case "rl":
-                    max=L_MAX;  break;
+                    ticksPerSec=160; max=L_MAX;  break;
                 case "ar": case "dr": case "sr": case "rr":
-                    max=R_MAX;  break;
+                    ticksPerSec=48; max=R_MAX; break;
 
 
                 //TODO:  Create reusable recalc actions which can be called when appropriate by Operator
                 case "cutoff":
-                    min=10; max=(int)(Global.MixRate/2); break;
+                    ticksPerSec=60; min=10; max=(int)(Global.MixRate/2); break;
                 case "resonance":
-                    min=1; max=10; break;
+                    ticksPerSec=30; min=1; max=10; break;
 
                 default:
                     //Perhaps the data member specified doesn't exist.  Check first before attempting to go further.
@@ -295,7 +295,7 @@ namespace PhaseEngine
                     break;
             }
             // return ((IBindableDataSrc)this).Bind(property, min, max, (int)val);  //Call the default bind implementation to handle the rest.
-            return ((IBindableDataSrc)this).Bind(property, min, max, val);  //Call the default bind implementation to handle the rest.
+            return ((IBindableDataSrc)this).Bind(property, min, max, val, ticksPerSec);  //Call the default bind implementation to handle the rest.
         }
 
     }

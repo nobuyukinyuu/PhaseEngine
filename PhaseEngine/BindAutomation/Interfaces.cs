@@ -11,7 +11,6 @@ namespace PhaseEngine
         //Gets a copy of every cached envelope bound to a property in this IBindable.
         public Dictionary<string, TrackerEnvelope> BoundEnvelopes {get;} //References to envelope bind data needed to create caches.
 
-
         //Calls the bind manager to add a TrackerEnvelope to BoundEnvelopes
         //It's up to each implementation on how to specify min and max values
         public bool Bind(string property, int minValue, int maxValue)
@@ -30,6 +29,16 @@ namespace PhaseEngine
             e.dataSourceType = this.GetType();
             return bindSuccessful;
         }
+        public bool Bind(string property, int minValue, int maxValue, int initialValue, int ticksPerSecond)
+        {
+            TrackerEnvelope e = BindManager.Bind(this, property, minValue, maxValue);
+            var bindAlreadyExists = !BoundEnvelopes.TryAdd(property, e);
+            if (bindAlreadyExists) return false;
+            e.TicksPerSecond = ticksPerSecond;
+            e.SetPoint(0, (0, initialValue) );
+            e.dataSourceType = this.GetType();
+            return true;
+        }
 
         // FIXME:  Consider using BindManager instead to fix CachedEnvelopes to not carry these properties.  Or partial rebake on NoteOn?
         bool Unbind(string property) => BoundEnvelopes.Remove(property);
@@ -42,7 +51,6 @@ namespace PhaseEngine
         //BindStates below are used to cycle through the cached envelopes for 
         //When IBindableDataSrc invokes an update to one of its fields, these are used to determine how to update it.
         public Dictionary<string, CachedEnvelope> BindStates {get;} 
-        public ushort BindClockDivider {get;}
 
         //Methods used to signal the start and release of the bound envelopes so they can loop properly.
         public void NoteOn();

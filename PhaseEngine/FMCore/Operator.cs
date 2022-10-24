@@ -15,9 +15,6 @@ namespace PhaseEngine
         public Oscillator.oscTypes OscType{ get => oscillator.CurrentWaveform; }
         public Dictionary<string, CachedEnvelope> BindStates { get; set; } = new Dictionary<string, CachedEnvelope>();
 
-        public ushort BindClockDivider{get; set;}
-        protected ushort bind_counter;
-
         protected delegate short SampleOutputFunc(ushort modulation = 0, ushort am_offset=0); //Primary function of the oscillator
         protected SampleOutputFunc operatorOutputSample;
 
@@ -71,7 +68,6 @@ namespace PhaseEngine
             
             env_counter = 0;
             env_hold_counter = 0;
-            bind_counter = 0;
 
             egAttenuation = Envelope.L_MAX;
             egStatus = EGStatus.DELAY;
@@ -88,7 +84,8 @@ namespace PhaseEngine
             //Clock the cached envelopes.
             // foreach(CachedEnvelope state in BindStates.Values)  state.Clock();
             //If it's time to update call BindManager.Update().
-            BindManager.Update(this, eg, BindManager.NO_ACTION);
+            // BindManager.Update(this, eg, BindManager.NO_ACTION);
+            BindManager.Update(this, eg);
 
             
 

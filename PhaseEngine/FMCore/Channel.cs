@@ -112,7 +112,13 @@ namespace PhaseEngine
                     // Adjust the EG based on values from the RTables.
                     if (midi_note < 0x80) 
                     {
-                        op.eg.ksl.Apply(midi_note, ref op.eg.levels[4]);  //Apply KSL to total level
+                        //Apply KSL to total level
+                        if (!op.BindStates.ContainsKey("tl"))
+                            op.eg.ksl.Apply(midi_note, ref op.eg.levels[4]);  
+                        else {  //Total level is bound to an automation envelope.  Scale it.
+                            var val = Math.Clamp(op.eg.ksl.ScaledValue(midi_note), 0, Envelope.L_MAX);
+                            op.BindStates["tl"].Add(val);
+                        }
 
                         for (int j=0; j<op.eg.rates.Length-1; j++)
                         {
@@ -123,9 +129,15 @@ namespace PhaseEngine
 
                         }
                         op.eg.ksr.Apply(midi_note, ref op.eg.rates[op.eg.rates.Length-1]); //Release rate
-
                     }
-                    op.eg.velocity.Apply(velocity, ref op.eg.levels[4]);  //Apply velocity to total level
+
+                    //Apply velocity to total level
+                    if (!op.BindStates.ContainsKey("tl"))
+                        op.eg.velocity.Apply(velocity, ref op.eg.levels[4]);  
+                    else {  //Total level is bound to an automation envelope.  Scale it.
+                        var val = Math.Clamp(op.eg.velocity.ScaledValue(velocity), 0, Envelope.L_MAX);
+                        op.BindStates["tl"].Add(val);
+                    }
 
 
 
@@ -214,7 +226,8 @@ namespace PhaseEngine
                 }
 
             }     
-            lastSample = (short)output.Clamp(short.MinValue, short.MaxValue);            
+            // lastSample = (short)output.Clamp(short.MinValue, short.MaxValue);            
+            lastSample = (short)Math.Clamp(output, short.MinValue, short.MaxValue);
         }
 
     // void TechniqueFM(byte src_op, ref int output)

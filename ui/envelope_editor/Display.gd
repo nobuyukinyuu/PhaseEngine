@@ -131,6 +131,7 @@ func _gui_input(event):
 				else:  #MouseUp
 					if drag_pt>0:  #Don't update 1st point; handled in owner.set_initial_value() and in SetEG().
 						owner.set_bind_value(drag_pt, drag_value)
+						global.emit_signal("op_tab_value_changed")
 					
 					drag_pt = -1  #Reset drag point.
 					loop_dragging = CanDrag.NO

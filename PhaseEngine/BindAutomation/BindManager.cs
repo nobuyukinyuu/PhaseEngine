@@ -56,7 +56,7 @@ namespace PhaseEngine
 
         //Used to update the fields we're bound to in the specified data source. Done whenever invoker's clock says it's OK to update.
         //Invoker's clock method should probably be where we also call recalcs for things like filters and increments...
-        public static void Update(IBindableDataConsumer invoker, IBindableDataSrc dataSource, Action action)  //IMPORTANT
+        public static void Update(IBindableDataConsumer invoker, IBindableDataSrc dataSource)//, Action action)  //IMPORTANT
         {
             //Only sets the value directly to current state.  Clocking must be done in invokers
             var envelope = dataSource.BoundEnvelopes;
@@ -64,25 +64,27 @@ namespace PhaseEngine
             // for(int i=0; i<envelope.Count; i++)
             foreach(string item in envelope.Keys)
             {
+               if(!state[item].JustTicked) { state[item].Clock(); continue; }
                 switch(envelope[item].associatedProperty)  //FIXME:  TYPE COERSION IS REALLY SLOW
                 {
                     case System.Reflection.PropertyInfo property:
-                        property.SetValue(dataSource, CoerceValue(state[item].currentPoint.currentValue, property.PropertyType));
+                        property.SetValue(dataSource, CoerceValue(state[item].currentValue, property.PropertyType, envelope[item]));
                         break;
                     case System.Reflection.FieldInfo field:
-                        field.SetValue(dataSource, CoerceValue(state[item].currentPoint.currentValue, field.FieldType));
+                        field.SetValue(dataSource, CoerceValue(state[item].currentValue, field.FieldType, envelope[item]));
                         break;
                 }
                 state[item].Clock();
             }
 
-            action();
+            // action();
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static object CoerceValue(int input, Type type)
+        static object CoerceValue(int input, Type type, TrackerEnvelope minMax)
         {
             // input = input.Clamp(Convert.ToInt32(type.GetField("MinValue").GetValue(null)), Convert.ToInt32(type.GetField("MaxValue").GetValue(null)));
+            input = Math.Clamp(input, minMax.minValue, minMax.maxValue);
             return Convert.ChangeType(input, type);
         }
 

@@ -10,6 +10,9 @@ namespace PhaseEngine
     {
         [Flags]
         enum PtMarker {None=0, LoopStart=1, LoopEnd=2, SustainStart=4, SustainEnd=8}
+        [Flags]  enum LoopType {None=0, Basic=1, Sustain=2, Compound=3}
+        LoopType looping = LoopType.None;
+        int loopStart, loopEnd, sustainStart, sustainEnd;  //Loop points
 
         private CachedEnvelope(){}  //Can't call default ctor for us.  Create one from a TrackerEnvelope.
         public CachedEnvelope(TrackerEnvelope src) => Bake(src);
@@ -18,15 +21,21 @@ namespace PhaseEngine
 
         public CachedEnvelopePoint currentPoint;
         int idx = 0;  public int EnvelopePosition => idx;
-        int currentValue;
+        public int currentValue;
 
-        public bool Finished => idx >= Count;
+        int tickCount, maxClocks=1;  //When baked, a prototype clock is created to reduce the number of calculations per second to automate the target field
+
+        public bool Finished => idx >= Count;  //TODO:  && isLooping == false
+
+        //Check after updating an envelope for a data consumer to determine whether to take an action, such as recalculating increments
+        public bool JustTicked => tickCount==0;  
 
         void Start() {}  //TODO:  reset 
         void Restart() {}
 
-        void Bake(CachedEnvelope prototype) //Rebakes itself using a prototype
+        void Bake(CachedEnvelope prototype) //Partially rebakes itself using a prototype.  Typically called whenever a copy of a CachedEnvelope is needed
         {
+            maxClocks = prototype.maxClocks;
             Clear();
             if (prototype.Count > 0) currentPoint = prototype[0];
             else {currentValue = prototype.currentValue; currentPoint = prototype.currentPoint; return;}
@@ -40,17 +49,36 @@ namespace PhaseEngine
             currentValue = prototype[0].initialValue;
         }
 
-        public void Bake(TrackerEnvelope src)
+        //Rescales a cached envelope with a multiplier supplied by rTables (Velocity, KSL / Key follow)
+        public void Multiply(float multiplier)
         {
+            for(int i=0; i<Count; i++)
+                this[i] = this[i].ScaledBy(multiplier);
+
+            currentValue = (int)(currentValue * multiplier);
+            currentPoint = currentPoint.ScaledBy(multiplier);
+        }
+        public void Add(float amount)
+        {
+            for(int i=0; i<Count; i++)
+                this[i] = this[i].Plus(amount);
+
+            currentValue = (int)(currentValue + amount);
+            currentPoint = currentPoint.Plus(amount);
+        }
+
+        public void Bake(TrackerEnvelope src)  //Typically called by a TrackerEnvelope to rebake its cache from scratch when values change.
+        {
+            maxClocks = src.ClockDivider;
             Clear();
-            for(int i=0; i<src.pts.Count-1; i++)
-                Add(CachedEnvelopePoint.Create(src.pts[i], src.pts[i+1]));
+            for(int i=0; i<src.Pts.Count-1; i++)
+                Add(CachedEnvelopePoint.Create(src.Pts[i], src.Pts[i+1], src.ClockDivider));
 
             if(Count>0) 
             {
                 currentPoint = this[0];
                 idx=0;
-            } else if (src.pts.Count == 1) {
+            } else if (src.Pts.Count == 1) {
                 //If there's only one TrackerEnvelopePoint,  then Finished will return True and the clock will always return whatever the initial value was.
                 currentPoint = CachedEnvelopePoint.CreatePlaceholder(src.InitialValue);
                 currentValue = src.InitialValue;
@@ -61,13 +89,18 @@ namespace PhaseEngine
 
         //TODO:  Rebake methods for individual points?
 
-        public int Clock() 
+        public void Clock() 
         {
             // System.Diagnostics.Debug.Assert(Count>0);
-            if(Finished || Count==0) return currentValue;
+            if(Finished || Count==0) return;
 
-            //TODO:  Stuff here to handle clocking at rates lower than the mix rate
             //TODO:  Stuff here to handle lööps
+            //TODO:  Stuff here to handle clocking at rates lower than the mix rate
+
+            tickCount++;
+            if(tickCount < maxClocks) return;  //Not time to process yet.  Exit early
+            tickCount=0;  //Reset tick counter.  It's now time to process.
+
             currentPoint = this[idx];  //Yoink a copy of the point at the current index
             currentValue = currentPoint.Clock();
             if (currentPoint.Finished)  //Next point
@@ -75,11 +108,12 @@ namespace PhaseEngine
                 // currentPoint.Reset();  //May not be necessary if we're not using copy constructors but baking new envelopes each time
                 this[idx] = currentPoint;  //Shove the modified value back into our collection since it was copied locally by value
                 idx++;
-                currentValue = this[Math.Min(idx, Count-1)].initialValue;
+                // currentValue = this[Math.Min(idx, Count-1)].initialValue;
+                if (!Finished)  currentValue = this[idx].initialValue;
             } else {
                 this[idx] = currentPoint;  //Shove the modified value back into our collection since it was copied locally by value
             }
-            return currentValue;
+            return;
         }
 
     }
@@ -88,7 +122,7 @@ namespace PhaseEngine
     public struct CachedEnvelopePoint
     {
         public int initialValue, length;  //Value to snap to when a new point is started, and the length of the transition from one point to another.
-        int totalProgress;   
+        float totalProgress;  //progressTickLength MUST be a value over 0
         public bool Finished => totalProgress >= length;
         public int currentValue;  //Current delta Y value in the transition's lifetime.
         double delta; //Delta impulse that would be applied every frame if we worked in floats.  We don't, though.
@@ -107,11 +141,11 @@ namespace PhaseEngine
             p.initialValue = p.currentValue = value;
             return p;
         }
-        public static CachedEnvelopePoint Create(TrackerEnvelopePoint A, TrackerEnvelopePoint B)
+        public static CachedEnvelopePoint Create(TrackerEnvelopePoint A, TrackerEnvelopePoint B, int divider)
         {
             var p = new CachedEnvelopePoint();
             p.currentValue = p.initialValue = (int) Math.Round(A.Value);
-            p.length = B.Samples - A.Samples;
+            p.length = (B.Samples - A.Samples) / divider;
 
             p.delta = p.length>1? (B.Value - A.Value) / p.length:  (B.Value - A.Value);
             p.whole = (int) Math.Truncate(p.delta);
@@ -121,6 +155,38 @@ namespace PhaseEngine
             if (p.frac != 0)  //Prefer longer rather than shorter cycle counts;  We'd rather undershoot any tweak amounts than overshoot.
                 p.cycles = (int) Math.Ceiling(1.0/Math.Abs(p.frac));  
 
+            return p;
+        }
+
+        //Produces another CachedEnvelopePoint scaled by the amount specified, as a multiplier
+        public CachedEnvelopePoint ScaledBy(float amount)
+        {
+            var p = new CachedEnvelopePoint();
+            p.length = length;
+            p.initialValue = (int)(initialValue*amount);
+            p.currentValue = (int)(currentValue*amount);
+            p.delta = delta * amount;
+            p.whole = (int) Math.Truncate(p.delta);
+            p.frac =  (p.delta % 1.0); //Remainder, not modulo. When adding frac+whole this results in the original delta
+            p.tweakAmt = (SByte) Math.Sign(p.delta);
+
+            if (p.frac != 0)  //Prefer longer rather than shorter cycle counts;  We'd rather undershoot any tweak amounts than overshoot.
+                p.cycles = (int) Math.Ceiling(1.0/Math.Abs(p.frac));  
+            return p;
+        }
+        public CachedEnvelopePoint Plus(float amount)
+        {
+            var p = new CachedEnvelopePoint();
+            p.length = length;
+            p.initialValue = (int)(initialValue+amount);
+            p.currentValue = (int)(currentValue+amount);
+            p.delta = delta;
+            p.whole = (int) Math.Truncate(p.delta);
+            p.frac =  (p.delta % 1.0); //Remainder, not modulo. When adding frac+whole this results in the original delta
+            p.tweakAmt = (SByte) Math.Sign(p.delta);
+
+            if (p.frac != 0)  //Prefer longer rather than shorter cycle counts;  We'd rather undershoot any tweak amounts than overshoot.
+                p.cycles = (int) Math.Ceiling(1.0/Math.Abs(p.frac));  
             return p;
         }
 

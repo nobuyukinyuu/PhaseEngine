@@ -84,7 +84,8 @@ namespace PhaseEngine
                 output += channels[i].RequestSample();
             }
 
-            return (short) output.Clamp(short.MinValue, short.MaxValue);
+            // return (short) output.Clamp(short.MinValue, short.MaxValue);
+            return (short)Math.Clamp(output, short.MinValue, short.MaxValue);
         }
         public short RequestSample(byte downscaleMagnitude)
         {

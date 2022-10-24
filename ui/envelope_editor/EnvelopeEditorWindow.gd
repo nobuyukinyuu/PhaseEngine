@@ -189,7 +189,7 @@ func repl_first(input:String, what, replacement):
 #Perform various actions.
 func _on_ToolButton_pressed(toggled=false, which_button=-1):
 	if not is_in_front():  
-		bring_to_front()
+#		bring_to_front()
 		return  #Ignore shortcut input from windows not in front.
 	
 	match which_button:
@@ -262,6 +262,8 @@ func _on_ToolButton_pressed(toggled=false, which_button=-1):
 			if susStart == -1 or susStart >= data.size():  susStart = closest
 			if susEnd == -1 or susEnd >= data.size():  susEnd = closest
 			$Display.update()
+
+	global.emit_signal("op_tab_value_changed")  #Update the preview
 
 func shift_loop_pt(handle, amt):
 	#Shift a loop point forward or backward. Used when adding or removing points to preserve user intent.
