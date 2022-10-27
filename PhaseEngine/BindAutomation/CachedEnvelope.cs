@@ -24,14 +24,12 @@ namespace PhaseEngine
         public int currentValue;
 
         int tickCount, maxClocks=1;  //When baked, a prototype clock is created to reduce the number of calculations per second to automate the target field
+        int chipDivider=1;  //The master clock divider for the chip using this cached envelope.  Separate from the clock divider for automating the target field.
 
         public bool Finished => idx >= Count;  //TODO:  && isLooping == false
 
-        //Check after updating an envelope for a data consumer to determine whether to take an action, such as recalculating increments
+        //Check after updating an envelope for a data consumer to determine whether to take an action, such as recalculating increments or filters
         public bool JustTicked => tickCount==0;  
-
-        void Start() {}  //TODO:  reset 
-        void Restart() {}
 
         void Bake(CachedEnvelope prototype) //Partially rebakes itself using a prototype.  Typically called whenever a copy of a CachedEnvelope is needed
         {
@@ -58,7 +56,7 @@ namespace PhaseEngine
             currentValue = (int)(currentValue * multiplier);
             currentPoint = currentPoint.ScaledBy(multiplier);
         }
-        public void Add(float amount)
+        public void AddAmount(float amount)
         {
             for(int i=0; i<Count; i++)
                 this[i] = this[i].Plus(amount);
@@ -67,12 +65,13 @@ namespace PhaseEngine
             currentPoint = currentPoint.Plus(amount);
         }
 
-        public void Bake(TrackerEnvelope src)  //Typically called by a TrackerEnvelope to rebake its cache from scratch when values change.
+        public void Bake(TrackerEnvelope src, int chipDivider=1)  //Typically called by a TrackerEnvelope to rebake its cache from scratch when values change.
         {
-            maxClocks = src.ClockDivider;
+            maxClocks = src.ClockDivider < 1?   1 : (int)maxClocks;
+            this.chipDivider = chipDivider;
             Clear();
             for(int i=0; i<src.Pts.Count-1; i++)
-                Add(CachedEnvelopePoint.Create(src.Pts[i], src.Pts[i+1], src.ClockDivider));
+                Add(CachedEnvelopePoint.Create(src.Pts[i], src.Pts[i+1], chipDivider));
 
             if(Count>0) 
             {
@@ -141,13 +140,19 @@ namespace PhaseEngine
             p.initialValue = p.currentValue = value;
             return p;
         }
-        public static CachedEnvelopePoint Create(TrackerEnvelopePoint A, TrackerEnvelopePoint B, int divider)
+        public static CachedEnvelopePoint Create(TrackerEnvelopePoint A, TrackerEnvelopePoint B, double divider)
         {
             var p = new CachedEnvelopePoint();
             p.currentValue = p.initialValue = (int) Math.Round(A.Value);
-            p.length = (B.Samples - A.Samples) / divider;
+            
+            var length = (B.Samples - A.Samples) / divider;
+            p.length = (int)length;  //Reduce the total number of frames by the divided number of samples we'll actually hit
 
-            p.delta = p.length>1? (B.Value - A.Value) / p.length:  (B.Value - A.Value);
+            if (p.length>1){
+                p.delta = (B.Value - A.Value) / length;
+                p.delta += (length % 1.0) / p.length;  //Add the tiniest bit more to the delta to compensate for partial frames
+            } else p.delta = (B.Value - A.Value);
+
             p.whole = (int) Math.Truncate(p.delta);
             p.frac =  (p.delta % 1.0); //Remainder, not modulo. When adding frac+whole this results in the original delta
             p.tweakAmt = (SByte) Math.Sign(p.delta); 

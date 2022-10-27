@@ -10,6 +10,9 @@ namespace PhaseEngine
 {
     public class Voice
     {
+        internal float BindManagerTicksPerSec {get=> Global.MixRate/bindManagerMaxClocks; set{bindManagerMaxClocks=(ushort)(Global.MixRate/value); ResetPreview();}}
+        ushort bindManagerMaxClocks=1;  //Used to synchronize preview with chip if we want to update binds more or less times per sec
+
         ////// Metadata for file I/O and use in user implementations
         public string name, desc;
 
@@ -90,9 +93,15 @@ namespace PhaseEngine
                  pgs[i] = Increments.Prototype();
              }
   
-            preview = new Channel(opCount);
+            preview = new Channel(opCount, bindManagerMaxClocks);
             preview.SetVoice(this);
             lfo.wavetable = this.wavetable;
+        }
+
+        void ResetPreview() //Used to create a new preview channel at a different tick rate
+        {
+            preview = new Channel(opCount, bindManagerMaxClocks);
+            preview.SetVoice(this);
         }
 
         public bool SetPresetAlgorithm(byte preset)
@@ -138,7 +147,7 @@ namespace PhaseEngine
             var output = new float[size];  var oc=0;
             var stride = (period/(double)size);
             var strideCount = stride;
-            var c = preview;  //Reduce memory thrash by using our own Channel instance
+            // var preview = this.preview;  //Reduce memory thrash by using our own Channel instance
             // c.SetVoice(this);
             // c.disableLFO = disableLFO;
 
@@ -148,24 +157,35 @@ namespace PhaseEngine
                 switch(alg.intent[i])
                 {
                     case OpBase.Intents.BITWISE:
-                        var op = c.ops[i] as BitwiseOperator;
+                        var op = preview.ops[i] as BitwiseOperator;
                         op.OpFuncType = egs[i].aux_func;  //Property has hidden side effect of setting func
                         break;
                 }
             }
 
-            c.NoteOn(0, 64);  //preview.NoteOn
+            preview.NoteOn(0, 64);  //preview.NoteOn
+            int bindTicks=0;
             for (int i=0; oc<size && i<period; i++)
             {
+                //Check binds for necessary updates
+                bindTicks++;
+                if (bindTicks >= bindManagerMaxClocks)
+                {
+                    bindTicks = 0;
+                      for(byte op=0;  op<opCount; op++)
+                        BindManager.Update(preview.ops[op], preview.ops[op].eg);
+                }
+
                 if (strideCount<1)  // Hit a point where we need to fill up output
                 {
                     strideCount += stride;
-                    output[oc] = Tables.short2float[c.RequestSample()+Tables.SIGNED_TO_INDEX];  oc++;
+                    output[oc] = Tables.short2float[preview.RequestSample()+ Tables.SIGNED_TO_INDEX];  oc++;
                 }
                 strideCount--;
                 
-                c.Clock();
+                preview.Clock();
             }
+            preview.NoteOff();
             return output;
         }
 

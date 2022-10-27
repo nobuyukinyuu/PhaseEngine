@@ -39,7 +39,7 @@ namespace PhaseEngine
         public ushort sl{get=> levels[2]; set=>RecalcLevel(2, value);}
         public ushort rl{get=> levels[3]; set=>RecalcLevel(3, value);}
 
-        public Dictionary<string, TrackerEnvelope> BoundEnvelopes {get;set;} = new Dictionary<string, TrackerEnvelope>();
+        public SortedList<string, TrackerEnvelope> BoundEnvelopes {get;set;} = new SortedList<string, TrackerEnvelope>();
 
         public byte feedback = 0;
         public ushort duty=32767;
@@ -242,31 +242,33 @@ namespace PhaseEngine
 
 
 /////////////////////////////////////////  BINDABLE INTERFACE  /////////////////////////////////////////
-        public bool Bind(string property)
+        public bool Bind(string property, double chipTicksPerSec=1)
         {
-            int min=0,max=0, ticksPerSec=120;
+            int min=0,max=0;
+            double clockCount = (chipTicksPerSec/120);  //Default tickrate,  120 ticks per sec
+            void SetTicks(double x) => clockCount = chipTicksPerSec / x; //Set clock counter to a multiple of our max ticks/sec
             var val = Convert.ToInt32(this.GetVal(property));
             //Set range values here.  wavetable_bank can't know max banks for a voice from here, so use Voice's bind method to specify it instead?
             switch(property)
             {
                 case "feedback":  case "ams":
-                    ticksPerSec=24; max=10;  break;
+                    SetTicks(24); max=10;  break;
                 case "duty":  
                     //FIXME:  Duty is represented internally by ushort but for UI purposes should be displayed as short
                     // min=short.MinValue; max=short.MaxValue; break;
                     min=ushort.MinValue; max=ushort.MaxValue; break;
 
                 case "tl": case "al": case "dl": case "sl": case "rl":
-                    ticksPerSec=160; max=L_MAX;  break;
+                    SetTicks(160); max=L_MAX;  break;
                 case "ar": case "dr": case "sr": case "rr":
-                    ticksPerSec=48; max=R_MAX; break;
+                    SetTicks(48); max=R_MAX; break;
 
 
                 //TODO:  Create reusable recalc actions which can be called when appropriate by Operator
                 case "cutoff":
-                    ticksPerSec=60; min=10; max=(int)(Global.MixRate/2); break;
+                    SetTicks(60); min=10; max=(int)(Global.MixRate/2); break;
                 case "resonance":
-                    ticksPerSec=30; min=1; max=10; break;
+                    SetTicks(30); min=1; max=10; break;
 
                 default:
                     //Perhaps the data member specified doesn't exist.  Check first before attempting to go further.
@@ -295,7 +297,8 @@ namespace PhaseEngine
                     break;
             }
             // return ((IBindableDataSrc)this).Bind(property, min, max, (int)val);  //Call the default bind implementation to handle the rest.
-            return ((IBindableDataSrc)this).Bind(property, min, max, val, ticksPerSec);  //Call the default bind implementation to handle the rest.
+            return ((IBindableDataSrc)this).Bind(property, min, max, val, (int)clockCount);  //Call the default bind implementation to handle the rest.
+            // return ((IBindableDataSrc)this).Bind(property, min, max, val, 48000);  //Call the default bind implementation to handle the rest.
         }
 
     }

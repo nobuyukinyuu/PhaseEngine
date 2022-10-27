@@ -19,9 +19,9 @@ namespace PhaseEngine
             cached = false;
         } }
 
-        public int ClockDivider {get=>divider; set{if(value<1) throw new ArgumentOutOfRangeException("Clock divider must be >=1"); divider=value;}}
-        public int TicksPerSecond {get=> (int)(Global.MixRate/divider); set=> ClockDivider=(int)(Global.MixRate/value);}
-        int divider=1;
+        public double ClockDivider {get=>divider; set{if(value<=0) throw new ArgumentOutOfRangeException("Clock divider must be >0"); divider=value;}}
+        // public double TicksPerSecond {get=> (Global.MixRate/divider); set=> ClockDivider=(Global.MixRate/value);}
+        double divider=1;
 
         //Helpers
         internal System.Type dataSourceType;  //The type of data source which wants its associated value to be automated by this envelope.
@@ -49,11 +49,16 @@ namespace PhaseEngine
 
         //Convenient property to rebake a cached envelope
         // public CachedEnvelope CachedEnvelope{ get{if(!cached) Bake();  return cache;} }
-        public CachedEnvelope CachedEnvelopeCopy{ get{if(!cached) Bake();  return new CachedEnvelope(cache);} }
-
-        public void Bake()
+        // public CachedEnvelope CachedEnvelopeCopy{ get{if(!cached) Bake();  return new CachedEnvelope(cache);} }
+        public CachedEnvelope CachedEnvelopeCopy(int chipDivider=1)
         {
-            cache.Bake(this);
+            if(!cached) Bake(chipDivider);
+            return new CachedEnvelope(cache);
+        }
+
+        public void Bake(int chipDivider=1)
+        {
+            cache.Bake(this, chipDivider);
             cached = true;
         }
 

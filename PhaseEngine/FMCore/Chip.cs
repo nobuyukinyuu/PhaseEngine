@@ -9,8 +9,9 @@ namespace PhaseEngine
 
         Voice voice; //= new Voice();  //Description of the timbre.
         public Voice Voice { get => voice; set => SetVoice(value); }
-        public bool disableLFO;  //Used by processes that wish to calculate voices without the LFO, such as the offline preview.
 
+        public readonly ushort bindManagerTicksPerSec=480, bindManagerMaxClocks=100;
+        ushort bindManagerClock;
 
         byte opCount = 6;  //Probably should be moved to a voice class, then the chip given a unitimbral description of the voice. Realloc on major change
         public byte OpCount{get=>opCount;}  //Use SetOpCount to set opCount outside of Chip.
@@ -40,17 +41,25 @@ namespace PhaseEngine
         public Chip() {InitChannels();}
         public Chip(byte polyphony): this(polyphony, true) {}
         private Chip(byte polyphony, bool initChannels)  { this.polyphony = polyphony; if (initChannels)  InitChannels(); }
-        public Chip(byte polyphony, byte opCount) : this(polyphony, false)
-            { this.opCount = opCount;  InitChannels(); }
+        public Chip(byte polyphony, byte opCount, bool initChannels=true) : this(polyphony, false)
+            { this.opCount = opCount;  if (initChannels)  InitChannels(); }
+        public Chip(byte polyphony, byte opCount, ushort bindManagerTicksPerSec) : this(polyphony, opCount, false)
+        { 
+            this.bindManagerTicksPerSec = bindManagerTicksPerSec; 
+            bindManagerMaxClocks = (ushort)(Global.MixRate/bindManagerTicksPerSec); 
+            InitChannels();  //Have to do this at the end so that the channels receive the correct chip divider value.
+            voice.BindManagerTicksPerSec = bindManagerTicksPerSec;
+        }
 
         void InitChannels()
         {
             channels = new Channel[polyphony];
             voice = new Voice(opCount);
+            voice.BindManagerTicksPerSec = bindManagerTicksPerSec;
 
             for(int i=0; i < polyphony; i++) 
             {
-                channels[i] = new Channel(opCount);
+                channels[i] = new Channel(opCount, bindManagerMaxClocks);
                 channels[i].SetVoice(voice);
             }
         }
@@ -59,6 +68,7 @@ namespace PhaseEngine
 
         public void Clock()
         {
+            //Update the LFO
             Channel.am_offset = voice.lfo.RequestAM();
             // System.Threading.Tasks.Parallel.For(0, channels.Length, i =>
             for (int i=0; i<channels.Length;  i++)
@@ -66,14 +76,30 @@ namespace PhaseEngine
                 if(channels[i].busy != BusyState.FREE) //Clock optimization
                 {
                     channels[i].Clock();
-                    
+
                     //Apply LFO pitch changes.
                     for(int j=0; j<opCount; j++)
                         voice.lfo.ApplyPM(ref channels[i].ops[j].pg);
                 }
             }//);
 
+            //Update the binds
+            bindManagerClock++;
+            if (bindManagerClock>=bindManagerMaxClocks)
+            {
+                bindManagerClock=0;
+                for (int i=0; i<channels.Length;  i++)
+                {
+                    if(channels[i].busy == BusyState.FREE)  continue;  //Clock optimization
+                    for(byte op=0;  op<opCount; op++)
+                        BindManager.Update(channels[i].ops[op], channels[i].ops[op].eg);
+                }
+            }
+
+
             voice.lfo.Clock();
+
+
         }
 
         public short RequestSample()
@@ -183,7 +209,7 @@ namespace PhaseEngine
                 }
                 if (ch.midi_note == midi_note) //The channel we're peeking is the same note! Turn off. Might be best candidate
                 {
-                    ch.NoteOff();
+                    ch.NoteOff();  //Also deals with stuck notes
                     // return ch;
                 }
 
@@ -244,6 +270,7 @@ namespace PhaseEngine
         public void SetVoice(Voice v)
         {
             voice = v;
+            v.BindManagerTicksPerSec = bindManagerTicksPerSec;
             for (int i=0; i<channels.Length; i++)
                 channels[i].SetVoice(v);
             

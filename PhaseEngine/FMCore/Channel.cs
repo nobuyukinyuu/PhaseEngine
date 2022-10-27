@@ -20,8 +20,10 @@ namespace PhaseEngine
 
         public static ushort am_offset=0;  //Set by the chip when clocking to pass down when requesting samples from our operators.
 
-        public Channel(byte opCount)
+        readonly ushort chipDivider=1;
+        public Channel(byte opCount, ushort chipDivider=1)
         {
+            this.chipDivider = chipDivider;
             ops = new OpBase[opCount];
             cache = new int[opCount];
 
@@ -79,12 +81,12 @@ namespace PhaseEngine
             if (midi_note >= 0x80)  return;  //Invalid note
             this.midi_note = midi_note;
             this.lastVelocity = velocity;
+            busy = BusyState.BUSY;                
 
             var opsToProcess = (byte)Math.Min(voice.alg.opCount, ops.Length); //Prevents out of bounds if the voice changed while notes are still on.
             for(byte i=0; i<opsToProcess; i++)
             {
                 var intent=ops[i].intent;
-                ((IBindableDataConsumer)ops[i]).Rebake(voice.egs[i]);  //Reset the cached envelopes
 
 
                 //NOTE:  This might be faster as a type-matching switch pattern, but this isn't supported in c# 7.2.  Consider changing it in the future if more efficient
@@ -95,7 +97,7 @@ namespace PhaseEngine
                 case OpBase.Intents.WAVEFOLDER:
                     var op = ops[i] as Operator;
                     op.eg.Configure(voice.egs[i]);
-                    // ((IBindableDataConsumer)op).Rebake(voice.egs[i]);  //Reset the cached envelopes
+                    ((IBindableDataConsumer)op).Rebake(op.eg, chipDivider);  //Reset the cached envelopes
                     // ((IBindableDataConsumer)op).Rebake(voice.pgs[i]);  //FIXME:  UNCOMMENT THIS ONCE IMPLEMENTED.  FILTERS DON'T USE THE PHASE ACCUMULATOR
 
                     //TODO:  Consider pooling envelope resources to reduce memory thrash
@@ -117,7 +119,7 @@ namespace PhaseEngine
                             op.eg.ksl.Apply(midi_note, ref op.eg.levels[4]);  
                         else {  //Total level is bound to an automation envelope.  Scale it.
                             var val = Math.Clamp(op.eg.ksl.ScaledValue(midi_note), 0, Envelope.L_MAX);
-                            op.BindStates["tl"].Add(val);
+                            op.BindStates["tl"].AddAmount(val);
                         }
 
                         for (int j=0; j<op.eg.rates.Length-1; j++)
@@ -136,7 +138,7 @@ namespace PhaseEngine
                         op.eg.velocity.Apply(velocity, ref op.eg.levels[4]);  
                     else {  //Total level is bound to an automation envelope.  Scale it.
                         var val = Math.Clamp(op.eg.velocity.ScaledValue(velocity), 0, Envelope.L_MAX);
-                        op.BindStates["tl"].Add(val);
+                        op.BindStates["tl"].AddAmount(val);
                     }
 
 
@@ -160,7 +162,6 @@ namespace PhaseEngine
                     break;
                 }
             }
-            busy = BusyState.BUSY;                
         }
 
         public void NoteOff()

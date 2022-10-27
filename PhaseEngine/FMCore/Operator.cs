@@ -82,10 +82,8 @@ namespace PhaseEngine
             phase += pg.increment;  
 
             //Clock the cached envelopes.
-            // foreach(CachedEnvelope state in BindStates.Values)  state.Clock();
             //If it's time to update call BindManager.Update().
             // BindManager.Update(this, eg, BindManager.NO_ACTION);
-            BindManager.Update(this, eg);
 
             
 

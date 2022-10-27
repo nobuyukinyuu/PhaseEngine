@@ -17,7 +17,8 @@ namespace PhaseEngine
         public ImportBTB(){fileFormat="btb"; description="BambooTracker Bank";}
 
         //Ratios used to convert an OPN detune value to a PhaseEngine one.
-        const double NATIVE_HZ_RATE = 55466.0;
+        // const double NATIVE_HZ_RATE = 55466.0;  //OPNA sample rate, as calculated internally by BambooTracker
+        const double NATIVE_HZ_RATE = 53267.0;  //YM2612 (OPN2) sample rate as noted by TmEE? for NTSC systems
         static double ClockMult = NATIVE_HZ_RATE/Global.MixRate * Global.ClockMult;  //Ratio needed to translate one OPNA clock to a PhaseEngine clock at current mixrate
 
 
