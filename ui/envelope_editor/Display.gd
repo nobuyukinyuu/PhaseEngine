@@ -134,6 +134,9 @@ func _gui_input(event):
 						global.emit_signal("op_tab_value_changed")
 					
 					drag_pt = -1  #Reset drag point.
+					
+					if loop_dragging != CanDrag.NO:  #Loop was dragged.  Update it
+						pass
 					loop_dragging = CanDrag.NO
 					
 					
@@ -213,12 +216,14 @@ func set_grab_handles(enabled=true):
 
 	
 func _draw():
+	draw_string(get_font(""), Vector2.ONE * 32, str(loop_dragging))
+	draw_string(get_font(""), Vector2.ONE * 40, str(can_drag_loop))
+	draw_string(get_font(""), Vector2.ONE * 48, str(can_drag_sustain))
 	#Draw reference lines.
 	if owner.log_scale:
-		for i in range(0, 32):
+		for i in range(0, 9):
 			var v = rect_size.y - global.xerp(0, rect_size.y, (i/8.0))
 			draw_line(Vector2(0, v), Vector2(rect_size.x,v), color*2)
-			if i==4:  draw_line(Vector2(0, v), Vector2(rect_size.x,v), color*3)
 	else:
 		for i in 8:
 			var v = rect_size.y * (i/8.0)

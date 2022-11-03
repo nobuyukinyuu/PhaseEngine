@@ -71,6 +71,7 @@ namespace PhaseEngine
     }
 
     public enum BusyState{BUSY=128, RELEASED=512, FREE=1024} //Order of BusyState in increasing yoink priority 
+    [Flags] public enum BindTypes {None=0, TrackerEnvelope=1, KeyFollow=2, VelocityTable=4}  //Types of binds available or specified
 
 
     static internal class XorShift64Star

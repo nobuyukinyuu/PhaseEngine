@@ -75,7 +75,7 @@ _global_script_class_icons={
 "EGSlider": "",
 "EGTooltip": "",
 "EnvelopeDisplay": "",
-"EnvelopeEditorWindow": "res://gfx/ui/bind_indicator.png",
+"EnvelopeEditorWindow": "res://gfx/ui/envelope_editor/icon_envelope.svg",
 "FilterTooltip": "",
 "KanbanColumn": "",
 "Knob": "res://ui/knob/icon_knob.svg",

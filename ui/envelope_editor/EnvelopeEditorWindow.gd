@@ -1,5 +1,5 @@
 extends WindowDialog
-class_name EnvelopeEditorWindow, "res://gfx/ui/bind_indicator.png"
+class_name EnvelopeEditorWindow, "res://gfx/ui/envelope_editor/icon_envelope.svg"
 
 var invoker:NodePath  #The control that spawned us.  Typically an EGSlider.  References invalidate when tab's moved
 var lo=0  #Minimum value of env output
@@ -76,7 +76,7 @@ func rebind_to(invoker:NodePath) -> bool:
 				p.connect("value_changed", self, "set_initial_value", [true])
 			return true
 	else:
-		printerr("EnvelopeEditor: Can't find invoker path! ", invoker)
+		print("EnvelopeEditor: Can't find invoker path to rebind to! ", invoker)
 	return false
 	
 func _ready():
@@ -254,6 +254,7 @@ func _on_ToolButton_pressed(toggled=false, which_button=-1):
 			var closest = $Display.last_closest_pt if $Display.last_closest_pt!=-1 else data.size()-1
 			if loopStart < 0 or loopStart >= data.size():  loopStart = closest
 			if loopEnd < 0 or loopEnd >= data.size():  loopEnd = closest
+			set_bind_loop_enable()
 			$Display.update()
 
 		SET_SUSTAIN:
@@ -261,6 +262,7 @@ func _on_ToolButton_pressed(toggled=false, which_button=-1):
 			var closest = $Display.last_closest_pt if $Display.last_closest_pt!=-1 else 0
 			if susStart == -1 or susStart >= data.size():  susStart = closest
 			if susEnd == -1 or susEnd >= data.size():  susEnd = closest
+			set_bind_loop_enable()
 			$Display.update()
 
 	global.emit_signal("op_tab_value_changed")  #Update the preview
@@ -323,6 +325,14 @@ func set_initial_value(val, from_invoker=false):
 func set_bind_value(index, pt):  #Update the data structure on the c# end
 	var c = get_node(owner.owner.chip_loc)
 	c.SetBindValue(data_source_type, operator, associated_value, index, pt, log_scale)
+func set_bind_loop_enable():
+	var mask = 0
+	if has_loop:  mask |= 1
+	if has_sustain:  mask |= 2
+	var c = get_node(owner.owner.chip_loc)
+	c.SetBindLoop(data_source_type, operator, associated_value, mask)
+func set_bind_loop_pt(pt_marker, index):
+	pass
 
 
 #Scales raw data down to 0-1 display values.

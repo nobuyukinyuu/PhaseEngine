@@ -78,7 +78,7 @@ namespace PhaseEngine
                 if (j.HasItem("intent")) //Probably clipboard data or data from UI.  Check for matching intent.  If not the same, fail operation.
                 {   
                     var expectedIntent = (RTableIntent) j.GetItem("intent", -1);
-                    if (intent != expectedIntent) throw new Exception("Intent does not match!");
+                    if (intent != expectedIntent) throw new Exception("RTable.cs:  Intent does not match!");
                 }
 
                 j.Assign("floor", ref floor);

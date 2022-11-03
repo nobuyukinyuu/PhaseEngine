@@ -8,10 +8,7 @@ namespace PhaseEngine
     //This is the envelope data that is sent as copies to the operators which perform the clocking. A copy is passed to relevant classes at NoteOn.
     public class CachedEnvelope : List<CachedEnvelopePoint>
     {
-        [Flags]
-        enum PtMarker {None=0, LoopStart=1, LoopEnd=2, SustainStart=4, SustainEnd=8}
-        [Flags]  enum LoopType {None=0, Basic=1, Sustain=2, Compound=3}
-        LoopType looping = LoopType.None;
+        TrackerEnvelope.LoopType looping = TrackerEnvelope.LoopType.None;
         int loopStart, loopEnd, sustainStart, sustainEnd;  //Loop points
 
         private CachedEnvelope(){}  //Can't call default ctor for us.  Create one from a TrackerEnvelope.
@@ -67,6 +64,12 @@ namespace PhaseEngine
 
         public void Bake(TrackerEnvelope src, int chipDivider=1)  //Typically called by a TrackerEnvelope to rebake its cache from scratch when values change.
         {
+            //Set up loop points
+            looping = src.looping;
+            loopStart = src.loopStart;  loopEnd = src.loopEnd;
+            sustainStart = src.sustainStart;  sustainEnd = src.sustainEnd;
+
+            //Set up clocking and deltas
             maxClocks = src.ClockDivider < 1?   1 : (int)maxClocks;
             this.chipDivider = chipDivider;
             Clear();
@@ -82,7 +85,7 @@ namespace PhaseEngine
                 currentPoint = CachedEnvelopePoint.CreatePlaceholder(src.InitialValue);
                 currentValue = src.InitialValue;
             } else {  //There were no points in the TrackerEnvelope.  This shouldn't be possible
-                throw new InvalidOperationException("TrackerEnvelope size is 0!");
+                throw new InvalidOperationException($"{nameof(TrackerEnvelope)} size is 0!");
             }
         }
 

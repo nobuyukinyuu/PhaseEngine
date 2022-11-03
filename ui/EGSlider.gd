@@ -10,7 +10,7 @@ onready var lblPos = Vector2(rect_size.x - len(name)*charw + text_offset, -2)
 onready var lblPos2 = Vector2(rect_size.x/2 - (len(str(value))+1)*charw/2.0, rect_size.y/2)
 
 export(String) var associated_property = ""  #Determines the envelope property this slider's supposed to modify.
-export(bool) var bindable
+#export(bool) var bindable
 export(int, FLAGS, "Envelope", "Key Follow", "Velocity Table") var bind_abilities
 var is_bound:bool = false
 
@@ -30,7 +30,7 @@ const style_disabled = preload("res://ui/EGSliderDisabled.stylebox")
 const bind_icon = preload("res://gfx/ui/bind_indicator.png")
 
 
-var envelope_editor:NodePath  #Used to hold the envelope editor node active 
+var bind_editor:NodePath  #Used to hold the envelope editor node active 
 signal bind_requested
 signal unbind_requested
 
@@ -66,11 +66,12 @@ func _ready():
 func _gui_input(event):
 	if event is InputEventMouseButton and event.button_index == BUTTON_RIGHT and !event.pressed:
 		prints(name, "right clicked....")
+		
 		var p = preload("res://ui/envelope_editor/BindableMenu.tscn").instance()
 		add_child(p)
 		p.owner = self
 		p.preview_paste_value =  special_display == SpecialDisplay.NONE
-		p.setup(self, bindable)
+		p.setup(self, bind_abilities, owner)
 		p.set_item_text(0, name)
 		
 		p.popup(Rect2(get_global_mouse_position(), p.rect_size))
@@ -78,21 +79,21 @@ func _gui_input(event):
 		accept_event()
 
 #Used for binds.  Use the proper context depending on what tab it's used in.
-func request_envelope_editor(title:String, data:Dictionary, context=global.Contexts.NONE, op:int=-1):
+func request_bind_editor(title:String, data:Dictionary, context=global.Contexts.NONE, op:int=-1):
 	if Engine.editor_hint:  return
 	
 	var existing_popup = global.get_modeless_popup(title, context)
 	
-	if not existing_popup and !envelope_editor.is_empty():  #Try the node path instead.
-		existing_popup = get_node_or_null(envelope_editor)
+	if not existing_popup and !bind_editor.is_empty():  #Try the node path instead.
+		existing_popup = get_node_or_null(bind_editor)
 	
-	print("Requesting env editor; path is ", envelope_editor,". existing popup is ", existing_popup)
+	print("Requesting bind editor; path is ", bind_editor,". existing popup is ", existing_popup)
 	if not existing_popup:  #The editor was closed and freed.  Make a new one.
 		var p:EnvelopeEditorWindow = global.ENV_EDITOR_SCENE.instance()
 		p.name = title
 		var new_owner = global.add_modeless_popup(p, context) #Add node to scene tree.
-		p.owner = get_node(new_owner)  #TODO:  Determine whether it's better to use self or owner
-		envelope_editor = p.get_path()  #Set this so where we know where to get it to update stuff later
+		p.owner = get_node(new_owner)  #Set the owner to the modeless popup manager
+		bind_editor = p.get_path()  #Set this so where we know where to get it to update stuff later
 		
 		p.log_scale = useExpTicks
 		p.setup(title, data, get_path())
@@ -100,16 +101,15 @@ func request_envelope_editor(title:String, data:Dictionary, context=global.Conte
 	
 		p.rect_position = local_popup_pos(p.rect_size)
 		p.show()
+		
+		return p
 	else:  #Popup still exists.  Show it.
 		print("Requesting existing popup for ", name)
 		existing_popup.rect_position = local_popup_pos(existing_popup.rect_size)
-		envelope_editor = existing_popup.get_path()
+		bind_editor = existing_popup.get_path()
 		existing_popup.show()
-#	else:
-#		var p = get_node(envelope_editor)
-#		p.rect_position = local_popup_pos(p.rect_size)
-#		p.show()
-#	pass
+
+		return existing_popup
 
 func local_popup_pos(size:Vector2=Vector2.ZERO, buffer:Vector2=Vector2(16,16)):
 	var pos = rect_global_position

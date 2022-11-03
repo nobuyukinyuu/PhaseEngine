@@ -5,7 +5,6 @@ class_name EGPanel
 #export(int,0,8) var operator = 0
 
 onready var rTables = [$KSR, $Velocity, $KSL]
-enum {TYPE_EG, TYPE_PG}
 signal changed
 
 func _ready():
@@ -136,37 +135,37 @@ func set_from_op(op:int):
 	check_binds()
 	refresh_envelope_preview()
 
-func check_binds():  #Goes through all bindable controls and rebinds them if necessary.
+func check_binds():  #Goes through all bindable controls and rebinds them to editors if necessary.
 	if chip_loc.is_empty():  return
 	for o in $Tune.get_children():  #Phase Generator
 		if !o is EGSlider:  continue
-		if !o.bindable:  continue
-		rebind(o, TYPE_PG)
+		if o.bind_abilities == NONE:  continue
+		rebind(o, LOC_TYPE_PG)
 	for o in $Rates.get_children():
 		if !o is EGSlider:  continue
-		if !o.bindable:  continue
-		rebind(o, TYPE_EG)
+		if o.bind_abilities == NONE:  continue
+		rebind(o, LOC_TYPE_EG)
 	for o in $Levels.get_children():
 		if !o is Slider:  continue
-		if !o.bindable:  continue
-		rebind(o, TYPE_EG)
+		if o.bind_abilities == NONE:  continue
+		rebind(o, LOC_TYPE_EG)
 
 	if $Tweak.has_node("Feedback"):  #Done manually to trigger the oscillator function check
-		rebind($Tweak/Feedback, TYPE_EG)
+		rebind($Tweak/Feedback, LOC_TYPE_EG)
 	elif $More/P/V.has_node("Feedback"):  #Panel is a BitwiseOpPanel
-		rebind($More/P/V/Feedback, TYPE_EG)
+		rebind($More/P/V/Feedback, LOC_TYPE_EG)
 
-	rebind($Tweak/AMS, TYPE_EG)
-	rebind($Duty, TYPE_EG)
+	rebind($Tweak/AMS, LOC_TYPE_EG)
+	rebind($Duty, LOC_TYPE_EG)
 
 
 #Do we need this?  Probably not, I don't think this parameter should be bindable.
 #	if $Tweak.has_node("Func Type"):  #BitwiseOpPanels only
 #		rebind($"Tweak/Func Type", TYPE_EG)
 
-#	rebind($"More/P/V/Phase Offset", TYPE_EG)
-#	rebind($"More/P/V/Increment Offset", TYPE_PG)
-#	rebind($"More/P/V/Detune Randomness", TYPE_PG)
+#	rebind($"More/P/V/Phase Offset", LOC_TYPE_EG)
+#	rebind($"More/P/V/Increment Offset", LOC_TYPE_PG)
+#	rebind($"More/P/V/Detune Randomness", LOC_TYPE_PG)
 
 #	$WavePanel/Wave.connect("value_changed", self, "set_oscillator")
 #
@@ -234,23 +233,36 @@ func setFeedback(value):
 	get_node(chip_loc).SetFeedback(operator, value)
 	global.emit_signal("op_tab_value_changed")
 
-func bindEG(sender:EGSlider, value, set_bound=true):
+func bindEG(bind_type:int, sender:EGSlider, value, set_bound=true):
+	#FIXME:  SUPPORT BIND_TYPE (Envelope, Keyfollow etc) IN CHIP BindEG AND SET EDITOR APPROPRIATELY
+	if bind_type != ENVELOPE:  return
+	
 	if set_bound:
 		var success = get_node(chip_loc).BindEG(operator, value)
 		if success:  #Bind succeeded.  Show editor and tell EGSlider it's bound already
 			sender.is_bound = true
 			sender.update()
-			request_envelope_editor(sender, get_bind_values(TYPE_EG, value))
-		elif bind_exists(TYPE_EG, value):  #Value is already bound.  Request editor.
-			request_envelope_editor(sender, get_bind_values(TYPE_EG, value))
+			request_bind_editor(sender, get_bind_values(LOC_TYPE_EG, value))
+		elif existing_binds(LOC_TYPE_EG, value):  #Value is already bound.  Request editor.
+			request_bind_editor(sender, get_bind_values(LOC_TYPE_EG, value))
 
 		prints("Bind", value, "returned", success)
 		return success
 	else:
-		#TODO:  UNBIND HERE
-		pass
+
+		var success = get_node(chip_loc).UnbindEG(operator, value)
+		if success:  #Unbind succeeded.  Find if a modeless window exists and close it.
+			sender.is_bound = false
+			var existing_popup = find_bind_editor(sender, LOC_TYPE_EG, ENVELOPE)  #TODO:  Support different editors
+			if existing_popup:  #Close it.
+				existing_popup.queue_free()
+				
+		prints("Unbind", value, "returned", success)
+		return success
+
+
 #TODO:
-#func bindPG(sender:EGSlider, value, set_bound=true):
+#func bindPG(bind_type:int, sender:EGSlider, value, set_bound=true):
 
 onready var ab = [$Tune, $Frequency]
 func _on_FixedRatio_toggled(button_pressed, update_chip=true):

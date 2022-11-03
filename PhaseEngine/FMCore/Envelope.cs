@@ -298,7 +298,6 @@ namespace PhaseEngine
             }
             // return ((IBindableDataSrc)this).Bind(property, min, max, (int)val);  //Call the default bind implementation to handle the rest.
             return ((IBindableDataSrc)this).Bind(property, min, max, val, (int)clockCount);  //Call the default bind implementation to handle the rest.
-            // return ((IBindableDataSrc)this).Bind(property, min, max, val, 48000);  //Call the default bind implementation to handle the rest.
         }
 
     }

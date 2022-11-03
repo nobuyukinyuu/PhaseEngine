@@ -10,7 +10,10 @@ namespace PhaseEngine
     public class TrackerEnvelope
     {
         [Flags]
-        enum EnvelopePtMarker {None=0, LoopStart=1, LoopEnd=2, SustainStart=4, SustainEnd=8}
+        public enum PtMarker {None=0, LoopStart=1, LoopEnd=2, SustainStart=4, SustainEnd=8}
+        [Flags] public enum LoopType {None=0, Basic=1, Sustain=2, Compound=3}
+        public LoopType looping = LoopType.None;
+        internal int loopStart, loopEnd, sustainStart, sustainEnd;  //Loop points
 
         public readonly int minValue, maxValue; //Values used for clamping and maybe some other calcs. Assigned from bind invoker
         public int InitialValue{get=> (int)pts[0].Value; set 
@@ -69,6 +72,39 @@ namespace PhaseEngine
         internal void SetPoint(int index, System.Numerics.Vector2 value) {pts[index] = new TrackerEnvelopePoint(value); cached = false;}
         public void SetPoint(int index, ValueTuple<float, float> value) {pts[index] = new TrackerEnvelopePoint(value); cached = false;}
 
+        //"Direct" set of loop points.  Does not check if the indices are sane
+        public bool SetLoopPt(PtMarker type, int index)
+        {
+            TypedReference targetRef;
+            switch(type) {   //Get the pointer to the target loop point
+                case PtMarker.LoopStart:    targetRef= __makeref(loopStart);     break;
+                case PtMarker.LoopEnd:      targetRef= __makeref(loopEnd);       break;
+                case PtMarker.SustainStart: targetRef= __makeref(sustainStart);  break;
+                case PtMarker.SustainEnd:   targetRef= __makeref(sustainEnd);    break;
+                default:  return false;
+            }
+            var target = __refvalue(targetRef, int);
+            target = index;
+            return true;
+        }
+        public bool SetLoopPt(LoopType type, ValueTuple<int,int> index)
+        {   
+            if (index.Item2 > index.Item1) return false;
+            if (index.Item1 < 0 || index.Item1 >= pts.Count) return false;
+            if (index.Item2 < 0 || index.Item2 >= pts.Count) return false;
+            switch(type) {
+                case LoopType.Basic:  loopStart = index.Item1;  loopEnd = index.Item2;  break;
+                case LoopType.Sustain:  sustainStart = index.Item1;  sustainEnd = index.Item2;  break;
+                case LoopType.Compound:
+                    loopStart = index.Item1;  loopEnd = index.Item2;
+                    sustainStart = index.Item1;  sustainEnd = index.Item2;
+                    break;
+                default:  return false; }
+            return true;
+        }
+        public bool SetLoopPt(LoopType type, System.Numerics.Vector2 index) => SetLoopPt(type, ((int)index.X, (int)index.Y));
+
+        //Godot helpers
         #if GODOT
         public void SetPoint(int index, Godot.Vector2 value)
         {
@@ -77,7 +113,9 @@ namespace PhaseEngine
             pts[index] = pt;
             cached = false;
         } 
+        public bool SetLoopPt(LoopType type, Godot.Vector2 index) => SetLoopPt(type, ((int)index.x, (int)index.y));
         #endif
+
 
 
 #region IO
@@ -94,6 +132,7 @@ namespace PhaseEngine
                 //Load the points in, save for the first point, which we already specified in the ctor with an initial value.
                 for(int i=2; i<pts.Length; i+=2)
                     output.pts.Add(new TrackerEnvelopePoint( (pts[i], pts[i+1]) ));
+                if (output.pts.Count < 1)  throw new PE_ImportException(IOErrorFlags.Corrupt, $"Failed to import {nameof(TrackerEnvelope)}: no points found");
 
                 //Try to figure out where this envelope came from and what it should be bound to.
                 output.dataSourceType = Type.GetType(j.GetItem("dataSource", ""));
@@ -108,10 +147,31 @@ namespace PhaseEngine
                         break;
                     default:
                         System.Diagnostics.Debug.Print(
-                            $"TrackerEnvelope: Import failed to find member {property} in {output.dataSourceType?.Name ?? "(invalid data source)"}.");
+                            $"{nameof(TrackerEnvelope)}: Import failed to find member {property} in {output.dataSourceType?.Name ?? "(invalid data source)"}.");
                         break;
                 }                
                 
+                if (j.HasItem("loopStart"))  //Import loop
+                {
+                    j.Assign("loopStart", ref output.loopStart);
+                    j.Assign("loopEnd", ref output.loopEnd);
+                    if (output.loopEnd >= output.loopStart)  //Loop is probably sane, greenlight it  
+                        output.looping |= LoopType.Basic;
+                    //Finally, sanitize the loop to fit within the number of points we have
+                    output.loopStart = Math.Max(0, output.loopStart);
+                    output.loopEnd = Math.Min(output.Pts.Count-1, output.loopEnd);
+                }
+                if (j.HasItem("sustainStart"))  //Import sustain
+                {
+                    j.Assign("sustainStart", ref output.sustainStart);
+                    j.Assign("sustainEnd", ref output.sustainEnd);
+                    if (output.sustainEnd >= output.sustainStart)  //Loop is probably sane, greenlight it  
+                        output.looping |= LoopType.Sustain;
+                    //Finally, sanitize the sustain to fit within the number of points we have
+                    output.sustainStart = Math.Max(0, output.sustainStart);
+                    output.sustainEnd = Math.Min(output.Pts.Count-1, output.sustainEnd);
+                }
+
                 return output;
             } catch (Exception e) {
                 System.Diagnostics.Debug.Print(e.Message);
@@ -132,7 +192,6 @@ namespace PhaseEngine
             o.AddPrim("minValue", minValue);
             o.AddPrim("maxValue", maxValue);
 
-
             var pts = new JSONArray();
             for (int i=0; i < this.pts.Count; i++)
             {   //Every odd value is millisecs (x), every even value is the raw value
@@ -142,6 +201,19 @@ namespace PhaseEngine
             o.AddItem("pts", pts);
             o.AddPrim("dataSource", AssociatedDataType);
             o.AddPrim("associatedValue", AssociatedProperty);
+
+            //lööps
+            if (looping.HasFlag(LoopType.Basic))
+            {
+                o.AddPrim("loopStart", loopStart);
+                o.AddPrim("loopEnd", loopEnd);
+            }
+            if (looping.HasFlag(LoopType.Sustain))
+            {
+                o.AddPrim("sustainStart", sustainStart);
+                o.AddPrim("sustainEnd", sustainEnd);
+            }
+
             return o;
         }
         public string ToJSONString() => ToJSONObject().ToJSONString();

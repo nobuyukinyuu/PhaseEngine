@@ -96,11 +96,13 @@ public class Test2 : Label
 #region BINDS
     //////////////////////////////    BINDS    ////////////////////////////////////
 
-    public bool BindExists(int whichKind, int opTarget, string property) {
+    public BindTypes ExistingBinds(int whichKind, int opTarget, string property) {
+        //TODO:  SUPPORT CHECKING FOR DIFFERENT BIND TYPES
+        var exists = false;
         switch ((Src)whichKind){
-            case Src.EG:  return c.Voice.egs[opTarget].BoundEnvelopes.ContainsKey(property);
+            case Src.EG:  exists = c.Voice.egs[opTarget].BoundEnvelopes.ContainsKey(property);  break;
             // case 1:  return c.Voice.pgs[opTarget].BoundEnvelopes.ContainsKey(property);
-        } return false;
+        } return exists?  BindTypes.TrackerEnvelope:  BindTypes.None;
     }
 
     public bool BindEG(int opTarget, string property) => c.Voice.egs[opTarget].Bind(property, c.bindManagerTicksPerSec);
@@ -109,6 +111,51 @@ public class Test2 : Label
         return target.Unbind(property);
         }
     // public bool BindPG(int opTarget, string property) => c.Voice.pgs[opTarget].Bind(property);
+
+    public BindPointReturnCode SetBindLoop(int whichKind, int opTarget, string property, int mask)
+    {
+        try{
+            TrackerEnvelope e;
+            switch((Src)whichKind)
+            {
+                case Src.EG:
+                    if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    e.looping = (TrackerEnvelope.LoopType) mask;
+                    break;
+                case Src.PG:
+                    // TODO:  IMPLEMENT
+                    return BindPointReturnCode.BindNotFound;
+                    // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+            }
+        } catch (Exception exception) {
+            Debug.Print(exception.Message);
+            return BindPointReturnCode.ERROR;
+        } return BindPointReturnCode.OK;
+    }
+
+    public BindPointReturnCode SetBindLoopPoint(int whichKind, int opTarget, string property, int ptMarker, int index)
+    {
+        try{
+            TrackerEnvelope e;
+            switch((Src)whichKind)
+            {
+                case Src.EG:
+                    if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    var success = e.SetLoopPt((TrackerEnvelope.PtMarker) ptMarker, index);
+                    if (!success) return BindPointReturnCode.ERROR;  //Most likely invalid ptMarker type
+                    break;
+                case Src.PG:
+                    // TODO:  IMPLEMENT
+                    return BindPointReturnCode.BindNotFound;
+                    // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+            }
+        } catch (Exception exception) {
+            Debug.Print(exception.Message);
+            return BindPointReturnCode.ERROR;
+        } return BindPointReturnCode.OK;
+    }
+
+
 
     public enum BindPointReturnCode {OK, BindNotFound, IndexOutOfRange, ValueOutOfRange, ERROR=-1}
     public BindPointReturnCode SetBindValue(int whichKind, int opTarget, string property, int ptIndex, Godot.Vector2 pt, bool log_scale)
@@ -239,6 +286,7 @@ public class Test2 : Label
         }
         return new Godot.Collections.Dictionary();
     }
+#endregion
 
     //Used by Op panels to populate the UI elements.  
     public Godot.Collections.Dictionary GetOpValues(int whichKind, int opTarget)
@@ -255,8 +303,6 @@ public class Test2 : Label
                 // return c.Voice.GetPG(opTarget);
         }
     }
-#endregion
-
     public byte GetOpIntent(int opTarget){ if(opTarget >= c.OpCount) return 0; else return (byte)c.Voice.alg.intent[opTarget]; }
     public byte GetOscType(int opTarget)
     {   if(opTarget >= c.OpCount) return 0; 

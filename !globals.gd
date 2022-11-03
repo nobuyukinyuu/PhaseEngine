@@ -82,6 +82,7 @@ func get_modeless_popup(name:String, context=Contexts.VOICE):
 	else:
 		printerr("Couldn't find a proper context! ", path)
 
+	return null
 
 func _ready():
 	# Generate the period frequencies of every note based on center tuning (A-4) at 440hz
