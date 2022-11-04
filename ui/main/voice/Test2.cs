@@ -154,6 +154,28 @@ public class Test2 : Label
             return BindPointReturnCode.ERROR;
         } return BindPointReturnCode.OK;
     }
+    public BindPointReturnCode SetBindLoopPoints(int whichKind, int opTarget, string property, int loopType, Vector2 index)
+    {
+        try{
+            TrackerEnvelope e;
+            switch((Src)whichKind)
+            {
+                case Src.EG:
+                    if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    var success = e.SetLoopPt((TrackerEnvelope.LoopType) loopType, index);
+                    if (!success) return BindPointReturnCode.ERROR;  //Most likely user specified LoopType.None
+                    break;
+                case Src.PG:
+                    // TODO:  IMPLEMENT
+                    return BindPointReturnCode.BindNotFound;
+                    // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+            }
+        } catch (Exception exception) {
+            Debug.Print(exception.Message);
+            return BindPointReturnCode.ERROR;
+        } return BindPointReturnCode.OK;
+
+    }
 
 
 

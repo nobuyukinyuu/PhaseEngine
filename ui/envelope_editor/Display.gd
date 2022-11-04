@@ -136,7 +136,8 @@ func _gui_input(event):
 					drag_pt = -1  #Reset drag point.
 					
 					if loop_dragging != CanDrag.NO:  #Loop was dragged.  Update it
-						pass
+#						owner.set_bind_loop_pt(loop_dragging if !can_drag_sustain else can_drag_sustain<<2)
+						pass #Reenable above line if we remove sets to chip from owner.set_loop_pt
 					loop_dragging = CanDrag.NO
 					
 					

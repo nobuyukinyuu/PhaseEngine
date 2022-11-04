@@ -89,7 +89,7 @@ namespace PhaseEngine
         }
         public bool SetLoopPt(LoopType type, ValueTuple<int,int> index)
         {   
-            if (index.Item2 > index.Item1) return false;
+            if (index.Item1 > index.Item2) return false;
             if (index.Item1 < 0 || index.Item1 >= pts.Count) return false;
             if (index.Item2 < 0 || index.Item2 >= pts.Count) return false;
             switch(type) {
@@ -100,6 +100,7 @@ namespace PhaseEngine
                     sustainStart = index.Item1;  sustainEnd = index.Item2;
                     break;
                 default:  return false; }
+            cached = false;
             return true;
         }
         public bool SetLoopPt(LoopType type, System.Numerics.Vector2 index) => SetLoopPt(type, ((int)index.X, (int)index.Y));

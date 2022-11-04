@@ -70,9 +70,9 @@ func rebind(sender:EGSlider, property_loc, type=ALL):  #Rebinds a control to its
 
 	#Look and see if there's an existing popup and rebind it to our control.
 	for i in 3:
-		if type >>i & 1 == 0:  continue  #Flag not enabled for this bind type.
+		if (type >>i) & 1 == 0:  continue  #Flag not enabled for this bind type.
 
-		var title = WINDOW_TITLE[i] % [operator+1, sender.associated_property.to_upper()]
+		var title = WINDOW_TITLE[1<<i] % [operator+1, sender.associated_property.to_upper()]
 		var existing_popup = global.get_modeless_popup(title, global.Contexts.VOICE)
 		if existing_popup:
 			sender.bind_editor = existing_popup.get_path()

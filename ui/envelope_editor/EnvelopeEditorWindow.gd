@@ -13,6 +13,7 @@ var last_clicked_position = Vector2.ZERO
 
 #Loop stuff
 enum LoopHandle {None, LoopStart, LoopEnd, SusStart = 4, SusEnd = 8}
+enum LoopType {None=0, Basic=1, Sustain=2, Compound=3}
 var susStart:int = -1
 var susEnd:int = -1
 var loopStart:int= -1
@@ -203,6 +204,10 @@ func _on_ToolButton_pressed(toggled=false, which_button=-1):
 			$Display/PointCrosshair.should_display=false
 			$Display/PointCrosshair.visible=false
 
+			var c = get_node(owner.owner.chip_loc)
+			var success = c.AddBindEnvelopePoint(data_source_type, operator, associated_value, 
+									last_closest, last_clicked_position, log_scale)
+
 			#Readjust the loop bounds to account for the change.
 			if loopEnd >= last_closest: shift_loop_pt(LoopHandle.LoopEnd, +1)
 			if loopStart >= last_closest: shift_loop_pt(LoopHandle.LoopStart, +1)
@@ -213,9 +218,6 @@ func _on_ToolButton_pressed(toggled=false, which_button=-1):
 			recalc_display_bounds()
 			$Display.update()
 			
-			var c = get_node(owner.owner.chip_loc)
-			var success = c.AddBindEnvelopePoint(data_source_type, operator, associated_value, 
-									last_closest, last_clicked_position, log_scale)
 
 			if success!=0:  printerr("Adding bind point failed!  Code ", success)
 
@@ -255,6 +257,7 @@ func _on_ToolButton_pressed(toggled=false, which_button=-1):
 			if loopStart < 0 or loopStart >= data.size():  loopStart = closest
 			if loopEnd < 0 or loopEnd >= data.size():  loopEnd = closest
 			set_bind_loop_enable()
+			set_bind_loop_pts(LoopType.Basic)
 			$Display.update()
 
 		SET_SUSTAIN:
@@ -263,6 +266,7 @@ func _on_ToolButton_pressed(toggled=false, which_button=-1):
 			if susStart == -1 or susStart >= data.size():  susStart = closest
 			if susEnd == -1 or susEnd >= data.size():  susEnd = closest
 			set_bind_loop_enable()
+			set_bind_loop_pts(LoopType.Sustain)
 			$Display.update()
 
 	global.emit_signal("op_tab_value_changed")  #Update the preview
@@ -273,30 +277,39 @@ func shift_loop_pt(handle, amt):
 		LoopHandle.LoopStart:
 			loopStart += amt
 			loopEnd = max(loopStart, loopEnd)
+			set_bind_loop_pts(LoopType.Basic)
 		LoopHandle.LoopEnd:
 			loopEnd += amt
 			loopStart = min(loopStart, loopEnd)
+			set_bind_loop_pts(LoopType.Basic)
 		LoopHandle.SusStart:
 			susStart += amt
 			susEnd = max(susStart, susEnd)
+			set_bind_loop_pts(LoopType.Sustain)
 		LoopHandle.SusEnd:
 			susEnd += amt
 			susStart = min(susStart, susEnd)
+			set_bind_loop_pts(LoopType.Sustain)
 
 func set_loop_pt(handle, value):  #Sets a loop point based on a handle value from the display.
+	#This is usually called every mousemove, so we call set_bind_loop_pt() in Display on MouseUp instead.
 	match handle:
 		LoopHandle.LoopStart:
 			loopStart = value
 			loopEnd = max(loopStart, loopEnd)
+			set_bind_loop_pts(LoopType.Basic)
 		LoopHandle.LoopEnd:
 			loopEnd = value
 			loopStart = min(loopStart, loopEnd)
+			set_bind_loop_pts(LoopType.Basic)
 		LoopHandle.SusStart:
 			susStart = value
 			susEnd = max(susStart, susEnd)
+			set_bind_loop_pts(LoopType.Sustain)
 		LoopHandle.SusEnd:
 			susEnd = value
 			susStart = min(susStart, susEnd)
+			set_bind_loop_pts(LoopType.Sustain)
 
 func clamp_loops():
 	loopStart = clamp(loopStart, 0, data.size()-1)
@@ -331,8 +344,34 @@ func set_bind_loop_enable():
 	if has_sustain:  mask |= 2
 	var c = get_node(owner.owner.chip_loc)
 	c.SetBindLoop(data_source_type, operator, associated_value, mask)
-func set_bind_loop_pt(pt_marker, index):
-	pass
+func set_bind_loop_pt(pt_marker, index=-1):
+	if index < 0:
+		match pt_marker:
+			LoopHandle.LoopStart: index = loopStart
+			LoopHandle.LoopEnd:   index = loopEnd
+			LoopHandle.SusStart:  index = susStart
+			LoopHandle.SusEnd:    index = susEnd
+
+	var c = get_node(owner.owner.chip_loc)
+	var err = c.SetBindLoopPoint(data_source_type, operator, associated_value, pt_marker, index)
+	if err:  print("Warning:  SetBindLoopPoint returned code ", err)
+func set_bind_loop_pts(loop_type, indices:Vector2=Vector2.ONE*-1):
+	if loop_type == LoopType.None:  
+		print("EnvelopeEditorWindow:  Attempting to set loop points when loops aren't enabled")
+		return
+	elif loop_type == LoopType.Compound:
+		print("EnvelopeEditorWindow:  Attempting to set loop points for both loops at once. This is not supported")
+		return
+	if indices.x < 0:
+		match loop_type:
+			LoopType.Basic:
+				indices = Vector2(loopStart, loopEnd)
+			LoopType.Sustain:
+				indices = Vector2(susStart, susEnd)
+	var c = get_node(owner.owner.chip_loc)
+	var err = c.SetBindLoopPoints(data_source_type, operator, associated_value, loop_type, indices)
+	if err:  print("Warning:  SetBindLoopPoints returned code ", err)
+	
 
 
 #Scales raw data down to 0-1 display values.

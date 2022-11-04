@@ -1,8 +1,8 @@
-[gd_scene load_steps=41 format=2]
+[gd_scene load_steps=39 format=2]
 
 [ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=1]
 [ext_resource path="res://gfx/fonts/numerics_5x8.tres" type="BitmapFont" id=2]
-[ext_resource path="res://gfx/fonts/NoteFont.tres" type="BitmapFont" id=3]
+[ext_resource path="res://ui/BindWindow.stylebox" type="StyleBox" id=3]
 [ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=4]
 [ext_resource path="res://gfx/ui/godot_icons/Load.svg" type="Texture" id=5]
 [ext_resource path="res://gfx/ui/godot_icons/Add.svg" type="Texture" id=6]
@@ -29,23 +29,6 @@
 [ext_resource path="res://gfx/ui/vu/ruler_log.png" type="Texture" id=27]
 [ext_resource path="res://ui/envelope_editor/value_label.gd" type="Script" id=28]
 
-[sub_resource type="StyleBoxFlat" id=1]
-bg_color = Color( 0, 0, 0, 0.878431 )
-border_width_left = 1
-border_width_top = 20
-border_width_right = 1
-border_width_bottom = 8
-border_color = Color( 0.0196078, 0.490196, 0.568627, 1 )
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-expand_margin_left = 6.0
-expand_margin_right = 4.0
-expand_margin_top = 20.0
-expand_margin_bottom = 6.0
-shadow_size = 10
-
 [sub_resource type="GDScript" id=16]
 script/source = "extends VSlider
 var pressed
@@ -65,11 +48,6 @@ func _draw():
 		draw_string(font, pos+Vector2.ONE, s, ColorN(\"black\"))
 		draw_string(font, pos, s)
 "
-
-[sub_resource type="StyleBoxFlat" id=13]
-bg_color = Color( 0, 0, 0, 0.776471 )
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
 
 [sub_resource type="GDScript" id=18]
 script/source = "extends Sprite
@@ -156,11 +134,10 @@ expand_margin_bottom = 2.0
 anti_aliasing_size = 0.6
 
 [node name="CustomEnvelope" type="WindowDialog"]
-visible = true
 margin_right = 464.0
 margin_bottom = 344.0
 rect_min_size = Vector2( 464, 344 )
-custom_styles/panel = SubResource( 1 )
+custom_styles/panel = ExtResource( 3 )
 popup_exclusive = true
 script = ExtResource( 12 )
 
@@ -239,44 +216,6 @@ margin_right = 440.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 1 )
-valign = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Banks" type="OptionButton" parent="H"]
-visible = false
-margin_left = 224.0
-margin_right = 272.0
-margin_bottom = 27.0
-rect_min_size = Vector2( 48, 0 )
-custom_fonts/font = ExtResource( 3 )
-custom_styles/hover = SubResource( 13 )
-custom_styles/pressed = SubResource( 13 )
-custom_styles/focus = SubResource( 13 )
-custom_styles/normal = SubResource( 13 )
-text = "0"
-align = 2
-items = [ "0", null, false, 0, null ]
-selected = 0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="lblBank" type="Label" parent="H"]
-visible = false
-margin_left = 165.0
-margin_top = 5.0
-margin_right = 220.0
-margin_bottom = 13.0
-size_flags_horizontal = 3
-custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
-custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
-custom_constants/shadow_offset_x = 1
-custom_constants/shadow_offset_y = 1
-custom_fonts/font = ExtResource( 4 )
-text = "Bank:"
-align = 2
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
