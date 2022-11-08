@@ -85,6 +85,7 @@ namespace PhaseEngine
             }
             var target = __refvalue(targetRef, int);
             target = index;
+            cached = false;
             return true;
         }
         public bool SetLoopPt(LoopType type, ValueTuple<int,int> index)

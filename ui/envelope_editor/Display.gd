@@ -217,9 +217,9 @@ func set_grab_handles(enabled=true):
 
 	
 func _draw():
-	draw_string(get_font(""), Vector2.ONE * 32, str(loop_dragging))
-	draw_string(get_font(""), Vector2.ONE * 40, str(can_drag_loop))
-	draw_string(get_font(""), Vector2.ONE * 48, str(can_drag_sustain))
+#	draw_string(get_font(""), Vector2.ONE * 32, str(loop_dragging))
+#	draw_string(get_font(""), Vector2.ONE * 40, str(can_drag_loop))
+#	draw_string(get_font(""), Vector2.ONE * 48, str(can_drag_sustain))
 	#Draw reference lines.
 	if owner.log_scale:
 		for i in range(0, 9):
