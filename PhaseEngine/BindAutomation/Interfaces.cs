@@ -64,6 +64,13 @@ namespace PhaseEngine
         //Methods used to signal the start and release of the bound envelopes so they can loop properly.
         public void NoteOn();
         public void NoteOff();
+        public static void NoteOff(IBindableDataConsumer bindableDataConsumer)  //Used by implementations to inform bound value states that the sustain period has ended
+        {
+            foreach(CachedEnvelope env in bindableDataConsumer.BindStates.Values)
+                env.NoteOff();
+        }
+
+        // NOTE:  Rebake is called in Channel now and decides when/if to rebake depending on the operator type
         // void NoteOn(IBindableDataSrc dataSource)  //Default method, Called by the NoteOn() in implementations to set up general housekeeping functions
         // {
         //     Rebake(dataSource);

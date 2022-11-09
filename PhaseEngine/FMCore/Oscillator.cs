@@ -101,29 +101,6 @@ namespace PhaseEngine
             return Tables.vol2attenuation[(int)Math.Abs(output*8191)];
         }
 
-        //Old, naive Pulse oscillator, using inferior antialiasing to blep
-        public static ushort Pulse2(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
-        {
-            const float scale_pt = 800; //frequency at which the pulse starts sloping off to reduce aliasing
-            const float scale_range = scale_pt*4;
-            // const float slope = 0.85f;  //Shape of the final waveform after exceeding the interpolation range.  0:  Pure square,  1:  Pure Sine
-            const float slope = 0.786f;  //Shape of the final waveform after exceeding the interpolation range.  0:  Pure square,  1:  Pure Sine
-
-            var auxdata2 = __refvalue(auxdata, double);  //Expecting pg.hz (double)
-
-            if (auxdata2 <= scale_pt)
-            {
-                ushort phase = (ushort) unchecked((n<<6));
-                flip = phase >= duty;
-                return 0;
-            } else if (auxdata2 > scale_range) {
-                return (ushort) (Sine2(n,duty, ref flip, auxdata));
-            } else {
-                var s = Sine2(n,duty, ref flip, auxdata);  //Flip is performed in this func
-                return (ushort) Tools.Lerp(0, s*slope, Math.Min( (auxdata2 - scale_pt) / (scale_range), 1));
-            }
-        }
-
         public static ushort Sine(ulong input, ushort duty, ref bool flip, TypedReference auxdata)
         {
             // return (short)Tables.sin[unchecked((ushort)n & Tables.SINE_TABLE_MASK)];
@@ -212,17 +189,6 @@ namespace PhaseEngine
             return Tables.sin[(input) & Tables.SINE_TABLE_MASK];
         }
 
-        //Depreciated in favor of Sine2, which can create absine waveforms when the duty cycle is at min/max
-        public static ushort Absine(ulong input, ushort duty, ref bool flip, TypedReference auxdata)
-        {
-            input = (ulong) (input >> 1);
-            if ( Tools.BIT(input, 8).ToBool() )
-                input = (ushort) ~input;
-
-
-            // return the value from the table
-            return Tables.s_sin_table[input & 0xff];
-        }
 
 
         public static ushort Saw(ulong n, ushort duty, ref bool flip, TypedReference auxdata)

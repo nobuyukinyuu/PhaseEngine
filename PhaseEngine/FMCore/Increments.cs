@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using PE_Json;
 using PhaseEngine;
 
@@ -7,13 +8,15 @@ using PhaseEngine;
 
 namespace PhaseEngine 
 {
-    public struct Increments
+    public struct Increments : IBindableDataSrc
     {
         //TODO:  Consider changing this from a struct to a class, and having a nullable field refer to the "next" increment in a chain.
         //       The idea being to define increment sweeps as linear slides from one increment to another, calculated once based on time
         //       when the next note in a chain of increments is met.  This allows non-interactive (but fast) pitch bends, which can be 
         //       separated back into requisite parts if necessary (for example in a tracked note structure).  During editing, moving
         //       the bend would take the relevant increment references and update it.
+
+        public SortedList<string, TrackerEnvelope> BoundEnvelopes {get;set;}
 
         internal double hz, base_hz;
         internal double tuned_hz; //Frequency of base_hz * coarse * fine + detune; the tuning without any external modifiers from lfo/controllers
@@ -63,6 +66,7 @@ namespace PhaseEngine
         public static Increments Prototype()
         {
             var o = new Increments();
+            o.BoundEnvelopes = new SortedList<string, TrackerEnvelope>();
             o._detune = o.detune_current = 1;
             o.mult = 1;  
             o.lfoMult = 1;  
@@ -235,10 +239,13 @@ namespace PhaseEngine
         // public static double FRatio { get =>  (1<<Tables.SINE_TABLE_BITS) / Global.MixRate; } // The increment of a frequency of 1 at the current mixing rate.
 
         //The increment of a frequency of 1 at the current mixing rate. We assume default table size of 1024 as this is the sine table size once mirrored to a full period.
-        public static double FRatio { get =>  0x400 / Global.MixRate; } 
+        public static double FRatio { get =>  0x400 / Global.MixRate; }
         
+
         private static double IncOfFreqD(double freq)  //Get the increment of a given frequency as a double.
             {return FRatio * freq;}
+
+
 
     }
 }

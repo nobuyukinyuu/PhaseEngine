@@ -51,10 +51,12 @@ namespace PhaseEngine
             // BindManager.Update(this, eg, Recalc);
             return;
         }
-        public override void NoteOff()
-        {
-            throw new NotImplementedException();
-        }
+        
+        // public override void NoteOff()
+        // {
+        //     // ((IBindableDataConsumer)this).NoteOff();
+        //     // throw new NotImplementedException();
+        // }
         public override void NoteOn()
         {  //TODO:  Consider re-using an rTable from EG (KSL?) to implement key follow for the frequency value.
             throw new NotImplementedException();

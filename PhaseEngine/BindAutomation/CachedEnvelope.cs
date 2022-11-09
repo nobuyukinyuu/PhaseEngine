@@ -8,9 +8,6 @@ namespace PhaseEngine
     //This is the envelope data that is sent as copies to the operators which perform the clocking. A copy is passed to relevant classes at NoteOn.
     public class CachedEnvelope : List<CachedEnvelopePoint>
     {
-        TrackerEnvelope.LoopType looping = TrackerEnvelope.LoopType.None;
-        int loopStart, loopEnd, sustainStart, sustainEnd;  //Loop points
-
         private CachedEnvelope(){}  //Can't call default ctor for us.  Create one from a TrackerEnvelope.
         public CachedEnvelope(TrackerEnvelope src) => Bake(src);
         public CachedEnvelope(CachedEnvelope prototype) => Bake(prototype); //Copy constructor for when we don't need to rebake
@@ -28,6 +25,10 @@ namespace PhaseEngine
         //Check after updating an envelope for a data consumer to determine whether to take an action, such as recalculating increments or filters
         public bool JustTicked => tickCount==0;  
 
+        TrackerEnvelope.LoopType looping = TrackerEnvelope.LoopType.None;
+        int loopStart, loopEnd, sustainStart, sustainEnd;  //Loop points
+
+
         void Bake(CachedEnvelope prototype) //Partially rebakes itself using a prototype.  Typically called whenever a copy of a CachedEnvelope is needed
         {
             //Set up loop points
@@ -36,7 +37,7 @@ namespace PhaseEngine
             sustainStart = prototype.sustainStart;  sustainEnd = prototype.sustainEnd;
 
             //Set up clocking and deltas
-            // this.chipDivider = prototype.chipDivider;  //Copying the chipDivider isn't needed because we're reusing the prototype's transitions
+            // this.chipDivider = prototype.chipDivider;  //Copying the chipDivider isn't needed because we're reusing the prototype's precalc'd transition times
             maxClocks = prototype.maxClocks;
             Clear();
             if (prototype.Count > 0) currentPoint = prototype[0];
@@ -78,9 +79,10 @@ namespace PhaseEngine
             }
         }
 
-        int GetNextPoint(int index)
+        int GetNextPoint(int index, TrackerEnvelope.LoopType? loopType = null)
         {
-            switch (looping)
+            if (loopType == null) loopType = looping;
+            switch (loopType)
             {
                 case TrackerEnvelope.LoopType.Compound:
                 case TrackerEnvelope.LoopType.Sustain:
@@ -116,34 +118,78 @@ namespace PhaseEngine
         {
             // System.Diagnostics.Debug.Assert(Count>0);
             if(Finished || Count==0) return;
-            // if(looping==TrackerEnvelope.LoopType.Basic && (loopEnd==0 || (loopEnd>Count && loopStart>Count)))  return;
-            // if(looping!=TrackerEnvelope.LoopType.None && sustainEnd==0)  return;  //Check sustain and compound loops.  FIXME:  disable this if noteOff
+            //Early exit conditions if the transition point ends on a hold (ie: start of loop is also end of loop)
+            if(looping>=TrackerEnvelope.LoopType.Sustain && idx >= sustainEnd && sustainEnd==sustainStart)  return;
+            else if(looping==TrackerEnvelope.LoopType.Basic && idx >= loopEnd && loopEnd==loopStart)  return;
+
+
 
             tickCount++;
             if(tickCount < maxClocks) return;  //Not time to process yet.  Exit early
             tickCount=0;  //Reset tick counter.  It's now time to process.
 
             currentPoint = this[idx];  //Yoink a copy of the point at the current index
-            currentValue = currentPoint.Clock();
             if (currentPoint.Finished)  //Next point
             {
+
+
                 currentPoint.Reset();  //May not be necessary if we're not using copy constructors but baking new envelopes each time, depends on loop type
                 this[idx] = currentPoint;  //Shove the modified value back into our collection since it was copied locally by value
                 idx = currentPoint.nextPoint;
 
-                // currentValue = this[Math.Min(idx, Count-1)].initialValue;
                 if (!this.Finished)
                 {
                     this[idx].SetSpillover(currentPoint.Spillover);  //Set the next point's initial position to the spillover from the last point's position.
                     currentValue = this[idx].initialValue;  //Set envelope value to the next point's initial value.
                 }
             } else {
+                currentValue = currentPoint.Clock();
                 this[idx] = currentPoint;  //Shove the modified value back into our collection since it was copied locally by value
             }
             return;
         }
 
+        public void NoteOff()
+        {
+            //Degrade the loop state so that sustain loops no longer apply
+            switch(looping)
+            {
+                case TrackerEnvelope.LoopType.Compound:
+                    looping = TrackerEnvelope.LoopType.Basic;  //Only the basic loop is left.
+                    for(int i=0; i<Count; i++)
+                    {  //Pull out the points, modify them to match the new looping condition, and shove them back into the collection.
+                        var pt = this[i];
+                        pt.nextPoint = (ushort) GetNextPoint(i, TrackerEnvelope.LoopType.Basic);
+                        this[i] = pt;
+                    }
+                    //If the loop was behind where our current point is, immediately jump to the beginning of it.
+                    if (idx>=loopEnd )
+                    {
+                        idx = loopStart;
+                        if(loopStart < Count)  
+                        {
+                            currentPoint = this[loopStart];
+                            currentValue = currentPoint.initialValue;
+                        }
+                        // else{}  //Index is equal to loopEnd and also the loop end is at the end of the envelope.
+                            
+                    }
+                    break;
+                case TrackerEnvelope.LoopType.Sustain:
+                    looping = TrackerEnvelope.LoopType.None;
+                    for(int i=0; i<Count; i++)
+                    {  //Pull out the points, modify them to match the new looping condition, and shove them back into the collection.
+                        var pt = this[i];
+                        pt.nextPoint = (ushort) GetNextPoint(i, TrackerEnvelope.LoopType.None);
+                        this[i] = pt;
+                    }
+                    break;
+            }
+        }
+
+
     }
+
 
     /// summary:  A struct representing a TrackerEnvelopePoint's transition to get from one point to another over a given timeframe.
     public struct CachedEnvelopePoint
@@ -247,11 +293,15 @@ namespace PhaseEngine
         }
 
         public void SetSpillover(int pos)  //Moves to a specific point in the transition based on spillover from last transition due to clock miss.
+        =>  totalProgress = pos;
+
+        public void FastForward(int pos)
         {
             totalProgress = pos;
-            // double inc = delta * (pos/(double)clockIncrement);
-            // currentValue = (int)Math.Round(inc);
+            double inc = delta * (pos/(double)clockIncrement);
+            currentValue = (int)Math.Round(inc);
         }
+        public void FastForwardToEnd() => FastForward(length);
 
         public void Reset()
         {

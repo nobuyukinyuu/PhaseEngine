@@ -37,7 +37,7 @@ namespace PhaseEngine
 
         public abstract short RequestSample(ushort input, ushort am_offset);
         public abstract void NoteOn();
-        public abstract void NoteOff();
+        public virtual void NoteOff() => IBindableDataConsumer.NoteOff(this);
     }
 
 
@@ -74,6 +74,7 @@ namespace PhaseEngine
         }
         public override void NoteOff()
         {
+            base.NoteOff();
             egStatus = EGStatus.RELEASED;
         }
 

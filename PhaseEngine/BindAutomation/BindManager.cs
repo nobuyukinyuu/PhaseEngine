@@ -67,7 +67,7 @@ namespace PhaseEngine
             {
                 var item=envelope.Keys[i];
                 if(!state.ContainsKey(item)) continue;
-                if(!state[item].JustTicked) { state[item].Clock(); continue; }
+                if(!state[item].JustTicked) { state[item].Clock(); continue; }  //Proceed without updating value if no tick
                 switch(envelope[item].associatedProperty)  //FIXME:  TYPE COERSION IS REALLY SLOW
                 {
                     case System.Reflection.PropertyInfo property:

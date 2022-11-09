@@ -169,8 +169,7 @@ namespace PhaseEngine
             if(busy==BusyState.BUSY)  busy=BusyState.RELEASED;
             for(byte i=0; i<ops.Length; i++)
             {
-                var op = ops[i] as Operator;
-                op?.NoteOff();
+                ops[i].NoteOff();
             }
         }
 

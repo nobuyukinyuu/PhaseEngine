@@ -7,11 +7,12 @@ namespace PhaseEngine
 {
     internal static class Global
     {
-        public const string BUILD_VERSION = "530345e"; //Generated on 4 Nov 2022, 06:15 PM
-        public const int FORMAT_VERSION = 10;
+        //Automagically generated string based on the most recent GitHub commit.  Can be attached to various things for debugging purposes.
+        public const string BUILD_VERSION = "735badd"; //Generated on 7 Nov 2022, 10:04 PM
+        public const int FORMAT_VERSION = 10;  //Version number attached to JSON output of voices/instruments
         public const byte DEFAULT_SEED = 1;  //Default reset state for most noise generators; used when the phase is reset on an oscillator with sync enabled
 
-        private static float mixRate = 48000;
+        private static float mixRate = 48000;  //The native rate which Chips are expected to output audio
         public static float MixRate {get => mixRate;
             set
             {
@@ -41,8 +42,7 @@ namespace PhaseEngine
         public const double BASE_MULT = 1 / BASE_HZ;
 
 
-        public const ushort ENVELOPE_UPDATE_TICKS = 1;  //Number of ticks to count up to before triggering an update.
-
+        //Precision spec values for the fixed-point phase accumulator
         public const byte FRAC_PRECISION_BITS = 20;
         public const ulong FRAC_SIZE = (1 << FRAC_PRECISION_BITS) - 1;
         public const double ONE_PER_FRAC_SIZE = 1.0 / FRAC_SIZE;

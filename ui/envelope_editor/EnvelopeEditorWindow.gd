@@ -51,6 +51,19 @@ func setup(title:String, d:Dictionary, invoker:NodePath=""):
 	associated_value = d["associatedValue"]
 	operator = get_node(invoker).owner.operator
 
+
+	#Set loops
+	if d.has("loopStart"):
+		$Btn.get_node(str(SET_LOOP)).set_pressed_no_signal(true)
+		has_loop = true
+		loopStart = d["loopStart"]
+		loopEnd = d["loopEnd"]
+	if d.has("sustainStart"):
+		$Btn.get_node(str(SET_SUSTAIN)).set_pressed_no_signal(true)
+		has_sustain = true
+		susStart = d["sustainStart"]
+		susEnd = d["sustainEnd"]
+	
 	#Grab the point data from the dict
 	var pts = d.get("pts", [0,0])
 	assert(pts.size() % 2 == 0)
