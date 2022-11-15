@@ -18,7 +18,7 @@ namespace PhaseEngine
         public readonly int minValue, maxValue; //Values used for clamping and maybe some other calcs. Assigned from bind invoker
         public int InitialValue{get=> (int)pts[0].Value; set 
         { 
-            pts[0] = new TrackerEnvelopePoint(0, value);
+            pts[0] = new TrackerEnvelopePoint(0, (float)value);
             cached = false;
         } }
 
@@ -38,25 +38,25 @@ namespace PhaseEngine
 
 
         public List<TrackerEnvelopePoint> Pts {get=>pts;}
-        private List<TrackerEnvelopePoint> pts = new List<TrackerEnvelopePoint>();
-        private CachedEnvelope cache;
+        protected List<TrackerEnvelopePoint> pts = new List<TrackerEnvelopePoint>();
+        protected CachedEnvelopeInt cache;
         public bool cached = false;  //Invalidate this whenever we are modified in some way.
 
 
-        private TrackerEnvelope()    {pts.Add(new TrackerEnvelopePoint(0)); cache=new CachedEnvelope(this);}
+        protected TrackerEnvelope()    {pts.Add(new TrackerEnvelopePoint(0)); cache=new CachedEnvelopeInt(this);}
         public TrackerEnvelope(int minValue, int maxValue) : this()
             {this.minValue = minValue; this.maxValue = maxValue; }
         public TrackerEnvelope(int minValue, int maxValue, int initialValue) : this(minValue, maxValue)
-            {InitialValue = initialValue; SetPoint(0, (0, initialValue));}
+            {InitialValue = initialValue;}
 
 
         //Convenient property to rebake a cached envelope
         // public CachedEnvelope CachedEnvelope{ get{if(!cached) Bake();  return cache;} }
         // public CachedEnvelope CachedEnvelopeCopy{ get{if(!cached) Bake();  return new CachedEnvelope(cache);} }
-        public CachedEnvelope CachedEnvelopeCopy(int chipDivider=1)
+        public CachedEnvelopeInt CachedEnvelopeCopy(int chipDivider=1)
         {
             if(!cached) Bake(chipDivider);
-            return new CachedEnvelope(cache);
+            return new CachedEnvelopeInt(cache);
         }
 
         public void Bake(int chipDivider=1)
@@ -187,7 +187,7 @@ namespace PhaseEngine
             var j = (JSONObject) P;
             return FromJSON(j);
         }
-        internal JSONObject ToJSONObject()
+        internal virtual JSONObject ToJSONObject()
         {
             var o = new JSONObject();
             // o.AddPrim<bool>("rising", rising);
@@ -220,6 +220,39 @@ namespace PhaseEngine
         }
         public string ToJSONString() => ToJSONObject().ToJSONString();
 #endregion
+    }
+
+    public class TrackerEnvelopeF : TrackerEnvelope
+    {
+        public new readonly float minValue, maxValue; //Values used for clamping and maybe some other calcs. Assigned from bind invoker
+        public new float InitialValue{get=> pts[0].Value; set 
+        { 
+            pts[0] = new TrackerEnvelopePoint(0, (float)value);
+            cached = false;
+        } }
+        protected new CachedEnvelopeFloat cache;
+
+        protected TrackerEnvelopeF()    {cache=new CachedEnvelopeFloat(this);}
+        public TrackerEnvelopeF(float minValue, float maxValue) : this()
+            {this.minValue = minValue; this.maxValue = maxValue; }
+        public TrackerEnvelopeF(float minValue, float maxValue, float initialValue) : this(minValue, maxValue)
+            {InitialValue = initialValue;}
+
+        public new CachedEnvelopeFloat CachedEnvelopeCopy(int chipDivider=1)
+        {
+            if(!cached) Bake(chipDivider);
+            return new CachedEnvelopeFloat(cache);
+        }
+
+        internal override JSONObject ToJSONObject()
+        {
+            var o = base.ToJSONObject();
+            //Replace the base object's min and max values with our floating point ones.
+            o.AddPrim("minValue", minValue);
+            o.AddPrim("maxValue", maxValue);
+            return o;
+        }
+
     }
 
 

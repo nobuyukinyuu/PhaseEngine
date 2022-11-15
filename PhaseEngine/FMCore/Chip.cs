@@ -92,7 +92,11 @@ namespace PhaseEngine
                 {
                     if(channels[i].busy == BusyState.FREE)  continue;  //Clock optimization
                     for(byte op=0;  op<opCount; op++)
-                        BindManager.Update(channels[i].ops[op], channels[i].ops[op].eg);
+                    {
+                        BindManager.Update(channels[i].ops[op], channels[i].ops[op].eg, BindManager.NO_ACTION);
+                        var updated = BindManager.Update(channels[i].ops[op], ref channels[i].ops[op].pg);
+                        if(updated) channels[i].ops[op].pg.Recalc();
+                    }
                 }
             }
 

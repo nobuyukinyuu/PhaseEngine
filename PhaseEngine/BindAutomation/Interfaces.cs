@@ -13,32 +13,23 @@ namespace PhaseEngine
 
         //Calls the bind manager to add a TrackerEnvelope to BoundEnvelopes
         //It's up to each implementation on how to specify min and max values, and tick rate
-        public bool Bind(string property, int minValue, int maxValue)
-        {
-            TrackerEnvelope e = BindManager.Bind(this, property, minValue, maxValue); 
-            var bindAlreadyExists = !BoundEnvelopes.TryAdd(property, e);
-            if(bindAlreadyExists) return false;  //Binding failed.  User must Unbind the value first.
-            e.dataSourceType = this.GetType();
-            return true;
-        }
-        public bool Bind(string property, int minValue, int maxValue, int initialValue)
-        {
-            TrackerEnvelope e = BindManager.Bind(this, property, minValue, maxValue); 
-            var bindSuccessful = BoundEnvelopes.TryAdd(property, e);
-            if (bindSuccessful)  e.SetPoint(0, (0, initialValue) );
-            e.dataSourceType = this.GetType();
-            return bindSuccessful;
-        }
-        // public bool Bind(string property, int minValue, int maxValue, int initialValue, double ticksPerSecond)
+        // public bool Bind(string property, int minValue, int maxValue)
         // {
-        //     TrackerEnvelope e = BindManager.Bind(this, property, minValue, maxValue);
+        //     TrackerEnvelope e = BindManager.Bind(this, property, minValue, maxValue); 
         //     var bindAlreadyExists = !BoundEnvelopes.TryAdd(property, e);
-        //     if (bindAlreadyExists) return false;
-        //     e.TicksPerSecond = ticksPerSecond;
-        //     e.SetPoint(0, (0, initialValue) );
+        //     if(bindAlreadyExists) return false;  //Binding failed.  User must Unbind the value first.
         //     e.dataSourceType = this.GetType();
         //     return true;
         // }
+        // public bool Bind(string property, int minValue, int maxValue, int initialValue)
+        // {
+        //     TrackerEnvelope e = BindManager.Bind(this, property, minValue, maxValue); 
+        //     var bindSuccessful = BoundEnvelopes.TryAdd(property, e);
+        //     if (bindSuccessful)  e.SetPoint(0, (0, initialValue) );
+        //     e.dataSourceType = this.GetType();
+        //     return bindSuccessful;
+        // }
+
         public bool Bind(string property, int minValue, int maxValue, int initialValue, int clockDivider)
         {
             TrackerEnvelope e = BindManager.Bind(this, property, minValue, maxValue);
@@ -49,6 +40,18 @@ namespace PhaseEngine
             e.dataSourceType = this.GetType();
             return true;
         }
+        public bool Bind(string property, float minValue, float maxValue, float initialValue, int clockDivider)
+        {
+            TrackerEnvelopeF e = BindManager.Bind(this, property, minValue, maxValue);
+            var bindAlreadyExists = !BoundEnvelopes.TryAdd(property, e);
+            if (bindAlreadyExists) return false;
+            e.ClockDivider = clockDivider;
+            e.SetPoint(0, (0, initialValue) );
+            e.dataSourceType = this.GetType();
+            return true;
+        }
+
+
         // FIXME:  Consider using BindManager instead to fix CachedEnvelopes to not carry these properties.  Or partial rebake on NoteOn?
         bool Unbind(string property) => BoundEnvelopes.Remove(property);
 
@@ -77,15 +80,28 @@ namespace PhaseEngine
         // }
 
         //Default method,  called by methods which need to update a data consumer to contain the latest data source's cached envelopes
+        internal void Rebake(IBindableDataSrc[] dataSources, ushort chipDivider=1)  
+        {
+            //TODO:  Consider options in the envelope editor to specify an action on how to deal with an rTable.
+            //       Creating baked envelopes of scaled data could consist of an addition to only the first point, all points (clamped), or
+            //       to all points save for the initial value multiplied by a ratio of the initial value to the rTable scaled value.
+
+            BindStates.Clear();
+            for(int i=0; i<dataSources.Length; i++)
+                AddDataSource(dataSources[i], chipDivider);
+        }
         internal void Rebake(IBindableDataSrc dataSource, ushort chipDivider=1)  
         {
             //TODO:  Consider options in the envelope editor to specify an action on how to deal with an rTable.
             //       Creating baked envelopes of scaled data could consist of an addition to only the first point, all points (clamped), or
             //       to all points save for the initial value multiplied by a ratio of the initial value to the rTable scaled value.
 
-            //FIXME:  Horribly inefficient.  Consider using a copy of the cache from TrackerEnvelope if properly baked!
-            // BindStates[property].Bake( data[property] );  
             BindStates.Clear();
+            AddDataSource(dataSource, chipDivider);
+        }
+
+        internal void AddDataSource(IBindableDataSrc dataSource, ushort chipDivider=1)
+        {
             foreach(string property in dataSource.BoundEnvelopes.Keys)
             // for(int i=0; i<dataSource.BoundEnvelopes.Count; i++)
             {

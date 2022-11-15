@@ -101,16 +101,36 @@ public class Test2 : Label
         var exists = false;
         switch ((Src)whichKind){
             case Src.EG:  exists = c.Voice.egs[opTarget].BoundEnvelopes.ContainsKey(property);  break;
-            // case 1:  return c.Voice.pgs[opTarget].BoundEnvelopes.ContainsKey(property);
-        } return exists?  BindTypes.TrackerEnvelope:  BindTypes.None;
+            case Src.PG:  exists = c.Voice.pgs[opTarget].BoundEnvelopes.ContainsKey(property);  break;
+        } return exists?  BindTypes.TrackerEnvelope:  BindTypes.None;  //FIXME:  SUPPORT OTHER BIND TYPES BASED ON REPORT FROM TRACKERENVELOPE
     }
 
-    public bool BindEG(int opTarget, string property) => c.Voice.egs[opTarget].Bind(property, c.bindManagerTicksPerSec);
-    public bool UnbindEG(int opTarget, string property) {
-        IBindableDataSrc target = (IBindableDataSrc)(c.Voice.egs[opTarget]); 
-        return target.Unbind(property);
+    public bool BindValue(int whichKind, int opTarget, string property) 
+    {
+        switch((Src)whichKind)
+        {
+            case Src.EG:
+                return c.Voice.egs[opTarget].Bind(property, c.bindManagerTicksPerSec);
+            case Src.PG:
+                return c.Voice.pgs[opTarget].Bind(property, c.bindManagerTicksPerSec);
         }
-    // public bool BindPG(int opTarget, string property) => c.Voice.pgs[opTarget].Bind(property);
+        return false;
+    }
+    public bool UnbindValue(int whichKind, int opTarget, string property) {
+        IBindableDataSrc target;
+        switch((Src)whichKind)
+        {
+            case Src.EG:
+                target = (IBindableDataSrc)(c.Voice.egs[opTarget]);
+                break;
+            case Src.PG:
+                target = (IBindableDataSrc)(c.Voice.pgs[opTarget]);
+                break;
+            default:
+                return false;
+        }
+        return target.Unbind(property);
+    }
 
     public BindPointReturnCode SetBindLoop(int whichKind, int opTarget, string property, int mask)
     {
@@ -124,8 +144,9 @@ public class Test2 : Label
                     break;
                 case Src.PG:
                     // TODO:  IMPLEMENT
-                    return BindPointReturnCode.BindNotFound;
-                    // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    e.looping = (TrackerEnvelope.LoopType) mask;
+                    break;
             }
         } catch (Exception exception) {
             Debug.Print(exception.Message);
@@ -145,9 +166,10 @@ public class Test2 : Label
                     if (!success) return BindPointReturnCode.ERROR;  //Most likely invalid ptMarker type
                     break;
                 case Src.PG:
-                    // TODO:  IMPLEMENT
+                    if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    success = e.SetLoopPt((TrackerEnvelope.PtMarker) ptMarker, index);
+                    if (!success) return BindPointReturnCode.ERROR;  //Most likely invalid ptMarker type
                     return BindPointReturnCode.BindNotFound;
-                    // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
             }
         } catch (Exception exception) {
             Debug.Print(exception.Message);
@@ -166,9 +188,10 @@ public class Test2 : Label
                     if (!success) return BindPointReturnCode.ERROR;  //Most likely user specified LoopType.None
                     break;
                 case Src.PG:
-                    // TODO:  IMPLEMENT
-                    return BindPointReturnCode.BindNotFound;
-                    // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    success = e.SetLoopPt((TrackerEnvelope.LoopType) loopType, index);
+                    if (!success) return BindPointReturnCode.ERROR;  //Most likely user specified LoopType.None
+                    break;
             }
         } catch (Exception exception) {
             Debug.Print(exception.Message);
@@ -183,11 +206,12 @@ public class Test2 : Label
     public BindPointReturnCode SetBindValue(int whichKind, int opTarget, string property, int ptIndex, Godot.Vector2 pt, bool log_scale)
     {
         try{
-            TrackerEnvelope e;
+    
             switch((Src)whichKind)
             {
                 case Src.EG:
-                    if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    if(!c.Voice.egs[opTarget].BoundEnvelopes.ContainsKey(property)) return BindPointReturnCode.BindNotFound;
+                    var e = c.Voice.egs[opTarget].BoundEnvelopes[property];
                     if (pt.y<0 || pt.y>1) return BindPointReturnCode.ValueOutOfRange;
                     // var val = property.EndsWith("l",true, System.Globalization.CultureInfo.InvariantCulture)? 
                     var val = log_scale? 
@@ -196,9 +220,15 @@ public class Test2 : Label
                     e.SetPoint(ptIndex, (pt.x, val));
                     break;
                 case Src.PG:
-                    // TODO:  IMPLEMENT
-                    return BindPointReturnCode.BindNotFound;
-                    // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    if(!c.Voice.pgs[opTarget].BoundEnvelopes.ContainsKey(property)) return BindPointReturnCode.BindNotFound;
+                    e = c.Voice.pgs[opTarget].BoundEnvelopes[property];
+                    if (pt.y<0 || pt.y>1) return BindPointReturnCode.ValueOutOfRange;
+                    // var val = property.EndsWith("l",true, System.Globalization.CultureInfo.InvariantCulture)? 
+                    val = log_scale? 
+                        (float)Tools.Xerp(e.minValue, e.maxValue, 1.0-pt.y): //Levels are exponential in nature, so remap them using exponential interpolation
+                        (float)Tools.Remap(pt.y, 0, 1, e.minValue, e.maxValue);  //Remap the input value from 0-1 to our binds bounds using linear interpolation
+                    e.SetPoint(ptIndex, (pt.x, val));
+                    break;
             }
         } catch (IndexOutOfRangeException exception) {
             Debug.Print(exception.Message);
@@ -221,9 +251,10 @@ public class Test2 : Label
                     e.SetPoint(0, (0, val));
                     break;
                 case Src.PG:
-                    // TODO:  IMPLEMENT
-                    return BindPointReturnCode.BindNotFound;
-                    // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    if (val<e.minValue || val>e.maxValue) return BindPointReturnCode.ValueOutOfRange;
+                    e.SetPoint(0, (0, val));
+                    break;
             }
         } catch (IndexOutOfRangeException exception) {
             Debug.Print(exception.Message);
@@ -251,9 +282,13 @@ public class Test2 : Label
                     e.Insert(ptIndex, (pt.x, val));
                     break;
                 case Src.PG:
-                    // TODO:  IMPLEMENT
-                    // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
-                    return BindPointReturnCode.BindNotFound;
+                    if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    if (pt.y<0 || pt.y>1) return BindPointReturnCode.ValueOutOfRange;
+                    val = log_scale? 
+                        (float)Tools.Xerp(e.minValue, e.maxValue, 1.0-pt.y): //Levels are exponential in nature, so remap them using exponential interpolation
+                        (float)Tools.Remap(pt.y, 0, 1, e.minValue, e.maxValue);  //Remap the input value from 0-1 to our binds bounds using linear interpolation
+                    e.Insert(ptIndex, (pt.x, val));
+                    break;
             }
         } catch (IndexOutOfRangeException exception) {
             GD.PrintErr(exception.Message);
@@ -276,9 +311,9 @@ public class Test2 : Label
                     e.Remove(ptIndex);
                     break;
                 case Src.PG:
-                    // TODO:  IMPLEMENT
-                    // if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
-                    return BindPointReturnCode.BindNotFound;
+                    if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
+                    e.Remove(ptIndex);
+                    break;
             }
         } catch (IndexOutOfRangeException exception) {
             Debug.Print(exception.Message);
@@ -302,13 +337,16 @@ public class Test2 : Label
                 var d = (Godot.Collections.Dictionary) Godot.JSON.Parse(e.ToJSONString()).Result;
                 return d;
             case Src.PG:  //PG
-                // if (c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e))
-                //     return (Godot.Collections.Dictionary) Godot.JSON.Parse(e.ToJSONString()).Result;
-                break;
+                success = c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e);
+                Debug.Assert(success);
+                d = (Godot.Collections.Dictionary) Godot.JSON.Parse(e.ToJSONString()).Result;
+                return d;
         }
-        return new Godot.Collections.Dictionary();
+        // return new Godot.Collections.Dictionary();
     }
 #endregion
+
+    ///////////////////////////////////  OPERATOR BUSSING  ///////////////////////////////////
 
     //Used by Op panels to populate the UI elements.  
     public Godot.Collections.Dictionary GetOpValues(int whichKind, int opTarget)
@@ -372,22 +410,6 @@ public class Test2 : Label
         return c.Voice.GetAlgorithm();
     }
 
-    public void NormalizeVoice()
-    {
-        //Find connections to output.
-        var outputs = new List<byte>(8);
-        var loudest = Envelope.L_MAX;
-        for(byte i=0; i<c.Voice.opCount; i++)
-        {
-            if(c.Voice.alg.connections[i]!=0) continue;
-            outputs.Add(i);
-            loudest = Math.Min(c.Voice.egs[i].tl, loudest);
-        }
-
-        // if (loudest==0) return;  //Voice is already normalized.
-        foreach(byte i in outputs) c.Voice.egs[i].tl -= loudest;
-    }
-
 
     //FIXME:  This function is hacky and only sets the chip's channel ops to the processed value.  Voice preview updates this manually as well.
     //        Channel.NoteOn doesn't set the delegate because c# has no fuckin switch fallthru and I don't want to use an If statement right now
@@ -418,6 +440,9 @@ public class Test2 : Label
         c.Voice.SetPG(opTarget, property, val);
         c.Voice.pgs[opTarget].Recalc();  //This isn't normally done by Voice but we need it for the UI tooltip mult preview, so we do it.
 
+        if (c.Voice.pgs[opTarget].BoundEnvelopes.ContainsKey(property))  //Update the initial value
+            SetBindInitialValue((int)Src.PG, opTarget, property, val);
+
         //For live feedback of changes in the PG value.  Inefficient;  DON'T use this in production!
         for(int i=0; i<c.channels.Length; i++)
         {
@@ -432,7 +457,6 @@ public class Test2 : Label
         c.Voice.SetEG(opTarget, property, val);
 
         if (c.Voice.egs[opTarget].BoundEnvelopes.ContainsKey(property))  //Update the initial value
-            // SetBindValue((int)Src.EG, opTarget, property, 0, new Vector2(0, val));
             SetBindInitialValue((int)Src.EG, opTarget, property, val);
 
         //For live feedback of changes in the EG value.  Inefficient;  DON'T use this in production!
@@ -491,6 +515,9 @@ public class Test2 : Label
         c.Voice.SetOscillator(opTarget, (int)val);
     }
 
+
+    ///////////////////////////////////  FILTERS  ///////////////////////////////////
+
     public void SetFilterType(int opTarget, float val)
     {
         c.Voice.egs[opTarget].aux_func = (byte)val;  //Needed for GetOscTypeOrFunction to work
@@ -509,9 +536,7 @@ public class Test2 : Label
         RecalcFilter(opTarget, "all");
     }
 
-
     public void RecalcPreviewFilters() {for(int i=0; i<c.Voice.opCount; i++)  RecalcPreviewFilter(i);}
-
     public void RecalcPreviewFilter(int opTarget, System.Reflection.MethodInfo m=null)
     {
         const double RATIO = 16.35 / Global.BASE_HZ;
@@ -527,7 +552,6 @@ public class Test2 : Label
             if(m==null) op.RecalcAll(); else m.Invoke(op, null);
         }         
     }
-
 
     public void RecalcFilter(int opTarget, string property)
     {
@@ -549,31 +573,19 @@ public class Test2 : Label
         //Set up preview for a recalc.
         RecalcPreviewFilter(opTarget, m);
 
-
         //Recalculate all channels applicable (including preview)
         for(int i=0; i<c.channels.Length; i++)
         {
             var op = c.channels[i].ops[opTarget] as Filter;
             m.Invoke(op, null);
-        //     switch(property)
-        //     {
-        //         case "type":
-        //             op.RecalcCoefficientsOnly();  break;
-        //         case "cutoff":
-        //             op.RecalcFrequency();  break;
-        //         case "resonance":
-        //             op.RecalcQFactor();  break;
-        //         case "gain":
-        //             op.RecalcGain();  break;
-        //         case "all":  default:
-        //             op.RecalcAll();   break;
-        //     }
         }
     }
 
-    public void SetBypass(int opTarget, bool val) {c.Voice.egs[opTarget].bypass = val;}
-    public void SetMute(int opTarget, bool val) {c.Voice.egs[opTarget].mute = val;}
-    public void SetVoiceData(string property, object val) {c.Voice.SetVal(property, val);}
+    ///////////////////////////////////  META  ///////////////////////////////////
+    public void SetBypass(int opTarget, bool val) => c.Voice.egs[opTarget].bypass = val;
+    public void SetMute(int opTarget, bool val) => c.Voice.egs[opTarget].mute = val;
+    public void SetVoiceData(string property, object val) => c.Voice.SetVal(property, val);  //Sets voice metadata and other top level properties
+
 
     //////////////////////////////    rTABLE    ////////////////////////////////////
     ///summary:  Updates a single column in an rTable.
@@ -670,7 +682,21 @@ public class Test2 : Label
 
         return output;
     }
+    public void NormalizeVoice()
+    {
+        //Find connections to output.
+        var outputs = new List<byte>(8);
+        var loudest = Envelope.L_MAX;
+        for(byte i=0; i<c.Voice.opCount; i++)
+        {
+            if(c.Voice.alg.connections[i]!=0) continue;
+            outputs.Add(i);
+            loudest = Math.Min(c.Voice.egs[i].tl, loudest);
+        }
 
+        // if (loudest==0) return;  //Voice is already normalized.
+        foreach(byte i in outputs) c.Voice.egs[i].tl -= loudest;
+    }
 
     ///////////////////////////////////  PREVIEW  ///////////////////////////////////
     public float[] CalcPreview() {return c.Voice.CalcPreview();}
@@ -685,7 +711,7 @@ public class Test2 : Label
         }
 
 
-    ///////////////////////////////////    WAVEFORM    /////////////////////////////////////
+    /////////////////////////////    WAVEFORM    //////////////////////////////
     public Godot.Collections.Array AddWave(int tableSize) {
         var sampleWidth = Tools.Ctz(tableSize);  //Snap table size to the nearest power of 2 by specifying the bit width to wavetable.AddBank().
         c.Voice.wavetable.AddBank((byte) Math.Clamp(sampleWidth, 4, 10)); 

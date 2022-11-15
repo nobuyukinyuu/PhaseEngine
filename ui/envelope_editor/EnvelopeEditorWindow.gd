@@ -5,6 +5,8 @@ var invoker:NodePath  #The control that spawned us.  Typically an EGSlider.  Ref
 var lo=0  #Minimum value of env output
 var hi=63 #Max value of env output
 var log_scale = false  #Used to configure this window for operating in the log domain.
+var using_floats = false #Used to configure this window for floating point operations
+var step = 1.0  #Used to snapify floating point units for display purposes
 
 var data=[Vector2.ZERO]  #Intermediate point data.  Vec2 where x=ms, y=0-1.
 var cached_display_bounds = {}
@@ -42,15 +44,15 @@ func setup(title:String, d:Dictionary, invoker:NodePath=""):
 	if title is String:  $H/lblTitle.text = title
 	else:  $H/lblTitle.text = "Envelope editor"
 
+	#Set minmax values
 	set_minmax(d.get("minValue", 0), d.get("maxValue", 63))
 	$ValueRuler/Log.visible = log_scale
 	$ValueRuler/Lin.visible = !log_scale
-
+	
 	#Set the source location so we know where to chooch edits
 	data_source_type = DataSource[ d["dataSource"] ]
 	associated_value = d["associatedValue"]
 	operator = get_node(invoker).owner.operator
-
 
 	#Set loops
 	if d.has("loopStart"):
@@ -171,11 +173,13 @@ func set_minmax(lowest, highest):
 	var top = 8.0 if !log_scale else $lblValue.vals.size()
 	if log_scale:  $lblValue.lbls.append(format_val(highest))
 	for i in range(0,top):
-		var midval = round(global.xerp(lowest, highest, $lblValue.vals[i]/256.0) if log_scale else 
-									lerp(highest+0.5, lowest, i/top))
+		var midval = stepify(global.xerp(lowest, highest, $lblValue.vals[i]/256.0) if log_scale else 
+									lerp(highest+(0.4 if step>=1 else 0), lowest, i/top), step)
+		
 		var mids = format_val(midval)
 #		$lblValue.vals.append(midval)
 		$lblValue.lbls.append(mids)
+		if len(mids) > 4:  $lblValue.thin_font()
 	
 	$lblValue.lbls.append(format_val(lowest))
 #	$lblValue.vals.append(lowest)
@@ -395,9 +399,10 @@ func scale_down(val):
 		return range_lerp(val, lo, hi, 0, 1)
 func scale_up(val):
 	if log_scale:
-		return round(global.xerp(lo, hi, 1.0-val))
+#		return round(global.xerp(lo, hi, 1.0-val))
+		return stepify(global.xerp(lo, hi, 1.0-val), step)
 	else:
-		return range_lerp(val, 0, 1, lo, hi)
+		return stepify(range_lerp(val, 0.0, 1.0, lo, hi), step)
 
 ####################### Window Management #######################
 func _on_CustomEnvelope_popup_hide():

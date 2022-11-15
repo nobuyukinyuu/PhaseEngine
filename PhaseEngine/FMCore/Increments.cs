@@ -1,7 +1,8 @@
 using System;
-using System.Collections.Generic;
-using PE_Json;
 using PhaseEngine;
+using PE_Json;
+using System.Collections.Generic;
+using System.Reflection;
 
 
 // Phase generator keeps track of tuning information
@@ -63,7 +64,21 @@ namespace PhaseEngine
 #endregion
 
 #region io / static constructors
-        public static Increments Prototype()
+        public void Configure(Increments p)  //Sets our increments value to that of a prototype
+        {
+            hz = p.hz; base_hz = p.base_hz;
+            tuned_hz = p.tuned_hz; 
+
+            noteIncrement = p.noteIncrement;  
+            tunedIncrement = p.tunedIncrement;
+            increment = p.increment;
+
+            fixedFreq = p.fixedFreq;
+            mult = p.mult;  lfoMult = p.lfoMult;
+            coarse = p.coarse; fine = p.fine;  increment_offset = p.increment_offset;
+        }
+
+        public static Increments Prototype()  //Initialize a new Increments
         {
             var o = new Increments();
             o.BoundEnvelopes = new SortedList<string, TrackerEnvelope>();
@@ -128,26 +143,6 @@ namespace PhaseEngine
             return o;
         }
 
-        #if GODOT
-            // public Godot.Collections.Dictionary GetGodotDictionary()
-            // {
-            //     var o = new Godot.Collections.Dictionary();
-
-            //     o.Add("hz", hz);
-            //     o.Add("base_hz", base_hz);
-            //     o.Add("tuned_hz", tuned_hz);
-            //     o.Add("fixedFreq", fixedFreq);
-
-            //     o.Add("mult", mult);
-            //     o.Add("coarse", coarse);
-            //     o.Add("fine", fine);
-            //     o.Add("detune", Detune);  //NOT the raw value, but the value PhaseEngine UI expects to map the raw value from -1 to 1.
-            //     o.Add("detune_randomness", detune_randomness);
-            //     o.Add("increment_offset", increment_offset);
-
-            //     return o;
-            // }
-        #endif 
 
         internal JSONObject ToJSONObject()
         {
@@ -172,6 +167,7 @@ namespace PhaseEngine
         }
         public string ToJSONString() => ToJSONObject().ToJSONString();
 #endregion
+
 
         // Recalculates the total increment given our current tuning settings.
         public void Recalc()
@@ -244,6 +240,39 @@ namespace PhaseEngine
 
         private static double IncOfFreqD(double freq)  //Get the increment of a given frequency as a double.
             {return FRatio * freq;}
+
+
+/////////////////////////////////////////  BINDABLE INTERFACE  /////////////////////////////////////////
+        public bool Bind(string property, double chipTicksPerSec=1)
+        {
+            float min=0,max=0;
+            double clockCount = (chipTicksPerSec/120);  //Default tickrate,  120 ticks per sec
+            void SetTicks(double x) => clockCount = chipTicksPerSec / x; //Set clock counter to a multiple of our max ticks/sec
+            var val = this.GetVal(property);
+            //Set range values here.  wavetable_bank can't know max banks for a voice from here, so use Voice's bind method to specify it instead?
+            switch(property)
+            {
+                // case "feedback":  case "ams":
+                //     SetTicks(24); max=10;  break;
+
+                case "mult":
+                    min=0.25f; max=16.0f;  break;
+                case "coarse":
+                    SetTicks(30); min=-12; max=12;  //break;
+                    return ((IBindableDataSrc)this).Bind(property, (int)min, (int)max, (int)val, (int)clockCount); 
+                case "fine":
+                    SetTicks(60); min=-100; max=100;  //break;
+                    return ((IBindableDataSrc)this).Bind(property, (int)min, (int)max, (int)val, (int)clockCount); 
+
+                case "Detune":
+                    min=-1.0f; max=1.0f;  break;
+
+                default:
+                    throw new KeyNotFoundException($"Increments.Bind:  Unsupported data member {property}!");
+            }
+            // return ((IBindableDataSrc)this).Bind(property, min, max, (int)val);  //Call the default bind implementation to handle the rest.
+            return ((IBindableDataSrc)this).Bind(property, min, max, (float)val, (int)clockCount);  //Call the default bind implementation to handle the rest.
+        }
 
 
 

@@ -25,64 +25,69 @@ namespace PhaseEngine
                 return property.PropertyType;
 ;
         } 
-        public static object GetVal<T>(this T instance, string propertyName)  
+        public static object GetVal<T>(this T instance, string memberName)  
         {
                 Type type = typeof(T);
-                System.Reflection.PropertyInfo property = type.GetProperty(propertyName);
+                System.Reflection.MemberInfo member = type.GetMember(memberName)[0];
 
-                if (property==null)
+                switch(member)
                 {
-                    System.Reflection.FieldInfo field = type.GetField(propertyName);
-                    return field.GetValue(instance);
+                    case System.Reflection.FieldInfo field:  return field.GetValue(instance);
+                    case System.Reflection.PropertyInfo property:  return property.GetValue(instance);
                 }
 
-                return property.GetValue(instance);
+            throw new InvalidOperationException($"Data member must be a property or field. Member is instead {member.MemberType.ToString()}");
         } 
-       public static void SetVal<T>(this T instance, string propertyName, object value)  where T:class
+       public static void SetVal<T>(this T instance, string memberName, object value)  where T:class
         {
             Type type = typeof(T);
-            System.Reflection.PropertyInfo property = type.GetProperty(propertyName);
+            System.Reflection.MemberInfo member = type.GetMember(memberName)[0];
 
-            if(property==null)
+            switch(member)
             {
-                System.Reflection.FieldInfo field = type.GetField(propertyName);
-
-                //Try to force unchecked conversion to the target type
-                var unboxedVal2 = Convert.ChangeType(value, field.FieldType);
-
-                field.SetValue(instance, unboxedVal2);
-
-                return;
+                case System.Reflection.PropertyInfo property:
+                    //Try to force unchecked conversion to the target type
+                    var unboxedVal = Convert.ChangeType(value, property.PropertyType);
+                    property.SetValue(instance, unboxedVal);
+                    return;
+                case System.Reflection.FieldInfo field:
+                    //Try to force unchecked conversion to the target type
+                    unboxedVal = Convert.ChangeType(value, field.FieldType);
+                    field.SetValue(instance, unboxedVal);
+                    return;
             }
-            //Try to force unchecked conversion to the target type
-            var unboxedVal = Convert.ChangeType(value, property.PropertyType);
-            property.SetValue(instance, unboxedVal);
+            throw new InvalidOperationException($"Data member must be a property or field. Member is instead {member.MemberType.ToString()}");
         }
-       public static void SetVal<T>(ref this T instance, string propertyName, object value) where T:struct
+
+       public static void SetVal<T>(ref this T instance, string memberName, object value) where T:struct
         {
             Type type = typeof(T);
-            System.Reflection.PropertyInfo property = type.GetProperty(propertyName);
+            System.Reflection.MemberInfo member = type.GetMember(memberName)[0];
 
-            if(property==null)
+            switch(member)
             {
-                System.Reflection.FieldInfo field = type.GetField(propertyName);
-                var self = __makeref(instance);
+                case System.Reflection.PropertyInfo property:
+                    //Try to force unchecked conversion to the target type
+                    var unboxedVal = Convert.ChangeType(value, property.PropertyType);
+                    object box = RuntimeHelpers.GetObjectValue(instance);
+                    property.SetValue(box, value);
+                    instance = (T)box;  //Copy back the box over ourself
+                    return;
+                case System.Reflection.FieldInfo field:
+                    var self = __makeref(instance);
 
-                //Try to force unchecked conversion to the target type
-                var unboxedVal2 = Convert.ChangeType(value, field.FieldType);
+                    //Try to force unchecked conversion to the target type
+                    var unboxedVal2 = Convert.ChangeType(value, field.FieldType);
 
-                //Pretty evil thing to do here, but it's the only way to make sure this works on a struct
-                field.SetValueDirect(self, unboxedVal2);
-                return;
+                    //Pretty evil thing to do here, but it's the only way to make sure this works on a struct
+                    field.SetValueDirect(self, unboxedVal2);
+                    return;
             }
-            //Try to force unchecked conversion to the target type
-            var unboxedVal = Convert.ChangeType(value, property.PropertyType);
-            object box = RuntimeHelpers.GetObjectValue(instance);
-            property.SetValue(box, value);
-            instance = (T)box;  //Copy back the box over ourself
+            throw new InvalidOperationException($"Data member must be a property or field. Member is instead {member.MemberType.ToString()}");
         }
-        
 
+
+        //Used by WaveTableData to compress our wavetables into managable chunks for instrument export
         public static byte[] Deflate(byte[] input, CompressionMode mode=CompressionMode.Decompress)
         {
             using (var inputStream = new MemoryStream(input))

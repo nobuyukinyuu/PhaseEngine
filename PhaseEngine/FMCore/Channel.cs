@@ -97,19 +97,11 @@ namespace PhaseEngine
                 case OpBase.Intents.WAVEFOLDER:
                     var op = ops[i] as Operator;
                     op.eg.Configure(voice.egs[i]);
-                    ((IBindableDataConsumer)op).Rebake(op.eg, chipDivider);  //Reset the cached envelopes
-                    // ((IBindableDataConsumer)op).Rebake(voice.pgs[i]);  //FIXME:  UNCOMMENT THIS ONCE IMPLEMENTED.  FILTERS DON'T USE THE PHASE ACCUMULATOR
-
-                    //TODO:  Consider pooling envelope resources to reduce memory thrash
-                    //No EG Source?  Generate a new envelope.
-                    // if (EGSource==null)
-                    // {
-                    //     op.eg = new Envelope(voice.egs[i]);  //Make copies of the old EG values so they can be altered on a per-note basis.
-                    // } else {
-                    //     //Return the previous envelope we were using to the pool and get a fresh one.
-                    //     EGSource.Return(op.eg);
-                    //     op.eg = EGSource.Get(voice.egs[i]);
-                    // }
+                    //FIXME: FILTERS DON'T USE THE PHASE ACCUMULATOR, so rebaking shouldn't need to be full!
+                    // ((IBindableDataConsumer)op).Rebake(new IBindableDataSrc[] {op.eg, op.pg}, chipDivider);  //Reset the cached envelopes
+                    op.BindStates.Clear();  //Rebind CachedEnvelopes from our data sources to our Operators (the data consumers):
+                    ((IBindableDataConsumer)op).AddDataSource(op.eg, chipDivider);
+                    ((IBindableDataConsumer)op).AddDataSource(op.pg, chipDivider);
 
                     // Adjust the EG based on values from the RTables.
                     if (midi_note < 0x80) 

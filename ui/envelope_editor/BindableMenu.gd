@@ -31,7 +31,7 @@ func setup(sender, bindable = BindAbilities.NONE, panel=null):
 		if panel and panel.has_method("existing_binds"):
 			#Attempt to determine the location in the chip the panel is supposed to send bind requests
 			var loc = panel.LOC_TYPE_EG  #Most requests are to the EG, so set it default.
-			if sender.is_connected("bind_requested", panel, "bindPG"):  loc = panel.LOC_TYPE_PG
+			if sender.is_connected("value_changed", panel, "setPG"):  loc = panel.LOC_TYPE_PG
 
 			print("Looking for existing binds.....")
 			existing_binds = panel.existing_binds(loc, sender.associated_property)

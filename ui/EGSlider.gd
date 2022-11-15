@@ -64,8 +64,9 @@ func _ready():
 	pass # Replace with function body.
 
 func _gui_input(event):
+	#Load the binds and copy/paste menu
 	if event is InputEventMouseButton and event.button_index == BUTTON_RIGHT and !event.pressed:
-		prints(name, "right clicked....")
+#		prints(name, "right clicked....")
 		
 		var p = preload("res://ui/envelope_editor/BindableMenu.tscn").instance()
 		add_child(p)
@@ -96,6 +97,8 @@ func request_bind_editor(title:String, data:Dictionary, context=global.Contexts.
 		bind_editor = p.get_path()  #Set this so where we know where to get it to update stuff later
 		
 		p.log_scale = useExpTicks
+		p.using_floats = int(min_value)!=min_value or int(max_value)!=max_value or step<1.0
+		if p.using_floats:  p.step = step
 		p.setup(title, data, get_path())
 #		p.set_minmax(data.get("minValue", min_value), data.get("maxValue", max_value))
 	

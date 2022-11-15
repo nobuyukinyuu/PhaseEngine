@@ -362,7 +362,7 @@ func _draw():
 	if dragging and drag_pt >=0:
 		var secs = $TimeRuler.format_secs(drag_value.x, "ms", " s")
 #		var true_val = int(lerp(owner.lo, owner.hi, drag_value.y))
-		var true_val = int(owner.scale_up(drag_value.y))
+		var true_val = stepify(owner.scale_up(drag_value.y), owner.step)
 		var c = ColorN("black")
 		draw_string(drag_font, get_local_mouse_position() - Vector2(-1, 39), "x:%s" % [secs],c)
 		draw_string(drag_font, get_local_mouse_position() - Vector2(-1, 23), "y:%s" % [true_val],c)

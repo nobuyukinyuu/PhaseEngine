@@ -11,7 +11,8 @@ func _ready():
 	for o in $Tune.get_children():
 		if !o is Slider:  continue
 		o.connect("value_changed", self, "setPG", [o.associated_property])
-		
+		o.connect("bind_requested", self, "bind_val", [o, o.associated_property, true, LOC_TYPE_PG])
+		o.connect("unbind_requested", self, "bind_val", [o, o.associated_property, false, LOC_TYPE_PG])
 
 	for o in $Rates.get_children():
 		if !o is Slider:  continue
@@ -26,20 +27,20 @@ func _ready():
 	if fb:
 		fb.connect("value_changed", self, "setFeedback")
 		#FIXME:  Binding to FB won't update the delegate. If initial value is 0, it will stay that way!
-		fb.connect("bind_requested", self, "bindEG", [fb, "feedback", true])
-		fb.connect("unbind_requested", self, "bindEG", [fb, "feedback", false])
-		
-		
+		fb.connect("bind_requested", self, "bind_val", [fb, "feedback", true])
+		fb.connect("unbind_requested", self, "bind_val", [fb, "feedback", false])
+
+
 	if $Tweak.has_node("Func Type"):  #BitwiseOpPanels only
 		$"Tweak/Func Type".connect("value_changed", self, "setBitwiseFunc")
 
 	$Tweak/AMS.connect("value_changed", self, "setEG", ["ams"])
-	$Tweak/AMS.connect("bind_requested", self, "bindEG", [$Tweak/AMS, "duty", true])
-	$Tweak/AMS.connect("unbind_requested", self, "bindEG", [$Tweak/AMS, "duty", false])
+	$Tweak/AMS.connect("bind_requested", self, "bind_val", [$Tweak/AMS, "duty", true])
+	$Tweak/AMS.connect("unbind_requested", self, "bind_val", [$Tweak/AMS, "duty", false])
 
 	$Duty.connect("value_changed", self, "setEG", ["duty"])
-	$Duty.connect("bind_requested", self, "bindEG", [$Duty, "duty", true])
-	$Duty.connect("unbind_requested", self, "bindEG", [$Duty, "duty", false])
+	$Duty.connect("bind_requested", self, "bind_val", [$Duty, "duty", true])
+	$Duty.connect("unbind_requested", self, "bind_val", [$Duty, "duty", false])
 
 	
 	$"More/P/V/Phase Offset".connect("value_changed", self, "setEG", ["phase_offset"])
@@ -52,8 +53,8 @@ func _ready():
 		if !o is Slider:  continue
 		o.connect("value_changed", self, "setEG", [o.associated_property])
 		o.connect("value_changed", self, "update_env", [o])
-		o.connect("bind_requested", self, "bindEG", [o, o.associated_property, true])
-		o.connect("unbind_requested", self, "bindEG", [o, o.associated_property, false])
+		o.connect("bind_requested", self, "bind_val", [o, o.associated_property, true])
+		o.connect("unbind_requested", self, "bind_val", [o, o.associated_property, false])
 
 	$WavePanel/Wave.connect("value_changed", self, "set_oscillator")
 
@@ -233,36 +234,33 @@ func setFeedback(value):
 	get_node(chip_loc).SetFeedback(operator, value)
 	global.emit_signal("op_tab_value_changed")
 
-func bindEG(bind_type:int, sender:EGSlider, value, set_bound=true):
-	#FIXME:  SUPPORT BIND_TYPE (Envelope, Keyfollow etc) IN CHIP BindEG AND SET EDITOR APPROPRIATELY
+func bind_val(bind_type:int, sender:EGSlider, value, set_bound=true, loc=LOC_TYPE_EG):
+	#FIXME:  SUPPORT BIND_TYPE (Envelope, Keyfollow etc) IN CHIP BindValue AND SET EDITOR APPROPRIATELY
 	if bind_type != ENVELOPE:  return
 	
 	if set_bound:
-		var success = get_node(chip_loc).BindEG(operator, value)
+		var success = get_node(chip_loc).BindValue(loc, operator, value)
 		if success:  #Bind succeeded.  Show editor and tell EGSlider it's bound already
 			sender.is_bound = true
 			sender.update()
-			request_bind_editor(sender, get_bind_values(LOC_TYPE_EG, value))
-		elif existing_binds(LOC_TYPE_EG, value):  #Value is already bound.  Request editor.
-			request_bind_editor(sender, get_bind_values(LOC_TYPE_EG, value))
+			request_bind_editor(sender, get_bind_values(loc, value))
+		elif existing_binds(loc, value):  #Value is already bound.  Request editor.
+			request_bind_editor(sender, get_bind_values(loc, value))
 
 		prints("Bind", value, "returned", success)
 		return success
 	else:
 
-		var success = get_node(chip_loc).UnbindEG(operator, value)
+		var success = get_node(chip_loc).UnbindValue(loc, operator, value)
 		if success:  #Unbind succeeded.  Find if a modeless window exists and close it.
 			sender.is_bound = false
-			var existing_popup = find_bind_editor(sender, LOC_TYPE_EG, ENVELOPE)  #TODO:  Support different editors
+			var existing_popup = find_bind_editor(sender, loc, ENVELOPE)  #TODO:  Support different editors
 			if existing_popup:  #Close it.
 				existing_popup.queue_free()
 				
 		prints("Unbind", value, "returned", success)
 		return success
 
-
-#TODO:
-#func bindPG(bind_type:int, sender:EGSlider, value, set_bound=true):
 
 onready var ab = [$Tune, $Frequency]
 func _on_FixedRatio_toggled(button_pressed, update_chip=true):
