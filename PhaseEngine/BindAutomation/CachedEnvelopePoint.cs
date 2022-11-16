@@ -17,14 +17,19 @@ namespace PhaseEngine
 
         public static ICachedEnvelopePointTransition<T> CreatePlaceholder(T value)
         {
-            dynamic p = value switch
+            switch(value)
             {
-                float _ => new CachedEnvelopePointF(),
-                int _ => new CachedEnvelopePoint(),
-                _ => null
+                case float _:
+                case double _:
+                    var p = new CachedEnvelopePointF();
+                    p.initialValue = p.currentValue = (float)Convert.ChangeType(value, typeof(float));
+                    return p as ICachedEnvelopePointTransition<T>;
+                case int _:
+                    var q = new CachedEnvelopePoint();
+                    q.initialValue = q.currentValue = (int)Convert.ChangeType(value, typeof(int));
+                    return q as ICachedEnvelopePointTransition<T>;
+                default:  throw new InvalidCastException($"Attempt to create placeholder of unsupported type {typeof(T).ToString()}");
             };
-            p.initialValue = p.currentValue = value;
-            return p;
         }
         public ICachedEnvelopePointTransition<T> Create(TrackerEnvelopePoint A, TrackerEnvelopePoint B, double divider, int nextPoint);
         public ICachedEnvelopePointTransition<T> ScaledBy(float amount);

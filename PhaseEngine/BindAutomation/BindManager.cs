@@ -24,17 +24,18 @@ namespace PhaseEngine
 
         //Create a TrackerEnvelope that is bound to one of an IBindable's properties.  
         //The output is used later for generating copies of the delta envelope for an IBindableDataConsumer instance to apply to its own properties.
-        public static TrackerEnvelope Bind(IBindableDataSrc dataSource, String property, int minValue, int maxValue)
+        public static TrackerEnvelope Bind(IBindableDataSrc dataSource, String memberName, int minValue, int maxValue)
         {
             var output = new TrackerEnvelope<int>(minValue, maxValue);
+            output.dataSourceType = dataSource.GetType();
 
-            switch(dataSource.GetType().GetMember(property)[0].MemberType)
+            switch(dataSource.GetType().GetMember(memberName)[0].MemberType)
             {
                 case System.Reflection.MemberTypes.Property:
-                    output.associatedProperty = dataSource.GetType().GetProperty(property);
+                    output.associatedProperty = dataSource.GetType().GetProperty(memberName);
                     break;
                 case System.Reflection.MemberTypes.Field:
-                    output.associatedProperty = dataSource.GetType().GetField(property);
+                    output.associatedProperty = dataSource.GetType().GetField(memberName);
                     break;
                 default:
                     throw new ArgumentException("Can't bind to this member.");
@@ -52,21 +53,21 @@ namespace PhaseEngine
             }
 
             if(!type.IsValueType) throw new NotSupportedException("Bound field must be a value type.");
-            output.SetDataSource(type, output.associatedProperty);
             return output;
         }
 
-        public static TrackerEnvelope Bind(IBindableDataSrc dataSource, String property, float minValue, float maxValue)
+        public static TrackerEnvelope Bind(IBindableDataSrc dataSource, String memberName, float minValue, float maxValue)
         {
             var output = new TrackerEnvelope<float>(minValue, maxValue);
+            output.dataSourceType = dataSource.GetType();
 
-            switch(dataSource.GetType().GetMember(property)[0].MemberType)
+            switch(dataSource.GetType().GetMember(memberName)[0].MemberType)
             {
                 case System.Reflection.MemberTypes.Property:
-                    output.associatedProperty = dataSource.GetType().GetProperty(property);
+                    output.associatedProperty = dataSource.GetType().GetProperty(memberName);
                     break;
                 case System.Reflection.MemberTypes.Field:
-                    output.associatedProperty = dataSource.GetType().GetField(property);
+                    output.associatedProperty = dataSource.GetType().GetField(memberName);
                     break;
                 default:
                     throw new ArgumentException("Can't bind to this member.");
@@ -84,7 +85,6 @@ namespace PhaseEngine
             }
 
             if(!type.IsValueType) throw new NotSupportedException("Bound field must be a value type.");
-            output.SetDataSource(type, output.associatedProperty);
             return output;
         }
 

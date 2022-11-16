@@ -52,7 +52,6 @@ namespace PhaseEngine
             if (bindAlreadyExists) return false;
             e.ClockDivider = clockDivider;
             e.SetPoint(0, (0, initialValue) );
-            e.dataSourceType = this.GetType();
             return true;
         }
 
@@ -70,7 +69,12 @@ namespace PhaseEngine
         public Dictionary<string, CachedEnvelope> BindStates {get;}
 
         //Methods used to signal the start and release of the bound envelopes so they can loop properly.
-        public void NoteOn();
+        public void NoteOn();  //Used by implementations to inform bound value states to reset to the initial value.
+        public static void NoteOn(IBindableDataConsumer bindableDataConsumer)  //Used by implementations to inform bound value states that the sustain period has ended
+        {
+            foreach(CachedEnvelope env in bindableDataConsumer.BindStates.Values)
+                env.NoteOn();
+        }
         public void NoteOff();
         public static void NoteOff(IBindableDataConsumer bindableDataConsumer)  //Used by implementations to inform bound value states that the sustain period has ended
         {

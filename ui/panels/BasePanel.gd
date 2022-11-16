@@ -90,10 +90,11 @@ func find_bind_editor(sender:EGSlider,property_loc, type=NONE) -> WindowDialog:
 	if type == NONE:  return null
 	var output
 	output = get_node_or_null(sender.bind_editor)  #Check the sender's editor loc first.
-	print("BasePanel:  Sender has invalid editor location.")
 	if output !=null:  return output
+
 	
 	#If we reached here then the sender's editor location was invalidated.  Try the modeless window manager
+	print("BasePanel:  Sender has invalid editor location.")
 	var title = ENV_TITLE % [operator+1, sender.associated_property.to_upper()]
 	print ("Attempting to find ", title)
 	output = global.get_modeless_popup(title, global.Contexts.VOICE)

@@ -22,6 +22,7 @@ namespace PhaseEngine
         public void Clock();
         public void AddAmount(float amount);
         public void Multiply(float multiplier);
+        public void NoteOn();
         public void NoteOff();
 
     }
@@ -81,13 +82,12 @@ namespace PhaseEngine
             if (prototype.Count > 0) currentPoint = prototype[0];
             else {currentValue = prototype.currentValue; currentPoint = prototype.currentPoint; return;}
 
+            //Prototype has points.  Set capacity and bring them in.
             Capacity = Math.Min(prototype.Count, 1);
             for(int i=0; i<prototype.Count; i++)
-                Add(prototype[i].Plus(0));  //ByVal copy
+                Add(prototype[i]);  //ByVal copy
 
-            currentPoint = this[0];
-            idx=0;
-            currentValue = prototype[0].InitialValue;
+            Reset();
         }
 
         public void Bake(TrackerEnvelope src, int chipDivider=1) //Typically called by a TrackerEnvelope to rebake its cache from scratch when values change.
@@ -188,6 +188,7 @@ namespace PhaseEngine
             return;
         }
 
+        public void NoteOn() => Reset();
         public void NoteOff()
         {
             //Degrade the loop state so that sustain loops no longer apply
@@ -226,6 +227,12 @@ namespace PhaseEngine
             }
         }
 
+        public void Reset()
+        {
+            currentPoint = this[0];
+            idx=0;
+            currentValue = currentPoint.InitialValue;            
+        }
     }
 
 

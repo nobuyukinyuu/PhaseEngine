@@ -134,7 +134,6 @@ expand_margin_bottom = 2.0
 anti_aliasing_size = 0.6
 
 [node name="CustomEnvelope" type="WindowDialog"]
-visible = true
 margin_right = 464.0
 margin_bottom = 344.0
 rect_min_size = Vector2( 464, 344 )

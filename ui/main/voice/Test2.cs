@@ -220,7 +220,7 @@ public class Test2 : Label
                         _ => default
                     }: e switch  {  //Remap the input value from 0-1 to our binds bounds using linear interpolation instead
                         TrackerEnvelope<float> f => (float)Tools.Remap(pt.y, 0, 1, (float)f.MinValue, (float)f.MaxValue),
-                        TrackerEnvelope<int> i => (float)Tools.Remap(pt.y, 0, 1, (float)i.MinValue, (float)i.MaxValue),
+                        TrackerEnvelope<int> i => (float)Tools.Remap(pt.y, 0, 1, (int)i.MinValue, (int)i.MaxValue),
                         _ => default
                     };
                     e.SetPoint(ptIndex, (pt.x, val));
@@ -237,7 +237,7 @@ public class Test2 : Label
                         _ => default
                     }: e switch  {  //Remap the input value from 0-1 to our binds bounds using linear interpolation instead
                         TrackerEnvelope<float> f => (float)Tools.Remap(pt.y, 0, 1, (float)f.MinValue, (float)f.MaxValue),
-                        TrackerEnvelope<int> i => (float)Tools.Remap(pt.y, 0, 1, (float)i.MinValue, (float)i.MaxValue),
+                        TrackerEnvelope<int> i => (float)Tools.Remap(pt.y, 0, 1, (int)i.MinValue, (int)i.MaxValue),
                         _ => default
                     };
                     e.SetPoint(ptIndex, (pt.x, val));
@@ -289,26 +289,31 @@ public class Test2 : Label
     public BindPointReturnCode AddBindEnvelopePoint(int whichKind, int opTarget, string property, int ptIndex, Godot.Vector2 pt, bool log_scale)
     {
         try{
-            TrackerEnvelope e;
+            TrackerEnvelope e = default;
+            if (pt.y<0 || pt.y>1) return BindPointReturnCode.ValueOutOfRange;
             switch((Src)whichKind)
             {
                 case Src.EG:
                     if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
                     if (pt.y<0 || pt.y>1) return BindPointReturnCode.ValueOutOfRange;
-                    var val = log_scale? 
-                        (float)Tools.Xerp((float)e.MinValue, (float)e.MaxValue, 1.0-pt.y): //Levels are exponential in nature, so remap them using exponential interpolation
-                        (float)Tools.Remap(pt.y, 0, 1, (float)e.MinValue, (float)e.MaxValue);  //Remap the input value from 0-1 to our binds bounds using linear interpolation
-                    e.Insert(ptIndex, (pt.x, val));
                     break;
                 case Src.PG:
                     if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
-                    if (pt.y<0 || pt.y>1) return BindPointReturnCode.ValueOutOfRange;
-                    val = log_scale? 
-                        (float)Tools.Xerp((float)e.MinValue, (float)e.MaxValue, 1.0-pt.y): //Levels are exponential in nature, so remap them using exponential interpolation
-                        (float)Tools.Remap(pt.y, 0, 1, (float)e.MinValue, (float)e.MaxValue);  //Remap the input value from 0-1 to our binds bounds using linear interpolation
-                    e.Insert(ptIndex, (pt.x, val));
                     break;
             }
+
+            float val = log_scale? e switch
+            {  //Levels are exponential in nature, so remap them using exponential interpolation
+                TrackerEnvelope<float> f => (float)Tools.Xerp((float)f.MinValue, (float)f.MaxValue, 1.0-pt.y),
+                TrackerEnvelope<int> i => (float)Tools.Xerp((float)i.MinValue, (float)i.MaxValue, 1.0-pt.y),
+                _ => default
+            }: e switch  {  //Remap the input value from 0-1 to our binds bounds using linear interpolation instead
+                TrackerEnvelope<float> f => (float)Tools.Remap(pt.y, 0, 1, (float)f.MinValue, (float)f.MaxValue),
+                TrackerEnvelope<int> i => (float)Tools.Remap(pt.y, 0, 1, (int)i.MinValue, (int)i.MaxValue),
+                _ => default
+            };
+            e.Insert(ptIndex, (pt.x, val));
+
         } catch (IndexOutOfRangeException exception) {
             GD.PrintErr(exception.Message);
             return BindPointReturnCode.IndexOutOfRange;

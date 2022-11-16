@@ -254,8 +254,8 @@ namespace PhaseEngine
                     o.AddPrim("maxValue", (float)Convert.ChangeType(maxValue, typeof(float)));
                     break;
                 default:
-                    o.AddPrim("minValue", (float)Convert.ChangeType(minValue, typeof(int)));
-                    o.AddPrim("maxValue", (float)Convert.ChangeType(maxValue, typeof(int)));
+                    o.AddPrim("minValue", (int)Convert.ChangeType(minValue, typeof(int)));
+                    o.AddPrim("maxValue", (int)Convert.ChangeType(maxValue, typeof(int)));
                     break;
             }
 

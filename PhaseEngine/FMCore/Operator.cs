@@ -36,7 +36,7 @@ namespace PhaseEngine
         public abstract void Clock();
 
         public abstract short RequestSample(ushort input, ushort am_offset);
-        public abstract void NoteOn();
+        public virtual void NoteOn() => IBindableDataConsumer.NoteOn(this);
         public virtual void NoteOff() => IBindableDataConsumer.NoteOff(this);
     }
 
@@ -62,8 +62,7 @@ namespace PhaseEngine
         public void NoteOn(Increments increments){ pg = increments;  NoteOn(); }
         public override void NoteOn()
         {
-            //TODO:  CREATE BINDSTATES FROM THE IBINDABLE DATA SOURCES 
-
+            base.NoteOn();
             ResetPhase();
             
             env_counter = 0;
