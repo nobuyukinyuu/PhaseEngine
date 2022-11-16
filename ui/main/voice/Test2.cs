@@ -140,12 +140,12 @@ public class Test2 : Label
             {
                 case Src.EG:
                     if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
-                    e.looping = (TrackerEnvelope.LoopType) mask;
+                    e.Looping = (TrackerEnvelope.LoopType) mask;
                     break;
                 case Src.PG:
                     // TODO:  IMPLEMENT
                     if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
-                    e.looping = (TrackerEnvelope.LoopType) mask;
+                    e.Looping = (TrackerEnvelope.LoopType) mask;
                     break;
             }
         } catch (Exception exception) {
@@ -206,27 +206,40 @@ public class Test2 : Label
     public BindPointReturnCode SetBindValue(int whichKind, int opTarget, string property, int ptIndex, Godot.Vector2 pt, bool log_scale)
     {
         try{
-    
             switch((Src)whichKind)
             {
                 case Src.EG:
                     if(!c.Voice.egs[opTarget].BoundEnvelopes.ContainsKey(property)) return BindPointReturnCode.BindNotFound;
                     var e = c.Voice.egs[opTarget].BoundEnvelopes[property];
                     if (pt.y<0 || pt.y>1) return BindPointReturnCode.ValueOutOfRange;
-                    // var val = property.EndsWith("l",true, System.Globalization.CultureInfo.InvariantCulture)? 
-                    var val = log_scale? 
-                        (float)Tools.Xerp(e.minValue, e.maxValue, 1.0-pt.y): //Levels are exponential in nature, so remap them using exponential interpolation
-                        (float)Tools.Remap(pt.y, 0, 1, e.minValue, e.maxValue);  //Remap the input value from 0-1 to our binds bounds using linear interpolation
+
+                    float val = log_scale? e switch
+                    {  //Levels are exponential in nature, so remap them using exponential interpolation
+                        TrackerEnvelope<float> f => (float)Tools.Xerp((float)f.MinValue, (float)f.MaxValue, 1.0-pt.y),
+                        TrackerEnvelope<int> i => (float)Tools.Xerp((float)i.MinValue, (float)i.MaxValue, 1.0-pt.y),
+                        _ => default
+                    }: e switch  {  //Remap the input value from 0-1 to our binds bounds using linear interpolation instead
+                        TrackerEnvelope<float> f => (float)Tools.Remap(pt.y, 0, 1, (float)f.MinValue, (float)f.MaxValue),
+                        TrackerEnvelope<int> i => (float)Tools.Remap(pt.y, 0, 1, (float)i.MinValue, (float)i.MaxValue),
+                        _ => default
+                    };
                     e.SetPoint(ptIndex, (pt.x, val));
                     break;
                 case Src.PG:
                     if(!c.Voice.pgs[opTarget].BoundEnvelopes.ContainsKey(property)) return BindPointReturnCode.BindNotFound;
                     e = c.Voice.pgs[opTarget].BoundEnvelopes[property];
                     if (pt.y<0 || pt.y>1) return BindPointReturnCode.ValueOutOfRange;
-                    // var val = property.EndsWith("l",true, System.Globalization.CultureInfo.InvariantCulture)? 
-                    val = log_scale? 
-                        (float)Tools.Xerp(e.minValue, e.maxValue, 1.0-pt.y): //Levels are exponential in nature, so remap them using exponential interpolation
-                        (float)Tools.Remap(pt.y, 0, 1, e.minValue, e.maxValue);  //Remap the input value from 0-1 to our binds bounds using linear interpolation
+
+                    val = log_scale? e switch
+                    {  //Levels are exponential in nature, so remap them using exponential interpolation
+                        TrackerEnvelope<float> f => (float)Tools.Xerp((float)f.MinValue, (float)f.MaxValue, 1.0-pt.y),
+                        TrackerEnvelope<int> i => (float)Tools.Xerp((float)i.MinValue, (float)i.MaxValue, 1.0-pt.y),
+                        _ => default
+                    }: e switch  {  //Remap the input value from 0-1 to our binds bounds using linear interpolation instead
+                        TrackerEnvelope<float> f => (float)Tools.Remap(pt.y, 0, 1, (float)f.MinValue, (float)f.MaxValue),
+                        TrackerEnvelope<int> i => (float)Tools.Remap(pt.y, 0, 1, (float)i.MinValue, (float)i.MaxValue),
+                        _ => default
+                    };
                     e.SetPoint(ptIndex, (pt.x, val));
                     break;
             }
@@ -243,19 +256,25 @@ public class Test2 : Label
     {
         try{
             TrackerEnvelope e;
-            switch((Src)whichKind)
-            {
+            switch((Src)whichKind){
                 case Src.EG:
                     if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
-                    if (val<e.minValue || val>e.maxValue) return BindPointReturnCode.ValueOutOfRange;
-                    e.SetPoint(0, (0, val));
                     break;
                 case Src.PG:
-                    if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
-                    if (val<e.minValue || val>e.maxValue) return BindPointReturnCode.ValueOutOfRange;
-                    e.SetPoint(0, (0, val));
+                    if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;                    
                     break;
+                default:
+                    return BindPointReturnCode.BindNotFound;
             }
+
+            float minValue=0, maxValue=0;
+            switch(e){
+                case TrackerEnvelope<float> f:  minValue = (float)f.MinValue;  maxValue = (float)f.MaxValue;   break;
+                case TrackerEnvelope<int>   i:  minValue = (float)i.MinValue;  maxValue = (float)i.MaxValue;   break;
+            }
+            if (val<minValue || val>maxValue) return BindPointReturnCode.ValueOutOfRange;
+            e.SetPoint(0, (0, val));
+
         } catch (IndexOutOfRangeException exception) {
             Debug.Print(exception.Message);
             return BindPointReturnCode.IndexOutOfRange;
@@ -277,16 +296,16 @@ public class Test2 : Label
                     if (!c.Voice.egs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
                     if (pt.y<0 || pt.y>1) return BindPointReturnCode.ValueOutOfRange;
                     var val = log_scale? 
-                        (float)Tools.Xerp(e.minValue, e.maxValue, 1.0-pt.y): //Levels are exponential in nature, so remap them using exponential interpolation
-                        (float)Tools.Remap(pt.y, 0, 1, e.minValue, e.maxValue);  //Remap the input value from 0-1 to our binds bounds using linear interpolation
+                        (float)Tools.Xerp((float)e.MinValue, (float)e.MaxValue, 1.0-pt.y): //Levels are exponential in nature, so remap them using exponential interpolation
+                        (float)Tools.Remap(pt.y, 0, 1, (float)e.MinValue, (float)e.MaxValue);  //Remap the input value from 0-1 to our binds bounds using linear interpolation
                     e.Insert(ptIndex, (pt.x, val));
                     break;
                 case Src.PG:
                     if (!c.Voice.pgs[opTarget].BoundEnvelopes.TryGetValue(property, out e)) return BindPointReturnCode.BindNotFound;
                     if (pt.y<0 || pt.y>1) return BindPointReturnCode.ValueOutOfRange;
                     val = log_scale? 
-                        (float)Tools.Xerp(e.minValue, e.maxValue, 1.0-pt.y): //Levels are exponential in nature, so remap them using exponential interpolation
-                        (float)Tools.Remap(pt.y, 0, 1, e.minValue, e.maxValue);  //Remap the input value from 0-1 to our binds bounds using linear interpolation
+                        (float)Tools.Xerp((float)e.MinValue, (float)e.MaxValue, 1.0-pt.y): //Levels are exponential in nature, so remap them using exponential interpolation
+                        (float)Tools.Remap(pt.y, 0, 1, (float)e.MinValue, (float)e.MaxValue);  //Remap the input value from 0-1 to our binds bounds using linear interpolation
                     e.Insert(ptIndex, (pt.x, val));
                     break;
             }

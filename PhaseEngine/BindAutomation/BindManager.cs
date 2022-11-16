@@ -26,7 +26,7 @@ namespace PhaseEngine
         //The output is used later for generating copies of the delta envelope for an IBindableDataConsumer instance to apply to its own properties.
         public static TrackerEnvelope Bind(IBindableDataSrc dataSource, String property, int minValue, int maxValue)
         {
-            var output = new TrackerEnvelope(minValue, maxValue);
+            var output = new TrackerEnvelope<int>(minValue, maxValue);
 
             switch(dataSource.GetType().GetMember(property)[0].MemberType)
             {
@@ -52,12 +52,13 @@ namespace PhaseEngine
             }
 
             if(!type.IsValueType) throw new NotSupportedException("Bound field must be a value type.");
+            output.SetDataSource(type, output.associatedProperty);
             return output;
         }
 
-        public static TrackerEnvelopeF Bind(IBindableDataSrc dataSource, String property, float minValue, float maxValue)
+        public static TrackerEnvelope Bind(IBindableDataSrc dataSource, String property, float minValue, float maxValue)
         {
-            var output = new TrackerEnvelopeF(minValue, maxValue);
+            var output = new TrackerEnvelope<float>(minValue, maxValue);
 
             switch(dataSource.GetType().GetMember(property)[0].MemberType)
             {
@@ -83,6 +84,7 @@ namespace PhaseEngine
             }
 
             if(!type.IsValueType) throw new NotSupportedException("Bound field must be a value type.");
+            output.SetDataSource(type, output.associatedProperty);
             return output;
         }
 
@@ -101,7 +103,7 @@ namespace PhaseEngine
                 if(!state.ContainsKey(item)) continue;
                 if(!state[item].JustTicked) { state[item].Clock(); continue; }  //Proceed without updating value if no tick
                 updated = true;
-                switch(envelope[item].associatedProperty)  //FIXME:  TYPE COERSION IS REALLY SLOW; IT DOESN'T WORK ON STRUCTS YET, USE SETVAL<T> INSTEAD
+                switch(envelope[item].DataMember)  //FIXME:  TYPE COERSION IS REALLY SLOW; IT DOESN'T WORK ON STRUCTS YET, USE SETVAL<T> INSTEAD
                 {
                     case System.Reflection.PropertyInfo property:
                         object box = System.Runtime.CompilerServices.RuntimeHelpers.GetObjectValue(dataSource);
@@ -151,7 +153,7 @@ namespace PhaseEngine
                 if(!state.ContainsKey(item)) continue;
                 if(!state[item].JustTicked) { state[item].Clock(); continue; }  //Proceed without updating value if no tick
                 updated = true;
-                switch(envelope[item].associatedProperty)  //FIXME:  TYPE COERSION IS REALLY SLOW; IT DOESN'T WORK ON STRUCTS YET, USE SETVAL<T> INSTEAD
+                switch(envelope[item].DataMember)  //FIXME:  TYPE COERSION IS REALLY SLOW; IT DOESN'T WORK ON STRUCTS YET, USE SETVAL<T> INSTEAD
                 {
                     case System.Reflection.PropertyInfo property:
                         switch(state[item])
@@ -191,36 +193,14 @@ namespace PhaseEngine
 
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static object CoerceValue(int input, Type type, TrackerEnvelope minMax) =>  Convert.ChangeType(Math.Clamp(input, minMax.minValue, minMax.maxValue), type);
+        static object CoerceValue(int input, Type type, TrackerEnvelope minMax) =>  Convert.ChangeType(Math.Clamp(input, (int)minMax.MinValue, (int)minMax.MaxValue), type);
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static object CoerceValue(float input, Type type, TrackerEnvelope minMax) =>  Convert.ChangeType(Math.Clamp(input, minMax.minValue, minMax.maxValue), type);
+        static object CoerceValue(float input, Type type, TrackerEnvelope minMax) => 
+                Convert.ChangeType(Math.Clamp(input, (float)minMax.MinValue, (float)minMax.MaxValue), type);
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static object CoerceValue(double input, Type type, TrackerEnvelope minMax) =>  Convert.ChangeType(Math.Clamp(input, minMax.minValue, minMax.maxValue), type);
+        static object CoerceValue(double input, Type type, TrackerEnvelope minMax) =>
+                Convert.ChangeType(Math.Clamp(input, (double)minMax.MinValue, (double)minMax.MaxValue), type);
 
-
-
-        //Used for resetting a consumer's target field value to an initial value (Such as defined by TrackerEnvelope)
-        public static void ResetValue(IBindableDataSrc dataSource, string key)
-        {
-            var envelope = dataSource.BoundEnvelopes;
-            var initialValue = envelope[key].InitialValue;
-            SetTargetValue(dataSource, key, initialValue);
-        }
-
-        public static void SetTargetValue(IBindableDataSrc dataSource, string key, ValueType value)
-        {
-            var envelope = dataSource.BoundEnvelopes;
-                switch(envelope[key].associatedProperty)
-                {
-                    case System.Reflection.PropertyInfo property:
-                        property.SetValue(dataSource, value);
-                        break;
-                    case System.Reflection.FieldInfo field:
-                        field.SetValue(dataSource, value);
-                        break;
-                }
-
-        }
 
     }
 }

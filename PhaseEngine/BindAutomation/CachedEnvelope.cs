@@ -29,13 +29,13 @@ namespace PhaseEngine
     public class CachedEnvelopeInt:CachedEnvelope<int>
     {
         protected CachedEnvelopeInt(){currentPoint=new CachedEnvelopePoint();}
-        public CachedEnvelopeInt(TrackerEnvelope src):this() => Bake(src); //Typically called by a TrackerEnvelope to rebake its cache from scratch when values change.
+        public CachedEnvelopeInt(TrackerEnvelope<int> src):this() => Bake(src); //Typically called by a TrackerEnvelope to rebake its cache from scratch when values change.
         public CachedEnvelopeInt(CachedEnvelope<int> prototype):this() => Bake(prototype); //Copy constructor for when we don't need to rebake
     }
     public class CachedEnvelopeFloat:CachedEnvelope<float>
     {
         protected CachedEnvelopeFloat(){currentPoint=new CachedEnvelopePointF();}
-        public CachedEnvelopeFloat(TrackerEnvelope src) : this() => Bake(src); //Typically called by a TrackerEnvelope to rebake its cache from scratch when values change.
+        public CachedEnvelopeFloat(TrackerEnvelope<float> src) : this() => Bake(src); //Typically called by a TrackerEnvelope to rebake its cache from scratch when values change.
         public CachedEnvelopeFloat(CachedEnvelopeFloat prototype) => Bake(prototype); //Copy constructor for when we don't need to rebake
     }
 
@@ -43,7 +43,7 @@ namespace PhaseEngine
     public class CachedEnvelope<T> : List<ICachedEnvelopePointTransition<T>>, CachedEnvelope //where T: ICachedEnvelopePointTransition<T>
     {
         protected CachedEnvelope(){}  //Can't call default ctor for us.  Create one from a TrackerEnvelope.
-        public CachedEnvelope(TrackerEnvelope src) => Bake(src); //Typically called by a TrackerEnvelope to rebake its cache from scratch when values change.
+        public CachedEnvelope(TrackerEnvelope src) => Bake(src, 1); //Typically called by a TrackerEnvelope to rebake its cache from scratch when values change.
         public CachedEnvelope(CachedEnvelope<T> prototype) => Bake(prototype); //Copy constructor for when we don't need to rebake
         public CachedEnvelope(int capacity) : base(capacity) {}
 
@@ -90,12 +90,12 @@ namespace PhaseEngine
             currentValue = prototype[0].InitialValue;
         }
 
-        public void Bake(TrackerEnvelope src, int chipDivider=1)  //Typically called by a TrackerEnvelope to rebake its cache from scratch when values change.
+        public void Bake(TrackerEnvelope src, int chipDivider=1) //Typically called by a TrackerEnvelope to rebake its cache from scratch when values change.
         {
             //Set up loop points
-            looping = src.looping;
-            loopStart = src.loopStart;  loopEnd = src.loopEnd;
-            sustainStart = src.sustainStart;  sustainEnd = src.sustainEnd;
+            looping = src.Looping;
+            loopStart = src.LoopStart;  loopEnd = src.LoopEnd;
+            sustainStart = src.SustainStart;  sustainEnd = src.SustainEnd;
 
             //Set up clocking and deltas
             maxClocks = src.ClockDivider < 1?   1 : (int)maxClocks;
@@ -111,7 +111,7 @@ namespace PhaseEngine
             } else if (src.Pts.Count == 1) {
                 //If there's only one TrackerEnvelopePoint,  then Finished will return True and the clock will always return whatever the initial value was.
                 var initialValue = (T)Convert.ChangeType(src.InitialValue, typeof(T));
-                currentPoint = currentPoint.CreatePlaceholder(initialValue);
+                currentPoint = ICachedEnvelopePointTransition<T>.CreatePlaceholder(initialValue);
                 currentValue = initialValue;
             } else {  //There were no points in the TrackerEnvelope.  This shouldn't be possible
                 throw new InvalidOperationException($"{nameof(TrackerEnvelope)} size is 0!");

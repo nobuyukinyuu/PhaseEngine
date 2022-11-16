@@ -15,7 +15,17 @@ namespace PhaseEngine
         public bool Finished {get;}
         public int Spillover {get;}
 
-        public ICachedEnvelopePointTransition<T> CreatePlaceholder(T value);
+        public static ICachedEnvelopePointTransition<T> CreatePlaceholder(T value)
+        {
+            dynamic p = value switch
+            {
+                float _ => new CachedEnvelopePointF(),
+                int _ => new CachedEnvelopePoint(),
+                _ => null
+            };
+            p.initialValue = p.currentValue = value;
+            return p;
+        }
         public ICachedEnvelopePointTransition<T> Create(TrackerEnvelopePoint A, TrackerEnvelopePoint B, double divider, int nextPoint);
         public ICachedEnvelopePointTransition<T> ScaledBy(float amount);
         public ICachedEnvelopePointTransition<T> Plus(float amount);
@@ -176,6 +186,7 @@ namespace PhaseEngine
             p.initialValue = p.currentValue = value;
             return p;
         }
+
         public ICachedEnvelopePointTransition<float> Create(TrackerEnvelopePoint A, TrackerEnvelopePoint B, double divider, int nextPoint)
         {
             var p = new CachedEnvelopePointF();

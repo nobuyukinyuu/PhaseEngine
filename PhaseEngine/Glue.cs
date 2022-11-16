@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Collections.Concurrent;
 using System.IO;
 using System.IO.Compression;
+using System.Reflection;
 
 namespace PhaseEngine
 {
@@ -28,12 +29,12 @@ namespace PhaseEngine
         public static object GetVal<T>(this T instance, string memberName)  
         {
                 Type type = typeof(T);
-                System.Reflection.MemberInfo member = type.GetMember(memberName)[0];
+                MemberInfo member = type.GetMember(memberName)[0];
 
                 switch(member)
                 {
-                    case System.Reflection.FieldInfo field:  return field.GetValue(instance);
-                    case System.Reflection.PropertyInfo property:  return property.GetValue(instance);
+                    case FieldInfo field:  return field.GetValue(instance);
+                    case PropertyInfo property:  return property.GetValue(instance);
                 }
 
             throw new InvalidOperationException($"Data member must be a property or field. Member is instead {member.MemberType.ToString()}");
@@ -41,16 +42,16 @@ namespace PhaseEngine
        public static void SetVal<T>(this T instance, string memberName, object value)  where T:class
         {
             Type type = typeof(T);
-            System.Reflection.MemberInfo member = type.GetMember(memberName)[0];
+            MemberInfo member = type.GetMember(memberName)[0];
 
             switch(member)
             {
-                case System.Reflection.PropertyInfo property:
+                case PropertyInfo property:
                     //Try to force unchecked conversion to the target type
                     var unboxedVal = Convert.ChangeType(value, property.PropertyType);
                     property.SetValue(instance, unboxedVal);
                     return;
-                case System.Reflection.FieldInfo field:
+                case FieldInfo field:
                     //Try to force unchecked conversion to the target type
                     unboxedVal = Convert.ChangeType(value, field.FieldType);
                     field.SetValue(instance, unboxedVal);
@@ -62,18 +63,18 @@ namespace PhaseEngine
        public static void SetVal<T>(ref this T instance, string memberName, object value) where T:struct
         {
             Type type = typeof(T);
-            System.Reflection.MemberInfo member = type.GetMember(memberName)[0];
+            MemberInfo member = type.GetMember(memberName)[0];
 
             switch(member)
             {
-                case System.Reflection.PropertyInfo property:
+                case PropertyInfo property:
                     //Try to force unchecked conversion to the target type
                     var unboxedVal = Convert.ChangeType(value, property.PropertyType);
                     object box = RuntimeHelpers.GetObjectValue(instance);
                     property.SetValue(box, value);
                     instance = (T)box;  //Copy back the box over ourself
                     return;
-                case System.Reflection.FieldInfo field:
+                case FieldInfo field:
                     var self = __makeref(instance);
 
                     //Try to force unchecked conversion to the target type
@@ -84,6 +85,24 @@ namespace PhaseEngine
                     return;
             }
             throw new InvalidOperationException($"Data member must be a property or field. Member is instead {member.MemberType.ToString()}");
+        }
+
+        public static Type GetUnderlyingType(this MemberInfo member)
+        {
+            switch (member.MemberType)
+            {
+                case MemberTypes.Event:
+                    return ((EventInfo)member).EventHandlerType;
+                case MemberTypes.Field:
+                    return ((FieldInfo)member).FieldType;
+                case MemberTypes.Method:
+                    return ((MethodInfo)member).ReturnType;
+                case MemberTypes.Property:
+                    return ((PropertyInfo)member).PropertyType;
+                default:
+                    throw new ArgumentException
+                    ("Input MemberInfo must be of type EventInfo, FieldInfo, MethodInfo, or PropertyInfo");
+            }
         }
 
 

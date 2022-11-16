@@ -5,8 +5,14 @@ using PE_Json;
 
 namespace PhaseEngine
 {
-    public interface IBindableDataSrc  //Objects that can assign TrackerEnvelope binds to fields.  Typically EGs and increment data.
+    public interface PE_Range<T>  //Used to pull values out of different types of envelopes.  TODO:  
+    {
+        T MinValue {get;}
+        T MaxValue {get;}
+        T InitialValue {get;set;}
+    }
 
+    public interface IBindableDataSrc  //Objects that can assign TrackerEnvelope binds to fields.  Typically EGs and increment data.
     {
         //Gets a copy of every cached envelope bound to a property in this IBindable.
         public SortedList<string, TrackerEnvelope> BoundEnvelopes {get;} //References to envelope bind data needed to create caches.
@@ -32,17 +38,16 @@ namespace PhaseEngine
 
         public bool Bind(string property, int minValue, int maxValue, int initialValue, int clockDivider)
         {
-            TrackerEnvelope e = BindManager.Bind(this, property, minValue, maxValue);
+            var e = (TrackerEnvelope<int>) BindManager.Bind(this, property, minValue, maxValue);
             var bindAlreadyExists = !BoundEnvelopes.TryAdd(property, e);
             if (bindAlreadyExists) return false;
             e.ClockDivider = clockDivider;
             e.SetPoint(0, (0, initialValue) );
-            e.dataSourceType = this.GetType();
             return true;
         }
         public bool Bind(string property, float minValue, float maxValue, float initialValue, int clockDivider)
         {
-            TrackerEnvelopeF e = BindManager.Bind(this, property, minValue, maxValue);
+            var e = (TrackerEnvelope<float>) BindManager.Bind(this, property, minValue, maxValue);
             var bindAlreadyExists = !BoundEnvelopes.TryAdd(property, e);
             if (bindAlreadyExists) return false;
             e.ClockDivider = clockDivider;
