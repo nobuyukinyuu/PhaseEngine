@@ -69,7 +69,7 @@ namespace PhaseEngine
         public void Bake(CachedEnvelope proto) //Partially rebakes itself using a prototype.  Typically called whenever a copy of a CachedEnvelope is needed
         {
             // CachedEnvelope<T> prototype = (CachedEnvelope<T>)Convert.ChangeType(proto, typeof(T));
-            CachedEnvelope<T> prototype = (CachedEnvelope<T>)proto;
+            CachedEnvelope<T> prototype = proto as CachedEnvelope<T>;
             //Set up loop points
             looping = prototype.looping;
             loopStart = prototype.loopStart;  loopEnd = prototype.loopEnd;
@@ -83,9 +83,12 @@ namespace PhaseEngine
             else {currentValue = prototype.currentValue; currentPoint = prototype.currentPoint; return;}
 
             //Prototype has points.  Set capacity and bring them in.
-            Capacity = Math.Min(prototype.Count, 1);
+            Capacity = Math.Max(prototype.Count, 1);
             for(int i=0; i<prototype.Count; i++)
-                Add(prototype[i]);  //ByVal copy
+            {
+                var temporary = prototype[i].GetType();
+                Add((ICachedEnvelopePointTransition<T>) prototype[i].Clone());  //ByVal copy
+            }
 
             Reset();
         }
@@ -156,7 +159,7 @@ namespace PhaseEngine
         public void Clock() 
         {
             // System.Diagnostics.Debug.Assert(Count>0);
-            if(Finished || Count==0) return;
+            if(looping==TrackerEnvelope.LoopType.None && Finished || Count==0) return;
             //Early exit conditions if the transition point ends on a hold (ie: start of loop is also end of loop)
             if(looping>=TrackerEnvelope.LoopType.Sustain && idx >= sustainEnd && sustainEnd==sustainStart)  return;
             else if(looping==TrackerEnvelope.LoopType.Basic && idx >= loopEnd && loopEnd==loopStart)  return;
@@ -170,20 +173,33 @@ namespace PhaseEngine
             currentPoint = this[idx];  //Yoink a copy of the point at the current index
             if (currentPoint.Finished)  //Next point
             {
+                var spillover = this[idx].Spillover;
 
-                this[idx] = currentPoint;  //Shove the modified value back into our collection since it was copied locally by value
+                //FIXME:  FOR SOME REASON THE METHOD DOES NOT RESOLVE THE PROPER REFERENCE AND RESET IS NEVER CALLED HERE, BUT USING REFLECTION WE CAN INVOKE IT ANYWAY??
+                // this[idx].Reset();
+                this[idx].GetType().GetMethod(nameof(ICachedEnvelopePointTransition<T>.Reset)).Invoke(this[idx],null);
+
+                // Godot.GD.Print($"Transition {idx} finished.  Reset {this[idx].CurrentValue}");
+                // this[idx] = currentPoint;  //Shove the modified value back into our collection since it was copied locally by value
                 idx = currentPoint.NextPoint;
-
                 if (!this.Finished)
+                    // Godot.GD.Print($"Grabbing Transition {idx}.  Initial:{this[idx].InitialValue}  Current:{this[idx].CurrentValue}  Final:{this[idx].FinalValue}");
+
+
+                if (!Finished)
                 {
-                    this[idx].SetSpillover(currentPoint.Spillover);  //Set the next point's initial position to the spillover from the last point's position.
+                    // Godot.GD.Print($"Spilling over {spillover} to {idx}...");
+                    this[idx].Spillover = spillover;  //Set the next point's initial position to the spillover from the last point's position.
                     currentValue = this[idx].InitialValue;  //Set envelope value to the next point's initial value.
+                } else {
+                    //End of the line.  Set current value to the final value.
+                    // Godot.GD.Print($"Setting final value to {currentPoint.FinalValue}.");
+                    currentValue = currentPoint.FinalValue;
                 }
-                currentPoint.Reset();  //May not be necessary if we're not using copy constructors but baking new envelopes each time, depends on loop type
 
             } else {
-                currentValue = currentPoint.Clock();
-                this[idx] = currentPoint;  //Shove the modified value back into our collection since it was copied locally by value
+                currentValue = this[idx].Clock();
+                // this[idx] = currentPoint;  //Shove the modified value back into our collection since it was copied locally by value
             }
             return;
         }
@@ -229,7 +245,7 @@ namespace PhaseEngine
 
         public void Reset()
         {
-            currentPoint = this[0];
+            currentPoint = this.Count>0?  this[0]: ICachedEnvelopePointTransition<T>.CreatePlaceholder(currentValue);
             idx=0;
             currentValue = currentPoint.InitialValue;            
         }

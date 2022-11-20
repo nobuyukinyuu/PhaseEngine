@@ -41,7 +41,6 @@ var loop_dragging = CanDrag.NO  #Active loop dragging handle.  Sustain values ar
 #signal loop_enabled  # [which
 #signal loop_moved
 
-
 func _ready():
 	pass # Replace with function body.
 
@@ -159,7 +158,12 @@ func _gui_input(event):
 		elif dragging and drag_pt>=0:  #Dragging a point around
 			var pos = value_at(get_local_mouse_position())
 			if Input.is_key_pressed(KEY_CONTROL):  pos.x = stepify(pos.x, STEP_X)
-			if Input.is_key_pressed(KEY_SHIFT):  pos.y = stepify(pos.y, STEP_Y)
+			if Input.is_key_pressed(KEY_SHIFT):  
+				if owner.using_floats:
+					pos.y = owner.scale_down(stepify(owner.scale_up(pos.y), owner.step))
+				else:
+					pos.y = stepify(pos.y, STEP_Y)
+					
 			pos.y = clamp(pos.y, 0.0, 1.0)
 			pos.x = clamp(pos.x, lower_bound, upper_bound)
 			drag_value = pos
@@ -361,8 +365,14 @@ func _draw():
 	#Draw the Overlay if dragging
 	if dragging and drag_pt >=0:
 		var secs = $TimeRuler.format_secs(drag_value.x, "ms", " s")
-#		var true_val = int(lerp(owner.lo, owner.hi, drag_value.y))
-		var true_val = stepify(owner.scale_up(drag_value.y), owner.step)
+
+		var true_val = str(owner.scale_up(drag_value.y))
+		var sigdigs = 0
+		#Account for unusual step values, make sure we show *something*
+		if owner.using_floats and (owner.step >=1 or owner.step==0):  sigdigs = 2 
+		elif owner.using_floats:  sigdigs = len(str(owner.step)) - str(owner.step).find(".",1) -1
+		true_val = true_val.pad_decimals(sigdigs)
+		
 		var c = ColorN("black")
 		draw_string(drag_font, get_local_mouse_position() - Vector2(-1, 39), "x:%s" % [secs],c)
 		draw_string(drag_font, get_local_mouse_position() - Vector2(-1, 23), "y:%s" % [true_val],c)

@@ -153,7 +153,8 @@ namespace PhaseEngine
                 if(!state.ContainsKey(item)) continue;
                 if(!state[item].JustTicked) { state[item].Clock(); continue; }  //Proceed without updating value if no tick
                 updated = true;
-                switch(envelope[item].DataMember)  //FIXME:  TYPE COERSION IS REALLY SLOW; IT DOESN'T WORK ON STRUCTS YET, USE SETVAL<T> INSTEAD
+
+                switch(envelope[item].DataMember)  //FIXME:  TYPE COERSION IS REALLY SLOW
                 {
                     case System.Reflection.PropertyInfo property:
                         switch(state[item])

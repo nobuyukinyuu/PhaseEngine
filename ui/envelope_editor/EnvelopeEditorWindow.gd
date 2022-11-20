@@ -400,9 +400,11 @@ func scale_down(val):
 func scale_up(val):
 	if log_scale:
 #		return round(global.xerp(lo, hi, 1.0-val))
-		return stepify(global.xerp(lo, hi, 1.0-val), step)
+#		return stepify(global.xerp(lo, hi, 1.0-val), step)
+		return global.xerp(lo, hi, 1.0-val)
 	else:
-		return stepify(range_lerp(val, 0.0, 1.0, lo, hi), step)
+#		return stepify(range_lerp(val, 0.0, 1.0, lo, hi), step)
+		return range_lerp(val, 0.0, 1.0, lo, hi)
 
 ####################### Window Management #######################
 func _on_CustomEnvelope_popup_hide():
