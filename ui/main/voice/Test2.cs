@@ -216,7 +216,7 @@ public class Test2 : Label
                     float val = log_scale? e switch
                     {  //Levels are exponential in nature, so remap them using exponential interpolation
                         TrackerEnvelope<float> f => (float)Tools.Xerp((float)f.MinValue, (float)f.MaxValue, 1.0-pt.y),
-                        TrackerEnvelope<int> i => (float)Tools.Xerp((float)i.MinValue, (float)i.MaxValue, 1.0-pt.y),
+                        TrackerEnvelope<int> i => (float)Tools.Xerp((int)i.MinValue, (int)i.MaxValue, 1.0-pt.y),
                         _ => default
                     }: e switch  {  //Remap the input value from 0-1 to our binds bounds using linear interpolation instead
                         TrackerEnvelope<float> f => (float)Tools.Remap(pt.y, 0, 1, (float)f.MinValue, (float)f.MaxValue),
@@ -233,7 +233,7 @@ public class Test2 : Label
                     val = log_scale? e switch
                     {  //Levels are exponential in nature, so remap them using exponential interpolation
                         TrackerEnvelope<float> f => (float)Tools.Xerp((float)f.MinValue, (float)f.MaxValue, 1.0-pt.y),
-                        TrackerEnvelope<int> i => (float)Tools.Xerp((float)i.MinValue, (float)i.MaxValue, 1.0-pt.y),
+                        TrackerEnvelope<int> i => (float)Tools.Xerp((int)i.MinValue, (int)i.MaxValue, 1.0-pt.y),
                         _ => default
                     }: e switch  {  //Remap the input value from 0-1 to our binds bounds using linear interpolation instead
                         TrackerEnvelope<float> f => (float)Tools.Remap(pt.y, 0, 1, (float)f.MinValue, (float)f.MaxValue),
@@ -305,7 +305,7 @@ public class Test2 : Label
             float val = log_scale? e switch
             {  //Levels are exponential in nature, so remap them using exponential interpolation
                 TrackerEnvelope<float> f => (float)Tools.Xerp((float)f.MinValue, (float)f.MaxValue, 1.0-pt.y),
-                TrackerEnvelope<int> i => (float)Tools.Xerp((float)i.MinValue, (float)i.MaxValue, 1.0-pt.y),
+                TrackerEnvelope<int> i => (float)Tools.Xerp((int)i.MinValue, (int)i.MaxValue, 1.0-pt.y),
                 _ => default
             }: e switch  {  //Remap the input value from 0-1 to our binds bounds using linear interpolation instead
                 TrackerEnvelope<float> f => (float)Tools.Remap(pt.y, 0, 1, (float)f.MinValue, (float)f.MaxValue),

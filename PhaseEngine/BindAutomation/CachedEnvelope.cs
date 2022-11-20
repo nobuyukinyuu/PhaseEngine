@@ -20,25 +20,13 @@ namespace PhaseEngine
         // ValueType this [int index] {get;}  //Indexer which spits out a value of some kind
         public object CurrentValue {get;}  
         public void Clock();
-        public void AddAmount(float amount);
+        public object AddAmount(float amount);
         public void Multiply(float multiplier);
         public void NoteOn();
         public void NoteOff();
 
     }
 
-    public class CachedEnvelopeInt:CachedEnvelope<int>
-    {
-        protected CachedEnvelopeInt(){currentPoint=new CachedEnvelopePoint();}
-        public CachedEnvelopeInt(TrackerEnvelope<int> src):this() => Bake(src); //Typically called by a TrackerEnvelope to rebake its cache from scratch when values change.
-        public CachedEnvelopeInt(CachedEnvelope<int> prototype):this() => Bake(prototype); //Copy constructor for when we don't need to rebake
-    }
-    public class CachedEnvelopeFloat:CachedEnvelope<float>
-    {
-        protected CachedEnvelopeFloat(){currentPoint=new CachedEnvelopePointF();}
-        public CachedEnvelopeFloat(TrackerEnvelope<float> src) : this() => Bake(src); //Typically called by a TrackerEnvelope to rebake its cache from scratch when values change.
-        public CachedEnvelopeFloat(CachedEnvelopeFloat prototype) => Bake(prototype); //Copy constructor for when we don't need to rebake
-    }
 
     //This is the envelope data that is sent as copies to the operators which perform the clocking. A copy is passed to relevant classes at NoteOn.
     public class CachedEnvelope<T> : List<ICachedEnvelopePointTransition<T>>, CachedEnvelope //where T: ICachedEnvelopePointTransition<T>
@@ -86,7 +74,6 @@ namespace PhaseEngine
             Capacity = Math.Max(prototype.Count, 1);
             for(int i=0; i<prototype.Count; i++)
             {
-                var temporary = prototype[i].GetType();
                 Add((ICachedEnvelopePointTransition<T>) prototype[i].Clone());  //ByVal copy
             }
 
@@ -146,13 +133,19 @@ namespace PhaseEngine
             currentPoint = currentPoint.ScaledBy(multiplier);
             currentValue = currentPoint.CurrentValue;
         }
-        public void AddAmount(float amount)
+        public object AddAmount(float amount)
         {
+            if (amount==0) return currentValue;
+            var method = currentPoint.GetType().GetMethod(nameof(ICachedEnvelopePointTransition<T>.Plus));
             for(int i=0; i<Count; i++)
-                this[i] = this[i].Plus(amount);
+                // this[i] = this[i].Plus(amount);
+                this[i] = (ICachedEnvelopePointTransition<T>) method.Invoke(this[i], new object[]{amount});
 
-            currentPoint = currentPoint.Plus(amount);
+            // currentPoint = currentPoint.Plus(amount);
+            currentPoint = (ICachedEnvelopePointTransition<T>)
+                            method.Invoke(currentPoint, new object[]{amount});
             currentValue = currentPoint.CurrentValue;
+            return currentValue;
         }
 
 
@@ -175,7 +168,8 @@ namespace PhaseEngine
             {
                 var spillover = this[idx].Spillover;
 
-                //FIXME:  FOR SOME REASON THE METHOD DOES NOT RESOLVE THE PROPER REFERENCE AND RESET IS NEVER CALLED HERE, BUT USING REFLECTION WE CAN INVOKE IT ANYWAY??
+                //FIXME:  FOR SOME REASON THE METHOD DOES NOT RESOLVE THE PROPER REFERENCE 
+                //        AND RESET IS NEVER CALLED HERE, BUT USING REFLECTION WE CAN INVOKE IT ANYWAY??
                 // this[idx].Reset();
                 this[idx].GetType().GetMethod(nameof(ICachedEnvelopePointTransition<T>.Reset)).Invoke(this[idx],null);
 
@@ -228,7 +222,6 @@ namespace PhaseEngine
                             currentValue = currentPoint.InitialValue;
                         }
                         // else{}  //Index is equal to loopEnd and also the loop end is at the end of the envelope.
-                            
                     }
                     break;
                 case TrackerEnvelope.LoopType.Sustain:

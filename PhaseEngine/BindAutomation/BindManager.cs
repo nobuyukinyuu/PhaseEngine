@@ -109,10 +109,10 @@ namespace PhaseEngine
                         object box = System.Runtime.CompilerServices.RuntimeHelpers.GetObjectValue(dataSource);
                         switch(state[item])  //FIXME LATER, SEE BELOW
                         {  //WARNING:  This shit is pure evil and probably slow.  Increments.Detune is probably the only thing which relies on it. Stack thrasher?
-                            case CachedEnvelopeInt pInt:
+                            case CachedEnvelope<int> pInt:
                                 property.SetValue(dataSource, CoerceValue((int)pInt.CurrentValue, property.PropertyType, envelope.Values[i]));
                                 break;
-                            case CachedEnvelopeFloat pFloat:
+                            case CachedEnvelope<float> pFloat:
                                 property.SetValue(dataSource, CoerceValue((float)pFloat.CurrentValue, property.PropertyType, envelope.Values[i]));
                                 break;
                             case CachedEnvelope<double> pDouble:
@@ -159,10 +159,10 @@ namespace PhaseEngine
                     case System.Reflection.PropertyInfo property:
                         switch(state[item])
                         {
-                            case CachedEnvelopeInt pInt:
+                            case CachedEnvelope<int> pInt:
                                 property.SetValue(dataSource, CoerceValue((int)pInt.CurrentValue, property.PropertyType, envelope.Values[i]));
                                 break;
-                            case CachedEnvelopeFloat pFloat:
+                            case CachedEnvelope<float> pFloat:
                                 property.SetValue(dataSource, CoerceValue((float)pFloat.CurrentValue, property.PropertyType, envelope.Values[i]));
                                 break;
                             case CachedEnvelope<double> pDouble:

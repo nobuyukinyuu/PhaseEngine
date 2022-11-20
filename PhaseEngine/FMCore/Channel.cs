@@ -111,7 +111,7 @@ namespace PhaseEngine
                             op.eg.ksl.Apply(midi_note, ref op.eg.levels[4]);  
                         else {  //Total level is bound to an automation envelope.  Scale it.
                             var val = Math.Clamp(op.eg.ksl.ScaledValue(midi_note), 0, Envelope.L_MAX);
-                            op.BindStates["tl"].AddAmount(val);
+                            op.eg.tl = (ushort)(int)op.BindStates["tl"].AddAmount(val);
                         }
 
                         for (int j=0; j<op.eg.rates.Length-1; j++)
@@ -130,7 +130,7 @@ namespace PhaseEngine
                         op.eg.velocity.Apply(velocity, ref op.eg.levels[4]);  
                     else {  //Total level is bound to an automation envelope.  Scale it.
                         var val = Math.Clamp(op.eg.velocity.ScaledValue(velocity), 0, Envelope.L_MAX);
-                        op.BindStates["tl"].AddAmount(val);
+                        op.eg.tl = (ushort)(int)op.BindStates["tl"].AddAmount(val);
                     }
 
 
