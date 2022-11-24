@@ -431,6 +431,7 @@ exp_edit = true
 tick_count = 32
 ticks_on_borders = false
 associated_property = "tl"
+bind_abilities = 1
 useExpTicks = true
 
 [node name="Attack Level" parent="Levels" instance=ExtResource( 3 )]
@@ -444,6 +445,7 @@ exp_edit = true
 tick_count = 32
 ticks_on_borders = false
 associated_property = "al"
+bind_abilities = 1
 useExpTicks = true
 
 [node name="Decay Level" parent="Levels" instance=ExtResource( 3 )]
@@ -458,6 +460,7 @@ exp_edit = true
 tick_count = 32
 ticks_on_borders = false
 associated_property = "dl"
+bind_abilities = 1
 useExpTicks = true
 
 [node name="Sustain Level" parent="Levels" instance=ExtResource( 3 )]
@@ -474,6 +477,7 @@ exp_edit = true
 tick_count = 32
 ticks_on_borders = false
 associated_property = "sl"
+bind_abilities = 1
 useExpTicks = true
 
 [node name="Rates" type="GridContainer" parent="."]
@@ -574,8 +578,7 @@ margin_bottom = 72.0
 custom_constants/hseparation = 16
 columns = 2
 __meta__ = {
-"_edit_group_": true,
-"_edit_use_anchors_": false
+"_edit_group_": true
 }
 
 [node name="Func Type" parent="Tweak" instance=ExtResource( 3 )]
@@ -600,6 +603,7 @@ max_value = 10.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "ams"
+bind_abilities = 1
 
 [node name="WavePanel" type="Panel" parent="."]
 margin_left = 216.0
@@ -831,6 +835,7 @@ size_flags_horizontal = 3
 custom_styles/slider = ExtResource( 12 )
 max_value = 65535.0
 associated_property = "duty"
+bind_abilities = 1
 
 [node name="More" type="Button" parent="."]
 anchor_top = 0.0106383

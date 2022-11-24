@@ -101,4 +101,31 @@ func find_bind_editor(sender:EGSlider,property_loc, type=NONE) -> WindowDialog:
 	
 	return output
 	
+func bind_val(bind_type:int, sender:EGSlider, value, set_bound=true, loc=LOC_TYPE_EG):
+	#FIXME:  SUPPORT BIND_TYPE (Envelope, Keyfollow etc) IN CHIP BindValue AND SET EDITOR APPROPRIATELY
+	if bind_type != ENVELOPE:  return
 	
+	if set_bound:
+		var success = get_node(chip_loc).BindValue(loc, operator, value)
+		if success:  #Bind succeeded.  Show editor and tell EGSlider it's bound already
+			sender.is_bound = true
+			sender.update()
+			request_bind_editor(sender, get_bind_values(loc, value))
+		elif existing_binds(loc, value):  #Value is already bound.  Request editor.
+			request_bind_editor(sender, get_bind_values(loc, value))
+
+		prints("Bind", value, "returned", success)
+		return success
+	else:
+
+		var success = get_node(chip_loc).UnbindValue(loc, operator, value)
+		if success:  #Unbind succeeded.  Find if a modeless window exists and close it.
+			sender.is_bound = false
+			var existing_popup = find_bind_editor(sender, loc, ENVELOPE)  #TODO:  Support different editors
+			if existing_popup:  #Close it.
+				existing_popup.queue_free()
+				
+		prints("Unbind", value, "returned", success)
+		return success
+
+

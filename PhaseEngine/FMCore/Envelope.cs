@@ -244,13 +244,25 @@ namespace PhaseEngine
 /////////////////////////////////////////  BINDABLE INTERFACE  /////////////////////////////////////////
         public bool Bind(string property, double chipTicksPerSec=1)
         {
-            int min=0,max=0;
+            float min=0,max=0;
             double clockCount = (chipTicksPerSec/120);  //Default tickrate,  120 ticks per sec
             void SetTicks(double x) => clockCount = chipTicksPerSec / x; //Set clock counter to a multiple of our max ticks/sec
-            var val = Convert.ToInt32(this.GetVal(property));
+            var val = Convert.ToSingle(this.GetVal(property));
+            var usingFloats = false;
             //Set range values here.  wavetable_bank can't know max banks for a voice from here, so use Voice's bind method to specify it instead?
             switch(property)
             {
+                //TODO:  Create reusable recalc actions which can be called when appropriate by Operator
+                case "cutoff":
+                    usingFloats = true;
+                    SetTicks(60); min=10; max=(int)(Global.MixRate/2); break;
+                case "resonance":
+                    usingFloats = true;
+                    SetTicks(30); min=1; max=10; break;
+                case "gain":
+                    usingFloats = true;
+                    SetTicks(60); min=0.1f; max=10; break;
+
                 case "feedback":  case "ams":
                     SetTicks(24); max=10;  break;
                 case "duty":  
@@ -263,12 +275,6 @@ namespace PhaseEngine
                 case "ar": case "dr": case "sr": case "rr":
                     SetTicks(48); max=R_MAX; break;
 
-
-                //TODO:  Create reusable recalc actions which can be called when appropriate by Operator
-                case "cutoff":
-                    SetTicks(60); min=10; max=(int)(Global.MixRate/2); break;
-                case "resonance":
-                    SetTicks(30); min=1; max=10; break;
 
                 default:
                     //Perhaps the data member specified doesn't exist.  Check first before attempting to go further.
@@ -296,8 +302,10 @@ namespace PhaseEngine
                     }
                     break;
             }
-            // return ((IBindableDataSrc)this).Bind(property, min, max, (int)val);  //Call the default bind implementation to handle the rest.
-            return ((IBindableDataSrc)this).Bind(property, min, max, val, (int)clockCount);  //Call the default bind implementation to handle the rest.
+            //Call the default bind implementation to handle the rest.
+            if (usingFloats)
+                 return ((IBindableDataSrc)this).Bind(property, min, max, val, (int)clockCount);  
+            else return ((IBindableDataSrc)this).Bind(property, (int)min, (int)max, (int)val, (int)clockCount);  
         }
 
     }

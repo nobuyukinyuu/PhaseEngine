@@ -461,8 +461,7 @@ margin_bottom = 72.0
 custom_constants/hseparation = 16
 columns = 2
 __meta__ = {
-"_edit_group_": true,
-"_edit_use_anchors_": false
+"_edit_group_": true
 }
 
 [node name="Feedback" parent="Tweak" instance=ExtResource( 3 )]
@@ -482,6 +481,7 @@ max_value = 10.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "ams"
+bind_abilities = 1
 
 [node name="WavePanel" type="Panel" parent="."]
 margin_left = 216.0

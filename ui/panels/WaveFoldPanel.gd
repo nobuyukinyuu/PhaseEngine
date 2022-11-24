@@ -7,8 +7,13 @@ func _ready():
 	for o in $Tweak.get_children():
 		if !o is Slider:  continue
 		o.connect("value_changed", self, "setEG", [o.associated_property])
+		o.connect("bind_requested", self, "bind_val", [o, o.associated_property, true])
+		o.connect("unbind_requested", self, "bind_val", [o, o.associated_property, false])
 
 	$Bias.connect("value_changed", self, "setEG", [$Bias.associated_property, 32768])
+	$Bias.connect("bind_requested", self, "bind_val", [$Bias, $Bias.associated_property, true])
+	$Bias.connect("unbind_requested", self, "bind_val", [$Bias, $Bias.associated_property, false])
+
 	$Crush.connect("value_changed", self, "setEG", [$Crush.associated_property, 1])
 
 	for o in $Rates.get_children():
@@ -20,6 +25,8 @@ func _ready():
 		if !o is Slider:  continue
 		o.connect("value_changed", self, "setEG", [o.associated_property])
 		o.connect("value_changed", self, "update_env", [o])
+		o.connect("bind_requested", self, "bind_val", [o, o.associated_property, true])
+		o.connect("unbind_requested", self, "bind_val", [o, o.associated_property, false])
 
 	$Limit.connect("toggled", self, "setLimit")
 
@@ -78,6 +85,22 @@ func set_from_op(op:int):
 
 	refresh_envelope_preview()
 
+func check_binds():  #Goes through all bindable controls and rebinds them to editors if necessary.
+	if chip_loc.is_empty():  return
+	for o in $Rates.get_children():
+		if !o is EGSlider:  continue
+		if o.bind_abilities == NONE:  continue
+		rebind(o, LOC_TYPE_EG, o.bind_abilities)
+	for o in $Levels.get_children():
+		if !o is Slider:  continue
+		if o.bind_abilities == NONE:  continue
+		rebind(o, LOC_TYPE_EG, o.bind_abilities)
+	for o in $Tweak.get_children():
+		if !o is Slider:  continue
+		if o.bind_abilities == NONE:  continue
+		rebind(o, LOC_TYPE_EG, o.bind_abilities)
+
+
 func refresh_envelope_preview():
 	var d = get_node(chip_loc).GetOpValues(0, operator)
 	var rates = d["rates"]
@@ -100,14 +123,7 @@ func refresh_envelope_preview():
 const env_map = {"ar":"Attack", "dr":"Decay", "sr":"Sustain", "rr":"Release"}
 func update_env(value, sender:EGSlider):
 	var prop = sender.associated_property
-#	match prop:
-#		"tl", "al", "dl", "sl", "decay", "hold":
-#			$EnvelopeDisplay.set(prop, sender.value)
-#			return
-#
-#	if prop.ends_with("r") and len(prop) == 2:  #Rate
-#		$EnvelopeDisplay.set(env_map[prop], sender.value)
-	
+
 	if prop.ends_with("l"):
 		$EnvelopeDisplay.call("update_" + prop, value/global.L_MAX)
 	else:

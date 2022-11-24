@@ -104,6 +104,7 @@ exp_edit = true
 tick_count = 32
 ticks_on_borders = false
 associated_property = "tl"
+bind_abilities = 1
 useExpTicks = true
 
 [node name="Attack Level" parent="Levels" instance=ExtResource( 3 )]
@@ -116,6 +117,7 @@ exp_edit = true
 tick_count = 32
 ticks_on_borders = false
 associated_property = "al"
+bind_abilities = 1
 useExpTicks = true
 
 [node name="Decay Level" parent="Levels" instance=ExtResource( 3 )]
@@ -129,6 +131,7 @@ exp_edit = true
 tick_count = 32
 ticks_on_borders = false
 associated_property = "dl"
+bind_abilities = 1
 useExpTicks = true
 
 [node name="Sustain Level" parent="Levels" instance=ExtResource( 3 )]
@@ -144,6 +147,7 @@ exp_edit = true
 tick_count = 32
 ticks_on_borders = false
 associated_property = "sl"
+bind_abilities = 1
 useExpTicks = true
 
 [node name="Rates" type="GridContainer" parent="."]
@@ -252,6 +256,7 @@ value = 1.0
 exp_edit = true
 tick_count = 0
 associated_property = "gain"
+bind_abilities = 1
 display_strings = PoolStringArray( "AND", "OR", "XOR" )
 
 [node name="AMS" parent="Tweak" instance=ExtResource( 3 )]
@@ -262,6 +267,7 @@ max_value = 10.0
 tick_count = 5
 ticks_on_borders = false
 associated_property = "ams"
+bind_abilities = 1
 
 [node name="EnvelopeDisplay" parent="." instance=ExtResource( 2 )]
 margin_top = 232.0
@@ -334,6 +340,7 @@ size_flags_horizontal = 3
 min_value = -32768.0
 max_value = 32767.0
 associated_property = "duty"
+bind_abilities = 1
 
 [node name="Crush" parent="." instance=ExtResource( 3 )]
 margin_left = 264.0

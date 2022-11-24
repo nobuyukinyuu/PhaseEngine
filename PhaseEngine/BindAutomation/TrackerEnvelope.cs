@@ -28,6 +28,8 @@ namespace PhaseEngine
         public Type DataSource{get;}   //The type of data source which wants its associated value to be automated by this envelope.
         public System.Reflection.MemberInfo DataMember{get;} //The field or property this envelope is expected to bind to. Used by BindManager to update data consumers
 
+        // public Action<double?> PostUpdateAction {get;set;}
+
 
         public CachedEnvelope CachedEnvelopeCopy(int chipDivider=1);
         public bool Cached {get;set;}  //Invalidate this whenever we are modified in some way.

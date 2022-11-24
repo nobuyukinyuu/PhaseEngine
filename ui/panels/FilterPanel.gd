@@ -18,7 +18,9 @@ func _ready():
 
 	for o in [$Frequency, $"Q [Resonance]", $"Dry Mix", $Gain]:
 		o.connect("value_changed", self, "setEG", [o.associated_property])
-
+		o.connect("bind_requested", self, "bind_val", [o, o.associated_property, true])
+		o.connect("unbind_requested", self, "bind_val", [o, o.associated_property, false])
+		
 	for i in $G.get_child_count():
 		$G.get_child(i).connect("pressed", self, "select", [i])
 

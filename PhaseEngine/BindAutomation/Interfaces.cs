@@ -5,13 +5,6 @@ using PE_Json;
 
 namespace PhaseEngine
 {
-    public interface PE_Range<T>  //Used to pull values out of different types of envelopes.  TODO:  
-    {
-        T MinValue {get;}
-        T MaxValue {get;}
-        T InitialValue {get;set;}
-    }
-
     public interface IBindableDataSrc  //Objects that can assign TrackerEnvelope binds to fields.  Typically EGs and increment data.
     {
         //Gets a copy of every cached envelope bound to a property in this IBindable.
@@ -58,7 +51,6 @@ namespace PhaseEngine
 
         // FIXME:  Consider using BindManager instead to fix CachedEnvelopes to not carry these properties.  Or partial rebake on NoteOn?
         bool Unbind(string property) => BoundEnvelopes.Remove(property);
-
     }
 
 
