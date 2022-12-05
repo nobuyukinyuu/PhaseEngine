@@ -13,7 +13,7 @@ namespace PhaseEngine
 
         protected Oscillator oscillator = new Oscillator(Oscillator.Sine2);
         public Oscillator.oscTypes OscType{ get => oscillator.CurrentWaveform; }
-        public Dictionary<string, CachedEnvelope> BindStates { get; set; } = new Dictionary<string, CachedEnvelope>();
+        public SortedList<string, CachedEnvelope> BindStates { get; set; } = new SortedList<string, CachedEnvelope>();
 
         protected delegate short SampleOutputFunc(ushort modulation = 0, ushort am_offset=0); //Primary function of the oscillator
         protected SampleOutputFunc operatorOutputSample;
@@ -377,7 +377,7 @@ namespace PhaseEngine
         public static readonly OpFunc[] operations = {OP_AND, OP_OR, OP_XOR, OP_RINGMOD};
         public byte OpFuncType {get => eg.aux_func;  set { if (value<operations.Length)  {BitwiseOp = operations[value]; eg.aux_func=value;} }}
 
-        public BitwiseOperator() {intent=Intents.BITWISE; BitwiseOp=OP_OR;}
+        public BitwiseOperator():base() {intent=Intents.BITWISE; BitwiseOp=OP_OR;}
 
         public override short RequestSample(ushort modulation = 0, ushort am_offset = 0)
         {

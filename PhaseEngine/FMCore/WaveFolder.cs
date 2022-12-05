@@ -5,7 +5,7 @@ namespace PhaseEngine
 {
     public class WaveFolder : Operator
     {
-        public WaveFolder()    {}
+        public WaveFolder()    {intent=Intents.WAVEFOLDER;}
 
         // public override void Clock()
         // {
@@ -32,7 +32,6 @@ namespace PhaseEngine
 
         short Fold(ushort input)
         {
-            //TODO:  Consider using osc_sync or another eg value to determine whether input should wrap or clamp
             double x = Tables.short2float[ (short)input + Tables.SIGNED_TO_INDEX] * eg.gain;
             double bias = Tables.short2float[ eg.duty ];
             x += bias;  //Apply bias

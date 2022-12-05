@@ -174,7 +174,7 @@ namespace PhaseEngine
                     bindTicks = 0;
                       for(byte op=0;  op<opCount; op++)
                       {
-                        BindManager.Update(preview.ops[op], preview.ops[op].eg, BindManager.NO_ACTION);
+                        BindManager.Update(preview.ops[op], preview.ops[op].eg);
                         var updated = BindManager.Update(preview.ops[op], ref preview.ops[op].pg);
                         if (updated) preview.ops[op].pg.Recalc();
                       }

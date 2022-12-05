@@ -151,6 +151,12 @@ namespace PhaseEngine
                 
                 case OpBase.Intents.FILTER:
                 //TODO:  Consider adding a case for FILTER intent to SetOscillatorType here so that it's not relied on user to change the intent of each channel manually.
+                    var filter = ops[i] as Filter;
+                    filter.eg.Configure(voice.egs[i]);
+                    ((IBindableDataConsumer)filter).Rebake(filter.eg, chipDivider);  //Reset the cached envelopes
+
+                    //TODO:  IMPLEMENT KEY FOLLOW AND VELOCITY TABLE ADJUSTMENTS FROM BINDS HERE
+                    filter.NoteOn();
                     break;
                 }
             }

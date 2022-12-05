@@ -140,7 +140,7 @@ namespace PhaseEngine
             }
             return updated;
         /*}*/}
-        public static void Update<T>(IBindableDataConsumer invoker, T dataSource, Action action)  where T:class,IBindableDataSrc //IMPORTANT
+        public static bool Update<T>(IBindableDataConsumer invoker, T dataSource)  where T:class,IBindableDataSrc //IMPORTANT
         { /*unchecked{*/
             //Only sets the value directly to current state.  Clocking must be done in invokers
             var envelope = dataSource.BoundEnvelopes;
@@ -187,8 +187,9 @@ namespace PhaseEngine
                 }
                 state[item].Clock();
             }
-            if (updated)
-            /*perform the*/ action();
+            // if (updated)
+            // /*perform the*/ action();
+            return updated;
         /*}*/}
 
 

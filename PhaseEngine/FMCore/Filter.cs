@@ -33,7 +33,7 @@ namespace PhaseEngine
         const int FRAC_PRECISION_BITS = 16-1;  //Precision bits for the Filter only
         const int FRAC_SIZE = 1 << FRAC_PRECISION_BITS;
 
-        public Filter()    {FilterToApply=RequestBypass; Reset();}
+        public Filter()    {FilterToApply=RequestBypass; Reset(); intent = Intents.FILTER;}
         public void Reset()
         {
             // reset filter coeffs
@@ -48,7 +48,28 @@ namespace PhaseEngine
             //      Actions are void delegates.  As an IBindableDataConsumer, we can check our valid BindStates at tick time to determine
             //      the action to take.  A full recalc need not be done every audio frame.  Also consider adding a user-customizable clock divider factor.
             //      More likely, to begin with, we can experiment with a coef recalc value as low as 100fps (divider of 480) to judge quality.
-            // BindManager.Update(this, eg, Recalc);
+
+            CachedEnvelope envelope;
+            bool recalcCoefficients = false;  //Used to determine if any of our important values changed and we therefore need to recalc our coefficients.
+            for(int i=0; i<BindStates.Count; i++)
+            {
+                envelope = BindStates.Values[i];
+                if(!envelope.JustTicked) continue;
+
+                switch(BindStates.Keys[i])
+                {
+                    case nameof(eg.cutoff):
+                        recalcCoefficients = true;
+                        RecalcFrequency(Convert.ToDouble(BindStates[nameof(eg.cutoff)].CurrentValue), false);  break;
+                    case nameof(eg.resonance):
+                        recalcCoefficients = true;
+                        RecalcQFactor(Convert.ToDouble(BindStates[nameof(eg.resonance)].CurrentValue), false); break;
+                    case nameof(eg.gain):
+                        recalcCoefficients = true;
+                        RecalcGain(Convert.ToDouble(BindStates[nameof(eg.gain)].CurrentValue), false); break;
+                }
+            }
+            if (recalcCoefficients) RecalcCoefficientsOnly();
             return;
         }
         
@@ -59,7 +80,23 @@ namespace PhaseEngine
         // }
         public override void NoteOn()
         {  //TODO:  Consider re-using an rTable from EG (KSL?) to implement key follow for the frequency value.
-            throw new NotImplementedException();
+            // ou1=ou2=in1=in2=0;
+            TrackerEnvelope envelope;
+            for(int i=0; i<eg.BoundEnvelopes.Count; i++)
+            {
+                envelope = eg.BoundEnvelopes.Values[i];
+                switch(eg.BoundEnvelopes.Keys[i])
+                {
+                    case nameof(eg.cutoff):
+                        eg.cutoff = Convert.ToDouble(envelope.InitialValue);  break;
+                    case nameof(eg.resonance):
+                        eg.resonance = Convert.ToDouble(envelope.InitialValue); break;
+                    case nameof(eg.gain):
+                        eg.gain = Convert.ToDouble(envelope.InitialValue); break;
+                }
+            }
+            Reset();  RecalcAll();
+            // throw new NotImplementedException();
         }
 
         public override short RequestSample(ushort input, ushort am_offset) => FilterToApply(input, am_offset); 
@@ -116,18 +153,18 @@ namespace PhaseEngine
         double beta, gain;
 
         public void RecalcFrequency() => RecalcFrequency(eg.cutoff);
-        void RecalcFrequency(double frequency)  //Use when frequency changes
+        void RecalcFrequency(double frequency, bool recalcCoefficients=true)  //Use when frequency changes
         {
             const double PI=3.1415926535897932384626433832795;
             omega=	2.0*PI*frequency/Global.MixRate;
             tsin	=	Math.Sin(omega);
             tcos	=	Math.Cos(omega);
 
-            Recalc();
+            if (recalcCoefficients) Recalc();
         }
 
         public void RecalcQFactor() => RecalcQFactor(eg.resonance);
-        void RecalcQFactor(double q, bool q_is_bandwidth=false)  //Use when Q factor changes
+        void RecalcQFactor(double q, bool q_is_bandwidth=false, bool recalcCoefficients=true)  //Use when Q factor changes
         {
             this.q=q;
             if(q_is_bandwidth)
@@ -135,15 +172,15 @@ namespace PhaseEngine
             else
                 alpha=tsin/(2.0*q);
 
-            Recalc();
+            if (recalcCoefficients) Recalc();
         }
         public void RecalcGain() => RecalcGain(eg.gain);
-        void RecalcGain(double input)
+        void RecalcGain(double input, bool recalcCoefficients=true)
         {
                 gain   	=	input;
                 beta	=	Math.Sqrt(input)/q;            
 
-            Recalc();
+            if (recalcCoefficients) Recalc();
         }
 
         //Recalc everything

@@ -9,8 +9,7 @@ namespace PhaseEngine
 
     public interface TrackerEnvelope
     {
-        [Flags]
-        public enum PtMarker {None=0, LoopStart=1, LoopEnd=2, SustainStart=4, SustainEnd=8}
+        [Flags] public enum PtMarker {None=0, LoopStart=1, LoopEnd=2, SustainStart=4, SustainEnd=8}
         [Flags] public enum LoopType {None=0, Basic=1, Sustain=2, Compound=3}
         public LoopType Looping {get;set;}
         public int LoopStart{get;set;}  public int LoopEnd{get;set;}
@@ -28,8 +27,10 @@ namespace PhaseEngine
         public Type DataSource{get;}   //The type of data source which wants its associated value to be automated by this envelope.
         public System.Reflection.MemberInfo DataMember{get;} //The field or property this envelope is expected to bind to. Used by BindManager to update data consumers
 
-        // public Action<double?> PostUpdateAction {get;set;}
 
+        // TODO:  Consider changing this to MethodInfo so it can be serialized properly.  Invocation might be easier using boxing provided we limit the parameters
+        //        Moreover, by using MethodInfo we can omit invocation entirely if the field returns null instead of setting a dummy action
+        // public Action<double?> PostUpdateAction {get;set;}
 
         public CachedEnvelope CachedEnvelopeCopy(int chipDivider=1);
         public bool Cached {get;set;}  //Invalidate this whenever we are modified in some way.
@@ -78,7 +79,6 @@ namespace PhaseEngine
         internal System.Type dataSourceType;  //The type of data source which wants its associated value to be automated by this envelope.
         internal System.Reflection.MemberInfo associatedProperty; //The field or property this envelope is expected to bind to. Used by BindManager to update data consumers
         public Type DataSource{get=>dataSourceType;}  public System.Reflection.MemberInfo DataMember{get=>associatedProperty;}
-
 
         //These properties help with identifying what this envelope might've been bound to when serializing out data.
         public string AssociatedDataType{get => dataSourceType?.Name ?? "None";}

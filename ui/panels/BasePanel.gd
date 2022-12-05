@@ -105,7 +105,7 @@ func bind_val(bind_type:int, sender:EGSlider, value, set_bound=true, loc=LOC_TYP
 	#FIXME:  SUPPORT BIND_TYPE (Envelope, Keyfollow etc) IN CHIP BindValue AND SET EDITOR APPROPRIATELY
 	if bind_type != ENVELOPE:  return
 	
-	if set_bound:
+	if set_bound:  #Bind
 		var success = get_node(chip_loc).BindValue(loc, operator, value)
 		if success:  #Bind succeeded.  Show editor and tell EGSlider it's bound already
 			sender.is_bound = true
@@ -116,7 +116,7 @@ func bind_val(bind_type:int, sender:EGSlider, value, set_bound=true, loc=LOC_TYP
 
 		prints("Bind", value, "returned", success)
 		return success
-	else:
+	else:  #Unbind
 
 		var success = get_node(chip_loc).UnbindValue(loc, operator, value)
 		if success:  #Unbind succeeded.  Find if a modeless window exists and close it.
@@ -124,7 +124,8 @@ func bind_val(bind_type:int, sender:EGSlider, value, set_bound=true, loc=LOC_TYP
 			var existing_popup = find_bind_editor(sender, loc, ENVELOPE)  #TODO:  Support different editors
 			if existing_popup:  #Close it.
 				existing_popup.queue_free()
-				
+			sender.update()
+
 		prints("Unbind", value, "returned", success)
 		return success
 

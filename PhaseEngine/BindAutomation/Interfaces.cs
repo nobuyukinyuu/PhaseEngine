@@ -58,7 +58,7 @@ namespace PhaseEngine
     {
         //BindStates below are used to cycle through the cached envelopes for 
         //When IBindableDataSrc invokes an update to one of its fields, these are used to determine how to update it.
-        public Dictionary<string, CachedEnvelope> BindStates {get;}
+        public SortedList<string, CachedEnvelope> BindStates {get;}
 
         //Methods used to signal the start and release of the bound envelopes so they can loop properly.
         public void NoteOn();  //Used by implementations to inform bound value states to reset to the initial value.

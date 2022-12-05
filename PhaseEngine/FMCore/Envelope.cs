@@ -249,6 +249,7 @@ namespace PhaseEngine
             void SetTicks(double x) => clockCount = chipTicksPerSec / x; //Set clock counter to a multiple of our max ticks/sec
             var val = Convert.ToSingle(this.GetVal(property));
             var usingFloats = false;
+
             //Set range values here.  wavetable_bank can't know max banks for a voice from here, so use Voice's bind method to specify it instead?
             switch(property)
             {
@@ -304,8 +305,8 @@ namespace PhaseEngine
             }
             //Call the default bind implementation to handle the rest.
             if (usingFloats)
-                 return ((IBindableDataSrc)this).Bind(property, min, max, val, (int)clockCount);  
-            else return ((IBindableDataSrc)this).Bind(property, (int)min, (int)max, (int)val, (int)clockCount);  
+                 return ((IBindableDataSrc)this).Bind(property, min, max, val, (int)clockCount);
+            else return ((IBindableDataSrc)this).Bind(property, (int)min, (int)max, (int)val, (int)clockCount);
         }
 
     }
