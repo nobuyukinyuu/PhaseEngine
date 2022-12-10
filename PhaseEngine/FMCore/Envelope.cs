@@ -253,10 +253,9 @@ namespace PhaseEngine
             //Set range values here.  wavetable_bank can't know max banks for a voice from here, so use Voice's bind method to specify it instead?
             switch(property)
             {
-                //TODO:  Create reusable recalc actions which can be called when appropriate by Operator
                 case "cutoff":
                     usingFloats = true;
-                    SetTicks(60); min=10; max=(int)(Global.MixRate/2); break;
+                    SetTicks(48); min=10; max=(int)(Global.MixRate/2); break;
                 case "resonance":
                     usingFloats = true;
                     SetTicks(30); min=1; max=10; break;
@@ -275,7 +274,6 @@ namespace PhaseEngine
                     SetTicks(160); max=L_MAX;  break;
                 case "ar": case "dr": case "sr": case "rr":
                     SetTicks(48); max=R_MAX; break;
-
 
                 default:
                     //Perhaps the data member specified doesn't exist.  Check first before attempting to go further.
@@ -304,9 +302,25 @@ namespace PhaseEngine
                     break;
             }
             //Call the default bind implementation to handle the rest.
+            bool success = false;
             if (usingFloats)
-                 return ((IBindableDataSrc)this).Bind(property, min, max, val, (int)clockCount);
-            else return ((IBindableDataSrc)this).Bind(property, (int)min, (int)max, (int)val, (int)clockCount);
+                 success = ((IBindableDataSrc)this).Bind(property, min, max, val, (int)clockCount);
+            else success = ((IBindableDataSrc)this).Bind(property, (int)min, (int)max, (int)val, (int)clockCount);
+
+            if (success) switch (property)
+                {  //Finally, bind the post-update actions for the appropriate fields.
+                    case "cutoff":
+                        this.BoundEnvelopes["cutoff"].PostUpdateAction = typeof(Filter).GetMethod(nameof(Filter.RecalcFrequency));
+                        break;
+                    case "resonance":
+                        this.BoundEnvelopes["resonance"].PostUpdateAction = typeof(Filter).GetMethod(nameof(Filter.RecalcQFactor));
+                        break;
+                    case "gain":
+                        this.BoundEnvelopes["gain"].PostUpdateAction = typeof(Filter).GetMethod(nameof(Filter.RecalcGain));
+                        break;
+                }
+
+            return success;
         }
 
     }

@@ -12,6 +12,8 @@ namespace PhaseEngine
         //Partially rebakes itself using a prototype. Typically called whenever a copy of a CachedEnvelope is needed
         public void Bake(CachedEnvelope prototype); 
 
+        public System.Reflection.MethodInfo PostUpdateAction {get;}
+
         public bool Finished {get;}
 
         //Check after updating an envelope for a data consumer to determine whether to take an action, such as recalculating increments or filters
@@ -35,6 +37,8 @@ namespace PhaseEngine
         public CachedEnvelope(TrackerEnvelope src) => Bake(src, 1); //Typically called by a TrackerEnvelope to rebake its cache from scratch when values change.
         public CachedEnvelope(CachedEnvelope<T> prototype) => Bake(prototype); //Copy constructor for when we don't need to rebake
         public CachedEnvelope(int capacity) : base(capacity) {}
+
+        public System.Reflection.MethodInfo PostUpdateAction {get;set;}
 
         protected ICachedEnvelopePointTransition<T> currentPoint;
         int idx = 0;  public int EnvelopePosition => idx;
@@ -66,6 +70,9 @@ namespace PhaseEngine
             //Set up clocking and deltas
             // this.chipDivider = prototype.chipDivider;  //Copying the chipDivider isn't needed because we're reusing the prototype's precalc'd transition times
             maxClocks = prototype.maxClocks;
+            PostUpdateAction = prototype.PostUpdateAction;
+
+            //Set up points
             Clear();
             if (prototype.Count > 0) currentPoint = prototype[0];
             else {currentValue = prototype.currentValue; currentPoint = prototype.currentPoint; return;}
@@ -90,6 +97,9 @@ namespace PhaseEngine
             //Set up clocking and deltas
             maxClocks = src.ClockDivider < 1?   1 : (int)maxClocks;
             this.chipDivider = chipDivider;
+            this.PostUpdateAction = src.PostUpdateAction;
+
+            //Set up points
             Clear();
             for(int i=0; i<src.Pts.Count-1; i++)
                 Add(currentPoint.Create(src.Pts[i], src.Pts[i+1], chipDivider, GetNextPoint(i)));

@@ -26,6 +26,7 @@ namespace PhaseEngine
         public void SetDataSource(Type dataSourceType, System.Reflection.MemberInfo dataMember);
         public Type DataSource{get;}   //The type of data source which wants its associated value to be automated by this envelope.
         public System.Reflection.MemberInfo DataMember{get;} //The field or property this envelope is expected to bind to. Used by BindManager to update data consumers
+        public System.Reflection.MethodInfo PostUpdateAction {get;set;}
 
 
         // TODO:  Consider changing this to MethodInfo so it can be serialized properly.  Invocation might be easier using boxing provided we limit the parameters
@@ -84,6 +85,7 @@ namespace PhaseEngine
         public string AssociatedDataType{get => dataSourceType?.Name ?? "None";}
         public string AssociatedProperty{get => associatedProperty?.Name ?? "Unknown";}
         //TODO:  Method for UnboundCopy()
+        public System.Reflection.MethodInfo PostUpdateAction {get;set;}
 
 
         public List<TrackerEnvelopePoint> Pts {get=>pts; set=>pts=value;}

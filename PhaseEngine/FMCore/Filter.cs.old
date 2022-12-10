@@ -14,12 +14,11 @@ using PhaseEngine;
 */
 
 
+
 namespace PhaseEngine 
 {
     public class Filter : OpBase
     {
-        const double LOG_OF_2 = 0.693147180559945;
-
         //TODO:  Replace with delegate func array
         public enum FilterType {NONE, LOWPASS, HIPASS, BANDPASS_CSG, BANDPASS_CZPG, NOTCH, ALLPASS, PEAKING, LOWSHELF, HISHELF}
         public delegate short FilterFunc(ushort input, ushort am_offset);
@@ -28,15 +27,17 @@ namespace PhaseEngine
         // filter coeffs
         float b0a0=1,b1a0=1,b2a0=1,a1a0=1,a2a0=1;
         // in/out history
-        float ou1,ou2,in1,in2;
+        int ou1,ou2,in1,in2;
 
-        public const double GAIN_MAX = 4.0, GAIN_MIN=0.25;  //Use to clamp envelope gain when converting from another Op type to Filter
+        public const double GAIN_MAX = 4.0, GAIN_MIN=0.25;
+        const int FRAC_PRECISION_BITS = 16-1;  //Precision bits for the Filter only
+        const int FRAC_SIZE = 1 << FRAC_PRECISION_BITS;
 
         public Filter()    {FilterToApply=RequestBypass; Reset(); intent = Intents.FILTER;}
         public void Reset()
         {
             // reset filter coeffs
-            b0a0=b1a0=b2a0=a1a0=a2a0= 1.0f;
+            b0a0=b1a0=b2a0=a1a0=a2a0= FRAC_SIZE;
             // reset in/out history
             ou1=ou2=in1=in2=0;	
         }
@@ -53,23 +54,20 @@ namespace PhaseEngine
             for(int i=0; i<BindStates.Count; i++)
             {
                 envelope = BindStates.Values[i];
-                if(envelope.PostUpdateAction==null || !envelope.JustTicked || envelope.Finished || eg.mute || eg.bypass) continue;
+                if(!envelope.JustTicked) continue;
 
-                // switch(BindStates.Keys[i])
-                // {
-                //     case nameof(eg.cutoff):
-                //         recalcCoefficients = true;
-                //         RecalcFrequency(Convert.ToDouble(BindStates[nameof(eg.cutoff)].CurrentValue), false);  break;
-                //     case nameof(eg.resonance):
-                //         recalcCoefficients = true;
-                //         RecalcQFactor(Convert.ToDouble(BindStates[nameof(eg.resonance)].CurrentValue), false); break;
-                //     case nameof(eg.gain):
-                //         recalcCoefficients = true;
-                //         RecalcGain(Convert.ToDouble(BindStates[nameof(eg.gain)].CurrentValue), false); break;
-                // }
-
-                envelope.PostUpdateAction.Invoke(this, null);  //Invoke the associated method, if it exists
-                recalcCoefficients = true;
+                switch(BindStates.Keys[i])
+                {
+                    case nameof(eg.cutoff):
+                        recalcCoefficients = true;
+                        RecalcFrequency(Convert.ToDouble(BindStates[nameof(eg.cutoff)].CurrentValue), false);  break;
+                    case nameof(eg.resonance):
+                        recalcCoefficients = true;
+                        RecalcQFactor(Convert.ToDouble(BindStates[nameof(eg.resonance)].CurrentValue), false); break;
+                    case nameof(eg.gain):
+                        recalcCoefficients = true;
+                        RecalcGain(Convert.ToDouble(BindStates[nameof(eg.gain)].CurrentValue), false); break;
+                }
             }
             if (recalcCoefficients) RecalcCoefficientsOnly();
             return;
@@ -82,20 +80,21 @@ namespace PhaseEngine
         // }
         public override void NoteOn()
         {  //TODO:  Consider re-using an rTable from EG (KSL?) to implement key follow for the frequency value.
-            // TrackerEnvelope envelope;
-            // for(int i=0; i<eg.BoundEnvelopes.Count; i++)
-            // {
-            //     envelope = eg.BoundEnvelopes.Values[i];
-            //     switch(eg.BoundEnvelopes.Keys[i])
-            //     {
-            //         case nameof(eg.cutoff):
-            //             eg.cutoff = Convert.ToDouble(envelope.InitialValue);  break;
-            //         case nameof(eg.resonance):
-            //             eg.resonance = Convert.ToDouble(envelope.InitialValue); break;
-            //         case nameof(eg.gain):
-            //             eg.gain = Convert.ToDouble(envelope.InitialValue); break;
-            //     }
-            // }
+            // ou1=ou2=in1=in2=0;
+            TrackerEnvelope envelope;
+            for(int i=0; i<eg.BoundEnvelopes.Count; i++)
+            {
+                envelope = eg.BoundEnvelopes.Values[i];
+                switch(eg.BoundEnvelopes.Keys[i])
+                {
+                    case nameof(eg.cutoff):
+                        eg.cutoff = Convert.ToDouble(envelope.InitialValue);  break;
+                    case nameof(eg.resonance):
+                        eg.resonance = Convert.ToDouble(envelope.InitialValue); break;
+                    case nameof(eg.gain):
+                        eg.gain = Convert.ToDouble(envelope.InitialValue); break;
+                }
+            }
             Reset();  RecalcAll();
             // throw new NotImplementedException();
         }
@@ -115,6 +114,18 @@ namespace PhaseEngine
             var output = Process(ins);
             var mix = Math.Clamp(output, short.MinValue, short.MaxValue);
             // int mix = (short)(output & SHORT_MASK);  //Causes wrap-around on overflow
+            mix = Tools.Lerp16(mix, ins, eg.duty);
+            return (short)(mix);
+        }
+
+        public short RequestFilteredSampleClamped(ushort input, ushort am_offset)
+        {
+            var ins = (short)input;
+            var output = Process(ins);
+            // var mix = Math.Clamp(output, short.MinValue, short.MaxValue);
+            // var mix = (int)(Math.Atan(Tools.InverseLerp(short.MinValue, short.MaxValue, output)) * ushort.MaxValue + short.MinValue);
+            var mix = Math.Min(1, Tools.InverseLerp(0, short.MaxValue, Math.Abs(output)));
+            mix = (int)(Math.Sin(mix * Math.PI/2) * short.MaxValue) * Math.Sign(output) >> 1;
             mix = Tools.Lerp16((int)mix, ins, eg.duty);
             return (short)(mix);
         }
@@ -122,20 +133,16 @@ namespace PhaseEngine
         //Since filters don't have an oscillator, we can re-use this function to recalculate our filter type based on the index.
         public override void SetOscillatorType(byte index)
         {
-            if (index==0)  FilterToApply=RequestBypass; else FilterToApply=RequestFilteredSample;
+            if (index==0)  FilterToApply=RequestBypass; else FilterToApply=RequestFilteredSampleClamped;
             // eg.aux_func = index;
             RecalcAll();
         }
 
-        public float Process(float in0)
+        public int Process(int in0)
         {
+            in0 <<= FRAC_PRECISION_BITS;
             // filter
-            var yn = (b0a0*in0 + b1a0*in1 + b2a0*in2 - a1a0*ou1 - a2a0*ou2);
-            // var n = Tools.InverseLerp(0, short.MaxValue+1, Math.Abs(yn));
-            // yn = Tools.Lerp(0, short.MaxValue, n - (float)Math.Pow(n, 3)/3.0f) * Math.Sign(yn);
-            yn = Tables.softClip[(int)Math.Clamp(yn+0x7FFF, 0, ushort.MaxValue)];
-
-
+            var yn = (int)(b0a0*in0 + b1a0*in1 + b2a0*in2 - a1a0*ou1 - a2a0*ou2);
             // push in/out buffers
             in2=in1;
             in1=in0;
@@ -143,7 +150,7 @@ namespace PhaseEngine
             ou1=yn;
 
             // return output
-            return yn;
+            return yn >> FRAC_PRECISION_BITS;
         }
 
 
@@ -160,8 +167,8 @@ namespace PhaseEngine
         public void RecalcFrequency() => RecalcFrequency(eg.cutoff);
         void RecalcFrequency(double frequency, bool recalcCoefficients=true)  //Use when frequency changes
         {
-            const double TWOPI=6.28318530717959;
-            omega=	TWOPI*frequency/Global.MixRate;
+            const double PI=3.1415926535897932384626433832795;
+            omega=	2.0*PI*frequency/Global.MixRate;
             tsin	=	Math.Sin(omega);
             tcos	=	Math.Cos(omega);
 
@@ -173,7 +180,7 @@ namespace PhaseEngine
         {
             this.q=q;
             if(q_is_bandwidth)
-                alpha=tsin * Math.Sinh(LOG_OF_2 / 2.0*q*omega/tsin);
+                alpha=tsin * Math.Sinh(Math.Log(2.0)/2.0*q*omega/tsin);
             else
                 alpha=tsin/(2.0*q);
 

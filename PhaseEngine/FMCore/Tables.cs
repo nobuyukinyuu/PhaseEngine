@@ -51,12 +51,15 @@ namespace PhaseEngine
         //Note transposition ratio table
         public static readonly double[] transpose = new double[1300];  //10kb
 
-        //Duty cycle increment ratio table
+        //Duty cycle increment ratio table for sine oscillators
         public static readonly float[] dutyRatio = new float[ushort.MaxValue+1];  //256kb
 
         //Amplitude modulation depth scaling ratio table
         public static readonly float[] amdScaleRatio = new float[1024];  //4kb.  Scale used to multiply against an oscillator to produce a given amplitude depth.
         public static readonly short[] amdPushupRatio = new short[1024];  //Amount used to push a value scaled by the above table to a positive range.
+
+        //Soft clipping in/out table for volume adjustment of iir filters
+        public static readonly float[] softClip = new float[ushort.MaxValue+1]; //256kb
 
         static Tables()
         {
@@ -65,6 +68,14 @@ namespace PhaseEngine
 
             for(int i=1; i<dutyRatio.Length; i++)  //Start at 1 to avoid divide by zero!
                 dutyRatio[i] = (float) (0xFFFF / (double)i) ;
+
+            for(int i=0; i<softClip.Length/2; i++)
+            {
+                var x = i/(softClip.Length/2.0);
+                softClip[i+softClip.Length/2] = (float)((x - Math.Pow(x,3)/3.0) * short.MaxValue);
+                softClip[softClip.Length/2-1-i] = -softClip[i+softClip.Length/2-1];
+
+            }
 
 
             //Transpose
