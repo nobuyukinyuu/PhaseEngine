@@ -84,6 +84,7 @@ func set_from_op(op:int):
 	$Bypass.pressed = d["bypass"]
 
 	refresh_envelope_preview()
+	check_binds()
 
 func check_binds():  #Goes through all bindable controls and rebinds them to editors if necessary.
 	if chip_loc.is_empty():  return
@@ -96,6 +97,11 @@ func check_binds():  #Goes through all bindable controls and rebinds them to edi
 		if o.bind_abilities == NONE:  continue
 		rebind(o, LOC_TYPE_EG, o.bind_abilities)
 	for o in $Tweak.get_children():
+		if !o is Slider:  continue
+		if o.bind_abilities == NONE:  continue
+		rebind(o, LOC_TYPE_EG, o.bind_abilities)
+
+	for o in [$Bias, $Crush]:
 		if !o is Slider:  continue
 		if o.bind_abilities == NONE:  continue
 		rebind(o, LOC_TYPE_EG, o.bind_abilities)

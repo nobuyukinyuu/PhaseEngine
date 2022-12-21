@@ -48,25 +48,12 @@ namespace PhaseEngine
             //      the action to take.  A full recalc need not be done every audio frame.  Also consider adding a user-customizable clock divider factor.
             //      More likely, to begin with, we can experiment with a coef recalc value as low as 100fps (divider of 480) to judge quality.
 
-            CachedEnvelope envelope;
             bool recalcCoefficients = false;  //Used to determine if any of our important values changed and we therefore need to recalc our coefficients.
             for(int i=0; i<BindStates.Count; i++)
             {
+                CachedEnvelope envelope;
                 envelope = BindStates.Values[i];
                 if(envelope.PostUpdateAction==null || !envelope.JustTicked || envelope.Finished || eg.mute || eg.bypass) continue;
-
-                // switch(BindStates.Keys[i])
-                // {
-                //     case nameof(eg.cutoff):
-                //         recalcCoefficients = true;
-                //         RecalcFrequency(Convert.ToDouble(BindStates[nameof(eg.cutoff)].CurrentValue), false);  break;
-                //     case nameof(eg.resonance):
-                //         recalcCoefficients = true;
-                //         RecalcQFactor(Convert.ToDouble(BindStates[nameof(eg.resonance)].CurrentValue), false); break;
-                //     case nameof(eg.gain):
-                //         recalcCoefficients = true;
-                //         RecalcGain(Convert.ToDouble(BindStates[nameof(eg.gain)].CurrentValue), false); break;
-                // }
 
                 envelope.PostUpdateAction.Invoke(this, null);  //Invoke the associated method, if it exists
                 recalcCoefficients = true;

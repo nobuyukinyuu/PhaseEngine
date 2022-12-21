@@ -33,7 +33,7 @@ func setup(sender, bindable = BindAbilities.NONE, panel=null):
 			var loc = panel.LOC_TYPE_EG  #Most requests are to the EG, so set it default.
 			if sender.is_connected("value_changed", panel, "setPG"):  loc = panel.LOC_TYPE_PG
 
-			print("Looking for existing binds.....")
+			print("BindableMenu.gd:  Looking for existing binds.....")
 			existing_binds = panel.existing_binds(loc, sender.associated_property)
 
 		for i in MAX_BIND_ABILITIES:

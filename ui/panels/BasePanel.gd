@@ -64,7 +64,7 @@ func rebind(sender:EGSlider, property_loc, type=ALL):  #Rebinds a control to its
 		printerr("BasePanel.gd:  Attempting to rebind to nothing.  Check call stack!!")
 		
 	if !existing_binds(property_loc, sender.associated_property):  return
-	print("Found bind(s) for ", sender.associated_property, ".  Rebinding...")
+	print("Rebinding. Found bind(s) for ", sender.associated_property, ".  Rebinding...")
 
 #	var abilities=sender.bind_abilities
 

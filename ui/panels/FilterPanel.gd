@@ -70,6 +70,18 @@ func set_from_op(op:int):
 	$Bypass.pressed = d["bypass"]
 
 	get_node(chip_loc).RecalcFilter(operator, "all")
+	check_binds()
+
+
+func check_binds():  #Goes through all bindable controls and rebinds them to editors if necessary.
+	if chip_loc.is_empty():  return
+	
+	for o in [$Frequency, $"Q [Resonance]", $"Dry Mix", $Gain]:
+		if !o is EGSlider:  continue
+		if o.bind_abilities == NONE:  continue
+		rebind(o, LOC_TYPE_EG)
+
+
 
 
 func setEG(value, property, recalc=true):
