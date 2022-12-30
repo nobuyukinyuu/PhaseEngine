@@ -97,7 +97,7 @@ func reinit_all():
 		_on_op_intent_changed(i, chip.GetOpIntent(i), $WiringGrid) 
 	
 	$LTab.reinit()
-	global.emit_signal("algorithm_changed")
+	global.emit_signal("algorithm_changed", true)  #Add "true" to this signal to indicate to bind editors to update
 
 
 func _on_Arrange_pressed(type=ArrangeType.TILE):

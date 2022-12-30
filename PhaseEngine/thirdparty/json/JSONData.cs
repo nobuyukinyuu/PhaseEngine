@@ -620,8 +620,8 @@ namespace PE_Json{
 
     #endregion
 
-        public void RemoveItem( string name ){
-            values.Remove(name);
+        public bool RemoveItem( string name ){
+            return values.Remove(name);
         }
         
         public bool HasItem( string name) {

@@ -37,7 +37,7 @@ func _on_Timer_timeout():
 #	print ("Timeout")
 
 
-func cache_recalc():
+func cache_recalc(_invalidate_bind_editors=false):
 	should_recalc = true
 
 func recalc(op_size_changed=false):

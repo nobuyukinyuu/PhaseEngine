@@ -5,29 +5,16 @@ using PE_Json;
 
 namespace PhaseEngine
 {
+    public interface IBindableData
+    {
+        [Flags] public enum Abilities {None=0, Envelope=1, KeyFollow=2, VelocityTable=4, All=0x7};
+        public Abilities BindType {get => Abilities.None;}
+    }
+
     public interface IBindableDataSrc  //Objects that can assign TrackerEnvelope binds to fields.  Typically EGs and increment data.
     {
         //Gets a copy of every cached envelope bound to a property in this IBindable.
         public SortedList<string, TrackerEnvelope> BoundEnvelopes {get;} //References to envelope bind data needed to create caches.
-
-        //Calls the bind manager to add a TrackerEnvelope to BoundEnvelopes
-        //It's up to each implementation on how to specify min and max values, and tick rate
-        // public bool Bind(string property, int minValue, int maxValue)
-        // {
-        //     TrackerEnvelope e = BindManager.Bind(this, property, minValue, maxValue); 
-        //     var bindAlreadyExists = !BoundEnvelopes.TryAdd(property, e);
-        //     if(bindAlreadyExists) return false;  //Binding failed.  User must Unbind the value first.
-        //     e.dataSourceType = this.GetType();
-        //     return true;
-        // }
-        // public bool Bind(string property, int minValue, int maxValue, int initialValue)
-        // {
-        //     TrackerEnvelope e = BindManager.Bind(this, property, minValue, maxValue); 
-        //     var bindSuccessful = BoundEnvelopes.TryAdd(property, e);
-        //     if (bindSuccessful)  e.SetPoint(0, (0, initialValue) );
-        //     e.dataSourceType = this.GetType();
-        //     return bindSuccessful;
-        // }
 
         public bool Bind(string property, int minValue, int maxValue, int initialValue, int clockDivider)
         {

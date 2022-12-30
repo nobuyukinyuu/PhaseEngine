@@ -213,8 +213,7 @@ namespace PhaseEngine
                 flip=true;
                 n = (ushort) ~n;
             }
-          var output = Tables.saw[(n>>2) & 0xFF];
-            // short output = unchecked((short)(n<<1));
+            var output = Tables.saw[(n>>2) & 0xFF];
             return (ushort)output;
         }
 
@@ -228,7 +227,6 @@ namespace PhaseEngine
             }
 
             return Tables.tri[unchecked(n>>4 & Tables.TRI_TABLE_MASK)];
-            // return Tables.logVol[Tables.tri[unchecked(n>>10 & Tables.TRI_TABLE_MASK)] + Tables.SIGNED_TO_INDEX];
         }
 
 

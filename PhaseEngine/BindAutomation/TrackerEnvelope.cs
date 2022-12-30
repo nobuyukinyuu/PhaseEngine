@@ -7,8 +7,10 @@ namespace PhaseEngine
 {
     //Contains the general definitions for serialization and copying purposes, and can create binds for bindable interfaces to use.
 
-    public interface TrackerEnvelope
+    public interface TrackerEnvelope : IBindableData
     {
+        // public new IBindableData.Abilities BindType {get => IBindableData.Abilities.Envelope;}
+
         [Flags] public enum PtMarker {None=0, LoopStart=1, LoopEnd=2, SustainStart=4, SustainEnd=8}
         [Flags] public enum LoopType {None=0, Basic=1, Sustain=2, Compound=3}
         public LoopType Looping {get;set;}
@@ -50,12 +52,16 @@ namespace PhaseEngine
         public bool SetLoopPt(TrackerEnvelope.LoopType type, Godot.Vector2 index) => SetLoopPt(type, ((int)index.x, (int)index.y));
         #endif
 
+
+        //IO
+        public bool Configure(JSONObject j);  //Loads points in without caring about associated types or whatever
         public JSONObject ToJSONObject();
         public string ToJSONString() => ToJSONObject().ToJSONString();
     }
 
     public class TrackerEnvelope<T> : TrackerEnvelope where T:struct, IComparable
     {
+        public IBindableData.Abilities BindType {get => IBindableData.Abilities.Envelope;}
         public Type UnderlyingType{get=>typeof(T);}
         public TrackerEnvelope.LoopType Looping {get;set;} = TrackerEnvelope.LoopType.None;
 
@@ -82,11 +88,11 @@ namespace PhaseEngine
         public Type DataSource{get=>dataSourceType;}  public System.Reflection.MemberInfo DataMember{get=>associatedProperty;}
 
         //These properties help with identifying what this envelope might've been bound to when serializing out data.
-        public string AssociatedDataType{get => dataSourceType?.Name ?? "None";}
-        public string AssociatedProperty{get => associatedProperty?.Name ?? "Unknown";}
-        //TODO:  Method for UnboundCopy()
+        public string AssociatedDataSource{get => dataSourceType?.Name ?? "None";}
+        public string AssociatedDataMember{get => associatedProperty?.Name ?? "Unknown";}
         public System.Reflection.MethodInfo PostUpdateAction {get;set;}
 
+        //TODO:  Method for UnboundCopy() to get serialized data without the associations, in a more portable format....
 
         public List<TrackerEnvelopePoint> Pts {get=>pts; set=>pts=value;}
         protected List<TrackerEnvelopePoint> pts = new List<TrackerEnvelopePoint>();
@@ -169,13 +175,51 @@ namespace PhaseEngine
 
 
 #region IO
-        public static TrackerEnvelope<T> FromJSON(JSONObject j)
+        public bool Configure(JSONObject j)  //Loads points in without caring about associated types or whatever
+        {
+            try{
+                var pts = j.GetItem<float>("pts", new float[]{0f, 0f});  //Get the points array so we can set the initial value in output's ctor
+
+                //Load the points in, save for the first point, which we already specified in the ctor with an initial value.
+                for(int i=2; i<pts.Length; i+=2)
+                    Pts.Add(new TrackerEnvelopePoint( (pts[i], pts[i+1]) ));
+                if (Pts.Count < 1)  throw new PE_ImportException(IOErrorFlags.Corrupt, $"Failed to import {nameof(TrackerEnvelope)}: no points found");
+                
+                if (j.HasItem("loopStart") && j.HasItem("loopEnd"))  //Import loop
+                {                    
+                    LoopStart = j.GetItem("loopStart").ToInt();
+                    LoopEnd = j.GetItem("loopEnd").ToInt();
+                    if (LoopEnd >= LoopStart)  //Loop is probably sane, greenlight it  
+                        Looping |= TrackerEnvelope.LoopType.Basic;
+                    //Finally, sanitize the loop to fit within the number of points we have
+                    LoopStart = Math.Max(0, LoopStart);
+                    LoopEnd = Math.Min(Pts.Count-1, LoopEnd);
+                }
+                if (j.HasItem("sustainStart") && j.HasItem("sustainEnd"))  //Import sustain
+                {  
+                    SustainStart = j.GetItem("sustainStart").ToInt();
+                    SustainEnd = j.GetItem("sustainEnd").ToInt();
+                    if (SustainEnd >= SustainStart)  //Loop is probably sane, greenlight it  
+                        Looping |= TrackerEnvelope.LoopType.Basic;
+                    //Finally, sanitize the sustain to fit within the number of points we have
+                    SustainStart = Math.Max(0, SustainStart);
+                    SustainEnd = Math.Min(Pts.Count-1, SustainEnd);
+                }
+
+                return true;
+            } catch (Exception e) {
+                System.Diagnostics.Debug.Print(e.Message);
+                return false;
+            }
+        }
+
+        public static TrackerEnvelope<T> FromJSON(JSONObject j, string dataSource="", string dataMember="")
         {
             try{
                 TrackerEnvelope output;
                 //First, we need to determine the type of our associated property/field.  We create a TrackerEnvelope<T> based on the most compatible type.
-                var dataSourceType = Type.GetType(j.GetItem("dataSource", ""));
-                var member = dataSourceType.GetMember(j.GetItem("associatedValue", ""))[0];
+                var dataSourceType = Type.GetType(j.GetItem("dataSource", dataSource));
+                var member = dataSourceType.GetMember(j.GetItem("memberName", dataMember))[0];
                 var pts = j.GetItem<float>("pts", new float[]{0f, 0f});  //Get the points array so we can set the initial value in output's ctor
 
                 switch(member.GetUnderlyingType())
@@ -197,18 +241,17 @@ namespace PhaseEngine
                 if (output.Pts.Count < 1)  throw new PE_ImportException(IOErrorFlags.Corrupt, $"Failed to import {nameof(TrackerEnvelope)}: no points found");
 
                 //Try to figure out where this envelope came from and what it should be bound to.
-                var memberName = j.GetItem("associatedValue", "");
                 switch(member.MemberType)
                 {
                     case System.Reflection.MemberTypes.Property:
-                        output.SetDataSource(dataSourceType, dataSourceType.GetType().GetProperty(memberName));
+                        output.SetDataSource(dataSourceType, dataSourceType.GetType().GetProperty(member.Name));
                         break;
                     case System.Reflection.MemberTypes.Field:
-                        output.SetDataSource(dataSourceType, dataSourceType.GetType().GetField(memberName));
+                        output.SetDataSource(dataSourceType, dataSourceType.GetType().GetField(member.Name));
                         break;
                     default:
                         System.Diagnostics.Debug.Print(
-                            $"{nameof(TrackerEnvelope)}: Import failed to find member {memberName} in {dataSourceType?.Name ?? "(invalid data source)"}.");
+                            $"{nameof(TrackerEnvelope)}: Import failed to find member {member?.Name?? "[invalid]"} in {dataSourceType?.Name?? "(invalid data source)"}.");
                         break;
                 }                
                 
@@ -249,6 +292,7 @@ namespace PhaseEngine
         public JSONObject ToJSONObject()
         {
             var o = new JSONObject();
+            o.AddPrim("type", BindType);
 
             switch (associatedProperty.GetUnderlyingType())
             {
@@ -270,8 +314,9 @@ namespace PhaseEngine
                 pts.AddPrim(this.pts[i].Value);
             }
             o.AddItem("pts", pts);
-            o.AddPrim("dataSource", AssociatedDataType);
-            o.AddPrim("associatedValue", AssociatedProperty);
+
+            o.AddPrim("dataSource", AssociatedDataSource); //Added for the sake of when the front-end fetches a bind directly.  Maybe could be done on the frontend...
+            o.AddPrim("memberName", AssociatedDataMember);
 
             //lööps
             if (Looping.HasFlag(TrackerEnvelope.LoopType.Basic))
@@ -289,41 +334,6 @@ namespace PhaseEngine
         }
 #endregion
     }
-
-    // public class TrackerEnvelopeF : TrackerEnvelope, PE_Range<float>
-    // {
-    //     readonly float minValue, maxValue; //Values used for clamping and maybe some other calcs. Assigned from bind invoker
-    //     public new float MinValue {get=>minValue;}  public new float MaxValue{get=>maxValue;}
-
-    //     public new float InitialValue{get=> pts[0].Value; set 
-    //     { 
-    //         pts[0] = new TrackerEnvelopePoint(0, (float)value);
-    //         cached = false;
-    //     } }
-    //     protected new CachedEnvelopeFloat cache;
-
-    //     protected TrackerEnvelopeF()    {cache=new CachedEnvelopeFloat(this);}
-    //     public TrackerEnvelopeF(float minValue, float maxValue) : this()
-    //         {this.minValue = minValue; this.maxValue = maxValue; }
-    //     public TrackerEnvelopeF(float minValue, float maxValue, float initialValue) : this(minValue, maxValue)
-    //         {InitialValue = initialValue;}
-
-    //     public new CachedEnvelopeFloat CachedEnvelopeCopy(int chipDivider=1)
-    //     {
-    //         if(!cached) Bake(chipDivider);
-    //         return new CachedEnvelopeFloat(cache);
-    //     }
-
-    //     internal override JSONObject ToJSONObject()
-    //     {
-    //         var o = base.ToJSONObject();
-    //         //Replace the base object's min and max values with our floating point ones.
-    //         o.AddPrim("minValue", minValue);
-    //         o.AddPrim("maxValue", maxValue);
-    //         return o;
-    //     }
-
-    // }
 
 
     /// summary:  typical representation of a point on a tracker envelope.  

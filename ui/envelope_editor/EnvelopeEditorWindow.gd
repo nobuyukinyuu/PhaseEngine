@@ -51,7 +51,7 @@ func setup(title:String, d:Dictionary, invoker:NodePath=""):
 	
 	#Set the source location so we know where to chooch edits
 	data_source_type = DataSource[ d["dataSource"] ]
-	associated_value = d["associatedValue"]
+	associated_value = d["memberName"]
 	operator = get_node(invoker).owner.operator
 
 	#Set loops
@@ -424,8 +424,8 @@ func _on_CustomEnvelope_gui_input(event):
 		bring_to_front()
 		#Don't accept_event() here, it'll lock input
 
-func _on_algorithm_changed():
+func _on_algorithm_changed(binds_invalidated=false):
 	var c = get_node(owner.owner.chip_loc)
 	if c==null:  _on_CustomEnvelope_popup_hide()
 	prints( c.GetOpCount(), operator)
-	if operator >= c.GetOpCount():  _on_CustomEnvelope_popup_hide()  #Invalidate window
+	if operator >= c.GetOpCount() or binds_invalidated:  _on_CustomEnvelope_popup_hide()  #Invalidate window

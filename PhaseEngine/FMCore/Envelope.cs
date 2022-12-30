@@ -78,12 +78,12 @@ namespace PhaseEngine
         public Envelope() { Reset(); }
 
         //Copy constructor
-        public Envelope(Envelope prototype, bool deserializeRTables=false) => Configure(prototype, deserializeRTables);
+        public Envelope(Envelope prototype, bool deserializeReferenceItems=false) => Configure(prototype, deserializeReferenceItems);
 
-        public bool Configure(Envelope prototype, bool deserializeRTables=false) 
+        public bool Configure(Envelope prototype, bool deserializeReferenceItems=false) 
         {
             var data = prototype.ToJSONString();
-            if(this.FromString(data,deserializeRTables)) //if importation of copy succeeded...
+            if(this.FromString(data,deserializeReferenceItems)) //if importation of copy succeeded...
             {
                     RecalcLevelRisings();
                     //Grab response table references from the prototype.  
@@ -92,7 +92,7 @@ namespace PhaseEngine
 
                     //Reuse the RTables from the prototype. Saves resources when copying the rest of the EG to a channel as an internal operation.
                     //Otherwise,  this.FromString() should've already assigned these.
-                    if (!deserializeRTables) 
+                    if (!deserializeReferenceItems) 
                     {
                         ksr = prototype.ksr;
                         ksl = prototype.ksl;
@@ -138,14 +138,14 @@ namespace PhaseEngine
         }
 
 #region IO
-        public bool FromJSON(JSONObject input, bool deserializeRTables=true)
+        public bool FromJSON(JSONObject input, bool deserializeReferenceItems=true, double chipTicksPerSec=1)
         {
             var j = input;
             try
             {
                 rates = j.GetItem<byte>("rates", rates);
                 levels = j.GetItem<ushort>("levels", levels);
-                // rising = j.GetItem<bool>("rising", rising);
+                // rising = j.GetItem<bool>("rising", rising);  //Done in Configure() when a copy is needed by an operator's NoteOn()
 
                 j.Assign("delay", ref delay);
                 j.Assign("hold", ref hold);
@@ -167,13 +167,48 @@ namespace PhaseEngine
                 // j.Assign("wavetable_bank", ref wavetable_bank);
                 wavetable_bank = (byte) j.GetItem("wavetable_bank", 0); //Reset if the tag doesn't exist so a channel doesn't reuse a previous value.
 
-                if (deserializeRTables)
-                {
+                if (deserializeReferenceItems)  
+                {   //User or system called this from an import routine and wants new objects instead of reusing references when reconfiguring.
                     //Any one of these could throw an exception from RTable.FromString(), which will be passed to our error handler and be reported.
                     if (j.HasItem("ksr")) ksr.FromJSON( (JSONObject) j.GetItem("ksr"));
                     if (j.HasItem("ksl")) ksl.FromJSON( (JSONObject) j.GetItem("ksl"));
                     if (j.HasItem("velocity")) velocity.FromJSON( (JSONObject) j.GetItem("velocity"));
-                }
+
+
+                    BoundEnvelopes.Clear();  //Clear binds;  useful when configuring from proto
+                    if (j.HasItem("binds"))
+                    {
+                        var bindArray = (JSONArray)j.GetItem("binds");
+                        foreach(JSONObject jsonBind in bindArray)
+                        {
+                            var memberName = jsonBind.GetItem("memberName", "[invalid]");
+                            //Get the type of this bind first so we know what to do with it.
+                            IBindableData.Abilities bindType = IBindableData.Abilities.None;
+                            jsonBind.Assign("type", ref bindType);
+
+                            switch(bindType)
+                            {
+                                case IBindableData.Abilities.Envelope:  //TrackerEnvelope
+                                    //First, bind the data member.  Then, configure it from our proto.
+                                    var success = Bind(memberName, chipTicksPerSec);
+                                    if (!success)
+                                    {
+                                        System.Diagnostics.Debug.Print($"Rebinding to EG Member {memberName} failed!");
+                                        continue;
+                                    }
+                                    //Finally, reconfigure the fresh bind with our envelope data.
+                                    BoundEnvelopes[memberName].Configure(jsonBind);
+                                    break;
+
+                                //TODO:  OTHER ABILITIES HERE
+                                default:
+                                    System.Diagnostics.Debug.Print($"EG Member {memberName} has unsupported bind ability {bindType}!");
+                                    break;
+                            }
+                        }
+                    }  //End of deserializing binds
+                }  //End deserialization of reference items
+
             } catch (Exception e) {
                 System.Diagnostics.Debug.Fail("EG fromJSON failed:  " + e.Message); //Consider removing?
                 return false;
@@ -182,19 +217,19 @@ namespace PhaseEngine
             return true;
 
         }
-        public bool FromString(string input, bool deserializeRTables=false)
+        public bool FromString(string input, bool deserializeReferenceItems=false)
         {
             var P = JSONData.ReadJSON(input);
             if (P is JSONDataError) return false;
             var j = (JSONObject) P;
-            return FromJSON(j, deserializeRTables);
+            return FromJSON(j, deserializeReferenceItems);
         }
         internal JSONObject ToJSONObject(bool includeRTables=true)
         {
             var o = new JSONObject();
             o.AddPrim<byte>("rates", rates);
             o.AddPrim<ushort>("levels", levels);
-            // o.AddPrim<bool>("rising", rising);
+            // o.AddPrim<bool>("rising", rising);  //Done in Configure() when a copy is needed by an operator's NoteOn()
 
             o.AddPrim("delay", delay);
             o.AddPrim("hold", hold);
@@ -219,6 +254,17 @@ namespace PhaseEngine
                 o.AddItem("ksl", ksl.ToJSONObject(false));
                 o.AddItem("velocity", velocity.ToJSONObject(false));
             }
+
+            //Fetch the BoundEnvelopes 
+            var binds = new JSONArray();
+            foreach(TrackerEnvelope t in BoundEnvelopes.Values)             //TODO:  Do this foreach for BoundTables.Values once that exists!!!!!
+            {
+                var e = t.ToJSONObject();
+                e.RemoveItem("dataSource");  //Remove the dataSource when serializing out since we can safely assume the data source is us when serializing in or out.
+                binds.AddItem(e);
+            }
+            if (binds.Length > 0)  o.AddItem("binds", binds);
+
 
             return o;
         }
@@ -341,10 +387,10 @@ namespace PhaseEngine
 
 
         //Grabs an envelope from the object pool and reconfigures it to match the prototype specified.
-        public Envelope Get(Envelope prototype, bool deserializeRTables=false)
+        public Envelope Get(Envelope prototype, bool deserializeReferenceItems=false)
         {
             var output = Get();  //Only performs Envelope's default ctor if there's nothing in the pool. Otherwise we get an old Envelope needing reconfig...
-            output.Configure(prototype, deserializeRTables);
+            output.Configure(prototype, deserializeReferenceItems);
             return output;
         } 
     }

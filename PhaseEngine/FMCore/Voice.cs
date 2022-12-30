@@ -346,6 +346,7 @@ namespace PhaseEngine
 
             output.AddPrim("oscillator", (Oscillator.oscTypes)oscType[opNum]);
             output.AddItem( "envelope", egs[opNum].ToJSONObject(alg.intent[opNum] != OpBase.Intents.FILTER) );  //Don't include RTables if op is a filter.
+
             if( ((int)alg.intent[opNum] & 1) == 1) //Only add increments object if the intent is FM_OP or BITWISE (1 or 3)
                 output.AddItem("increments", pgs[opNum].ToJSONObject());
 
@@ -356,7 +357,7 @@ namespace PhaseEngine
             if (op.HasItem("increments"))  pgs[idx] = Increments.FromJSON((JSONObject) op.GetItem("increments"));
 
             var e = (JSONObject) op.GetItem("envelope");
-            bool success = egs[idx].FromJSON(e);
+            bool success = egs[idx].FromJSON(e, true, BindManagerTicksPerSec);
             if (!success)
             {
                 System.Diagnostics.Debug.Print( $"Voice.FromJSON:  Problem parsing envelope {idx}" );

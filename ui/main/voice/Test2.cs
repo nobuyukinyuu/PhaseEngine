@@ -650,7 +650,7 @@ public class Test2 : Label
         JSONParseResult result = Godot.JSON.Parse(data);
         if (result.Error != Error.Ok)
         {
-            GD.PrintErr(String.Format("Error validating JSON: {0} (line {1})", result.ErrorString, result.ErrorLine) );
+            GD.PrintErr(String.Format("PasteJSONData:  Error validating JSON: {0} (line {1})", result.ErrorString, result.ErrorLine) );
             return result.Error;
         }
         var o = PE_Json.JSONData.ReadJSON(data) as PE_Json.JSONObject;

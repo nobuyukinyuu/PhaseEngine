@@ -3,7 +3,7 @@ var caller  #EGSlider which calls this popup into existence.
 enum {COPY=10, PASTE=20, BIND=40, UNBIND=50}
 
 var preview_paste_value = true
-enum BindAbilities {NONE=0, ENVELOPE=1, KEY_FOLLOW=2, VELOCITY_TABLE=4}
+enum BindAbilities {NONE=0, ENVELOPE=1, KEY_FOLLOW=2, VELOCITY_TABLE=4, ALL=0x7}
 const MAX_BIND_ABILITIES = 3  #Change this if the number of bind abilites available change in the future
 
 func _ready():
