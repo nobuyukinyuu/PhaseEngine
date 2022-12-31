@@ -354,7 +354,7 @@ namespace PhaseEngine
         }
         internal void SetOpFromJSON(byte idx, JSONObject op)
         {
-            if (op.HasItem("increments"))  pgs[idx] = Increments.FromJSON((JSONObject) op.GetItem("increments"));
+            if (op.HasItem("increments"))  pgs[idx] = Increments.FromJSON((JSONObject) op.GetItem("increments"), BindManagerTicksPerSec);
 
             var e = (JSONObject) op.GetItem("envelope");
             bool success = egs[idx].FromJSON(e, true, BindManagerTicksPerSec);

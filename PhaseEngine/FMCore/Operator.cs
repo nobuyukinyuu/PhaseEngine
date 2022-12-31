@@ -347,19 +347,24 @@ namespace PhaseEngine
         //  attenuation of the envelope
         //-------------------------------------------------
 
+        int amBuf = 0;
+        short Filter(int input)  //Filters input based on the status of our filter buffer.
+        {
+            const byte k = 3;  //Amount of lowpass
+            var ou = amBuf >> k;
+            amBuf = amBuf - ou + input;
+            return (short)ou;
+        }
+
         protected ushort envelope_attenuation(ushort am_offset)
         {
             ushort result = egAttenuation;
-
-            // // add in LFO AM modulation
-            // if (m_regs.lfo_am_enabled())
-            //     result += am_offset;
-        	// result += pg.lastClockedAttenuation;
+            am_offset = (ushort)Filter(am_offset);  //Filter result to prevent pops and clicks.  TODO:  Determine how slow this is
 
             // // add in total level
             result += eg.tl;
 
-            if (eg.ams > 0)
+            if (eg.ams > 0)  //Apply AMS attenuation
                 result += LFO.ApplyAMS(am_offset, eg.ams);
 
 

@@ -35,8 +35,8 @@ func _ready():
 		$"Tweak/Func Type".connect("value_changed", self, "setBitwiseFunc")
 
 	$Tweak/AMS.connect("value_changed", self, "setEG", ["ams"])
-	$Tweak/AMS.connect("bind_requested", self, "bind_val", [$Tweak/AMS, "duty", true])
-	$Tweak/AMS.connect("unbind_requested", self, "bind_val", [$Tweak/AMS, "duty", false])
+	$Tweak/AMS.connect("bind_requested", self, "bind_val", [$Tweak/AMS, "ams", true])
+	$Tweak/AMS.connect("unbind_requested", self, "bind_val", [$Tweak/AMS, "ams", false])
 
 	$Duty.connect("value_changed", self, "setEG", ["duty"])
 	$Duty.connect("bind_requested", self, "bind_val", [$Duty, "duty", true])

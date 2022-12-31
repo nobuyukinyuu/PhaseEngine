@@ -224,7 +224,7 @@ namespace PhaseEngine
             var j = (JSONObject) P;
             return FromJSON(j, deserializeReferenceItems);
         }
-        internal JSONObject ToJSONObject(bool includeRTables=true)
+        internal JSONObject ToJSONObject(bool includeReferenceItems=true)
         {
             var o = new JSONObject();
             o.AddPrim<byte>("rates", rates);
@@ -248,7 +248,7 @@ namespace PhaseEngine
 
             if (wavetable_bank>0) o.AddPrim("wavetable_bank", wavetable_bank);
 
-            if (includeRTables) //Reasons to exclude:  Tables are all default/disabled, operator is a filter, etc.
+            if (includeReferenceItems) //Reasons to exclude:  Tables are all default/disabled, operator is a filter, etc.
             {   //Add tables.  No intent needed.
                 o.AddItem("ksr", ksr.ToJSONObject(false));
                 o.AddItem("ksl", ksl.ToJSONObject(false));
@@ -310,7 +310,7 @@ namespace PhaseEngine
                     SetTicks(60); min=0.1f; max=10; break;
 
                 case "feedback":  case "ams":
-                    SetTicks(24); max=10;  break;
+                    SetTicks(24); min=0; max=10;  break;
                 case "duty":  
                     //FIXME:  Duty is represented internally by ushort but for UI purposes should be displayed as short
                     // min=short.MinValue; max=short.MaxValue; break;

@@ -166,6 +166,7 @@ namespace PhaseEngine
         {
             if (ch == null) return false;
             ch.NoteOff();
+            voice.lfo.NoteOff();
             return true;
         }
 
@@ -179,6 +180,7 @@ namespace PhaseEngine
             {
                 chs[i].NoteOff();
             }
+            voice.lfo.NoteOff();
             return true;
         }
         /// Turns off the channel with the corresponding event ID.
@@ -189,6 +191,7 @@ namespace PhaseEngine
             Channel ch = FindChannel(out ch_idx, eventID);
             if (ch == null) return -1;
             ch.NoteOff();
+            voice.lfo.NoteOff();
             ch.CalcPriorityScore();
             return ch_idx;
         }

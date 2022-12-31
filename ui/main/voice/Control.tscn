@@ -285,6 +285,7 @@ tab_align = 0
 script = ExtResource( 39 )
 
 [node name="Metadata" type="Control" parent="LTab"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 1.0
@@ -379,7 +380,6 @@ title_align = Vector2( 0.3, -0.1 )
 value_font = ExtResource( 7 )
 
 [node name="LFO" type="Control" parent="LTab"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 1.0
@@ -607,7 +607,7 @@ custom_styles/pressed = SubResource( 9 )
 custom_styles/focus = SubResource( 9 )
 custom_styles/normal = SubResource( 9 )
 text = "None"
-items = [ "None", null, false, 0, null, "Oscillator", null, false, 1, null, "End of Delay", null, false, 2, null ]
+items = [ "None", null, false, 0, null, "Oscillator", null, false, 1, null, "End of Delay", null, false, 2, null, "On Release", null, false, 3, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -641,7 +641,6 @@ margin_bottom = 129.0
 rect_min_size = Vector2( 64, 20 )
 max_value = 1023.0
 value = 1023.0
-exp_edit = true
 associated_property = "AMD"
 
 [node name="Waveforms" parent="LTab" instance=ExtResource( 41 )]

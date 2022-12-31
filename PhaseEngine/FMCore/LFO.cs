@@ -10,7 +10,7 @@ namespace PhaseEngine
 
         const int divider_max_count=6; //How often the LFO clocks.  The clock counter counts up to this number before recalculating the increment.
         byte cycle_counter;
-        long delay_counter;
+        long delay_counter;  //Clocks up from sync point to determine when to start LFO
 
         
         short lastClockedVolume = 0;
@@ -26,13 +26,15 @@ namespace PhaseEngine
         short amd;  public short AMD {get => (short)(Envelope.L_MAX-amd); set => amd=(short)(Envelope.L_MAX-value);}  //User specified amplitude modulation depth.
         public bool osc_sync;  //Resets the phase of the LFO when NoteOn occurs.
         public bool delay_sync;  //Resets the phase of the LFO after the delay elapses.
+        public bool release_sync;  //Resets the phase of the LFO after NoteOff.
         public byte wavetable_bank;
 
         //Sets and returns the delay time in millisecs.
         public int Delay {get => (int)(delay / Global.MixRate * 1000); set => delay=(int)(value * Global.MixRate / 1000);}  
         public byte Speed{get => speed;  set=> SetSpeed(value);}
 
-        internal int SyncType {get=> delay_sync? 2: osc_sync? 1:0; set{ osc_sync=value>0;  delay_sync=value>1;} }  //For serialization
+        internal int SyncType { get=> release_sync? 3: delay_sync? 2: osc_sync? 1:0; 
+                set{ {osc_sync=value>0;  delay_sync=value>1;  release_sync=value>2;}} }  //For serialization
 
         // public LFO()  {Init();}
         public LFO(byte speed=19)  {Init(speed);}
@@ -54,30 +56,41 @@ namespace PhaseEngine
 
         public override void NoteOn()
         {
+            egStatus = EGStatus.HOLD;
             delay_counter = 0;
             if (osc_sync) phase = 0;
         }
-        public override void NoteOff() => throw new NotImplementedException();
+        public override void NoteOff()
+        {
+            egStatus = EGStatus.RELEASED;
+             if (release_sync) {phase=0; delay_counter=0;} 
+        }
 
 
         public bool ClockOK {get=> cycle_counter == 0;} //Returns true if the clock event just fired last tick.
         public override void Clock()
         {
-            if (delay_sync && delay_counter == delay)  phase = 0;  //Reset phase on delay ending
 
             phase += pg.increment;
-
             cycle_counter++;
-            delay_counter++;
+
+            if (delay_sync && delay_counter == delay)  
+            {  //The following routine sets up the buffer to realign the LFO in the middle of the phase to mitigate pops and clicks.
+                phase = -256 << Global.FRAC_PRECISION_BITS;  //Reset phase on delay ending
+                cycle_counter = 0;
+                lastClockedVolume = operatorOutputSample();
+                lBuf = -lastClockedVolume << 3;
+                lastAMVolume = RequestAM();
+            }
+
+            if(!release_sync || egStatus==EGStatus.RELEASED)  
+                delay_counter++;
 
 
             if (cycle_counter == divider_max_count)
             {
                 cycle_counter = 0;
                 UpdateOscillator();
-
-                //TODO:  Clock logic here updating increment of the input frequency (not the same as the LFO's frequency)
-                //      Map the output of the LFO osc to the channel's hz range between half the input increment and double.
             }
         }
         public void UpdateOscillator()  //Updates the status of the oscillator output.
@@ -90,7 +103,7 @@ namespace PhaseEngine
         int lBuf;  //Low pass filter buffer
         short Filter(int input)  //Filters input based on the status of our filter buffer.
         {
-            const byte k = 5;  //Amount of lowpass
+            const byte k = 3;  //Amount of lowpass
             var ou = lBuf >> k;
             lBuf = lBuf - ou + input;
             return (short)ou;
@@ -254,6 +267,7 @@ namespace PhaseEngine
             return (short)result;  //We don't need to flip the result because this is handled in the respective ApplyPM / ApplyAM?
         }
 
+#region io /////////////////////////////
         public string ToJSONString() => ToJSONObject().ToJSONString();
         public JSONObject ToJSONObject()
         {
@@ -292,5 +306,6 @@ namespace PhaseEngine
 
 
     }
+#endregion
 
 }

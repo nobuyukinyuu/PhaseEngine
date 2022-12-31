@@ -117,7 +117,7 @@ namespace PhaseEngine
             var j = (JSONObject) P;
             return FromJSON(j);
         }
-        public static Increments FromJSON(JSONObject j)
+        public static Increments FromJSON(JSONObject j, double chipTicksPerSec=1)
         {
             var o = Increments.Prototype();
             try
@@ -134,6 +134,38 @@ namespace PhaseEngine
                 o.Detune = j.GetItem("detune", o.Detune); //Set up real detune values using the setter
                 j.Assign("detune_randomness", ref o.detune_randomness);
                 j.Assign("increment_offset", ref o.increment_offset);
+
+                if (j.HasItem("binds"))
+                {
+                    var bindArray = (JSONArray)j.GetItem("binds");
+                    foreach(JSONObject jsonBind in bindArray)
+                    {
+                        var memberName = jsonBind.GetItem("memberName", "[invalid]");
+                        //Get the type of this bind first so we know what to do with it.
+                        IBindableData.Abilities bindType = IBindableData.Abilities.None;
+                        jsonBind.Assign("type", ref bindType);
+
+                        switch(bindType)
+                        {
+                            case IBindableData.Abilities.Envelope:  //TrackerEnvelope
+                                //First, bind the data member.  Then, configure it from our proto.
+                                var success = o.Bind(memberName, chipTicksPerSec);
+                                if (!success)
+                                {
+                                    System.Diagnostics.Debug.Print($"Rebinding to PG Member {memberName} failed!");
+                                    continue;
+                                }
+                                //Finally, reconfigure the fresh bind with our envelope data.
+                                o.BoundEnvelopes[memberName].Configure(jsonBind);
+                                break;
+
+                            //TODO:  OTHER ABILITIES HERE
+                            default:
+                                System.Diagnostics.Debug.Print($"PG Member {memberName} has unsupported bind ability {bindType}!");
+                                break;
+                        }
+                    }
+                }  //End of deserializing binds
 
                 o.Recalc();
             } catch (Exception e) {
@@ -163,8 +195,18 @@ namespace PhaseEngine
             o.AddPrim("detune_randomness", detune_randomness);
             o.AddPrim("increment_offset", increment_offset);
 
+            //Fetch the BoundEnvelopes 
+            var binds = new JSONArray();
+            foreach(TrackerEnvelope t in BoundEnvelopes.Values)             //TODO:  Do this foreach for BoundTables.Values once that exists!!!!!
+            {
+                var e = t.ToJSONObject();
+                e.RemoveItem("dataSource");  //Remove the dataSource when serializing out since we can safely assume the data source is us when serializing in or out.
+                binds.AddItem(e);
+            }
+            if (binds.Length > 0)  o.AddItem("binds", binds);
+
             return o;
-        }
+       }
         public string ToJSONString() => ToJSONObject().ToJSONString();
 #endregion
 

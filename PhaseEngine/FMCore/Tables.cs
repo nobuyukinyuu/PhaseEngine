@@ -180,7 +180,7 @@ namespace PhaseEngine
 
 
         //  Reface DX compatible LFO speed values 0-127 as measured by Martin Tarenskeen.  Used by PhaseEngine as the default LFO range.
-        //  Source:  https://www.yamahasynth.com/ask-a-question/generating-specific-lfo-frequencies-on-dx
+        //  Source:  https://www.yamahasynth.com/forum/generating-specific-lfo-frequencies-on-dx
         //  Most other YM chips have their own LFO specs which aren't very compatible with each other. We may be able to specify them elsewhere.
         public static readonly double[] LFOSpeed= 
         {

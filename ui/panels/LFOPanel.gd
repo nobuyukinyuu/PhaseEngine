@@ -75,12 +75,20 @@ func _on_Sync_item_selected(index):
 		0:  #No sync.
 			c.SetLFO("osc_sync", false)
 			c.SetLFO("delay_sync", false)
+			c.SetLFO("release_sync", false)
 		1:  #Osc sync.
 			c.SetLFO("osc_sync", true)
 			c.SetLFO("delay_sync", false)
+			c.SetLFO("release_sync", false)
 		2:  #Delay sync.
 			c.SetLFO("osc_sync", false)
 			c.SetLFO("delay_sync", true)
+			c.SetLFO("release_sync", false)
+		3:  #Release sync.
+			c.SetLFO("osc_sync", false)
+			c.SetLFO("delay_sync", true)
+			c.SetLFO("release_sync", true)
+
 
 
 func _on_Preview_gui_input(event):
