@@ -200,7 +200,7 @@ namespace PhaseEngine
                     SustainStart = j.GetItem("sustainStart").ToInt();
                     SustainEnd = j.GetItem("sustainEnd").ToInt();
                     if (SustainEnd >= SustainStart)  //Loop is probably sane, greenlight it  
-                        Looping |= TrackerEnvelope.LoopType.Basic;
+                        Looping |= TrackerEnvelope.LoopType.Sustain;
                     //Finally, sanitize the sustain to fit within the number of points we have
                     SustainStart = Math.Max(0, SustainStart);
                     SustainEnd = Math.Min(Pts.Count-1, SustainEnd);
@@ -270,7 +270,7 @@ namespace PhaseEngine
                     output.SustainStart = j.GetItem("sustainStart").ToInt();
                     output.SustainEnd = j.GetItem("sustainEnd").ToInt();
                     if (output.SustainEnd >= output.SustainStart)  //Loop is probably sane, greenlight it  
-                        output.Looping |= TrackerEnvelope.LoopType.Basic;
+                        output.Looping |= TrackerEnvelope.LoopType.Sustain;
                     //Finally, sanitize the sustain to fit within the number of points we have
                     output.SustainStart = Math.Max(0, output.SustainStart);
                     output.SustainEnd = Math.Min(output.Pts.Count-1, output.SustainEnd);
