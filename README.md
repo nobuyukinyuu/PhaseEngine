@@ -6,6 +6,7 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 # Screenshots
 ![Main View](https://user-images.githubusercontent.com/1023003/147164517-5a67d4b3-70a9-4355-8b51-3bd2a86990eb.png)
 ![Wiring Grid and 6op Presets](https://user-images.githubusercontent.com/1023003/132633883-80a5c551-074c-42b8-b50a-892c93ccae4a.png)![rTables](https://user-images.githubusercontent.com/1023003/132632455-aa52c44c-e76a-4805-a894-27921c8169da.png)
+![Bind Envelopes](https://user-images.githubusercontent.com/1023003/214999540-a4dc1018-ac97-48db-a3e3-77f1415aaeeb.png)
 
 
 # Features and differences to [gdsFM](https://github.com/nobuyukinyuu/gdsfm)
@@ -20,6 +21,7 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 * All FM operators support Reface-style operator feedback.
 * More traditional noise generators, including an LFSR-based generator with selectable periodicity (create more buzzing effects) similar to 2a03, etc.
 * Variable length wavetables from 32 samples up to 1024 samples per bank.  Selectable sample bank per-oscillator for FM and bitwise ops.
+* Parameter automation bind system, allowing instruments to adjust their parameters over time using a tracker envelope-like interface
 
 ## Different
 * Based on more traditional paradigms, comparable to most other FM synths under the hood
@@ -44,12 +46,9 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 * "Linear" wavetable morphing operator
 * Possible second LFO as well as OPZ waveforms for tx81z support
 * Voice format specification  (almost complete!)
-* Arbitrary parameter envelopes  (Routing an envelope to a specific parameter)
-
+* rTable bind system to automate keyfollow/velocity changes to any parameter (including modifying existing bind envelopes) 
 
 ## May or may not be implemented or come back
-* Pitch generator
 * Wider range of sampling options
 * Multitimbral operation (for now, multiple chip instances syncing their clocks should suffice)
-* LFO oscillator access to the wavetable
 * High-quality oscillator lookup table support (greater than 10-bit), for richer timbres
