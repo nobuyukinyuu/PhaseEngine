@@ -65,9 +65,14 @@ func _ready():
 #Activated when one of the ease menus is selected.
 func _on_EaseMenu_index_pressed(curveType, parent_index, descending):
 	var startpos = 0
-	var endpos = 127
+	var endpos = 128
+	var reinterpolate:bool = true
+
+	var startval = global.RTABLE_SIZE if descending else 0
+	var endval = 0 if descending else global.RTABLE_SIZE
 	
 	prints("preset?", curveType, parent_index, descending)
+	var tbl = owner.get_node("VU").tbl
 	
 	#Determine the area we need to apply the curve preset.
 	match int(parent_index/2):
@@ -77,40 +82,78 @@ func _on_EaseMenu_index_pressed(curveType, parent_index, descending):
 		RIGHT_ONLY:
 			startpos = owner.get_node("VU").split
 			print ("Right only.  Startpos is ", startpos)
+		BOTH_SIDES:
+			reinterpolate=false  #Mark this for first/last value 
+#			endpos = 127
 
+	#Determine whether reinterpolation is needed.
+	if not (owner.get_node("VU").split < 128 and reinterpolate):  reinterpolate=false
+	else:
+		startval = tbl[startpos]
+		endval = tbl[min(endpos,127)]
+		match int(parent_index/2):  #Check if the direction makes sense for reinterpolation. Else use bounds
+			LEFT_ONLY:
+				if descending and startval <= endval:
+					startval = global.RTABLE_SIZE
+				elif not descending and startval >= endval:
+					startval = 0
+			RIGHT_ONLY:
+				if descending and startval <= endval:
+					endval = 0
+				elif not descending and startval >= endval:
+					endval = global.RTABLE_SIZE
 
 	#Now, apply the curve to the table.
-	var tbl = owner.get_node("VU").tbl
 	var size = float(endpos-startpos)  #Number of elements.
 	match curveType:
 		LINEAR:
 			for i in range(startpos, endpos):
-				var val = lerp(0, global.RTABLE_SIZE, i/(startpos+size))
-				var pos = startpos+endpos-i-1 if descending else i
+#				var val = lerp(0, global.RTABLE_SIZE, i/(startpos+size))
+				var val = lerp(startval, endval, (i-startpos)/size)
+#				var pos = startpos+endpos-i-1 if descending else i
+				var pos = i
 				tbl[pos] = val
 
 		IN, OUT, IN_OUT, OUT_IN:
 			for i in range(startpos, endpos):
-				var val = ease(i/(startpos+size), CURVEMAP[curveType]) * global.RTABLE_SIZE
-				var pos = startpos+endpos-i-1 if descending else i
+#				var val = ease(i/(startpos+size), CURVEMAP[curveType]) * global.RTABLE_SIZE
+				var curve = 1.0/CURVEMAP[curveType] if descending else CURVEMAP[curveType]
+				var val = ease((i-startpos)/size, curve) * (endval-startval) + startval
+#				var pos = startpos+endpos-i-1 if descending else i
+				var pos = i
 				tbl[pos] = val
 
 		TWELFTH_ROOT_OF_2:
-			if descending:
-				for i in range(startpos, endpos):
+#			if descending:
+#				for i in range(startpos, endpos):
+#					var pos = range_lerp((i-startpos), 0, endpos-startpos, 0, 128) 
+#					tbl[i] = 1 / pow(2, (pos)/12.0) * global.RTABLE_SIZE
+#			else:  #Ascending
+#				for i in range(startpos, endpos):
+#					var j = range_lerp((i-startpos), 0, size, 0, 128)
+##					print (j)
+#					tbl[i] = pow(2, (j-127)/12.0) * global.RTABLE_SIZE
+			for i in range(startpos, endpos):
+				if descending:
 					var pos = range_lerp((i-startpos), 0, endpos-startpos, 0, 128) 
 					tbl[i] = 1 / pow(2, (pos)/12.0) * global.RTABLE_SIZE
-
-
-			else:  #Ascending
-				for i in range(startpos, endpos):
-					var j = range_lerp((i-startpos), 0, size, 0, 128)
-#					print (j)
-					tbl[i] = pow(2, (j-127)/12.0) * global.RTABLE_SIZE
-	
+				else:
+					var pos = range_lerp(i, startpos, endpos-1, 0, 10) 
+					tbl[i] = pow(2, (pos)) 
+				
+#	if reinterpolate:
+#		print("Reinterpolating positions %s to %s with values %s to %s...." % [startpos,endpos,startval,endval])
+#		for i in range(startpos, endpos):
+#			tbl[i] = range_lerp(tbl[i], 0, global.RT_MINUS_ONE, startval, endval)
+		
 
 	owner.get_node("VU").update()
 	owner.get_node("VU").emit_signal("table_updated", -1, -1)
+
+func ease12(val, percent):
+	
+	pass
+
 
 	#  12th ROOT OF 2 CURVE is implemented as 1 / Pow(2, x/12) for descending,
 	#  Pow(2, (x-global.RT_MINUS_ONE) / 12) for ascending

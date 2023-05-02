@@ -379,17 +379,6 @@ exp_edit = true
 associated_property = "gain"
 bind_abilities = 1
 
-[node name="Label" type="Label" parent="."]
-margin_left = -336.0
-margin_top = 104.0
-margin_right = -17.0
-margin_bottom = 152.0
-text = "TODO:  Sweep 
-            (stack of rate/level values + loop opts)"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="lblTitle" type="Label" parent="."]
 margin_left = 8.0
 margin_top = 8.0

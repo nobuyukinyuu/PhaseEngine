@@ -133,6 +133,7 @@ func _draw():
 #			var h = rev_xerp(0, rect_size.x, i/float(tick_count)) - 1
 #			var h = inv_xerp(1, rect_size.x, (i/float(tick_count)) * rect_size.x) * rect_size.x - 1
 #			draw_texture(preload("res://gfx/ui/tick.png"), Vector2(h, 9))
+			if h < 0:  continue
 			if i % 4 == 2:
 				draw_texture(preload("res://gfx/ui/tick2x.png"), Vector2(h, 9))
 			else:
