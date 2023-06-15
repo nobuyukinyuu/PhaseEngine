@@ -72,7 +72,7 @@ namespace PhaseEngine
         public static ushort Wave2(ulong n, ref bool flip, short[] auxdata2)
         {
             ushort MASK = (ushort) (auxdata2.Length -1);
-            byte BITS = (byte) (10 - Tools.Ctz(auxdata2.Length));
+            byte BITS = (byte) (10 - Tools.Ctz(auxdata2.Length));  //Count trailing 0s of waveform length to determine closest power of 2 to scale phase by.
 
             ushort phase = (ushort) unchecked((n>>BITS));  //Scale result to always be the same octave as other oscillators
             var volume = auxdata2[phase & MASK];

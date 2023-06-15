@@ -387,9 +387,6 @@ margin_bottom = 16.0
 rect_scale = Vector2( 2, 2 )
 custom_fonts/font = ExtResource( 3 )
 text = "Filter"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [connection signal="toggled" from="Mute" to="." method="_on_Mute_toggled" binds= [ false ]]
 [connection signal="toggled" from="Bypass" to="." method="_on_Mute_toggled" binds= [ true ]]
