@@ -155,6 +155,11 @@ func _on_Copy_pressed():
 
 
 func _on_Paste_pressed():
+	var err2 = validate_json(OS.clipboard)
+	if err2:  #Should produce nothing if JSON is valid, otherwise an error
+		print("WiringGrid.gd:  Clipboard validation failed; ", err2)
+		return #Early so JSON.parse doesn't throw a stupid error to console
+	
 	var desc:JSONParseResult = JSON.parse(OS.clipboard)
 	if desc.error != OK:  
 		print("WiringGrid:  Clipboard data failed to pass JSON validation...")

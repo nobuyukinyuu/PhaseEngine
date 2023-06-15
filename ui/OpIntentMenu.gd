@@ -52,6 +52,12 @@ func popup_intent_menu(id):  #Spawns the popup to view/change the operator type.
 	set_meta("id", id)
 
 	#Detect whether we should enable the paste menu!!
+	var err = validate_json(OS.clipboard)
+	if err:  #Should produce nothing if JSON is valid, otherwise an error
+#		print("OpIntentMenu.gd:  Clipboard validation failed; ", err)
+		set_item_disabled(get_item_index(ID_PASTE), true)
+		return #Early so JSON.parse doesn't throw a stupid error to console
+
 	var result:JSONParseResult = JSON.parse(OS.clipboard)
 
 	#For some reason, CSVs pass JSON validation without enclosing brackets. So, we need to make sure
