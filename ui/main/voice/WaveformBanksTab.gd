@@ -43,7 +43,7 @@ func update_bank(which):
 
 #onready var stride=global.WAVETABLE_SIZE/$Items.fixed_icon_size.x
 func make_icon(data):
-	if not (data is Array):
+	if not (data is Array) or data.size() < 32:
 		return load("res://gfx/ui/wave_preview_fail.png")
 #	if data.size() != global.WAVETABLE_SIZE:
 #		return load("res://gfx/ui/wave_preview_fail.png")
@@ -129,6 +129,8 @@ func _on_Remove_pressed():
 
 	global.emit_signal("wavebanks_changed", idx)
 
+
+	_on_Items_nothing_selected()
 
 
 

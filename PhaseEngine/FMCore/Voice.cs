@@ -307,6 +307,12 @@ namespace PhaseEngine
             } catch (Exception e) {
                 System.Diagnostics.Debug.Print("Voice.FromJSON:  Malformed JSON or missing data.. " + e.Data.ToString());
             }
+
+            wavetable = new WaveTableData();
+            if (data.HasItem("wavetable"))
+            {
+                wavetable.FromJSON((JSONObject) data.GetItem("wavetable"));
+            }
         }
 
         public string ToJSONString() => ToJSONObject().ToJSONString();
