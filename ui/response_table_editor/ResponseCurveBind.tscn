@@ -100,7 +100,6 @@ shader = ExtResource( 18 )
 shader_param/disabled = 2
 
 [node name="ResponseCurve" type="WindowDialog"]
-visible = true
 margin_right = 576.0
 margin_bottom = 304.0
 rect_min_size = Vector2( 320, 304 )

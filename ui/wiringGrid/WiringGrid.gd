@@ -182,6 +182,8 @@ func _on_Paste_pressed():
 #	$SlotIndicator.load_from_description( preset_description )
 	check_if_presets()
 
+	#If the paste data contains waveforms, we must perform a reset of the wavebanks.
+	if desc.result.has("wavetable"):  global.emit_signal("wavebanks_reset")
 
 #Activated when the user selects a preset algorithm.
 func _on_Preset_item_activated(index):

@@ -758,9 +758,10 @@ public class Test2 : Label
         if (tbl.NumBanks <=0) return output;
         if (bank<=-1)  //Get all banks
             for(int i=0; i<tbl.NumBanks; i++)
-                output.Add(tbl.GetTable(i));
+                // output.Add(tbl.GetTable(i));
+                output.Add(new Godot.Collections.Array(tbl.GetTable(i)));
         else if (bank<tbl.NumBanks)
-            output= new Godot.Collections.Array(c.Voice.wavetable.GetTable(bank));
+            output= new Godot.Collections.Array(tbl.GetTable(bank));
 
         return output;
     }

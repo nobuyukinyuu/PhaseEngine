@@ -44,6 +44,7 @@ signal algorithm_changed  #Emitted by WiringGrid and VoiceMain to refresh the ou
 signal op_intent_changed  #Emitted by the op intent menu to signal refreshing tabs
 signal request_op_intent_menu  #Emitted by a tab or context menu from wiring grid
 signal wavebanks_changed #Emitted by the Waveform bank tab to signal panels to update their bank spinner.
+signal wavebanks_reset #Emitted by anything that changes the voice and requires wavebank UI to reset.
 
 #Some node and scene locations needed to prevent cyclic dependency, ensure window management, etc.
 const ENV_EDITOR_SCENE = preload("res://ui/envelope_editor/EnvelopeEditor.tscn")

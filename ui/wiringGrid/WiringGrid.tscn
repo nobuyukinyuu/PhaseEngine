@@ -33,219 +33,219 @@ __meta__ = {
 }
 
 [node name="0" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_right = 36.0
-margin_bottom = 33.0
+margin_right = 37.0
+margin_bottom = 34.0
 
 [node name="1" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 37.0
-margin_right = 73.0
-margin_bottom = 33.0
+margin_left = 38.0
+margin_right = 75.0
+margin_bottom = 34.0
 
 [node name="2" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 74.0
-margin_right = 110.0
-margin_bottom = 33.0
+margin_left = 76.0
+margin_right = 113.0
+margin_bottom = 34.0
 
 [node name="3" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 111.0
-margin_right = 147.0
-margin_bottom = 33.0
+margin_left = 114.0
+margin_right = 150.0
+margin_bottom = 34.0
 
 [node name="4" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 148.0
-margin_right = 184.0
-margin_bottom = 33.0
+margin_left = 151.0
+margin_right = 187.0
+margin_bottom = 34.0
 
 [node name="5" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 185.0
-margin_right = 221.0
-margin_bottom = 33.0
+margin_left = 188.0
+margin_right = 224.0
+margin_bottom = 34.0
 
 [node name="6" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_top = 34.0
-margin_right = 36.0
-margin_bottom = 67.0
+margin_top = 35.0
+margin_right = 37.0
+margin_bottom = 69.0
 
 [node name="7" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 37.0
-margin_top = 34.0
-margin_right = 73.0
-margin_bottom = 67.0
+margin_left = 38.0
+margin_top = 35.0
+margin_right = 75.0
+margin_bottom = 69.0
 
 [node name="8" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 74.0
-margin_top = 34.0
-margin_right = 110.0
-margin_bottom = 67.0
+margin_left = 76.0
+margin_top = 35.0
+margin_right = 113.0
+margin_bottom = 69.0
 
 [node name="9" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 111.0
-margin_top = 34.0
-margin_right = 147.0
-margin_bottom = 67.0
+margin_left = 114.0
+margin_top = 35.0
+margin_right = 150.0
+margin_bottom = 69.0
 
 [node name="10" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 148.0
-margin_top = 34.0
-margin_right = 184.0
-margin_bottom = 67.0
+margin_left = 151.0
+margin_top = 35.0
+margin_right = 187.0
+margin_bottom = 69.0
 
 [node name="11" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 185.0
-margin_top = 34.0
-margin_right = 221.0
-margin_bottom = 67.0
+margin_left = 188.0
+margin_top = 35.0
+margin_right = 224.0
+margin_bottom = 69.0
 
 [node name="12" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_top = 68.0
-margin_right = 36.0
-margin_bottom = 101.0
+margin_top = 70.0
+margin_right = 37.0
+margin_bottom = 104.0
 
 [node name="13" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 37.0
-margin_top = 68.0
-margin_right = 73.0
-margin_bottom = 101.0
+margin_left = 38.0
+margin_top = 70.0
+margin_right = 75.0
+margin_bottom = 104.0
 
 [node name="14" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 74.0
-margin_top = 68.0
-margin_right = 110.0
-margin_bottom = 101.0
+margin_left = 76.0
+margin_top = 70.0
+margin_right = 113.0
+margin_bottom = 104.0
 
 [node name="15" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 111.0
-margin_top = 68.0
-margin_right = 147.0
-margin_bottom = 101.0
+margin_left = 114.0
+margin_top = 70.0
+margin_right = 150.0
+margin_bottom = 104.0
 
 [node name="16" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 148.0
-margin_top = 68.0
-margin_right = 184.0
-margin_bottom = 101.0
+margin_left = 151.0
+margin_top = 70.0
+margin_right = 187.0
+margin_bottom = 104.0
 
 [node name="17" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 185.0
-margin_top = 68.0
-margin_right = 221.0
-margin_bottom = 101.0
+margin_left = 188.0
+margin_top = 70.0
+margin_right = 224.0
+margin_bottom = 104.0
 
 [node name="18" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_top = 102.0
-margin_right = 36.0
-margin_bottom = 135.0
+margin_top = 105.0
+margin_right = 37.0
+margin_bottom = 139.0
 
 [node name="19" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 37.0
-margin_top = 102.0
-margin_right = 73.0
-margin_bottom = 135.0
+margin_left = 38.0
+margin_top = 105.0
+margin_right = 75.0
+margin_bottom = 139.0
 
 [node name="20" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 74.0
-margin_top = 102.0
-margin_right = 110.0
-margin_bottom = 135.0
+margin_left = 76.0
+margin_top = 105.0
+margin_right = 113.0
+margin_bottom = 139.0
 
 [node name="21" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 111.0
-margin_top = 102.0
-margin_right = 147.0
-margin_bottom = 135.0
+margin_left = 114.0
+margin_top = 105.0
+margin_right = 150.0
+margin_bottom = 139.0
 
 [node name="22" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 148.0
-margin_top = 102.0
-margin_right = 184.0
-margin_bottom = 135.0
+margin_left = 151.0
+margin_top = 105.0
+margin_right = 187.0
+margin_bottom = 139.0
 
 [node name="23" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 185.0
-margin_top = 102.0
-margin_right = 221.0
-margin_bottom = 135.0
+margin_left = 188.0
+margin_top = 105.0
+margin_right = 224.0
+margin_bottom = 139.0
 
 [node name="24" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_top = 136.0
-margin_right = 36.0
-margin_bottom = 169.0
+margin_top = 140.0
+margin_right = 37.0
+margin_bottom = 174.0
 
 [node name="25" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 37.0
-margin_top = 136.0
-margin_right = 73.0
-margin_bottom = 169.0
+margin_left = 38.0
+margin_top = 140.0
+margin_right = 75.0
+margin_bottom = 174.0
 
 [node name="26" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 74.0
-margin_top = 136.0
-margin_right = 110.0
-margin_bottom = 169.0
+margin_left = 76.0
+margin_top = 140.0
+margin_right = 113.0
+margin_bottom = 174.0
 
 [node name="27" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 111.0
-margin_top = 136.0
-margin_right = 147.0
-margin_bottom = 169.0
+margin_left = 114.0
+margin_top = 140.0
+margin_right = 150.0
+margin_bottom = 174.0
 
 [node name="28" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 148.0
-margin_top = 136.0
-margin_right = 184.0
-margin_bottom = 169.0
+margin_left = 151.0
+margin_top = 140.0
+margin_right = 187.0
+margin_bottom = 174.0
 
 [node name="29" parent="SlotIndicator" instance=ExtResource( 1 )]
-margin_left = 185.0
-margin_top = 136.0
-margin_right = 221.0
-margin_bottom = 169.0
+margin_left = 188.0
+margin_top = 140.0
+margin_right = 224.0
+margin_bottom = 174.0
 
 [node name="30" parent="SlotIndicator" instance=ExtResource( 1 )]
 self_modulate = Color( 0, 0.5, 1, 1 )
-margin_top = 170.0
-margin_right = 36.0
-margin_bottom = 203.0
+margin_top = 175.0
+margin_right = 37.0
+margin_bottom = 208.0
 slot_type = 1
 
 [node name="31" parent="SlotIndicator" instance=ExtResource( 1 )]
 self_modulate = Color( 0, 0.5, 1, 1 )
-margin_left = 37.0
-margin_top = 170.0
-margin_right = 73.0
-margin_bottom = 203.0
+margin_left = 38.0
+margin_top = 175.0
+margin_right = 75.0
+margin_bottom = 208.0
 slot_type = 1
 
 [node name="32" parent="SlotIndicator" instance=ExtResource( 1 )]
 self_modulate = Color( 0, 0.5, 1, 1 )
-margin_left = 74.0
-margin_top = 170.0
-margin_right = 110.0
-margin_bottom = 203.0
+margin_left = 76.0
+margin_top = 175.0
+margin_right = 113.0
+margin_bottom = 208.0
 slot_type = 1
 
 [node name="33" parent="SlotIndicator" instance=ExtResource( 1 )]
 self_modulate = Color( 0, 0.5, 1, 1 )
-margin_left = 111.0
-margin_top = 170.0
-margin_right = 147.0
-margin_bottom = 203.0
+margin_left = 114.0
+margin_top = 175.0
+margin_right = 150.0
+margin_bottom = 208.0
 slot_type = 1
 
 [node name="34" parent="SlotIndicator" instance=ExtResource( 1 )]
 self_modulate = Color( 0, 0.5, 1, 1 )
-margin_left = 148.0
-margin_top = 170.0
-margin_right = 184.0
-margin_bottom = 203.0
+margin_left = 151.0
+margin_top = 175.0
+margin_right = 187.0
+margin_bottom = 208.0
 slot_type = 1
 
 [node name="35" parent="SlotIndicator" instance=ExtResource( 1 )]
 self_modulate = Color( 0, 0.5, 1, 1 )
-margin_left = 185.0
-margin_top = 170.0
-margin_right = 221.0
-margin_bottom = 203.0
+margin_left = 188.0
+margin_top = 175.0
+margin_right = 224.0
+margin_bottom = 208.0
 slot_type = 1
 
 [node name="Add" type="Button" parent="."]
@@ -311,9 +311,6 @@ margin_top = 172.0
 margin_bottom = 200.0
 icon = ExtResource( 10 )
 align = 0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ReferenceRect" type="ReferenceRect" parent="."]
 visible = false

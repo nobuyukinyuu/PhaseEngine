@@ -19,6 +19,7 @@ func _ready():
 
 	populate()
 
+	global.connect("wavebanks_reset", self, "populate")
 
 
 func populate():
@@ -31,6 +32,8 @@ func populate():
 	var data = c.GetWave(ALL)
 	for i in data.size():
 		$Items.add_item("%s:  [%s]" % [i, data[i].size()], make_icon(data[i]))
+
+	global.emit_signal("wavebanks_changed")
 	
 func update_bank(which):
 	var c = get_node(chip_loc)
