@@ -60,7 +60,9 @@ namespace PhaseEngine
                     string line;
                     line=sr.ReadLine();
                     //Check header for validity.  TODO:  Check to see if there exists other formats created in other drivers
-                    if (!line.StartsWith("//MiOPMdrv")) { throw new PE_ImportException(IOErrorFlags.UnrecognizedFormat); }
+                    if (!line.StartsWith("//MiOPMdrv")) //Sound driver label missing but could still be valid OPM.  Proceed.
+                        if (!line.StartsWith("//LFO: LFRQ AMD PMD WF NFRQ")) 
+                            { throw new PE_ImportException(IOErrorFlags.UnrecognizedFormat); }
 
                     //Move forward to the instrument blocks.
                     // while (!line.StartsWith("@:"))  line=sr.ReadLine();

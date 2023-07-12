@@ -8,7 +8,7 @@ var force_change_intent=false
 
 func _ready():
 	#Populate the operator types popup menu.
-	var lbl=["Nothing", "FM (Default)", "Filter", "Bitwise Op", "Wave Folder"]
+	var lbl=["Nothing", "FM (Default)", "FM (HiQual)", "Filter", "Bitwise Op", "Wave Folder", "Linear"]
 	add_separator("Operator X")
 	
 #	$OpType.add_separator()

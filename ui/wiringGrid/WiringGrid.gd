@@ -72,7 +72,7 @@ func _on_Add_pressed():
 		#Probably because the chip isn't yet ready, the new op doesn't have a type to set.
 		#We can set it here to override that;  it's ugly, but it works......
 		var slot = $SlotIndicator.get_child($SlotIndicator.get_child_count()-1)
-		slot.set_slot_type(slot.opType.CARRIER)
+		slot.set_slot_type(global.OpIntent.FM_OP)
 
 		_on_slot_moved() 
 		set_buttons_enabled(true)

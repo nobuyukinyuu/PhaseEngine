@@ -7,7 +7,7 @@ namespace PhaseEngine
     
     public abstract class OpBase : IBindableDataConsumer  //Base for operator, LFO and filter classes
     {
-        public enum Intents { LFO=-1, NONE, FM_OP, FILTER, BITWISE, WAVEFOLDER };
+        public enum Intents { LFO=-1, NONE, FM_OP, FM_HQ, FILTER, BITWISE, WAVEFOLDER, LINEAR };
         public Intents intent = Intents.NONE;
 
 
@@ -105,7 +105,7 @@ namespace PhaseEngine
         }
 
         //Sets up the operator to act as an oscillator for FM output.
-        public void SetOscillatorType(Oscillator.oscTypes type)
+        public virtual void SetOscillatorType(Oscillator.oscTypes type)
         {
             oscillator.CurrentWaveform = type;
             switch(type.ToString())

@@ -190,7 +190,7 @@ func reset_default_op_positions(sz:int):
 	var start = sz*sz - sz
 	for i in sz:
 		var p = get_child(start+i)
-		if p.slot_type ==2:  p.set_slot(i, 1)  #1=carrier  2=modulator
+#		if p.slot_type ==2:  p.set_slot(i, 1)  #1=carrier  2=modulator
 
 		setGridID(p.gridPos, i)
 
@@ -235,9 +235,9 @@ func redraw_grid():
 			var slot = slotNodeAt(op.gridPos)
 			var opType
 			opType = owner.get_node(owner.chip_loc).GetOpIntent(op.id)
-			if opType == global.OpIntent.FM_OP:  opType = 1 if op.gridPos.y == total_ops-1 else 2
-			elif opType > 0:  opType +=1
-			slot.set_slot(op.id, opType)
+#			if opType == global.OpIntent.FM_OP:  opType = 1 if op.gridPos.y == total_ops-1 else 2
+#			elif opType > 0:  opType +=1
+			slot.set_slot(op.id, opType, false if op.gridPos.y == total_ops-1 else true)
 		
 	update()
 

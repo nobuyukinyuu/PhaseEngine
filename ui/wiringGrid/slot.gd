@@ -2,8 +2,8 @@
 extends PanelContainer
 class_name WiringGridSlot
 
-enum opType {NONE, CARRIER, MODULATOR, FILTER, BITWISE, WAVEFOLDER}
-export (opType) var slot_type setget set_slot_type
+#enum opType {NONE, CARRIER, MODULATOR, FILTER, BITWISE, WAVEFOLDER}
+export (global.OpIntent) var slot_type setget set_slot_type
 
 var s_norm = preload("res://ui/wiringGrid/slot.stylebox")
 var s_hover = preload("res://ui/wiringGrid/slot_hover.stylebox")
@@ -19,30 +19,44 @@ signal dropped
 signal mid_clicked
 signal right_clicked
 
+const CARRIER = Color(0,0.5,1,1)
+const MODULATOR = Color(1,0,0,1)
 
-func set_slot_type(val):
+func set_slot_type(val, is_modulator=false):
 #	print("Setting Slot Type")
 	slot_type = val
 	match val:
-		opType.NONE:
+		global.OpIntent.NONE:
 			self_modulate = Color(0.6,0.6,0.6,1)
-		opType.CARRIER:
+		global.OpIntent.FM_OP, global.OpIntent.FM_HQ:
 			self_modulate = Color(0,0.5,1,1)
-		opType.MODULATOR:
-			self_modulate = Color(1,0,0,1)
-		opType.FILTER:
+#		opType.MODULATOR:
+#			self_modulate = Color(1,0,0,1)
+		global.OpIntent.FILTER:
 			self_modulate = Color(0,1,0.5,1)
-		opType.BITWISE:
-			self_modulate = Color(0.8,0.8,0.8,1)
-		opType.WAVEFOLDER:
+		global.OpIntent.BITWISE:
+			self_modulate = Color(0,1.1,1.2,1)
+		global.OpIntent.WAVEFOLDER:
 			self_modulate = Color(1,0.5,1,1)
+
+	if is_modulator: #Turn FM operators red to match algo preset diagrams from other manufacturers
+		if val > global.OpIntent.FM_HQ:  #Non-FM operators get their color tinted reddish 25%.
+			self_modulate.a = 0.75 #if not global.OpIntent.BITWISE else 0.4
+			self_modulate = MODULATOR.blend(self_modulate)
+		else:  #Typical FM operator.  Color accordingly.
+			self_modulate = MODULATOR
+
+	#Slightly alter the hue of HQ FM operators to make them distinguishable on the wiring grid.
+	if val == global.OpIntent.FM_HQ: self_modulate.h -= 0.04
+			
+func reset_color():  set_slot_type(slot_type)
 
 func _ready():
 	pass
 
-func set_slot(_id, slotType):
+func set_slot(_id, slotType, is_modulator=false):
 	id = _id
-	set_slot_type(slotType)
+	set_slot_type(slotType, is_modulator)
 	if _id>=0:
 		$Label.text = str(id+1)
 	else:
@@ -50,7 +64,7 @@ func set_slot(_id, slotType):
 
 func reset():
 	id = -1
-	set_slot_type(opType.NONE)
+	set_slot_type(global.OpIntent.NONE)
 	$Label.text = ""
 	unfocus()
 	

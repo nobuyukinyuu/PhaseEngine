@@ -113,10 +113,12 @@ func make_tab(group_loc:TabContainer, opNum:int, intent):
 	match intent:
 		global.OpIntent.FM_OP:
 			p = preload("res://ui/panels/EGPanel.tscn").instance()
-		global.OpIntent.BITWISE:
-			p = preload("res://ui/panels/BitwiseOpPanel.tscn").instance()
+		global.OpIntent.FM_HQ:
+			p = preload("res://ui/panels/EGPanel.tscn").instance()
 		global.OpIntent.FILTER:
 			p = preload("res://ui/panels/FilterPanel.tscn").instance()
+		global.OpIntent.BITWISE:
+			p = preload("res://ui/panels/BitwiseOpPanel.tscn").instance()
 		global.OpIntent.WAVEFOLDER:
 			p = preload("res://ui/panels/WaveFolderPanel.tscn").instance()
 		_:

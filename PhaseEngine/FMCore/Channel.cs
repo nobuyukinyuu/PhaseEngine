@@ -93,6 +93,7 @@ namespace PhaseEngine
                 switch(intent)
                 {
                 case OpBase.Intents.FM_OP:
+                case OpBase.Intents.FM_HQ:
                 case OpBase.Intents.BITWISE:
                 case OpBase.Intents.WAVEFOLDER:
                     var op = ops[i] as Operator;
@@ -288,12 +289,20 @@ namespace PhaseEngine
                     switch((OpBase.Intents)voice.alg.intent[i])
                     {
                         case OpBase.Intents.FM_OP:
+                        case OpBase.Intents.FM_HQ:
                             var op = new Operator();
                             ops[i] = op;
                             op.eg.Configure(voice.egs[i]);
                             op.pg = voice.pgs[i];  //ByVal copy
                             op.wavetable = voice.wavetable;
                             break;
+                        // case OpBase.Intents.FM_HQ:
+                        //     var hop = new OperatorHQ();
+                        //     ops[i] = hop;
+                        //     hop.eg.Configure(voice.egs[i]);
+                        //     hop.pg = voice.pgs[i];  //ByVal copy
+                        //     hop.wavetable = voice.wavetable;
+                        //     break;
                         case OpBase.Intents.FILTER:
                             var f = new Filter();
                             ops[i] = f;
