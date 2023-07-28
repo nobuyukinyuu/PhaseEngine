@@ -637,7 +637,8 @@ public class Test2 : Label
     {
         opNum = (opNum < c.Voice.opCount)?  opNum: 0;
         IResponseTable tbl = c.Voice.egs[opNum].GetTable(intent);
-        return tbl.ToJSONString();
+        //Be sure to attach intent cuz we may have to validate it if we use the clipboard for this function in future
+        return tbl.ToJSONString(true);  
     }
 
     //////////////////////////////    IO    ////////////////////////////////////

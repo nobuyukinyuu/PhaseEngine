@@ -62,7 +62,8 @@ func set_table_default(_intent):
 #				$VU.tbl[i] = global.RTABLE_SIZE -SCALE -i*SCALE
 #				$VU.tbl[i] = global.RTABLE_SIZE * ease((127-i)/127.0, 3)
 				$VU.tbl[i] = global.RTABLE_SIZE * pow((127-i)/127.0, 3) * 0.75
-				$VU.tbl[i+64] = global.RTABLE_SIZE * (127-i)/127.0 * 0.1875
+				$VU.tbl[i+64] = global.RTABLE_SIZE * (127-i-64)/127.0 * 0.1875
+
 		ranges.rates:
 			for i in 128:
 				$VU.tbl[i] = i*SCALE / 2

@@ -27,19 +27,20 @@ namespace PhaseEngine
 
 
         //HQ Sine table  (probably unused)
-        public const int SINE_TABLE_BITS = 12;  //We bit-shift right by the bit width of the phase counter minus this value to check the table.
-        // public const int SINE_TABLE_SHIFT = 32 - SINE_TABLE_BITS;  //How far to shift a phase counter value to be in range of the table.
-        public const int SINE_RATIO = SINE_TABLE_BITS - 8;  //How far to shift a phase counter value to be in range of the table.
+        public const int SINE_TABLE_BITS = 15;  //We bit-shift right by the bit width of the phase counter minus this value to check the table. Don't exceed 15bit.
+        public const int SINE_RATIO = Global.FRAC_PRECISION_BITS - 5 - SINE_TABLE_BITS;  //How far to shift a phase counter value to be in range of the table.
         public const int SINE_HIGH_BIT = SINE_TABLE_BITS;
         public const int SINE_SIGN_BIT = SINE_TABLE_BITS+1;
         public const int SINE_TABLE_MASK = (1 << SINE_TABLE_BITS) - 1;  //Mask for creating a rollover.
         public const int SINE_HALFWAY_BIT = SINE_TABLE_BITS - 1;
+        public const int MODULATION_PRECISION_BITS = Global.FRAC_PRECISION_BITS - SINE_TABLE_BITS;  //How much to scale up modulation to match the phase accumulator.
 
-        public static ushort[] sin = new ushort[SINE_TABLE_MASK +1];  //integral Increment/decrement can use add/sub operations to alter phase counter.
+        // public static ushort[] sin = new ushort[SINE_TABLE_MASK +1];  //integral values used with attenuation of HQ EG to produce a lookup value for the hq exp table.
+        public static float[] sinF = new float[SINE_TABLE_MASK +1];  //Output values of 0-1.
 
 
         //Triangle and saw table
-        public const byte TRI_TABLE_BITS = 5;
+        public const byte TRI_TABLE_BITS = 4;
         public const byte TRI_TABLE_MASK = (1 << TRI_TABLE_BITS) - 1;
         public static readonly ushort[] tri = new ushort[TRI_TABLE_MASK+1];
         public static readonly ushort[] saw = new ushort[256];
@@ -52,7 +53,7 @@ namespace PhaseEngine
         public static readonly double[] transpose = new double[1300];  //10kb
 
         //Duty cycle increment ratio table for sine oscillators
-        public static readonly float[] dutyRatio = new float[ushort.MaxValue+1];  //256kb
+        public static readonly float[] dutyRatio = new float[ushort.MaxValue+1];  //256kb. Converts a ushort into a fraction from 0-1.
 
         //Amplitude modulation depth scaling ratio table
         public static readonly float[] amdScaleRatio = new float[1024];  //4kb.  Scale used to multiply against an oscillator to produce a given amplitude depth.
@@ -60,6 +61,12 @@ namespace PhaseEngine
 
         //Soft clipping in/out table for volume adjustment of iir filters
         public static readonly float[] softClip = new float[ushort.MaxValue+1]; //256kb
+
+        //HQ rate increment and exponent tables
+        public static readonly ushort[] attenuationHQ2vol = new ushort[ushort.MaxValue+1]; //256kb
+        public static readonly ushort[] vol2attenuationHQ = new ushort[short.MaxValue+1]; //128kb. Increase table size if SINE_TABLE_BITS exceeds 15
+        public static readonly uint[,] egHQincrementRates = new uint[4, Envelope.R_MAX]; //ADSR precalc increment estimations from curve-fit
+
 
         static Tables()
         {
@@ -82,11 +89,12 @@ namespace PhaseEngine
             for(int i=0; i<transpose.Length; i++)
                 transpose[i] = Math.Pow(2, (i * 0.01)/12.0);
 
-            //sin
-            for(int i=0; i<sin.Length; i++)
+            //sinHQ
+            for(int i=0; i<sinF.Length; i++)
             {
-                // sin[i] =  (short) Math.Round(Math.Sin(TAU * (i/(double)sin.Length) )*short.MaxValue);
-                sin[i] =  unchecked( (ushort) Math.Round( -Tools.Log2(Math.Sin((i+0.5) * Math.PI/sin.Length/2.0)) * 256) );
+                // sin[i] =  (ushort) Math.Round(Math.Sin(Math.PI/2.0 * (i/(double)sin.Length) )*short.MaxValue);
+                sinF[i] =  (float) ( Math.Sin(Math.PI/2.0 * (i/(double)sinF.Length)) );
+                // sin[i] =  unchecked( (ushort) Math.Round( -Tools.Log2(Math.Sin((i+0.5) * Math.PI/sin.Length/2.0)) * 256) ); //Log domain
             }
             
             //tri
@@ -94,7 +102,7 @@ namespace PhaseEngine
             {
                 var inc = ((i+0.5)/(double)(tri.Length)) ;
                 // saw[i] = (ushort)(Tools.ToFixedPoint( inc, 8) | (uint)inc  & (ushort.MaxValue>>0));
-                tri[i] = (ushort) ( (float) Math.Round(-Tools.Log2(inc*2) * 256));
+                tri[i] = (ushort) ( (float) Math.Round(-Tools.Log2(inc) * 256));
             }
 
             //saw table
@@ -152,11 +160,30 @@ namespace PhaseEngine
                     lastVal = vol2attenuation[i];
             }
 
+
             for (ushort i=0; i<first_instance; i++)  //FIXME:  This block may not be necessary.  Check against very slow LFOs with saw waves.
             {
                 vol2attenuation[i] = (ushort)Tools.Lerp(2047, vol2attenuation[first_instance], i/(first_instance-1));
             }
 
+
+
+            //HQ Exponent and rate tables
+            for (int i=0; i < attenuationHQ2vol.Length; i++)
+            { //Two values up to short.MaxValue, the oscillator and the HQ EG, are added together in the log domain. We make a table to convert these to volume.
+                //Chip range is 0 to -96db, so we use an increment value that's -96 divided by the size of the table.
+                attenuationHQ2vol[i] = (ushort)db2vol( i/(double)attenuationHQ2vol.Length * -96.0);
+            }
+            for (int i=0; i < vol2attenuationHQ.Length; i++)
+                vol2attenuationHQ[i] = (ushort)Math.Round(vol2db(i/(double)32768.0) * -(1.0/48.0) * 32767.0);
+
+                vol2attenuationHQ[0] = 16384;
+
+
+            // for(int i=0; i<64; i++)
+            // {
+            //     Godot.GD.Print(get_eg_increment(i) >> EG_LEVEL_PRECISION);
+            // }
 
 
             // Stopwatch sw = new Stopwatch();
@@ -176,7 +203,11 @@ namespace PhaseEngine
 
             // System.Diagnostics.Debug.Print("Shornlf");
 
+
         }
+
+        static int db2vol(double x) => (int)Math.Round(Math.Pow(10, x/10.0) * 32767);  //negative numbers up to 96db
+        static double vol2db(double x) => 10.0*Math.Log(x, 10.0);  //Values from 0-1.  To convert from 16bit wave value (v), divide abs(v) by 32768.0
 
 
         //  Reface DX compatible LFO speed values 0-127 as measured by Martin Tarenskeen.  Used by PhaseEngine as the default LFO range.

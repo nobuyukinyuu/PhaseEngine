@@ -289,20 +289,20 @@ namespace PhaseEngine
                     switch((OpBase.Intents)voice.alg.intent[i])
                     {
                         case OpBase.Intents.FM_OP:
-                        case OpBase.Intents.FM_HQ:
+                        // case OpBase.Intents.FM_HQ:
                             var op = new Operator();
                             ops[i] = op;
                             op.eg.Configure(voice.egs[i]);
                             op.pg = voice.pgs[i];  //ByVal copy
                             op.wavetable = voice.wavetable;
                             break;
-                        // case OpBase.Intents.FM_HQ:
-                        //     var hop = new OperatorHQ();
-                        //     ops[i] = hop;
-                        //     hop.eg.Configure(voice.egs[i]);
-                        //     hop.pg = voice.pgs[i];  //ByVal copy
-                        //     hop.wavetable = voice.wavetable;
-                        //     break;
+                        case OpBase.Intents.FM_HQ:
+                            var hop = new OperatorHQ();
+                            ops[i] = hop;
+                            hop.eg.Configure(voice.egs[i]);
+                            hop.pg = voice.pgs[i];  //ByVal copy
+                            hop.wavetable = voice.wavetable;
+                            break;
                         case OpBase.Intents.FILTER:
                             var f = new Filter();
                             ops[i] = f;
@@ -345,6 +345,7 @@ namespace PhaseEngine
                 else rising= "Doing nothing";
                 sb.Append( $"Op{i+1}: {op.egStatus} and {rising} ({op.egAttenuation})"  );
                 // sb.Append(String.Format("\nOp{0}: {1}", i+1, ops[i].pg.increment));
+                if (op is OperatorHQ) sb.Append($"({((OperatorHQ)op).egAttenuation2 >> OperatorHQ.EG_LEVEL_PRECISION})");
                 sb.Append(nl);
                 i++;
             }

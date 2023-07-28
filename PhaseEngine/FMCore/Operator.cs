@@ -29,6 +29,8 @@ namespace PhaseEngine
         public Increments pg = Increments.Prototype();
  
         public WaveTableData wavetable;
+        public PE_Json.IJSONSerializable auxdata;  //Used by future operators to store extra data such as extended feedback, etc. Not covered by eg.aux_func
+        //TODO:  Add a func to be implemented by derivative classes validating whether their copy of auxdata is the correct derived type
 
         // public abstract void SetOscillatorType(Oscillator.waveFunc waveFunc);
         public abstract void SetOscillatorType(byte waveform_index);
@@ -203,7 +205,8 @@ namespace PhaseEngine
             // start with the upper 10 bits of the phase value plus modulation
             // the low 10 bits of this result represents a full 2*PI period over
             // the full sin wave
-            ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + modulation);
+            ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + (modulation<<5));
+            // ushort phase = (ushort)((this.phase + (modulation<<6) >> Global.FRAC_PRECISION_BITS);
 
             // get the absolute value of the sin, as attenuation, as a 4.8 fixed point value
             // ushort sin_attenuation = oscillator.Generate(phase, eg.duty, ref flip, __makeref(pg.hz));

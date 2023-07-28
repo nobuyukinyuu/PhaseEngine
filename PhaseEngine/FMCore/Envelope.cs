@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace PhaseEngine 
 {
-    public class Envelope : IBindableDataSrc
+    public class Envelope : IBindableDataSrc, IJSONSerializable
     {
         public bool mute;
         public bool bypass;
@@ -138,7 +138,8 @@ namespace PhaseEngine
         }
 
 #region IO
-        public bool FromJSON(JSONObject input, bool deserializeReferenceItems=true, double chipTicksPerSec=1)
+        public bool FromJSON(JSONObject input) => FromJSON(input, true, 1);
+        internal bool FromJSON(JSONObject input, bool deserializeReferenceItems=true, double chipTicksPerSec=1)
         {
             var j = input;
             try
@@ -217,14 +218,16 @@ namespace PhaseEngine
             return true;
 
         }
-        public bool FromString(string input, bool deserializeReferenceItems=false)
+        public bool FromString(string input) => FromString(input, true);
+        internal bool FromString(string input, bool deserializeReferenceItems)
         {
             var P = JSONData.ReadJSON(input);
             if (P is JSONDataError) return false;
             var j = (JSONObject) P;
             return FromJSON(j, deserializeReferenceItems);
         }
-        internal JSONObject ToJSONObject(bool includeReferenceItems=true)
+        public JSONObject ToJSONObject() => ToJSONObject(true);
+        internal JSONObject ToJSONObject(bool includeReferenceItems)
         {
             var o = new JSONObject();
             o.AddPrim<byte>("rates", rates);

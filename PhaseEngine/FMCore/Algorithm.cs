@@ -6,7 +6,7 @@ using PE_Json;
 namespace PhaseEngine 
 {
     /// Summary:  Tracks the wiring of an FM algorithm.
-    public class Algorithm
+    public class Algorithm : IJSONSerializable
     {
         public byte opCount = 6;
 
@@ -265,9 +265,8 @@ namespace PhaseEngine
         public void FixConnections()  { for(byte i=0; i<opCount; i++)  FixConnections(i); }
 
 
-        // public bool FromString
-
-        public void FromJSON(JSONObject data, bool fabricateGrid=false, bool reinit=false)
+        public bool FromJSON(JSONObject data) => FromJSON(data, false);
+        public bool FromJSON(JSONObject data, bool reinit)
         {
             try
             {
@@ -297,12 +296,13 @@ namespace PhaseEngine
 
             } catch (Exception e) {
                 System.Diagnostics.Debug.Fail("Algorithm.FromJSON failed:  " + e.Message);
+                return false;
             }
-
+            return true;
         }
 
         public string ToJSONString() => ToJSONObject().ToJSONString();
-        internal JSONObject ToJSONObject()
+        public JSONObject ToJSONObject()
         {
             var o=new JSONObject();
             o.AddPrim("opCount", opCount);

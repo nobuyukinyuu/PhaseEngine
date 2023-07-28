@@ -77,7 +77,11 @@ func set_from_op(op:int):
 	var type = clamp(eg.GetOscType(op), 0, $WavePanel/Wave.max_value)
 	$WavePanel/Wave.value = type
 	
+	#Changing the step temporarily is necessary to stop Godot from snapping a mult of 0.5 to 1.
+	$Tune/Mult.step = 0
 	$Tune/Mult.value = d2["mult"]
+	$Tune/Mult.step = 1
+	
 	$Tune/Coarse.value = d2["coarse"]
 	$Tune/Fine.value = d2["fine"]
 	$Tune/Detune.value = d2["detune"]
@@ -86,8 +90,11 @@ func set_from_op(op:int):
 #	_on_FixedRatio_toggled(!d2["fixedFreq"], false)
 #	$Frequency/Frequency.value = d2["base_hz"]
 	$FixedRatio.pressed = !d2.get("fixedFreq", false)
-	_on_FixedRatio_toggled(!d2.get("fixedFreq", false), false)
-	$Frequency/Frequency.value = d2.get("base_hz", 440)
+	_on_FixedRatio_toggled(!d2.get("fixedFreq", false), false)  #Flip the panel to the appropriate side
+	
+	var base_hz = d2.get("base_hz", 440)
+	$Frequency/Frequency.value = int(base_hz)
+	$"Frequency/H/Fine Tune".value = base_hz if base_hz < 1 else fposmod(base_hz, 1)
 	
 	#Get dictionary of rTable values and populate the tbl_placeholder in ResponseButtons
 	for btn in rTables:

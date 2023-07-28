@@ -9,12 +9,13 @@ namespace PhaseEngine
         // void Apply(byte index, ref object target);
         void UpdateValue(byte index, ushort value);
         void SetScale(float floor, float ceiling);
-        public string ToJSONString();
+        // public string ToJSONString();
+        public string ToJSONString(bool includeIntent=false);
     }
 
-    public abstract class RTable<T> : IResponseTable
+    public abstract class RTable<T> : IResponseTable, IJSONSerializable
     {
-        protected const short RTABLE_MAX = 1024;
+        protected const short RTABLE_MAX = 1024;  //Typically the highest value a standard RTable can have
         public RTableIntent intent = RTableIntent.DEFAULT;
         public float floor=0, ceiling=100;
         public T[] values = new T[128];
@@ -54,9 +55,11 @@ namespace PhaseEngine
             }
         }
 
-        public string ToJSONString() { return ToJSONObject(true).ToJSONString(); }
-        public string ToJSONString(bool includeIntent=true) { return ToJSONObject(includeIntent).ToJSONString(); }
-        internal JSONObject ToJSONObject(bool includeIntent=true)
+        public string ToJSONString() { return ToJSONObject(false).ToJSONString(); }
+        public string ToJSONString(bool includeIntent) { return ToJSONObject(includeIntent).ToJSONString(); }
+
+        public JSONObject ToJSONObject() => ToJSONObject(false);
+        internal JSONObject ToJSONObject(bool includeIntent)
         {
             JSONObject j = new JSONObject();
 
@@ -104,13 +107,6 @@ namespace PhaseEngine
             }
 
             return true;
-        }
-        public bool FromString(string input)
-        {
-            var P = JSONData.ReadJSON(input);
-            if (P is JSONDataError) throw new ArgumentException("JSON Data invalid. " + P.ToString());
-            var j = (JSONObject) P;
-            return FromJSON(j);
         }
 
         //Returns a table 2x the size of the normal table, every even index being a low byte and odd index a high byte.

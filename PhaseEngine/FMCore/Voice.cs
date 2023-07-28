@@ -8,7 +8,7 @@ using Godot;
 
 namespace PhaseEngine 
 {
-    public class Voice
+    public class Voice : IJSONSerializable
     {
         internal float BindManagerTicksPerSec {get=> Global.MixRate/bindManagerMaxClocks; set{bindManagerMaxClocks=(ushort)(Global.MixRate/value); ResetPreview();}}
         ushort bindManagerMaxClocks=1;  //Used to synchronize preview with chip if we want to update binds more or less times per sec
@@ -284,7 +284,7 @@ namespace PhaseEngine
 
 
         //////////////////////////////////////////////////  IO  //////////////////////////////////////////////////
-        public void FromJSON(JSONObject data)
+        public bool FromJSON(JSONObject data)
         {
             try
             {
@@ -305,15 +305,19 @@ namespace PhaseEngine
 
                 lfo.FromJSON((JSONObject) data.GetItem("lfo"));
 
+                if (data.HasItem("wavetable"))
+                {
+                    var wavedata = new WaveTableData();
+                    if (wavedata.FromJSON((JSONObject) data.GetItem("wavetable")))  //If parsing fails, we don't wanna clobber our wavetable...
+                        wavetable = wavedata;
+                }
+
             } catch (Exception e) {
                 System.Diagnostics.Debug.Print("Voice.FromJSON:  Malformed JSON or missing data.. " + e.Data.ToString());
+                return false;
             }
 
-            wavetable = new WaveTableData();
-            if (data.HasItem("wavetable"))
-            {
-                wavetable.FromJSON((JSONObject) data.GetItem("wavetable"));
-            }
+            return true;
         }
 
         public string ToJSONString() => ToJSONObject().ToJSONString();
@@ -354,8 +358,14 @@ namespace PhaseEngine
             output.AddPrim("oscillator", (Oscillator.oscTypes)oscType[opNum]);
             output.AddItem( "envelope", egs[opNum].ToJSONObject(alg.intent[opNum] != OpBase.Intents.FILTER) );  //Don't include RTables if op is a filter.
 
-            if( ((int)alg.intent[opNum] & 1) == 1) //Only add increments object if the intent is FM_OP or BITWISE (1 or 3)
-                output.AddItem("increments", pgs[opNum].ToJSONObject());
+            //Only add increments object if the intent is FM_OP, FM_HQ, BITWISE, or the operator utilizes adjustments to the mult ratio.
+            switch(alg.intent[opNum]){
+                case OpBase.Intents.FM_OP:
+                case OpBase.Intents.FM_HQ:
+                case OpBase.Intents.BITWISE:
+                    output.AddItem("increments", pgs[opNum].ToJSONObject());
+                    break;
+            }
 
             return output;
         }
