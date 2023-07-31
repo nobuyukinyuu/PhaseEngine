@@ -144,7 +144,22 @@ namespace PhaseEngine
         public float[] CalcPreview(int period=12000, int size=256, bool disableLFO=true )
         {
             // const int NOTE_A4=69;
-            var output = new float[size];  var oc=0;
+            var output = new float[size*3];  var oc=0; //Output min/max values in the upper thirds of the array.
+
+            //Determine if any attacks to output are slow. Increase the period until we have a visual of sound.
+            int speed = 0;
+            for(byte i=0;  i<opCount;  i++)
+                {
+                    if(alg.connections[i] != 0) continue;
+                    if(egs[i].ar > speed) speed = egs[i].ar;
+                }
+            if (speed<2) return new float[size]; //Skip infinite output and output that takes a long time to process
+            else if (speed < 24)
+            {
+                speed = 1 + (Envelope.R_MAX >> 1) - speed;  //Speed is now transformed into a multiplier.
+                period = (int)(period*speed/3.2f);
+            }
+
             var stride = (period/(double)size);
             var strideCount = stride;
             // var preview = this.preview;  //Reduce memory thrash by using our own Channel instance
@@ -165,7 +180,7 @@ namespace PhaseEngine
 
             preview.NoteOn(0, 64);  //preview.NoteOn
             int bindTicks=0;
-            for (int i=0; oc<size && i<period; i++)
+            for (int i=0; oc<size && i<period; i++)  //Don't exceed our preview period and keep going until all output checks are completed
             {
                 //Check binds for necessary updates
                 bindTicks++;
@@ -180,13 +195,28 @@ namespace PhaseEngine
                       }
                 }
 
+                //Assign minmaxes
+                var sample = Tables.short2float[preview.RequestSample() + Tables.SIGNED_TO_INDEX];
+                output[oc+size] = Math.Min(sample, output[oc+size]);
+                output[oc+(size<<1)] = Math.Max(sample, output[oc+(size<<1)]);
+
                 if (strideCount<1)  // Hit a point where we need to fill up output
                 {
                     strideCount += stride;
-                    output[oc] = Tables.short2float[preview.RequestSample()+ Tables.SIGNED_TO_INDEX];  oc++;
+                    // output[oc] = Tables.short2float[preview.RequestSample() + Tables.SIGNED_TO_INDEX];
+                    output[oc] = sample;
+        
+                    oc++;
+
+                    if (oc<size) //Prime the next samples' minmaxes.
+                    {
+                        output[oc+size] = sample;
+                        output[oc+(size<<1)] = sample;
+                    }
                 }
                 strideCount--;
-                
+
+
                 preview.Clock();
             }
             preview.NoteOff();
@@ -250,7 +280,17 @@ namespace PhaseEngine
         internal void SetIntent(byte opTarget, OpBase.Intents intent)  //Sets up envelopes for a new usage intent to saner defaults.
         {
             //Update the preview and the intent.
+            var oldIntent = alg.intent[opTarget];
             alg.SetIntent(opTarget, intent);
+
+            if (oldIntent == OpBase.Intents.FM_HQ && intent != OpBase.Intents.FM_HQ)  
+                //Old intent was HQ, shrink down FB levels.
+                egs[opTarget].feedback = (byte)Math.Round(egs[opTarget].feedback/25.5);
+            else if (intent == OpBase.Intents.FM_HQ && oldIntent != OpBase.Intents.FM_HQ)
+            {   //Increase the feedback and AMS levels to extended values
+                egs[opTarget].feedback = (byte)Math.Min(Math.Round(egs[opTarget].feedback*25.5), 255);
+                // egs[opTarget].ams = Math.Clamp(egs[opTarget].ams, (byte)0, (byte)10);
+            }
 
             switch (intent)
             {
@@ -270,9 +310,8 @@ namespace PhaseEngine
                     egs[opTarget].duty = 0;  //Set dry mix to 0.  Default for FM ops is 0x7FFF (50%) and may confuse new users.
                     egs[opTarget].gain = Math.Clamp(egs[opTarget].gain, Filter.GAIN_MIN, Filter.GAIN_MAX);  //Prevent extreme gain from wavefolders
                     break;
-
-
             }
+
             preview.SetIntents(opTarget, (byte)(opTarget + 1));
         }
 

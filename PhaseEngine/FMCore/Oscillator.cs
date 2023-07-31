@@ -58,7 +58,9 @@ namespace PhaseEngine
             // const ushort MASK = WaveTableData.TBL_SIZE -1;
             // const byte BITS = 10 - WaveTableData.TBL_BITS;
             ushort MASK = (ushort) (auxdata2.Length -1);
-            byte BITS = (byte) (10 - Tools.Ctz(auxdata2.Length));  //Count trailing 0s of waveform length to determine closest power of 2 to scale phase by.
+
+            //Count trailing 0s of waveform length to determine closest power of 2 to scale phase by.
+            byte BITS = (byte) (Increments.UNIT_BIT_WIDTH - Tools.Ctz(auxdata2.Length));  
 
             ushort phase = (ushort) unchecked((n>>BITS));  //Scale result to always be the same octave as other oscillators
             var volume = auxdata2[phase & MASK];
@@ -72,7 +74,8 @@ namespace PhaseEngine
         public static ushort Wave2(ulong n, ref bool flip, short[] sample)
         {
             ushort MASK = (ushort) (sample.Length -1);
-            byte BITS = (byte) (10 - Tools.Ctz(sample.Length));  //Count trailing 0s of waveform length to determine closest power of 2 to scale phase by.
+            //Count trailing 0s of waveform length to determine closest power of 2 to scale phase by.
+            byte BITS = (byte) (Increments.UNIT_BIT_WIDTH - Tools.Ctz(sample.Length));  
 
             ushort phase = (ushort) unchecked((n>>BITS));  //Scale result to always be the same octave as other oscillators
             var volume = sample[phase & MASK];

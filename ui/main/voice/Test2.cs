@@ -398,6 +398,7 @@ public class Test2 : Label
         switch(c.Voice.alg.intent[opTarget])
         {
             case OpBase.Intents.FM_OP:
+            case OpBase.Intents.FM_HQ:
                 return GetOscType(opTarget);
             case OpBase.Intents.FILTER:
             case OpBase.Intents.BITWISE:
@@ -724,11 +725,10 @@ public class Test2 : Label
     }
 
     ///////////////////////////////////  PREVIEW  ///////////////////////////////////
-    public float[] CalcPreview() {return c.Voice.CalcPreview();}
-
-    public bool is_quiet() {return c.ChannelsAreFree;}
-    public int connections_to_output() {return c.Voice.alg.NumberOfConnectionsToOutput;}
-    public byte[] GetCarriers() {return c.Voice.alg.GetCarriers();}
+    public float[] CalcPreview() => c.Voice.CalcPreview();
+    public bool is_quiet() => c.ChannelsAreFree;
+    public int connections_to_output() => c.Voice.alg.NumberOfConnectionsToOutput;
+    public byte[] GetCarriers() => c.Voice.alg.GetCarriers();  //Used to create stack groups in UI
     public byte[] GetModulators(byte opNum) {  //Used by the UI to arrange operators in the kanban by stack.
         var m = c.Voice.alg.GetModulators(opNum);
         var output=new byte[m.Count]; 

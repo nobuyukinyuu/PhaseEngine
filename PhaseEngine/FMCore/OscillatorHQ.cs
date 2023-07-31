@@ -58,7 +58,9 @@ namespace PhaseEngine
             // const ushort MASK = WaveTableData.TBL_SIZE -1;
             // const byte BITS = 10 - WaveTableData.TBL_BITS;
             ushort MASK = (ushort) (auxdata2.Length -1);
-            byte BITS = (byte) (10 - Tools.Ctz(auxdata2.Length));  //Count trailing 0s of waveform length to determine closest power of 2 to scale phase by.
+
+            //Count trailing 0s of waveform length to determine closest power of 2 to scale phase by.
+            byte BITS = (byte) (Increments.UNIT_BIT_WIDTH - Tools.Ctz(auxdata2.Length));  
 
             ushort phase = (ushort) unchecked((n>>BITS));  //Scale result to always be the same octave as other oscillators
             var volume = auxdata2[phase & MASK];
@@ -72,15 +74,16 @@ namespace PhaseEngine
         public static float Wave2(ulong n, ref bool flip, short[] sample)
         {
             ushort MASK = (ushort) (sample.Length -1);
-            byte BITS = (byte) (10 - Tools.Ctz(sample.Length));  //Count trailing 0s of waveform length to determine closest power of 2 to scale phase by.
+            //Count trailing 0s of waveform length to determine closest power of 2 to scale phase by.
+            byte BITS = (byte) (Increments.UNIT_BIT_WIDTH - Tools.Ctz(sample.Length));
 
             ushort phase = (ushort) unchecked((n>>BITS));  //Scale result to always be the same octave as other oscillators
             var volume = sample[phase & MASK];
             volume |= 1;  //Chop a bit off the end; this is done to stop an overflow if the value is MinValue
-            var attenuation = Tables.vol2attenuation[Tools.Abs(volume) >> 2]; //Convert sample to 14-bit and get attenuation.
+
 
             flip = volume < 0;
-            return attenuation;  //0x7F for tables of 128, or 0xFF for 256 if upped later....
+            return Math.Abs(Tables.short2float[volume+Tables.SIGNED_TO_INDEX]); 
         }
 
         public static float Pulse(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
@@ -98,7 +101,7 @@ namespace PhaseEngine
             output -= bump2;
 
             // output = Tables.vol2attenuation[(int)Math.Abs(output*8191)];
-            return Tables.vol2attenuation[(int)Math.Abs(output*8191)];
+            return (float)Math.Abs(output);
         }
 
         public static float Sine(ulong input, ushort duty, ref bool flip, TypedReference auxdata)
@@ -128,15 +131,15 @@ namespace PhaseEngine
         public static float Saw(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
             var auxdata2 = __refvalue(auxdata, long);
-            ushort phase = (ushort) unchecked((n<<6));
-            var inc = (auxdata2 >> Global.FRAC_PRECISION_BITS) << 6;
+            ushort phase = (ushort) n;
+            var inc = (auxdata2 >> Global.FRAC_PRECISION_BITS);
             var output = phase / 32768.0 - 1.0;
             var bump1=(PolyBLEP(phase, inc&65535));
 
             flip= (output < 0);
             output -= bump1;
 
-            return Tables.vol2attenuation[(int)Math.Abs(output*8191)];
+            return (float)Math.Abs(output);
         }
 
         public static float Saw2(ulong n, ushort duty, ref bool flip, TypedReference auxdata)  //Older, non-antialiased saw.

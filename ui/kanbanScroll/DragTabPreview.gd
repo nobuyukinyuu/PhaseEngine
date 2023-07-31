@@ -4,7 +4,7 @@ extends Control
 const wave_desc = ["Sin", "Tri", "Saw", "Sqr", "Wht", "Pnk", "Brn", "Ns1", "APU", "Wav"]
 const filt_desc = ["Flt", "LPF", "HPF", "BPF", "BPz", "Not", "All", "Pk" , "LoS", "HiS"]
 const bit_desc  = ["And", "Or", "Xor", "R\\g"]
-const intent_cols = ["ffffff", "36d5ff", "38dfc8", "b3efff", "ffb9b5"]
+const intent_cols = ["ffffff", "36d5ff", Color(0.5,1.2,2), "38dfc8", "b3efff", "ffb9b5"]
 
 const bit_icons = [
 	preload("res://gfx/ui/ops/icon_and.svg"),
@@ -31,7 +31,7 @@ func setup(intent, osc_type):
 func set_desc(intent, osc_type):
 	
 	match intent:
-		global.OpIntent.FM_OP:
+		global.OpIntent.FM_OP, global.OpIntent.FM_HQ:
 			return wave_desc[osc_type]
 		global.OpIntent.FILTER:
 			return filt_desc[osc_type]
@@ -54,7 +54,7 @@ func set_icon(intent, osc_type):
 	style2.border_color = Color("1da8b2")
 
 	match intent:
-		global.OpIntent.FM_OP:
+		global.OpIntent.FM_OP, global.OpIntent.FM_HQ:
 			#Use waveform icons.
 			return load("res://gfx/ui/ops/%s.svg" % min(osc_type,4))
 		global.OpIntent.FILTER:

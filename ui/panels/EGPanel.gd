@@ -19,7 +19,7 @@ func _ready():
 		o.connect("value_changed", self, "setEG", [o.associated_property])
 		o.connect("value_changed", self, "update_env", [o])
 
-	var fb
+	var fb:EGSlider
 	if $Tweak.has_node("Feedback"):  #Done manually to trigger the oscillator function check
 		fb = $Tweak/Feedback
 	elif $More/P/V.has_node("Feedback"):  #Panel is a BitwiseOpPanel
@@ -66,12 +66,21 @@ func _ready():
 		
 		
 
-	if !chip_loc.is_empty():
-		set_from_op(operator)
+	if !chip_loc.is_empty():  
+		set_from_op(operator)  #Get the appropriate operator values and set up our panel
+
 
 #Bus operator values from the C# Chip handler.  
 func set_from_op(op:int):
 	var eg = get_node(chip_loc)
+
+	#Increase the resolution of feedback if we're an HQ Operator
+	if eg.GetOpIntent(op) == global.OpIntent.FM_HQ:
+		var fb:EGSlider = $Tweak/Feedback
+		fb.special_display = fb.SpecialDisplay.PERCENT
+		fb.max_value = 255
+
+
 	var d = eg.GetOpValues(0, op)  #EG dictionary
 	var d2 = eg.GetOpValues(1, op) #PG dictionary
 	var type = clamp(eg.GetOscType(op), 0, $WavePanel/Wave.max_value)

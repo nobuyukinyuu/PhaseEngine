@@ -100,11 +100,8 @@ namespace PhaseEngine
                 // EGClock(env_counter);
         }
 
-        public override short RequestSample(ushort modulation = 0, ushort am_offset = 0)
-        {
-            return operatorOutputSample(modulation, am_offset);
-            // return oscillator.Generate(unchecked(phase >> Global.FRAC_PRECISION_BITS), duty, ref flip);
-        }
+        public override short RequestSample(ushort modulation = 0, ushort am_offset = 0) => operatorOutputSample(modulation, am_offset);
+
 
         //Sets up the operator to act as an oscillator for FM output.
         public virtual void SetOscillatorType(Oscillator.oscTypes type)
@@ -162,7 +159,7 @@ namespace PhaseEngine
         }
         public short ComputeWavetable(ushort modulation, ushort am_offset)
         {
-            ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + modulation);
+            ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + (modulation<<5));
 
             //TODO:  Consider using this.CurrentTable to reduce fetch calls.
             //  This would also allow a Linear intent to create morphed tables during Clock() at a rate we can specify as a separate envelope
@@ -270,17 +267,20 @@ namespace PhaseEngine
                     //     egStatus = EGStatus.SUSTAINED;
                     // else egStatus = EGStatus.DECAY;
                     egStatus = EGStatus.DECAY;
-
+                    return;
                     // target = eg.levels[(int)EGStatus.DECAY];
                 } else {
                     env_hold_counter++; 
                     return;
                 }
-                break;
+                // break;
 
             case EGStatus.DECAY:
                 target = eg.levels[(int)EGStatus.DECAY];
-                if ( ((egAttenuation >= target) && !eg.rising[(int)EGStatus.DECAY]) | (eg.rising[(int)EGStatus.DECAY] && (egAttenuation <= target)))  egStatus ++;
+                if ( ((egAttenuation >= target) && !eg.rising[(int)EGStatus.DECAY]) | (eg.rising[(int)EGStatus.DECAY] && (egAttenuation <= target)))  {
+                    egStatus ++;
+                    return;
+                }
                 break;
             case EGStatus.SUSTAINED:
                 target = eg.levels[(int)EGStatus.SUSTAINED];
@@ -322,11 +322,11 @@ namespace PhaseEngine
 
 
             // determine the increment based on the non-fractional part of env_counter
-            byte increment = Tables.attenuation_increment(rate, (byte) Tools.BIT(env_counter, 11, 3));
+            // byte increment = Tables.attenuation_increment(rate, (byte) Tools.BIT(env_counter, 11, 3));
+            byte increment = Tables.attenuation_increment(rate, (byte)Tools.BIT(env_counter, (rate_shift <= 11) ? (byte)11 : rate_shift, 3));
 
 
             // attack is the only one that increases
-            // if (egStatus == EGStatus.ATTACK || eg.rising[(int)egStatus])
             if (egStatus == EGStatus.ATTACK)
             {
                 egAttenuation += (ushort) ((~egAttenuation * increment) >> 4);

@@ -52,8 +52,9 @@ namespace PhaseEngine
         //Note transposition ratio table
         public static readonly double[] transpose = new double[1300];  //10kb
 
-        //Duty cycle increment ratio table for sine oscillators
+        //Duty cycle increment ratio table for sine oscillators, and HQ feedback ratio
         public static readonly float[] dutyRatio = new float[ushort.MaxValue+1];  //256kb. Converts a ushort into a fraction from 0-1.
+        public static readonly float[] fbRatio = new float[256];
 
         //Amplitude modulation depth scaling ratio table
         public static readonly float[] amdScaleRatio = new float[1024];  //4kb.  Scale used to multiply against an oscillator to produce a given amplitude depth.
@@ -84,6 +85,11 @@ namespace PhaseEngine
 
             }
 
+
+            //Determine how much to divide the modulation offset feedback for HQ operators. Typical range for LQ is UShort.MaxValue>>(10-fb).
+            for(int i=0; i<fbRatio.Length; i++) 
+                fbRatio[i] =  (float)(1.0/    Math.Pow(2, ((fbRatio.Length-i-1)/(double)fbRatio.Length) * 10.0));
+            //TODO:  Consider replacing fbRatio[0] with 0 so fb can be automated in HQ operators
 
             //Transpose
             for(int i=0; i<transpose.Length; i++)
