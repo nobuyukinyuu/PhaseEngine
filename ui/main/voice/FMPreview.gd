@@ -34,12 +34,12 @@ func _draw():
 		var h = rect_size.y/2 #Midline
 		var h2 = 0.75 if not c else 4.0/float(c.connections_to_output()) * 0.75 #Volume scalar
 		var pt = Vector2(i,  pts[i] * h2 * h + h)
-		var p2 = Vector2(i,  pts[i+1] * h2 * h + h)
+		var p2 = Vector2(i+1,  pts[i+1] * h2 * h + h)
 		var a = Vector2(i, pts[i+sz] * h2 * h + h) #min
 		var b = Vector2(i, pts[i+sz+sz] * h2 * h + h) #max
 		draw_line(a,b, ColorN("yellow", 0.2))
 #		draw_circle(pt, 1, ColorN("yellow", 0.6))
-		draw_line(pt, p2, ColorN("yellow", 0.6),1.0, false)
+		draw_line(pt, p2, ColorN("yellow", 0.6),1.0, true)
 		draw_line(a, Vector2(i, h), ColorN("yellow", 0.05))
 
 func _on_Timer_timeout():

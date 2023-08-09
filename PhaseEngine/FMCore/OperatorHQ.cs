@@ -15,6 +15,8 @@ namespace PhaseEngine
         //Parameters specific to Operator
         // public short[] fbBuf = new short[2];  //feedback buffer
 
+        protected new OscillatorHQ oscillator = new OscillatorHQ(OscillatorHQ.Sine);
+
         public OperatorHQ(){operatorOutputSample=ComputeVolume; intent=Intents.FM_HQ; }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)] 
@@ -52,7 +54,7 @@ namespace PhaseEngine
         //Sets up the operator to act as an oscillator for FM output.
         public override void SetOscillatorType(Oscillator.oscTypes type)
         {
-            oscillator.CurrentWaveform = type;
+            oscillator.CurrentWaveform = (OscillatorHQ.oscTypes)type;
             switch(type.ToString())
             {
                 case "Brown":
@@ -90,7 +92,7 @@ namespace PhaseEngine
 //         }
         public new short ComputeWavetable(ushort modulation, ushort am_offset)
         {
-            ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + modulation);
+            ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + (modulation<<5));
 
             //TODO:  Consider using this.CurrentTable to reduce fetch calls.
             //  This would also allow a Linear intent to create morphed tables during Clock() at a rate we can specify as a separate envelope
@@ -132,7 +134,7 @@ namespace PhaseEngine
 
             //Now, get the oscillator output, which should also be in float, and multiply together.
             // env_vol *= OscillatorHQ.Sine((ulong)phase, eg.duty, ref flip, __makeref(modulation));
-            env_vol *= OscillatorHQ.Sine(phase, eg.duty, ref flip, __makeref(pg.increment));
+            env_vol *= oscillator.Generate(phase, eg.duty, ref flip, __makeref(pg.increment));
 
             //Now scale up to the 14-bit volume the other operators expect for backwards compatibility. The extra precision bits will go elsewhere
             //So that they can be mixed into other HQ operators by the chip's channel mixer.
@@ -181,15 +183,11 @@ namespace PhaseEngine
             var seedRef = __makeref(this.seed);
             var samp = (short) oscillator.Generate(phase, eg.duty, ref flip, seedRef);
             // seed = __refvalue(seedRef, int);
-            ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);
+            float env_vol = -Tables.short2float[ 32767 - Tables.attenuationHQ2vol[envelope_attenuation(am_offset)] ];
 
-            const float SCALE = 1.0f / 8192;
+            // ushort logScale = (ushort)(Tables.attenuation_to_volume((ushort)(env_attenuation)));
 
-            ushort logScale = (ushort)(Tables.attenuation_to_volume((ushort)(env_attenuation)));
-
-            // var tl = 1 - (eg.tl*ONE_PER_THOU);
-            // short result = (short) (samp * (logScale * SCALE) * tl);
-            short result = (short) (samp * (logScale * SCALE) );
+            short result = (short) (samp * (env_vol));
 
             return result;
         }

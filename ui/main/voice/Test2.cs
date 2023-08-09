@@ -17,7 +17,7 @@ public class Test2 : Label
 
     public short testValue = 69;
 
-    Chip c = new Chip(6,4, 480);
+    Chip c = new Chip(6,1, 480);
     long[] lastID = new long[128];  //Keeps track of the last ID pressed on a specified note, to turn it off when a noteOff event is detected.
     public int[] channel_ttl = new int[]{0,0,0,0,0,0};  //Used to keep track of positions of active notes
     public int[] channel_release_tick = new int[]{0,0,0,0,0,0};  //Used to keep track of positions of the ttl at the time of NoteOff

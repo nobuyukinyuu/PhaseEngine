@@ -297,7 +297,8 @@ namespace PhaseEngine
                 case OpBase.Intents.FM_OP:
                 case OpBase.Intents.FM_HQ:
                 case OpBase.Intents.BITWISE:
-                    egs[opTarget].duty = 32767;  //Reset duty cycle to default.
+                    if (oldIntent==OpBase.Intents.WAVEFOLDER || oldIntent==OpBase.Intents.FILTER)
+                        egs[opTarget].duty = 32767;  //Reset duty cycle to default.
                     egs[opTarget].osc_sync = true;  //Enable oscillator sync to reduce popping.
                     break;
 

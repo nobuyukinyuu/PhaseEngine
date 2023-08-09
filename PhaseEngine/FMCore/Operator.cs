@@ -183,7 +183,6 @@ namespace PhaseEngine
             ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + modulation);
             var seedRef = __makeref(this.seed);
             var samp = (short) oscillator.Generate(phase, eg.duty, ref flip, seedRef);
-            // seed = __refvalue(seedRef, int);
             ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);
 
             const float SCALE = 1.0f / 8192;

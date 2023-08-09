@@ -43,6 +43,7 @@ namespace PhaseEngine
         public const byte TRI_TABLE_BITS = 4;
         public const byte TRI_TABLE_MASK = (1 << TRI_TABLE_BITS) - 1;
         public static readonly ushort[] tri = new ushort[TRI_TABLE_MASK+1];
+        public static readonly float[] triHQ = new float[TRI_TABLE_MASK+1];
         public static readonly ushort[] saw = new ushort[256];
 
 
@@ -109,6 +110,7 @@ namespace PhaseEngine
                 var inc = ((i+0.5)/(double)(tri.Length)) ;
                 // saw[i] = (ushort)(Tools.ToFixedPoint( inc, 8) | (uint)inc  & (ushort.MaxValue>>0));
                 tri[i] = (ushort) ( (float) Math.Round(-Tools.Log2(inc) * 256));
+                triHQ[i] = (float)inc;
             }
 
             //saw table

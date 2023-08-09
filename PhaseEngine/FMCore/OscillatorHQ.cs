@@ -42,14 +42,6 @@ namespace PhaseEngine
             else return 0.0;
         }
 
-        // // Branchless -- but tested, takes 2x longer than the original!
-        // public static float polyBlep2(float t, float dt)
-        // {
-        //     float s = Math.Sign(t-0.5);
-        //     t = Math.Min((0.5f-s*(t-0.5f))/dt, 1.0f);    
-        //     return s*(t*t - 2.0f*t + 1.0f);
-        // }
-
 
         public static float Wave(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
@@ -89,8 +81,8 @@ namespace PhaseEngine
         public static float Pulse(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
             var auxdata2 = __refvalue(auxdata, long);
-            ushort phase = (ushort) unchecked((n<<6));
-            var inc = (auxdata2 >> Global.FRAC_PRECISION_BITS) << 6;
+            ushort phase = (ushort) n;
+            var inc = (auxdata2 >> Global.FRAC_PRECISION_BITS);
             var output = phase >= duty?  -1.0:1.0;
             var bump1=(PolyBLEP(phase, inc&65535));
             var bump2=(PolyBLEP((phase - duty)&65535, inc&65535));
@@ -142,28 +134,23 @@ namespace PhaseEngine
             return (float)Math.Abs(output);
         }
 
-        public static float Saw2(ulong n, ushort duty, ref bool flip, TypedReference auxdata)  //Older, non-antialiased saw.
-        {
-            flip=false;
-            if ( Tools.BIT(n, 9).ToBool() )
-            {
-                flip=true;
-                n = (ushort) ~n;
-            }
-            var output = Tables.saw[(n>>2) & 0xFF];
-            return (ushort)output;
-        }
 
         public static float Tri(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
-            flip = Tools.BIT(n, 9).ToBool();
+            const int SHIFT_BITS = 14 - Tables.TRI_TABLE_BITS;  
+            
+            var dutyCheck = (ushort)(n);
+            if (duty<<1 < dutyCheck || (ushort)~duty<<1 < (ushort)~dutyCheck ) return 0;
 
-            if ( Tools.BIT(n, 8).ToBool() )
-            {
-                n = (ushort) ~n;
-            }
+            n >>= SHIFT_BITS;  //Move the phase into the range of the table
 
-            return Tables.tri[unchecked(n>>4 & Tables.TRI_TABLE_MASK)];
+            const int FLIP_BIT = Tables.TRI_TABLE_BITS+1;
+            flip = Tools.BIT(n, FLIP_BIT).ToBool();
+
+            if ( Tools.BIT(n, Tables.TRI_TABLE_BITS).ToBool() )
+                n = (ushort) ~n; 
+
+            return Tables.triHQ[unchecked(n & Tables.TRI_TABLE_MASK)];
         }
 
 
@@ -193,7 +180,7 @@ namespace PhaseEngine
         {
             unchecked
             {
-                var phase = unchecked((ushort) n);
+                var phase = unchecked((ushort) n>>6);
                 var seed = __refvalue(auxdata, int);
 
                 if (phase % ((byte)(duty)+1)==0)  
@@ -265,13 +252,18 @@ namespace PhaseEngine
         public static APU_Noise gen2 = new APU_Noise();
         public static float Noise2(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
+            var seed = __refvalue(auxdata, int);
+            gen2.seed = (ushort)(seed & 0xFFFF);
+            gen2.counter = (ushort)(seed>>16);
+
             gen2.ModeBit = unchecked((byte)(duty >>12));  //Sets the mode to a value 0-15 from high 4 bits. 
             gen2.pLen = (ushort)(((duty<<2) & 0x7F) +((duty>>5) & 0x7F) );  //Sets counter len to to bits 0-4 * 4, plus bits 5-11.
             ushort gen = gen2.Current((uint)n );
+    
+            //Return the seed back to the method that requested it, so we can hold the state of multiple oscillators
+            __refvalue(auxdata, int) = (gen2.counter<<16)| gen2.seed;  
             return gen;
         }
-
-
 
     }
 

@@ -340,24 +340,29 @@ namespace PhaseEngine
             return (ushort) (output);
         }
 
-        static int bval = 0x1A500;
-        public static ushort Brown_OLD(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
-        {
-            bval +=  ( (ushort)bgen.urand() ) >> 5 ;
-            bval = (int) (bval * 0.99);
-            var output = (bval - 0x7FFF);
+        // static int bval = 0x1A500;
+        // public static ushort Brown_OLD(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
+        // {
+        //     bval +=  ( (ushort)bgen.urand() ) >> 5 ;
+        //     bval = (int) (bval * 0.99);
+        //     var output = (bval - 0x7FFF);
 
-            return (ushort) (output);
-        }
-
-
+        //     return (ushort) (output);
+        // }
 
         public static APU_Noise gen2 = new APU_Noise();
         public static ushort Noise2(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
+            var seed = __refvalue(auxdata, int);
+            gen2.seed = (ushort)(seed & 0xFFFF);
+            gen2.counter = (ushort)(seed>>16);
+
             gen2.ModeBit = unchecked((byte)(duty >>12));  //Sets the mode to a value 0-15 from high 4 bits. 
             gen2.pLen = (ushort)(((duty<<2) & 0x7F) +((duty>>5) & 0x7F) );  //Sets counter len to to bits 0-4 * 4, plus bits 5-11.
             ushort gen = gen2.Current((uint)n );
+    
+            //Return the seed back to the method that requested it, so we can hold the state of multiple oscillators
+            __refvalue(auxdata, int) = (gen2.counter<<16)| gen2.seed;  
             return gen;
         }
 
@@ -378,8 +383,8 @@ public class APU_Noise
     public byte ModeBit{get=> mode_bit;  set=> mode_bit = (byte)((value & 0xF)+1); }
     byte mode_bit = 1;  //1-8, determines the periodicity of the waveform.
 
-    ushort seed = Global.DEFAULT_SEED;
-    ushort counter=0;
+    public ushort seed = Global.DEFAULT_SEED;
+    public ushort counter=0;
 
     //Converts a midi note value such that this generator's wait period before shifting output values runs at one of 16 given rates.
     //See https://www.nesdev.org/wiki/APU_Noise for more details
