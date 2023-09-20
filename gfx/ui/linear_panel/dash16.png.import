@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/marker11.png-427d9d2120357159625c5e2eb07fad39.stex"
+path="res://.import/dash16.png-743efc97d6e0ea9f06e42ac4acaae9bd.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://gfx/ui/marker11.png"
-dest_files=[ "res://.import/marker11.png-427d9d2120357159625c5e2eb07fad39.stex" ]
+source_file="res://gfx/ui/linear_panel/dash16.png"
+dest_files=[ "res://.import/dash16.png-743efc97d6e0ea9f06e42ac4acaae9bd.stex" ]
 
 [params]
 

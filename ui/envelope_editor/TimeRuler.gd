@@ -1,4 +1,6 @@
 extends Control
+class_name TimeRuler, "res://gfx/ui/godot_icons/Sub.svg"
+tool
 
 var zoom = 1200  #Number of millisecs to display on ruler at once
 var offset = 0  #Offset from 0ms to start with
@@ -9,14 +11,20 @@ var col2 = Color("#40d6ff")
 var font = preload("res://gfx/fonts/numerics_5x8.tres")
 var font2 = preload("res://gfx/fonts/thin_font_6x8.tres")
 
-func _ready():
-	pass # Replace with function body.
+export(bool) var text_past_border = false
 
+func set_zoom(value):  
+	zoom = value
+	update()
+func set_offset(value):  
+	offset = value
+	update()
 
 func ms_per_px() -> float:  return zoom / float(rect_size.x) #number of millisecs in one pixel
 func ms2offset(ms):  return (ms - offset) / ms_per_px()  #Hypothetical px offset for a given ms
 
-const BASE_WIDTH=24.0 #px
+onready var BASE_WIDTH=12.0 if rect_size.x < 256 else 24.0 #px
+
 func _draw():
 	draw_line(Vector2.ZERO, Vector2(rect_size.x, 0), col)
 	
@@ -37,23 +45,24 @@ func _draw():
 		unit /=2.0
 
 	var mOffset = offset / one_px
-	var pxOffset = fmod(mOffset, uw)
+	var pxOffset = wrapf(mOffset, 0, uw)
 
 
 #	draw_string(font2, Vector2.ZERO,"unit: %sms, uw: %s, one_px: %s" % [unit, uw, one_px])
 
 	#Determine the number of subticks we can fit in between marked ticks before reaching base width (power of 2)
-	var subticks:float = 0 if uw < BASE_WIDTH else pow(2,round(log(uw/24)/log(2)))
+	var subticks:float = 0 if uw < BASE_WIDTH else pow(2,round(log(uw/BASE_WIDTH)/log(2)))
 
 	#First, determine if we can fit a label on the left side by measuring it.
-	var lbl = format_secs( offset )
-	if len(lbl)*5 + 2.5 < uw-pxOffset:  #continue
-		#Draw the label and associated tick.
-		draw_string(font, Vector2(0, h+2), lbl, Color("#ffff80"))
-		draw_line(Vector2.ZERO, Vector2(0, h) , col)
+	if not text_past_border:
+		var lbl = format_secs( offset )
+		if len(lbl)*5 + 2.5 < uw-pxOffset:  #continue
+			#Draw the label and associated tick.
+			draw_string(font, Vector2(0, h+2), lbl, Color("#ffff80"))
+			draw_line(Vector2.ZERO, Vector2(0, h) , col)
 
-
-	for i in range(0, rect_size.x+uw+1, uw):
+	var b = uw if text_past_border else 0
+	for i in range(-b, rect_size.x+uw+1+b, uw):
 		var xpos = i - pxOffset
 		var true_value = i #+ floor(offset/unit)
 
@@ -62,7 +71,10 @@ func _draw():
 #		else:
 		#Draw labels.
 		var ms = format_secs( stepify(true_value * one_px, unit/2.0) + floor(offset/unit)*unit)
-		if xpos + len(ms) * 5 <= rect_size.x and i>0:
+		var lblWidth = len(ms) * 5 if not text_past_border else 0
+		var lblWidth2 = len(ms) * 5 #if not text_past_border else 0
+#		if xpos+lblWidth <= rect_size.x and (i>0 or text_past_border) and (lblWidth2<=uw or wrapf(i,-b,uw)>0):
+		if xpos+lblWidth <= rect_size.x and (i>0 or text_past_border) and (lblWidth2<=uw or wrapf(i,-b,uw)>0):
 			draw_string(font, Vector2(xpos, h+2), ms)
 
 		#Draw ticks
@@ -89,10 +101,11 @@ func format_secs(input, ms_lbl="ms", s_lbl="s", m_lbl="m"):
 		var in_seconds = input >= 1000
 		var output = str(input if not in_seconds else input/1000.0)
 		if in_seconds or input < 10:
-			output = output.pad_decimals(2)
+			output = output.pad_decimals(2)  
 		else:
 			output = output.pad_decimals(0)
 		if output.ends_with(".00"):  output = output.substr(0, len(output)-3) #Near integer. No pad needed.
+#		elif output.ends_with(".0"):  output = output.substr(0, len(output)-2) 
 		
 		output += s_lbl if in_seconds else ms_lbl
 	

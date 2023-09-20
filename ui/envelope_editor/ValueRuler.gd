@@ -6,6 +6,7 @@ func _draw():
 		draw.dotted_line(self,Vector2(0, mPos.y), Vector2(rect_size.x, mPos.y), ColorN("yellow"), 1.0, false, 
 				2.0, 2.0, Color(1,0,0,0.75))
 
+	#Drawing over the time ruler here reduces the number of string redraws needed for the time ruler itself
 	var time_ruler = owner.get_node("Display/TimeRuler")
 	var origin = owner.get_node("Display").rect_position + time_ruler.rect_position - rect_position
 	var x = origin.x + mPos.x-rect_position.x

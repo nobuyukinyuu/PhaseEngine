@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=2]
+[gd_scene load_steps=38 format=2]
 
 [ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=1]
 [ext_resource path="res://gfx/fonts/numerics_5x8.tres" type="BitmapFont" id=2]
@@ -19,12 +19,12 @@
 [ext_resource path="res://gfx/ui/envelope_editor/icon_zoom_in.png" type="Texture" id=17]
 [ext_resource path="res://gfx/ui/envelope_editor/icon_zoom_out.png" type="Texture" id=18]
 [ext_resource path="res://ui/envelope_editor/Display.gd" type="Script" id=19]
-[ext_resource path="res://ui/envelope_editor/TimeRuler.gd" type="Script" id=20]
+[ext_resource path="res://ui/envelope_editor/TimeRuler.tscn" type="PackedScene" id=20]
 [ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=21]
 [ext_resource path="res://gfx/ui/hSlider.theme" type="Theme" id=22]
 [ext_resource path="res://gfx/ui/envelope_editor/icon_sustain.png" type="Texture" id=23]
 [ext_resource path="res://gfx/ui/envelope_editor/icon_loop.png" type="Texture" id=24]
-[ext_resource path="res://gfx/ui/point_crosshair.png" type="Texture" id=25]
+[ext_resource path="res://ui/PointCrosshair.tscn" type="PackedScene" id=25]
 [ext_resource path="res://ui/envelope_editor/NotePositions.gd" type="Script" id=26]
 [ext_resource path="res://gfx/ui/vu/ruler_log.png" type="Texture" id=27]
 [ext_resource path="res://ui/envelope_editor/value_label.gd" type="Script" id=28]
@@ -47,26 +47,6 @@ func _draw():
 		var pos = Vector2(max(20, get_local_mouse_position().x), get_local_mouse_position().y) + offset
 		draw_string(font, pos+Vector2.ONE, s, ColorN(\"black\"))
 		draw_string(font, pos, s)
-"
-
-[sub_resource type="GDScript" id=18]
-script/source = "extends Sprite
-
-var target = 0
-var should_display = false
-
-func _ready():
-	get_tree().create_timer(0.5).connect(\"timeout\", self, \"timeout\")
-
-
-func timeout():
-	target = 2 - target
-	frame=target
-	
-	yield(get_tree().create_timer(0.04),\"timeout\")
-	frame += 1
-	
-	get_tree().create_timer(0.5).connect(\"timeout\", self, \"timeout\")
 "
 
 [sub_resource type="GDScript" id=23]
@@ -96,7 +76,7 @@ func inv_xerp2(A,B,value):
 	return log(value/A)/log(B/A)
 "
 
-[sub_resource type="AtlasTexture" id=14]
+[sub_resource type="AtlasTexture" id=24]
 atlas = ExtResource( 11 )
 region = Rect2( 0, 0, 13, 5 )
 
@@ -229,20 +209,9 @@ margin_bottom = 272.0
 color = Color( 0.00392157, 0.0313726, 0.0470588, 1 )
 script = ExtResource( 19 )
 
-[node name="TimeRuler" type="Control" parent="Display"]
-margin_left = 4.0
-margin_top = 260.0
-margin_right = 408.0
-margin_bottom = 280.0
-script = ExtResource( 20 )
+[node name="TimeRuler" parent="Display" instance=ExtResource( 20 )]
 
-[node name="PointCrosshair" type="Sprite" parent="Display"]
-visible = false
-modulate = Color( 0.75, 0.5, 1, 1 )
-position = Vector2( 316, 104 )
-texture = ExtResource( 25 )
-hframes = 4
-script = SubResource( 18 )
+[node name="PointCrosshair" parent="Display" instance=ExtResource( 25 )]
 
 [node name="NotePositions" type="Control" parent="Display"]
 anchor_right = 1.0
@@ -286,7 +255,7 @@ margin_left = 16.0
 margin_top = 274.0
 margin_right = 29.0
 margin_bottom = 282.0
-texture = SubResource( 14 )
+texture = SubResource( 24 )
 stretch_mode = 4
 
 [node name="MinmaxSliderLabel2" type="TextureRect" parent="."]

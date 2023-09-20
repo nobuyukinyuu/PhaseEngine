@@ -54,6 +54,16 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://ui/knob/Knob.gd"
 }, {
+"base": "VoicePanel",
+"class": "LinearPanel",
+"language": "GDScript",
+"path": "res://ui/panels/LinearPanel.gd"
+}, {
+"base": "Control",
+"class": "TimeRuler",
+"language": "GDScript",
+"path": "res://ui/envelope_editor/TimeRuler.gd"
+}, {
 "base": "Control",
 "class": "VoiceIODialogs",
 "language": "GDScript",
@@ -79,6 +89,8 @@ _global_script_class_icons={
 "FilterTooltip": "",
 "KanbanColumn": "",
 "Knob": "res://ui/knob/icon_knob.svg",
+"LinearPanel": "res://gfx/ui/ops/icon_linear.svg",
+"TimeRuler": "res://gfx/ui/godot_icons/Sub.svg",
 "VoiceIODialogs": "res://gfx/ui/godot_icons/Save.svg",
 "VoicePanel": "res://gfx/ui/ops/icon_fm.svg",
 "WiringGridSlot": ""

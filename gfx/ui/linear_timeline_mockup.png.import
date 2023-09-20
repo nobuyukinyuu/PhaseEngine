@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/marker11.png-427d9d2120357159625c5e2eb07fad39.stex"
+path="res://.import/linear_timeline_mockup.png-ecc64f19c33e1210e352287334b805a8.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://gfx/ui/marker11.png"
-dest_files=[ "res://.import/marker11.png-427d9d2120357159625c5e2eb07fad39.stex" ]
+source_file="res://gfx/ui/linear_timeline_mockup.png"
+dest_files=[ "res://.import/linear_timeline_mockup.png-ecc64f19c33e1210e352287334b805a8.stex" ]
 
 [params]
 

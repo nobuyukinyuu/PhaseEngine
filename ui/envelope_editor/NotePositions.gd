@@ -5,7 +5,7 @@ enum BusyState{BUSY=128, RELEASED=512, FREE=1024}
 
 func _draw():
 #	if owner.owner == null:  return
-	var c = get_node(owner.owner.owner.chip_loc)
+	var c = get_node(owner.owner.owner.chip_loc) if owner is WindowDialog else get_node(owner.chip_loc)
 	if !c:  return
 	
 	var bounds = $"../TimeRuler"

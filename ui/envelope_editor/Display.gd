@@ -41,10 +41,6 @@ var loop_dragging = CanDrag.NO  #Active loop dragging handle.  Sustain values ar
 #signal loop_enabled  # [which
 #signal loop_moved
 
-func _ready():
-	pass # Replace with function body.
-
-
 #TODO:  Consider events on MouseUp to update max offset and zoom level to reach 10000ms or the last offset, 
 #		whichever is greater
 
@@ -53,7 +49,7 @@ func _gui_input(event):
 		
 		#First, check if the window is in the background.  If so, move the window up.
 		var parent = owner.get_parent()
-		if event.pressed and not owner.is_in_front():
+		if owner is WindowDialog and event.pressed and not owner.is_in_front():
 			print("window out of focus.  Refocusing!")
 			owner._on_CustomEnvelope_gui_input(event)
 #			return  #Uncomment this line if you'd rather input not propagate input to unfocused windows

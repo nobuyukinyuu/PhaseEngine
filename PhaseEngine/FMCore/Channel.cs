@@ -56,9 +56,12 @@ namespace PhaseEngine
                 //        Determine if the filter's connected to output, and only then process op as if directly connected to output.
                 if (!voice.OpReachesOutput(i) || voice.egs[i].mute)  continue;  //Skip over connections not connected to output.
 
+                const ushort THRESHOLD = 720;  //Attenuation threshold before we consider the TL output quiet enough
                 var op=ops[i];
                 if (busy==BusyState.BUSY ||
-                   (busy==BusyState.RELEASED &&  (op.egStatus != EGStatus.INACTIVE)) )
+                   (busy==BusyState.RELEASED &&  
+                     (op.egStatus!=EGStatus.INACTIVE && (op.egAttenuation + op.eg.tl < THRESHOLD))
+                   ) ) //Attenuation threshold actually doesn't have to be higher than 720 as very low output is only really perceptible on modulators.
                         setFree = false; //Found an active channel.  Don't set our busy state to FREE.
 
                 //Status of the envelope is such that the further along in the envelope it is, the higher the score.

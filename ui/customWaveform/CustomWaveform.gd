@@ -98,9 +98,27 @@ func fetch_table(bank=0):
 
 func _on_menu_item_selected(index):  #Called when needing to add or remove banks
 	match index:
-		4:  #Import bank from wave file
+		0:  #Import bank from wave file
 			$WaveImport/Dialog.popup_centered()
-		2:  #Smooth waveform
+		2:  #Amplify
+			pass
+		3:  #Normalize
+			var loudest=0
+			var tmp = []
+			for i in $VU.tbl.size():
+				var val = range_lerp($VU.tbl[i], 0,100,-1,1)
+				tmp.append(val)
+				loudest = max(loudest, abs(val))
+
+			if loudest == 0 or loudest == 1:  return
+			loudest = 1.0 / loudest #Reciprocate value to find amplification value.
+			for i in $VU.tbl.size():
+				$VU.tbl[i] = range_lerp(tmp[i]*loudest, -1, 1, 0, 100)
+			if $H2/Smooth.pressed:  $VU.smooth()
+			$VU.update()
+			update_table(ALL)
+			
+		255:  #Smooth waveform
 			$SmoothDialog.tbl = $VU.tbl
 			$SmoothDialog.popup(Rect2(get_local_mouse_position(), $SmoothDialog.rect_size))
 			

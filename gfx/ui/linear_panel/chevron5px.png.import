@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/marker11.png-427d9d2120357159625c5e2eb07fad39.stex"
+path="res://.import/chevron5px.png-7b4d0db554338b92876c2a979b0feae8.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://gfx/ui/marker11.png"
-dest_files=[ "res://.import/marker11.png-427d9d2120357159625c5e2eb07fad39.stex" ]
+source_file="res://gfx/ui/linear_panel/chevron5px.png"
+dest_files=[ "res://.import/chevron5px.png-7b4d0db554338b92876c2a979b0feae8.stex" ]
 
 [params]
 

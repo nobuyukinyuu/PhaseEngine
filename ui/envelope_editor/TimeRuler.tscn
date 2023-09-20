@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://ui/envelope_editor/TimeRuler.gd" type="Script" id=1]
+
+[node name="TimeRuler" type="Control"]
+margin_left = 4.0
+margin_top = 260.0
+margin_right = 408.0
+margin_bottom = 280.0
+script = ExtResource( 1 )

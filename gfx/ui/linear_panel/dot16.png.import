@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/marker11.png-427d9d2120357159625c5e2eb07fad39.stex"
+path="res://.import/dot16.png-7abee07ab801c7387e0f0202e1987a81.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://gfx/ui/marker11.png"
-dest_files=[ "res://.import/marker11.png-427d9d2120357159625c5e2eb07fad39.stex" ]
+source_file="res://gfx/ui/linear_panel/dot16.png"
+dest_files=[ "res://.import/dot16.png-7abee07ab801c7387e0f0202e1987a81.stex" ]
 
 [params]
 

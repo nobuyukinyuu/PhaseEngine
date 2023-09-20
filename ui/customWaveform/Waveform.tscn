@@ -22,8 +22,8 @@
 [ext_resource path="res://ui/customWaveform/SmoothDialog.gd" type="Script" id=20]
 [ext_resource path="res://gfx/ui/vu/25_percent_halftone_overlay.png" type="Texture" id=21]
 [ext_resource path="res://gfx/fonts/NoteFont.tres" type="BitmapFont" id=22]
-[ext_resource path="res://gfx/ui/godot_icons/Add.svg" type="Texture" id=23]
-[ext_resource path="res://gfx/ui/godot_icons/Remove.svg" type="Texture" id=24]
+[ext_resource path="res://gfx/ui/icon_speaker.svg" type="Texture" id=23]
+[ext_resource path="res://gfx/ui/icon_waveform.svg" type="Texture" id=24]
 [ext_resource path="res://gfx/ui/hSlider.theme" type="Theme" id=25]
 [ext_resource path="res://gfx/fonts/numerics_8x10.tres" type="BitmapFont" id=27]
 
@@ -170,9 +170,6 @@ margin_right = 304.0
 margin_bottom = 448.0
 custom_styles/panel = SubResource( 10 )
 script = ExtResource( 11 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Panel" type="Panel" parent="."]
 margin_top = 40.0
@@ -453,8 +450,6 @@ window_title = "Open a File"
 mode = 0
 access = 2
 filters = PoolStringArray( "*.wav; Wave File", "*.raw; Raw data" )
-current_dir = "/music/samples"
-current_path = "/music/samples/"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -484,8 +479,7 @@ margin_right = -24.0
 margin_bottom = 6.0
 custom_constants/separation = 4
 __meta__ = {
-"_edit_group_": true,
-"_edit_use_anchors_": false
+"_edit_group_": true
 }
 
 [node name="MenuButton" type="MenuButton" parent="H"]
@@ -497,7 +491,7 @@ custom_colors/font_color_pressed = Color( 0, 0.403922, 0.509804, 1 )
 custom_fonts/font = ExtResource( 12 )
 text = ":::"
 align = 2
-items = [ "Add", ExtResource( 23 ), 0, false, false, 0, 0, null, "", false, "", null, 0, false, false, 1, 0, null, "", true, "Delete", ExtResource( 24 ), 0, false, false, 5, 0, null, "", false, "", null, 0, false, true, 3, 0, null, "", true, "import...", ExtResource( 15 ), 0, false, false, 4, 0, null, "", false ]
+items = [ "import=", ExtResource( 15 ), 0, false, false, 0, 0, null, "", false, "", null, 0, false, false, 1, 0, null, "", true, "Amplify=", ExtResource( 24 ), 0, false, false, 2, 0, null, "", false, "Normalize", ExtResource( 23 ), 0, false, false, 3, 0, null, "", false ]
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -678,8 +672,7 @@ margin_right = -16.0
 margin_bottom = 344.0
 custom_constants/separation = 10
 __meta__ = {
-"_edit_group_": true,
-"_edit_use_anchors_": false
+"_edit_group_": true
 }
 
 [node name="Smooth" type="CheckBox" parent="H2"]

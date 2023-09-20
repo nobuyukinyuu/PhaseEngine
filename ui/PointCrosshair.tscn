@@ -1,0 +1,31 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://gfx/ui/point_crosshair.png" type="Texture" id=1]
+
+[sub_resource type="GDScript" id=18]
+script/source = "extends Sprite
+
+var target = 0
+var should_display = false
+
+func _ready():
+	get_tree().create_timer(0.5).connect(\"timeout\", self, \"timeout\")
+
+
+func timeout():
+	target = 2 - target
+	frame=target
+	
+	yield(get_tree().create_timer(0.04),\"timeout\")
+	frame += 1
+	
+	get_tree().create_timer(0.5).connect(\"timeout\", self, \"timeout\")
+"
+
+[node name="PointCrosshair" type="Sprite"]
+visible = false
+modulate = Color( 0.75, 0.5, 1, 1 )
+position = Vector2( 316, 104 )
+texture = ExtResource( 1 )
+hframes = 4
+script = SubResource( 18 )
