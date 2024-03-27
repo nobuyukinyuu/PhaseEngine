@@ -1,4 +1,4 @@
-[gd_scene load_steps=41 format=2]
+[gd_scene load_steps=49 format=2]
 
 [ext_resource path="res://ui/responseCurve/PresetMenu.theme" type="Theme" id=1]
 [ext_resource path="res://gfx/fonts/numerics_7seg.tres" type="BitmapFont" id=2]
@@ -25,7 +25,9 @@
 [ext_resource path="res://gfx/ui/icon_speaker.svg" type="Texture" id=23]
 [ext_resource path="res://gfx/ui/icon_waveform.svg" type="Texture" id=24]
 [ext_resource path="res://gfx/ui/hSlider.theme" type="Theme" id=25]
+[ext_resource path="res://ui/DialogDarkener.stylebox" type="StyleBox" id=26]
 [ext_resource path="res://gfx/fonts/numerics_8x10.tres" type="BitmapFont" id=27]
+[ext_resource path="res://ui/customWaveform/Amplify.gd" type="Script" id=28]
 
 [sub_resource type="StyleBoxFlat" id=10]
 bg_color = Color( 0, 0, 0, 0.878431 )
@@ -94,13 +96,6 @@ func _draw():
 
 [sub_resource type="ButtonGroup" id=6]
 
-[sub_resource type="StyleBoxFlat" id=14]
-bg_color = Color( 0, 0, 0, 0.752941 )
-expand_margin_left = 2048.0
-expand_margin_right = 2048.0
-expand_margin_top = 2048.0
-expand_margin_bottom = 2048.0
-
 [sub_resource type="StyleBoxFlat" id=13]
 bg_color = Color( 0, 0, 0, 0.776471 )
 corner_radius_bottom_right = 4
@@ -163,7 +158,28 @@ expand_margin_bottom = 12.0
 shadow_size = 1
 shadow_offset = Vector2( 1, 1 )
 
+[sub_resource type="Theme" id=23]
+
+[sub_resource type="InputEventAction" id=24]
+action = "ui_mult"
+
+[sub_resource type="ShortCut" id=25]
+shortcut = SubResource( 24 )
+
+[sub_resource type="InputEventAction" id=26]
+action = "ui_divide"
+
+[sub_resource type="ShortCut" id=27]
+shortcut = SubResource( 26 )
+
+[sub_resource type="InputEventAction" id=29]
+action = "envelope_remove_pt"
+
+[sub_resource type="ShortCut" id=30]
+shortcut = SubResource( 29 )
+
 [node name="CustomWaveform" type="WindowDialog"]
+visible = true
 margin_left = 8.0
 margin_top = 24.0
 margin_right = 304.0
@@ -228,6 +244,7 @@ __meta__ = {
 }
 
 [node name="VU" type="TextureRect" parent="."]
+unique_name_in_owner = true
 margin_left = 24.0
 margin_top = 56.0
 margin_right = 280.0
@@ -238,8 +255,7 @@ texture = ExtResource( 9 )
 stretch_mode = 2
 script = ExtResource( 6 )
 __meta__ = {
-"_edit_group_": true,
-"_edit_use_anchors_": false
+"_edit_group_": true
 }
 
 [node name="ToolTipProto" type="Label" parent="VU"]
@@ -284,6 +300,25 @@ __meta__ = {
 wait_time = 0.04
 autostart = true
 
+[node name="Fidelity" parent="." instance=ExtResource( 10 )]
+margin_left = 8.0
+margin_top = 16.0
+margin_right = 136.0
+margin_bottom = 36.0
+min_value = 2.0
+max_value = 16.0
+value = 16.0
+exp_edit = true
+
+[node name="Quantize" parent="." instance=ExtResource( 10 )]
+margin_left = 152.0
+margin_top = 16.0
+margin_right = 280.0
+margin_bottom = 36.0
+min_value = 1.0
+max_value = 6.0
+value = 1.0
+
 [node name="CPMenu" type="PopupMenu" parent="."]
 margin_left = -128.0
 margin_top = 8.0
@@ -306,16 +341,16 @@ __meta__ = {
 }
 
 [node name="WaveImport" type="ConfirmationDialog" parent="."]
+visible = true
 margin_left = 648.0
 margin_top = 24.0
 margin_right = 984.0
-margin_bottom = 480.0
+margin_bottom = 450.0
 theme = ExtResource( 19 )
 popup_exclusive = true
 window_title = "Import Waveform..."
 __meta__ = {
-"_edit_group_": true,
-"_edit_use_anchors_": false
+"_edit_group_": true
 }
 
 [node name="Margin" type="MarginContainer" parent="WaveImport"]
@@ -338,7 +373,7 @@ __meta__ = {
 margin_left = 16.0
 margin_top = 16.0
 margin_right = 304.0
-margin_bottom = 374.0
+margin_bottom = 344.0
 custom_constants/separation = 8
 
 [node name="Header" type="Label" parent="WaveImport/Margin/V"]
@@ -442,7 +477,7 @@ icon = ExtResource( 16 )
 margin_left = 8.0
 margin_top = 8.0
 margin_right = 328.0
-margin_bottom = 430.0
+margin_bottom = 400.0
 rect_min_size = Vector2( 320, 392 )
 theme = ExtResource( 19 )
 popup_exclusive = true
@@ -459,18 +494,18 @@ show_behind_parent = true
 margin_left = 8.0
 margin_top = 8.0
 margin_right = 312.0
-margin_bottom = 396.0
+margin_bottom = 366.0
 mouse_filter = 2
-custom_styles/panel = SubResource( 14 )
+custom_styles/panel = ExtResource( 26 )
 
 [node name="Darkener" type="Panel" parent="WaveImport"]
 show_behind_parent = true
 margin_left = 8.0
 margin_top = 8.0
 margin_right = 328.0
-margin_bottom = 430.0
+margin_bottom = 400.0
 mouse_filter = 2
-custom_styles/panel = SubResource( 14 )
+custom_styles/panel = ExtResource( 26 )
 
 [node name="H" type="HBoxContainer" parent="."]
 anchor_right = 1.0
@@ -645,25 +680,6 @@ theme = ExtResource( 17 )
 custom_fonts/font = ExtResource( 13 )
 text = "Apply"
 
-[node name="Fidelity" parent="." instance=ExtResource( 10 )]
-margin_left = 8.0
-margin_top = 16.0
-margin_right = 136.0
-margin_bottom = 36.0
-min_value = 2.0
-max_value = 16.0
-value = 16.0
-exp_edit = true
-
-[node name="Quantize" parent="." instance=ExtResource( 10 )]
-margin_left = 152.0
-margin_top = 16.0
-margin_right = 280.0
-margin_bottom = 36.0
-min_value = 1.0
-max_value = 6.0
-value = 1.0
-
 [node name="H2" type="HBoxContainer" parent="."]
 anchor_right = 1.0
 margin_left = 24.0
@@ -778,8 +794,118 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Amplify" type="ConfirmationDialog" parent="."]
+visible = true
+margin_left = 336.0
+margin_top = 128.0
+margin_right = 542.0
+margin_bottom = 240.0
+theme = ExtResource( 19 )
+popup_exclusive = true
+window_title = "Amplify..."
+dialog_text = "Amplify by:
+"
+script = ExtResource( 28 )
+
+[node name="Margin" type="MarginContainer" parent="Amplify"]
+anchor_right = 4.0
+anchor_bottom = 1.0
+margin_left = 8.0
+margin_top = 27.0
+margin_right = -626.0
+margin_bottom = -26.0
+custom_constants/margin_right = 8
+custom_constants/margin_left = 8
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="V" type="VBoxContainer" parent="Amplify/Margin"]
+margin_left = 8.0
+margin_right = 182.0
+margin_bottom = 59.0
+custom_constants/separation = 12
+
+[node name="SpinBox" type="SpinBox" parent="Amplify/Margin/V"]
+margin_right = 174.0
+margin_bottom = 16.0
+theme = SubResource( 23 )
+max_value = 8000.0
+step = 0.1
+value = 100.0
+suffix = "%"
+
+[node name="H" type="HBoxContainer" parent="Amplify/Margin/V"]
+margin_top = 28.0
+margin_right = 174.0
+margin_bottom = 46.0
+
+[node name="0" type="Button" parent="Amplify/Margin/V/H"]
+margin_right = 32.0
+margin_bottom = 18.0
+hint_tooltip = "Add a new point to the envelope."
+size_flags_horizontal = 3
+theme_type_variation = "BigMarginButton"
+shortcut_in_tooltip = false
+shortcut = SubResource( 25 )
+text = "x2"
+
+[node name="1" type="Button" parent="Amplify/Margin/V/H"]
+margin_left = 38.0
+margin_right = 70.0
+margin_bottom = 18.0
+hint_tooltip = "Removes selected point from the envelope."
+size_flags_horizontal = 3
+theme_type_variation = "BigMarginButton"
+shortcut_in_tooltip = false
+shortcut = SubResource( 27 )
+text = "}2"
+
+[node name="VSeparator" type="VSeparator" parent="Amplify/Margin/V/H"]
+margin_left = 76.0
+margin_right = 80.0
+margin_bottom = 18.0
+
+[node name="2" type="Button" parent="Amplify/Margin/V/H"]
+margin_left = 86.0
+margin_right = 134.0
+margin_bottom = 18.0
+hint_tooltip = "Removes selected point from the envelope."
+theme_type_variation = "BigMarginButton"
+shortcut_in_tooltip = false
+text = "~Norm"
+
+[node name="VSeparator2" type="VSeparator" parent="Amplify/Margin/V/H"]
+margin_left = 140.0
+margin_right = 144.0
+margin_bottom = 18.0
+
+[node name="3" type="Button" parent="Amplify/Margin/V/H"]
+margin_left = 150.0
+margin_right = 174.0
+margin_bottom = 18.0
+hint_tooltip = "Removes selected point from the envelope."
+theme_type_variation = "BigMarginButton"
+shortcut_in_tooltip = false
+shortcut = SubResource( 30 )
+icon = ExtResource( 16 )
+
+[node name="Darkener" type="Panel" parent="Amplify"]
+show_behind_parent = true
+margin_left = 8.0
+margin_top = 27.0
+margin_right = 198.0
+margin_bottom = 86.0
+mouse_filter = 2
+custom_styles/panel = ExtResource( 26 )
+__meta__ = {
+"_edit_lock_": true
+}
+
 [connection signal="visibility_changed" from="." to="." method="_on_CustomWaveform_visibility_changed"]
 [connection signal="timeout" from="VU/RecalcSmooth" to="VU" method="_on_RecalcSmooth_timeout"]
+[connection signal="value_changed" from="Fidelity" to="." method="_on_Fidelity_value_changed"]
+[connection signal="value_changed" from="Quantize" to="." method="_on_Quantize_value_changed"]
 [connection signal="index_pressed" from="CPMenu" to="." method="_on_CPMenu_index_pressed"]
 [connection signal="about_to_show" from="WaveImport" to="." method="_on_WaveImport_about_to_show"]
 [connection signal="confirmed" from="WaveImport" to="." method="_on_WaveImport_confirmed"]
@@ -790,8 +916,6 @@ __meta__ = {
 [connection signal="value_changed" from="SmoothDialog/V/Preserve Center" to="SmoothDialog" method="_on_Amount_value_changed"]
 [connection signal="toggled" from="SmoothDialog/V/Wrap" to="SmoothDialog" method="_on_Wrap_toggled"]
 [connection signal="pressed" from="SmoothDialog/V/Apply" to="." method="_on_Smooth_Apply_pressed"]
-[connection signal="value_changed" from="Fidelity" to="." method="_on_Fidelity_value_changed"]
-[connection signal="value_changed" from="Quantize" to="." method="_on_Quantize_value_changed"]
 [connection signal="toggled" from="H2/Smooth" to="." method="_on_Smooth_toggled"]
 [connection signal="toggled" from="H2/Wrap" to="." method="_on_Wrap_toggled"]
 [connection signal="value_changed" from="Amount" to="VU" method="_on_Amount_value_changed"]
@@ -800,3 +924,4 @@ __meta__ = {
 [connection signal="value_changed" from="Ctr" to="VU" method="_on_Ctr_value_changed"]
 [connection signal="pressed" from="Revert" to="." method="_on_Revert_pressed"]
 [connection signal="pressed" from="str" to="." method="_on_str_pressed"]
+[connection signal="confirmed" from="Amplify" to="Amplify" method="_on_Amplify_confirmed"]

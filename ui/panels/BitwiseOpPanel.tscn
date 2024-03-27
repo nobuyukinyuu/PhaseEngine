@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=2]
+[gd_scene load_steps=43 format=2]
 
 [ext_resource path="res://ui/EGCheckBox.tres" type="Theme" id=1]
 [ext_resource path="res://ui/envelopeDisplay/EnvelopeDisplay.tscn" type="PackedScene" id=2]
@@ -15,6 +15,7 @@
 [ext_resource path="res://gfx/ui/vCheck.png" type="Texture" id=13]
 [ext_resource path="res://gfx/fonts/spelunkid_font.png" type="Texture" id=14]
 [ext_resource path="res://gfx/wave/9.png" type="Texture" id=15]
+[ext_resource path="res://ui/panels/WaveBankSpinBox.gd" type="Script" id=16]
 [ext_resource path="res://gfx/wave/1.png" type="Texture" id=17]
 [ext_resource path="res://gfx/wave/3.png" type="Texture" id=18]
 [ext_resource path="res://gfx/wave/2.png" type="Texture" id=19]
@@ -726,6 +727,7 @@ margin_bottom = 31.0
 theme = SubResource( 18 )
 custom_icons/updown = SubResource( 19 )
 editable = false
+script = ExtResource( 16 )
 __meta__ = {
 "_edit_use_anchors_": false
 }

@@ -50,6 +50,8 @@ func _ready():
 	$H/MenuButton.get_popup().theme = $CPMenu.theme
 	$H/Banks.get_popup().theme = $CPMenu.theme
 	$H/Banks.get_popup().add_font_override("font", $H/Banks.get_font("font"))
+	$Amplify.get_cancel().theme_type_variation = "BigMarginButton"
+	$Amplify.get_ok().theme_type_variation = "BigMarginButton"
 
 	var check = AtlasTexture.new()
 	var uncheck = AtlasTexture.new()
@@ -101,7 +103,8 @@ func _on_menu_item_selected(index):  #Called when needing to add or remove banks
 		0:  #Import bank from wave file
 			$WaveImport/Dialog.popup_centered()
 		2:  #Amplify
-			pass
+			$Amplify.popup_centered()
+
 		3:  #Normalize
 			var loudest=0
 			var tmp = []
@@ -135,11 +138,17 @@ func _on_CPMenu_index_pressed(index):
 #		fetch_table(bank)
 		pass
 
+var handle_open = false
 #Wave import file dialog
 func _on_Dialog_file_selected(path):
+	# This tends to get triggered multiple times for some reason, 
+	# so make sure to quit out if a file handle's open.
+	if handle_open:  return
+	
 	var f = File.new()
 	f.open(path, File.READ)
-
+	handle_open = true
+	
 	#Check the format to see if it's valid
 	var header = f.get_32()
 	if header == 0x46464952:  # "RIFF"
@@ -172,6 +181,7 @@ func _on_Dialog_file_selected(path):
 						if audio_format != 1:  
 							print("WaveImport:  WARNING, unsupported audio format %s (%s).." % [audio_format, desc])
 							OS.alert("WaveImport:  Unsupported audio format %s (%s).." % [audio_format, desc])
+							prints(start_of_chunk, chunkSize)
 						
 						wave.description = "RIFF Wave (%s)" % desc
 						wave.channels = f.get_16()
@@ -191,7 +201,7 @@ func _on_Dialog_file_selected(path):
 						_on_btnSquish_pressed()
 
 					0x6C766177:  #'wavl' chunk.  The file is cursed.  Abandon hope
-						f.seek_end()						
+						f.seek_end()
 					0x74636166:  #'fact' chunk.
 						#Next 4 bytes would specify number of samples per channel, for extended waves.
 						#Floating-point formats probably require this chunk but we don't support those
@@ -218,6 +228,7 @@ func _on_Dialog_file_selected(path):
 	
 	import_path = path
 	f.close()
+	handle_open = false
 
 #	owner.modulate.a = 0.5
 	$WaveImport/Margin/V/Header.text = wave.to_string()

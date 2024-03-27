@@ -138,6 +138,7 @@ func _on_Remove_pressed():
 
 
 func edit(bank):
+	if $Disabled.visible:  return
 	$Disabled.visible = true
 	var p = preload("res://ui/customWaveform/Waveform.tscn").instance()
 	add_child(p)
