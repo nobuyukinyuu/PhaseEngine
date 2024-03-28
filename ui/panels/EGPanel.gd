@@ -83,7 +83,10 @@ func set_from_op(op:int):
 
 	var d = eg.GetOpValues(0, op)  #EG dictionary
 	var d2 = eg.GetOpValues(1, op) #PG dictionary
-	var type = clamp(eg.GetOscType(op), 0, $WavePanel/Wave.max_value)
+	var type = eg.GetOscType(op)
+	if clamp(type, 0, $WavePanel/Wave.max_value) != type:  #Uh oh. Probably invalid value for bitwise
+		#At this point we should check the UI if it's a custom waveform
+		$WavePanel.switch_bank_ui(type==$WavePanel.CUSTOM)
 	$WavePanel/Wave.value = type
 	
 	#Changing the step temporarily is necessary to stop Godot from snapping a mult of 0.5 to 1.

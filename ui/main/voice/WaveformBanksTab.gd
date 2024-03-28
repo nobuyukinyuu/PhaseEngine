@@ -46,7 +46,7 @@ func update_bank(which):
 
 #onready var stride=global.WAVETABLE_SIZE/$Items.fixed_icon_size.x
 func make_icon(data):
-	if not (data is Array) or data.size() < 32:
+	if not (data is Array) or data.size() < 16:
 		return load("res://gfx/ui/wave_preview_fail.png")
 #	if data.size() != global.WAVETABLE_SIZE:
 #		return load("res://gfx/ui/wave_preview_fail.png")
@@ -176,6 +176,13 @@ func _on_Items_item_activated(index):
 func _on_Sample_size_toggle(size):
 	wavetable_size = size
 	print ("Sample size changed to ", size)
+
+func _on_SpinBox_value_changed(value):
+	var size = 1 << int(value)  #Number of bits in name converted to table size
+	$Menu/SampLength.text = "(%s)\nSamples" % size
+	wavetable_size = size
+
+
 
 func _on_Edit_pressed():
 	$Edit.release_focus()

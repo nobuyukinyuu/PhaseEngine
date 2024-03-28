@@ -1,6 +1,6 @@
 extends SpinBox
 var bankline:LineEdit  #LineEdit control for wave bank
-var target = -1  #Operator target, or LFO
+#var target = -1  #Operator target, or LFO
 const tooltip_text= "No sample banks defined for the voice.\nAdd from the Waveform panel, or select a new oscillator."
 
 
@@ -15,8 +15,6 @@ func _ready():
 
 	global.connect("wavebanks_changed", self, "check_banks")
 
-	#Set the operator target
-	if owner is EGPanel:  target = owner.operator
 	connect("value_changed", self, "_on_Bank_value_changed")
 
 func focus(on):
@@ -29,18 +27,22 @@ func _on_Bank_value_changed(value):
 	var c = get_node(owner.chip_loc)
 	if !c:  return
 
-	c.SetWaveBank(target, value)
+	c.SetWaveBank(get_target(), value)
 	global.emit_signal("op_tab_value_changed")
 
 
-func check_banks(removed_idx=-1):
+func get_target():  return owner.operator if owner is VoicePanel else -1
+
+func check_banks(removed_idx=-1, force_index_to=-1):
+	prints("Checking Bank for", owner.name, ". Op Target is", get_target())
 	if !visible:  return  #Bank state not relevant because the oscillator is set to something else.
 	
 	var c = get_node(owner.chip_loc)
 	if !c:  return
+	prints("Bank should be", c.GetWaveBankFor(get_target()), "and current value is", value)
 	
 	var numBanks = c.NumBanks - 1
-	var old_idx = value
+	var old_idx = c.GetWaveBankFor(get_target())
 	max_value = max(0, numBanks)
 	editable = numBanks > 0
 
@@ -53,4 +55,6 @@ func check_banks(removed_idx=-1):
 			value = clamp(old_idx-1, 0, max_value)
 
 	#Set the wave bank to whatever value is now valid.
-	_on_Bank_value_changed(value)
+	if value != old_idx:  
+		value = old_idx
+		_on_Bank_value_changed(value)

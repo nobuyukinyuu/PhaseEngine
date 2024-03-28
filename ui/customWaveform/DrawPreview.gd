@@ -14,6 +14,10 @@ const dark_color = Color("0072c4")
 
 var elementWidth = 5  #How wide is a column?
 
+#Held values to allow keyboard tweaking.
+var last_column = 0
+var last_value = 0
+
 export(int,1,255) var maxValue = 100
 
 var cursor = preload("res://gfx/ui/vu/cursor.png").get_data()
@@ -22,9 +26,6 @@ var cursor_img = Image.new()
 var cursor_texture=ImageTexture.new()
 var custom_texture=ImageTexture.new()
 
-#Held values to allow keyboard tweaking.
-var last_column = 0
-var last_value = 0
 
 enum {NO, PROCESS_LEFT, PROCESS_MID, PROCESS_RIGHT, PROCESS_MIDDRAG, PROCESS_MIDUP}  #For input events
 

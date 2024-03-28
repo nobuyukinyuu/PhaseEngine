@@ -5,7 +5,7 @@ const CUSTOM=9  #Microsample oscillator index
 
 func _ready():
 	
-#	for i in global.waves.size():
+#	for i in global.waves.size():  #Can't use this because we have a different oscillator list depending on opType
 	for i in $Popup/G.get_child_count():
 		var idx = $Popup/G.get_child(i).name
 		idx= int(idx.substr(len(idx)-1))  #Use Wave idx name to assign, for Bitwise doesn't use Noise

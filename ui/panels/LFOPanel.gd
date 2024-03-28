@@ -61,7 +61,7 @@ func reinit():
 	$LFO/Sync.selected = (pull(l, "syncType", 0))
 
 	#Load waveforms and etc.  TODO
-	
+	switch_bank_ui($LFO/WavePanel/Wave.value == CUSTOM)
 
 func pull(dict, key, default):
 	if dict.has(key): return dict[key] 

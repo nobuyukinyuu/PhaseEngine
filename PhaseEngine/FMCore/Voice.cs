@@ -350,6 +350,7 @@ namespace PhaseEngine
                     var wavedata = new WaveTableData();
                     if (wavedata.FromJSON((JSONObject) data.GetItem("wavetable")))  //If parsing fails, we don't wanna clobber our wavetable...
                         wavetable = wavedata;
+                        lfo.wavetable = wavetable;
                 }
 
             } catch (Exception e) {

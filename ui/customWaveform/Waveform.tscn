@@ -179,7 +179,6 @@ action = "envelope_remove_pt"
 shortcut = SubResource( 29 )
 
 [node name="CustomWaveform" type="WindowDialog"]
-visible = true
 margin_left = 8.0
 margin_top = 24.0
 margin_right = 304.0
@@ -795,7 +794,6 @@ __meta__ = {
 }
 
 [node name="Amplify" type="ConfirmationDialog" parent="."]
-visible = true
 margin_left = 336.0
 margin_top = 128.0
 margin_right = 542.0

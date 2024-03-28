@@ -739,13 +739,14 @@ public class Test2 : Label
     /////////////////////////////    WAVEFORM    //////////////////////////////
     public Godot.Collections.Array AddWave(int tableSize) {
         var sampleWidth = Tools.Ctz(tableSize);  //Snap table size to the nearest power of 2 by specifying the bit width to wavetable.AddBank().
-        c.Voice.wavetable.AddBank((byte) Math.Clamp(sampleWidth, 4, 10)); 
+        c.Voice.wavetable.AddBank((byte) Math.Clamp(sampleWidth, 4, 16)); 
         return new Godot.Collections.Array(c.Voice.wavetable.GetTable(c.Voice.wavetable.NumBanks-1));
         }
     public void RemoveWave(int idx) {c.Voice.wavetable.RemoveBank(idx);}
 
     public int NumBanks {get => c.Voice.wavetable.NumBanks;}
 
+    public int GetWaveBankFor(int opNum) { if (opNum==(int)Src.LFO) return c.Voice.lfo.wavetable_bank; else return c.Voice.egs[opNum].wavetable_bank; }
     public void SetWaveBank(int opNum, int bank) 
     {
         if (opNum==(int)Src.LFO) c.Voice.lfo.wavetable_bank = (byte) bank;

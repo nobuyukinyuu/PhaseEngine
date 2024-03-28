@@ -266,13 +266,14 @@ func _on_WaveImport_confirmed():
 	
 	if stride <= 0:  stride = 1
 	for i in wavetable_size:
-		f.seek(wave.dataStartPos + pos)
+		f.seek(wave.dataStartPos + stepify(pos, wave.bytesPerSample))
 		$VU.set_table_pos(i, readbits(f, $WaveImport/Margin/V/chkBits.pressed, 
 								$WaveImport/Margin/V/chkStereo.pressed,
 								$WaveImport/Margin/V/chkSigned.pressed)
 						)
 
-		pos = fmod(pos+stride, wave.chunkSize)
+#		pos = fmod(pos+stride, wave.chunkSize)
+		pos += stride
 
 	f.close()
 
