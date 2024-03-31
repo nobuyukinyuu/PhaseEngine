@@ -1,0 +1,35 @@
+[remap]
+
+importer="texture"
+type="StreamTexture"
+path="res://.import/al15.png-124b9c5a3e506031f538b8c5f474233d.stex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://gfx/ui/alg/dx7/al15.png"
+dest_files=[ "res://.import/al15.png-124b9c5a3e506031f538b8c5f474233d.stex" ]
+
+[params]
+
+compress/mode=0
+compress/lossy_quality=0.7
+compress/hdr_mode=0
+compress/bptc_ldr=0
+compress/normal_map=0
+flags/repeat=0
+flags/filter=true
+flags/mipmaps=false
+flags/anisotropic=false
+flags/srgb=2
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/HDR_as_SRGB=false
+process/invert_color=false
+process/normal_map_invert_y=false
+stream=false
+size_limit=0
+detect_3d=true
+svg/scale=1.0
