@@ -88,7 +88,7 @@ namespace PhaseEngine
             if (sysex.sizeMSB != 0x20  ||  sysex.sizeLSB != 0)
             {
                 err = "Did not find bulk size 4096";
-                return IOErrorFlags.UnrecognizedFormat;
+                // return IOErrorFlags.UnrecognizedFormat;
             }
             if (sysex.sysexEnd != 0xF7)
             {
