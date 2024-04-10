@@ -9,12 +9,14 @@ namespace PhaseEngine
     public abstract class VoiceBankImporter
     {
         public string metadata;
-        public string[] bank;
+        public string[] bank;  //JSON-formatted strings in PhaseEngine Voice format representing all voices in the cartridge bank.
 
         public string fileFormat;  //Associated format
         public string description="";
 
-        public VoiceBankImporter()    {}
+        public string importDetails = ""; // When calling Load(), if there are any detailed warnings or error messages, put them here.
+
+        public VoiceBankImporter(){}
 
         public abstract IOErrorFlags Load(string path);
     }
@@ -66,7 +68,7 @@ namespace PhaseEngine
         public static IOErrorFlags TryLoad(string path, out VoiceBankImporter loader)
         {
             foreach(string format in loaders.Keys)
-                if(path.EndsWith(format))  //Try loading the format
+                if(path.ToLower().EndsWith(format.ToLower()))  //Try loading the format
                 {
                     loader = loaders[format];
                     return loader.Load(path);

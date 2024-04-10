@@ -693,7 +693,9 @@ public class Test2 : Label
 
         if (err !=IOErrorFlags.OK) 
         {
-            GD.Print($"Import failed.  (Code {err})");
+            var errorMessage = $"Import failed.  (Code {err})";
+            GD.Print(errorMessage);
+            OS.Alert(v?.importDetails, errorMessage);
             return output;
         }
 
