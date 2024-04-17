@@ -60,6 +60,26 @@ func set_alg_icons(how=YM2xxx):
 		REFACE:
 			pass  #TODO:  make icons for this and figure out if a format for Reface carts exists
 
+	var f = preload("res://gfx/fonts/numerics_16x20.png")
+	for i in range(alg_icons.size()):
+		var icon = alg_icons[i]
+#		var vp = $Viewport.duplicate()
+#
+#		vp.get_node("Img").texture = icon
+#		vp.get_node("Label").text = str(i + how)
+#		var tex = ImageTexture.new()
+#		tex.create_from_image(vp.get_texture().get_data())
+
+		var img = Image.new()
+		img.create(92, 20, false, Image.FORMAT_RGBA8)
+		img.blit_rect(icon.get_data(), Rect2(0,0,60,20), Vector2(32, 0))
+		img.blit_rect(f.get_data)
+
+		var tex = ImageTexture.new()
+		tex.create_from_image(img)
+
+		alg_icons[i] = tex
+		
 
 func populate(bank):
 	$V/List.clear()

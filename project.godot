@@ -175,6 +175,10 @@ ui_mult={
  ]
 }
 
+[mono]
+
+project/assembly_name="PhaseEngine"
+
 [rendering]
 
 quality/driver/driver_name="GLES2"
