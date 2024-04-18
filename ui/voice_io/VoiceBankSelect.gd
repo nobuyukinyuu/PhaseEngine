@@ -60,26 +60,29 @@ func set_alg_icons(how=YM2xxx):
 		REFACE:
 			pass  #TODO:  make icons for this and figure out if a format for Reface carts exists
 
-	var f = preload("res://gfx/fonts/numerics_16x20.png")
 	for i in range(alg_icons.size()):
 		var icon = alg_icons[i]
-#		var vp = $Viewport.duplicate()
-#
-#		vp.get_node("Img").texture = icon
-#		vp.get_node("Label").text = str(i + how)
-#		var tex = ImageTexture.new()
-#		tex.create_from_image(vp.get_texture().get_data())
 
 		var img = Image.new()
-		img.create(92, 20, false, Image.FORMAT_RGBA8)
-		img.blit_rect(icon.get_data(), Rect2(0,0,60,20), Vector2(32, 0))
-		img.blit_rect(f.get_data)
+		img.create(100, 20, false, Image.FORMAT_RGBA8)
+		img.blit_rect(icon.get_data(), Rect2(0,0,60,20), Vector2(40, 0))
+		#This stupid i+how trick won't work with more presets added.
+		#It's mainly there to match user expectations for algo numbering...
+		blit_number(str(i+how).pad_zeros(2), img)
 
 		var tex = ImageTexture.new()
 		tex.create_from_image(img)
 
 		alg_icons[i] = tex
 		
+func blit_number(n:String, img:Image):
+	var f = preload("res://gfx/fonts/numerics_16x20.png")
+	var src_rect = Rect2(64,20,16,20)
+#	if len(n)==1:  img.blit_rect(f.get_data(), src_rect,Vector2(16, 0))
+	for i in len(n):
+		src_rect.position = Vector2(32+int(n.substr(i, 1))*16, 0)
+		img.blit_rect(f.get_data(), src_rect,Vector2(i*16, 0))
+
 
 func populate(bank):
 	$V/List.clear()
