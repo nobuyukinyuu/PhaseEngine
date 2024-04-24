@@ -10,6 +10,39 @@ namespace PhaseEngine
     {
         public ImportDX7Sysex(){fileFormat="syx"; description="DX7 Sysex";}
 
+        static readonly Dictionary<LFOWaves, Oscillator.oscTypes> oscTypes = new Dictionary<LFOWaves, Oscillator.oscTypes>
+            {
+                {LFOWaves.Triangle, Oscillator.oscTypes.Triangle},
+                {LFOWaves.Sine, Oscillator.oscTypes.Sine},
+                {LFOWaves.SawDown, Oscillator.oscTypes.Saw},
+                {LFOWaves.SawUp, Oscillator.oscTypes.Saw},
+                {LFOWaves.Square, Oscillator.oscTypes.Pulse},
+                {LFOWaves.SAndHold, Oscillator.oscTypes.Noise2},
+            };
+        static readonly byte[] feedbackOperatorForPreset = new byte[] // 0-indexed 
+        {// Which operator for a given dx7 algorithm takes the feedback value? Multi-op loops consider the bottom of the stack.
+            5,1,5,3, 5,4,5,3,
+            1,2,5,1, 5,5,1,5,
+            1,2,5,2, 2,5,5,5,
+            5,5,2,4, 5,4,5,5,
+        };
+
+        static readonly byte[][] presetMap = new byte[][] 
+        {   //Operator preset map to arrange DX7 algorithms to fit PhaseEngine 6op preset order. Index=dx7op, value=pe_op
+            Algo(5,3,6,4,2,1), Algo(5,3,6,4,2,1), Algo(5,3,1,6,4,2), Algo(5,3,1,6,4,2), //0-3
+            Algo(4,1,5,2,6,3), Algo(4,1,5,2,6,3), Algo(5,2,6,3,4,1), Algo(5,2,6,3,4,1), //4-7
+            Algo(5,2,6,3,4,1), Algo(6,4,1,5,2,3), Algo(6,4,1,5,2,3), Algo(6,4,5,1,2,3), //8-11
+            Algo(6,4,5,1,2,3), Algo(5,3,6,4,1,2), Algo(5,3,6,4,1,2), Algo(6,3,4,1,5,2), //12-15
+            Algo(6,3,4,1,5,2), Algo(6,3,4,5,2,1), Algo(4,2,1,5,6,3), Algo(4,5,1,6,2,3), //16-19
+            Algo(3,4,1,5,6,2), Algo(3,1,4,5,6,2), Algo(3,4,1,5,6,2), Algo(2,3,4,5,6,1), //20-23
+            Algo(2,3,4,5,6,1), Algo(4,5,1,6,3,2), Algo(4,5,1,6,3,2), Algo(4,2,5,3,1,6), //24-27
+            Algo(3,4,5,2,6,1), Algo(3,4,5,2,1,6), Algo(2,3,4,5,6,1), Algo(1,2,3,4,5,6), //28-31
+        }; 
+        static byte[] Algo(params byte[] input) { //Takes a 1-indexed array of bytes and makes it a 0-indexed array 
+            for(int i=0; i<input.Length; i++)
+                input[i] -=1;
+            return input;
+        }
 
         const ushort FILE_SIZE = 4104;  //Sysex size, in bytes
         public override IOErrorFlags Load(string path)
@@ -36,12 +69,67 @@ namespace PhaseEngine
                         bank = new string[32];
                         for (int i=0; i<32; i++)
                         {
-                            Voice v = new Voice();
+                            //// General ////
+                            var p = sysex.voices[i];
+                            Voice v = new Voice(6);
                             v.name = sysex.voices[i].name.Trim();
-                            v.alg = Algorithm.FromPreset(sysex.voices[i].algorithm, Algorithm.PresetType.DX);
-                            bank[i] = v.ToJSONString();
+                            v.SetPresetAlgorithm(sysex.voices[i].algorithm);
+                            
+                            //// LFO ////
+                            v.lfo.AMD = (short) Map(p.lfoAMD, Envelope.L_MAX);
+                            v.lfo.Delay = p.lfoDelay;  //FIXME: Produce a delay table for DX7 and map it to our engine
+                            v.lfo.SetSpeed(p.lfoSpeed); //FIXME
+                            v.lfo.SyncType = p.LFOKeySync? 2: 0; //Sync to end of delay period
+                            v.lfo.pmd = Tools.Remap(p.lfoPMD, 0, 99, 0, 1.0f);
+
+                            if (p.LFOWaveform == LFOWaves.SawDown) v.lfo.invert = true;
+                            v.lfo.SetOscillatorType(oscTypes[p.LFOWaveform]);
+
+
+                            //// Operators ////
+                            for (int j=0; j<p.ops.Length; j++)
+                            {
+                                var idx = presetMap[p.algorithm][j]; //Target operator index on the PhaseEngine side
+                                var op = p.ops[j];
+                                var eg = v.egs[idx];
+                                var pg = Increments.Prototype();
+
+                                //// Envelope ////
+                                eg.osc_sync = p.OscKeySync; //DX7 osc sync is global, but ours is per-operator
+                                eg.ams = (byte)(op.AMS << 1); //DX7 AMS is 0-3. Map it to values closer to ours
+                                if(feedbackOperatorForPreset[p.algorithm] == j)  eg.feedback=p.Feedback;
+                                
+                                //Levels
+                                eg.tl = LvMap(op.outputLevel);
+                                eg.al = LvMap(op.EG_L1);
+                                eg.dl = LvMap(op.EG_L2);
+                                eg.sl = LvMap(op.EG_L3);
+                                eg.rl = LvMap(op.EG_L4);
+                                //Rates
+                                eg.ar = (byte)Map(op.EG_R1, 32);
+                                eg.dr = (byte)Map(op.EG_R2, 32);
+                                eg.sr = (byte)Map(op.EG_R3, 32);
+                                eg.rr = (byte)Map(op.EG_R4, Envelope.R_MAX);
+
+                                //// Increments ////
+                                /// FIXME:  Convert FIXED FREQUENCY ops values to raw Hz value
+                                /// //op.CoarseFrequency goes up to 32; check if we should change our mult vals
+                                pg.mult = op.CoarseFrequency==0? 0.5f : op.CoarseFrequency ; 
+
+                                //FIXME:  FineFrequency is a 0-99 value multiplier from 1x-2x of our mult.
+                                //        We should probably set mult to an integer value, then determine
+                                //        the closest coarse/fine freq to the integral and fractional representations
+                                //        the dx7 fine frequency maps to. So eg. dx7 FINE 99 = coarse +12, fine -1.
+                                // pg.coarse = op.FineFrequency;
+                                pg.Detune = Tools.Remap(op.Detune, 0, 14, -1.0f, 1.0f);
+
+                                v.pgs[idx].Configure(pg);
+                                
+                            }
+                            
 
                             //TODO:  IMPORT AND CONVERT EVERY OTHER PROPERTY
+                            bank[i] = v.ToJSONString();
                         }
                     }
 
@@ -54,6 +142,8 @@ namespace PhaseEngine
             return err;
         }
 
+        public static ushort LvMap(int input) => (ushort)(Tools.Remap(input, 0, 99, Envelope.L_MAX, 0));
+        public static int Map(int input, int outMax) => (int)Math.Round(Tools.Remap(input, 0, 99, 0, outMax));
 
         public override string ToString()
         {
@@ -245,7 +335,7 @@ namespace PhaseEngine
             readonly public int RateScale { get=> DT_RS & 0x7; }
 
             readonly public int VelocitySensitivity { get=> (VEL_AMS >> 2) & 0x7; }
-            readonly public int AMS  { get=> VEL_AMS & 0x3; }
+            readonly public byte AMS  { get=> (byte)(VEL_AMS & 0x3); }
 
 
             readonly public OscModes FrequencyMode {get=> (OscModes)(FC_M & 1);}
