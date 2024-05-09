@@ -128,7 +128,7 @@ namespace PhaseEngine
                                 pg.Detune = Tools.Remap(op.Detune, -7, 7, -1.0f, 1.0f);
                                 var cf = (1+ op.FineFrequency * 0.01) * pg.mult;
                                 pg.mult = (float)Math.Truncate(cf);
-                                var coarse = (cf - pg.mult) * 12;
+                                var coarse = (cf - pg.mult) * 12; //FIXME:  NOT CORRECT,  CONVERT LINEAR MULT TO NEAREST 12th ROOT OF 2 (IN CENTS)
                                 pg.coarse = (int)Math.Round(coarse);
                                 var fine = coarse-Math.Truncate(coarse) < 0.5? coarse-Math.Truncate(coarse) :  -1 + coarse-Math.Truncate(coarse);
                                 pg.fine = (int)Math.Round(fine*100);
