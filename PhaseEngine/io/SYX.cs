@@ -111,6 +111,10 @@ namespace PhaseEngine
                                 eg.sr = (byte)Map(op.EG_R3, 32);
                                 eg.rr = (byte)Map(op.EG_R4, Envelope.R_MAX);
 
+                                //rTables
+                                eg.velocity = new VelocityTable(); eg.velocity.ceiling = Tools.Remap(op.VelocitySensitivity, 0,7,0,100);
+
+
                                 //// Increments ////
                                 /// FIXME:  Convert FIXED FREQUENCY ops values to raw Hz value
                                 /// //op.CoarseFrequency goes up to 32; check if we should change our mult vals
@@ -121,8 +125,13 @@ namespace PhaseEngine
                                 //        the closest coarse/fine freq to the integral and fractional representations
                                 //        the dx7 fine frequency maps to. So eg. dx7 FINE 99 = coarse +12, fine -1.
                                 // pg.coarse = op.FineFrequency;
-                                pg.Detune = Tools.Remap(op.Detune, 0, 14, -1.0f, 1.0f);
-
+                                pg.Detune = Tools.Remap(op.Detune, -7, 7, -1.0f, 1.0f);
+                                var cf = (1+ op.FineFrequency * 0.01) * pg.mult;
+                                pg.mult = (float)Math.Truncate(cf);
+                                var coarse = (cf - pg.mult) * 12;
+                                pg.coarse = (int)Math.Round(coarse);
+                                var fine = coarse-Math.Truncate(coarse) < 0.5? coarse-Math.Truncate(coarse) :  -1 + coarse-Math.Truncate(coarse);
+                                pg.fine = (int)Math.Round(fine*100);
                                 v.pgs[idx].Configure(pg);
                                 
                             }
@@ -142,7 +151,9 @@ namespace PhaseEngine
             return err;
         }
 
-        public static ushort LvMap(int input) => (ushort)(Tools.Remap(input, 0, 99, Envelope.L_MAX, 0));
+        // public static ushort LvMap(int input) => (ushort)(((int)(Tools.Remap(input, 0, 99, Envelope.L_MAX, 0)) << 1) & Envelope.L_MAX);
+        public static ushort LvMap(int input) => (ushort)Tools.Remap(input, 0, 99, Envelope.L_MAX, 0);
+        
         public static int Map(int input, int outMax) => (int)Math.Round(Tools.Remap(input, 0, 99, 0, outMax));
 
         public override string ToString()

@@ -76,6 +76,8 @@ namespace PhaseEngine
             fixedFreq = p.fixedFreq;
             mult = p.mult;  lfoMult = p.lfoMult;
             coarse = p.coarse; fine = p.fine;  increment_offset = p.increment_offset;
+
+            Detune = p.Detune;
         }
 
         public static Increments Prototype()  //Initialize a new Increments
