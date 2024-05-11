@@ -36,6 +36,9 @@ namespace PhaseEngine
         //A detune value of 1 in other cores is close to 1/6 the value (or 16.667%) of max detune here, or around 6 seconds at 440hz.  Detune in other cores does NOT
         //scale linearly with notes, however.  Since it's an adjustment to fnum and increment lookup tables, detune will never be *perfectly* aligned.
         //Detune at 1760hz seems to be 3s when expected to be closer to 3s at 880hz.  Might implement a scaling factor to offset this at NoteOn based on distance from A440.
+
+        //NOTE:  According to this issue, the DX7II manual claims the detune range is ±2 cents....
+        //https://github.com/asb2m10/dexed/issues/88
         const double DETUNE_MAX = 1 + 1/440.0;
         const double DETUNE_MIN = 1/DETUNE_MAX;
 

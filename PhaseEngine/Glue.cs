@@ -87,6 +87,7 @@ namespace PhaseEngine
             throw new InvalidOperationException($"Data member must be a property or field. Member is instead {member.MemberType.ToString()}");
         }
 
+        //Used by binding constructs (TrackerEnvelopes/rTables) to de/serialize information about the data member it's bound to
         public static Type GetUnderlyingType(this MemberInfo member)
         {
             switch (member.MemberType)

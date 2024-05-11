@@ -44,6 +44,8 @@ namespace PhaseEngine
             return input;
         }
 
+
+        public static readonly float[] PMS_MAP = new float[]{0, 0.0264f, 0.0534f, 0.0889f, 0.1612f, 0.2769f, 0.4967f, 1}; 
         const ushort FILE_SIZE = 4104;  //Sysex size, in bytes
         public override IOErrorFlags Load(string path)
         {
@@ -80,7 +82,7 @@ namespace PhaseEngine
                             v.lfo.Delay = p.lfoDelay;  //FIXME: Produce a delay table for DX7 and map it to our engine
                             v.lfo.SetSpeed(p.lfoSpeed); //FIXME
                             v.lfo.SyncType = p.LFOKeySync? 2: 0; //Sync to end of delay period
-                            v.lfo.pmd = Tools.Remap(p.lfoPMD, 0, 99, 0, 1.0f);
+                            v.lfo.pmd = Tools.Remap(p.lfoPMD, 0, 99, 0, 1.0f) * PMS_MAP[p.LFO_PMS];
 
                             if (p.LFOWaveform == LFOWaves.SawDown) v.lfo.invert = true;
                             v.lfo.SetOscillatorType(oscTypes[p.LFOWaveform]);
@@ -113,27 +115,35 @@ namespace PhaseEngine
 
                                 //rTables
                                 eg.velocity = new VelocityTable(); eg.velocity.ceiling = Tools.Remap(op.VelocitySensitivity, 0,7,0,100);
-
+                                //TODO:  RATE CURVE SCALING
 
                                 //// Increments ////
-                                /// FIXME:  Convert FIXED FREQUENCY ops values to raw Hz value
-                                /// //op.CoarseFrequency goes up to 32; check if we should change our mult vals
-                                pg.mult = op.CoarseFrequency==0? 0.5f : op.CoarseFrequency ; 
+                                if (op.FrequencyMode == OscModes.Fixed)
+                                {
+                                    pg.fixedFreq = true;
 
-                                //FIXME:  FineFrequency is a 0-99 value multiplier from 1x-2x of our mult.
-                                //        We should probably set mult to an integer value, then determine
-                                //        the closest coarse/fine freq to the integral and fractional representations
-                                //        the dx7 fine frequency maps to. So eg. dx7 FINE 99 = coarse +12, fine -1.
-                                // pg.coarse = op.FineFrequency;
+                                    //Determine frequency from OP values. The multiplier from coarse determines 1-1000hz, repeating
+                                    var freq = Math.Pow(10, op.CoarseFrequency % 4);
+                                    //The fine freq was calculated using a model regression from an emulator, may not be accurate...
+                                    freq *= Math.Pow(2, op.FineFrequency * 0.0332193);
+
+                                    pg.FreqSelect(freq);
+                                } else {  //Ratio mode
+                                    // FIXME:  op.CoarseFrequency goes up to 32; check if we should change our mult vals
+                                    pg.mult = op.CoarseFrequency==0? 0.5f : op.CoarseFrequency ; 
+
+                                    // FineFrequency is a 0-99 value multiplier from 1x-2x of our mult.
+                                    // We should probably set mult to an integer value, then determine
+                                    // the closest coarse/fine freq to the integral and fractional representations
+                                    // the dx7 fine frequency maps to. So eg. dx7 FINE 99 = coarse +12, fine -1.
+
+                                    var trans = GetTranspose(op.FineFrequency); //Returns a value from 0-1299.
+                                    pg.coarse = trans / 100; //0-12
+                                    pg.fine = trans % 100; //0-99
+                                }
                                 pg.Detune = Tools.Remap(op.Detune, -7, 7, -1.0f, 1.0f);
-                                var cf = (1+ op.FineFrequency * 0.01) * pg.mult;
-                                pg.mult = (float)Math.Truncate(cf);
-                                var coarse = (cf - pg.mult) * 12; //FIXME:  NOT CORRECT,  CONVERT LINEAR MULT TO NEAREST 12th ROOT OF 2 (IN CENTS)
-                                pg.coarse = (int)Math.Round(coarse);
-                                var fine = coarse-Math.Truncate(coarse) < 0.5? coarse-Math.Truncate(coarse) :  -1 + coarse-Math.Truncate(coarse);
-                                pg.fine = (int)Math.Round(fine*100);
-                                v.pgs[idx].Configure(pg);
-                                
+
+                                v.pgs[idx].Configure(pg);                                
                             }
                             
 
@@ -159,6 +169,32 @@ namespace PhaseEngine
         public override string ToString()
         {
             return base.ToString();
+        }
+
+   /////////////////////////////////////////////// GLUE /////////////////////////////////////////////// 
+        private static Dictionary<int, int> transpose_cache = new Dictionary<int, int>(100);
+        protected static int GetTranspose(int input, bool shortcircuit=true)
+        { //Gets a dx7 fine value and returns the corresponding PhaseEngine coarse/fine transpose table index.
+            if (transpose_cache.ContainsKey(input)) return transpose_cache[input];
+            if(input < 0 || input > 99) 
+                throw new PE_ImportException(IOErrorFlags.Corrupt, "Transpose value out of 0-99 range");
+
+            var target = input/100.0f + 1; //Convert to multiplier value 1.0-2.0, same as transpose table.
+            var closest = -1;
+            var minDifference = double.MaxValue;
+            for(int i=0; i<Tables.transpose.Length; i++)
+            {
+                var element = Tables.transpose[i];
+                var difference = Math.Abs(element - target);
+                if (difference < minDifference)
+                {
+                    minDifference = difference;
+                    closest = i;
+                } 
+                else if (shortcircuit)  break;
+            }
+            if (closest>=0)  transpose_cache[input] = closest;
+            return closest;
         }
 
    //////////////////////////////////////////////// IO //////////////////////////////////////////////// 

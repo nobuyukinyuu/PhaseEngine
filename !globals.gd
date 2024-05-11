@@ -165,7 +165,8 @@ func tl_to_db(tl:int):
 	return range_lerp(tl, 0, L_MAX, 0, DB_MAX)
 
 
-
+# Reface LFO speeds (in Hz) taken from here: 
+# https://yamahasynth.com/community/reface-1/generating-specific-lfo-frequencies-on-dx/
 const LFO_SPEED = [
 0.026,	0.042,	0.084,	0.126,	0.168,	0.210,	0.252,	0.294,	0.336,	0.372,	0.412,	0.456,	0.505,	0.542,	0.583,	0.626,
 0.673,	0.711,	0.752,	0.795,	0.841,	0.880,	0.921,	0.964,	1.009,	1.049,	1.090,	1.133,	1.178,	1.218,	1.259,	1.301,
