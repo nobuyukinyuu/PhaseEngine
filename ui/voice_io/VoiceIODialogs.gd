@@ -7,6 +7,8 @@ signal voice_imported
 
 var last_bank = {}
 
+var busy = false #Used to prevent multiple load attempts when OS.Alert is used
+
 func _ready():
 	#Convert the chip location to an absolute location!!
 	#Otherwise, the value specified in the editor will only be valid for us and none of our children.
@@ -41,24 +43,35 @@ func _on_Open_file_selected(path):
 	var c = get_node(chip_loc)
 	if !c:  return
 
+	#When launching a modal dialog, this func gets called multiple times (why?)
+	#Addresses this issue: https://github.com/godotengine/godot/issues/37472
+	if busy:
+		printerr("WARNING:  VoiceIODialogs already busy!")
+		return
+	busy = true
+
 	var list = c.RequestVoiceImport(path)
 	
 	if !list: 
 		OS.alert("Import failed.")
+		busy = false
 		return
-	if list.size() == 0:
+	elif list.size() == 0:
 		OS.alert("No voices found in this file.")
+		busy = false
 		return
 	elif list.size() == 1:
 		#Load this specific voice
 		paste(list[0])
+		busy = false
 		return
 		
 	#If we got this far, we received a bank of voices.  Prompt for selection.
 	last_bank = list
 	$BankSelect.populate(list)
 	$BankSelect.popup_centered()
-
+	busy = false
+	
 func _on_Save_file_selected(path):
 	pass # Replace with function body.
 

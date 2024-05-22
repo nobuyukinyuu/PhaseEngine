@@ -177,7 +177,7 @@ namespace PhaseEngine
         { //Gets a dx7 fine value and returns the corresponding PhaseEngine coarse/fine transpose table index.
             if (transpose_cache.ContainsKey(input)) return transpose_cache[input];
             if(input < 0 || input > 99) 
-                throw new PE_ImportException(IOErrorFlags.Corrupt, "Transpose value out of 0-99 range");
+                throw new PE_ImportException(IOErrorFlags.Corrupt, $"Transpose value {input} out of 0-99 range");
 
             var target = input/100.0f + 1; //Convert to multiplier value 1.0-2.0, same as transpose table.
             var closest = -1;
