@@ -146,9 +146,9 @@ public class JSONTokeniser {
                 break;
 			case ASCIICodes.CHR_DOUBLE_QUOTE:
 				int startIndex = stringIndex;
-        		int endIndex = jsonString.IndexOf("\"",stringIndex);
+        		int endIndex = jsonString.IndexOf("\"",stringIndex,StringComparison.InvariantCulture);
                 while (endIndex != -1 && jsonString[endIndex-1] == ASCIICodes.CHR_BACKSLASH){
-                    endIndex = jsonString.IndexOf("\"",endIndex+1);
+                    endIndex = jsonString.IndexOf("\"",endIndex+1, StringComparison.InvariantCulture);
                 }
                 if (endIndex == -1){
                     ParseFailure("Unterminated string");
@@ -204,7 +204,7 @@ public class JSONTokeniser {
 
 		string numberString = jsonString.Slice(index,stringIndex-1);
 		
-		if (numberString.IndexOf(".") != -1 || numberString.IndexOf("e") != -1 || numberString.IndexOf("E") != -1){
+		if (numberString.IndexOf(".", StringComparison.InvariantCulture) != -1 || numberString.IndexOf("e") != -1 || numberString.IndexOf("E") != -1){
 		    return JSONToken.CreateToken(JSONToken.TOKEN_UNPARSED_FLOAT,numberString);
 		} else {
 			int value = ParseInteger(numberString);

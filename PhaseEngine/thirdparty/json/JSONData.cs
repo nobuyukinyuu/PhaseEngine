@@ -180,24 +180,25 @@ namespace PE_Json{
                 if ( (ch > 127) || (ch < 32) || (ch == 92) || (ch == 34) || (ch == 47)) {
                     retString.Append(input.Slice(lastSlice,i));
                     if (ch == 34){ //quote
-                        retString.Append("\\q");
+                        retString.Append("\\\"");
                     } else if (ch == 10){ //newline
-                        retString.Append("\\n");
+                        retString.Append(@"\n");
                     } else if (ch == 13){ //return
-                        retString.Append("\\r");
+                        retString.Append(@"\r");
                     } else if (ch == 92){ //back slash
-                        retString.Append("\\\\");
+                        // retString.Append(@"\\");
+                        retString.Append(@"\u005c");
                     } else if (ch == 47){ //forward slash
-                        retString.Append("\\/");
+                        retString.Append(@"\/");
                     } else if (ch > 127){ //unicode
-                        retString.Append("\\u");
-                        // retString.Append(IntToHexString(ch));
+                        retString.Append(@"\u");
+                        retString.Append(IntToHexString(ch));
                     } else if (ch == 8){ //backspace
-                        retString.Append("\\b");
+                        retString.Append(@"\b");
                     } else if (ch == 12){ //linefeed
-                        retString.Append("\\f");
+                        retString.Append(@"\f");
                     } else if (ch == 9){ //tab
-                        retString.Append("\\t");
+                        retString.Append(@"\t");
                     }
                     lastSlice = i+1;
                 }
@@ -233,7 +234,7 @@ namespace PE_Json{
         }
 
         public static string UnEscapeJSON(string input){
-            int escIndex = input.IndexOf("\\");
+            int escIndex = input.IndexOf(@"\", StringComparison.InvariantCulture);
             
             if (escIndex == -1)  return input;
             
@@ -253,9 +254,9 @@ namespace PE_Json{
                         retString.Append( "\t" );
                         break;
                     case 92: // backslash
-                        retString.Append( "\\" );
+                        retString.Append( @"\" );
                         break;
-                    case 47: ///
+                    case 47: // forward slash
                         retString.Append( "/" );
                         break;
                     case 114: //r carriage return
@@ -273,7 +274,7 @@ namespace PE_Json{
                         break;
                 }
                 copyStartIndex = escIndex+2;
-                escIndex = input.IndexOf("\\",copyStartIndex);
+                escIndex = input.IndexOf(@"\",copyStartIndex, StringComparison.InvariantCulture);
             }
 
             // if (copyStartIndex < input.Length)     retString.Append( input[copyStartIndex..] );

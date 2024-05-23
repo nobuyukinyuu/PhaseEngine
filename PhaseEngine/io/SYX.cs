@@ -74,7 +74,7 @@ namespace PhaseEngine
                             //// General ////
                             var p = sysex.voices[i];
                             Voice v = new Voice(6);
-                            v.name = sysex.voices[i].name.Trim();
+                            v.name = sysex.voices[i].name/*.Trim()*/;
                             v.SetPresetAlgorithm(sysex.voices[i].algorithm);
                             
                             //// LFO ////
@@ -177,7 +177,10 @@ namespace PhaseEngine
         { //Gets a dx7 fine value and returns the corresponding PhaseEngine coarse/fine transpose table index.
             if (transpose_cache.ContainsKey(input)) return transpose_cache[input];
             if(input < 0 || input > 99) 
-                throw new PE_ImportException(IOErrorFlags.Corrupt, $"Transpose value {input} out of 0-99 range");
+                if(input==127) //This has been confirmed to happen in Dexed_01.syx.....
+                    input=99;  //Fix it by clamping the value to 99
+                else
+                    throw new PE_ImportException(IOErrorFlags.Corrupt, $"Transpose value {input} out of 0-99 range");
 
             var target = input/100.0f + 1; //Convert to multiplier value 1.0-2.0, same as transpose table.
             var closest = -1;
@@ -224,7 +227,7 @@ namespace PhaseEngine
             }
             if (sysex.sizeMSB != 0x20  ||  sysex.sizeLSB != 0)
             {
-                err = "Did not find bulk size 4096";
+                err = "Did not find bulk VMEM size 4096";
                 // return IOErrorFlags.UnrecognizedFormat;
             }
             if (sysex.sysexEnd != 0xF7)
@@ -363,9 +366,9 @@ namespace PhaseEngine
             public byte scaleLeftDepth;
             public byte scaleRightDepth;
 
-                                                    //public byte             bit #
-                                                    // #     6   5   4   3   2   1   0   param A       range  param B       range
-                                                    //----  --- --- --- --- --- --- ---  ------------  -----  ------------  -----
+                                        //public byte             bit #
+                                        // #     6   5   4   3   2   1   0   param A       range  param B       range
+                                        //----  --- --- --- --- --- --- ---  ------------  -----  ------------  -----
             public byte scaleCurve;    // 11    0   0   0 |  RC   |   LC  | SCL LEFT CURVE 0-3   SCL RGHT CURVE 0-3
             public byte DT_RS;         // 12  |      DET      |     RS    | OSC DETUNE     0-14  OSC RATE SCALE 0-7
             public byte VEL_AMS;       // 13    0   0 |    KVS    |  AMS  | KEY VEL SENS   0-7   AMP MOD SENS   0-3
@@ -395,10 +398,42 @@ namespace PhaseEngine
         
         struct PackedVoice
         {
-            public static PackedVoice Prototype() 
+            public static PackedVoice Prototype() //Defaults
             {
                 var o= new PackedVoice();
                 o.ops = new PackedOperator[6];
+
+                // Defaults from https://usa.yamaha.com/files/download/other_assets/0/319440/plg150dx_1.pdf pg.54 (VCED format)
+                o.name = "INIT VOICE";
+
+                o.pitchEGR1 = 99;
+                o.pitchEGR2 = 99;
+                o.pitchEGR3 = 99;
+                o.pitchEGR4 = 99;
+                o.pitchEGL1 = 50;
+                o.pitchEGL2 = 50;
+                o.pitchEGL3 = 50;
+                o.pitchEGL4 = 50;
+                o.KEYSYNC_FB = 1 << 3;  //OPI=1, FB=0
+                o.lfoSpeed = 0x23;
+                o.lfoPackedOpts = (03 << 4) | 1;  //PMS=3, LFO KS=1
+
+                for(int i=0; i<o.ops.Length; i++)
+                {
+                    o.ops[i].EG_R1=99;
+                    o.ops[i].EG_R2=99;
+                    o.ops[i].EG_R3=99;
+                    o.ops[i].EG_R4=99;
+                    o.ops[i].EG_L1=99;
+                    o.ops[i].EG_L2=99;
+                    o.ops[i].EG_L3=99;
+                    o.ops[i].EG_L4=00;
+                    o.ops[i].levelScalingBreakPoint=NOTE_C3;
+                    o.ops[i].FC_M= 1 << 1;  //Coarse=01,  Mode=0 (Ratio)
+                    o.ops[i].DT_RS = 7 << 3; //Detune=+0, RateScale=0
+                }
+                    o.ops[0].outputLevel=99;
+
                 return o;
             }
             public PackedOperator[] ops;
@@ -415,11 +450,11 @@ namespace PhaseEngine
             public byte pitchEGL4;
         
 
-                                                        //public byte             bit #
-                                                        // #     6   5   4   3   2   1   0   param A       range  param B       range
-                                                        //----  --- --- --- --- --- --- ---  ------------  -----  ------------  -----
-            public byte algorithm;       //110    0   0 |        ALG        | ALGORITHM     0-31
-            public byte KEYSYNC_FB;      //111    0   0   0 |OKS|    FB     | OSC KEY SYNC  0-1    FEEDBACK      0-7
+                                        //public byte             bit #
+                                        // #     6   5   4   3   2   1   0   param A       range  param B       range
+                                        //----  --- --- --- --- --- --- ---  ------------  -----  ------------  -----
+            public byte algorithm;      //110    0   0 |        ALG        | ALGORITHM     0-31
+            public byte KEYSYNC_FB;     //111    0   0   0 |OKS|    FB     | OSC KEY SYNC  0-1    FEEDBACK      0-7
 
             readonly public bool OscKeySync {get => ((KEYSYNC_FB>>3) & 1) == 1; }
             readonly public byte Feedback {get => (byte)(KEYSYNC_FB & 0x7); }
@@ -428,7 +463,7 @@ namespace PhaseEngine
             public byte lfoDelay;
             public byte lfoPMD;
             public byte lfoAMD;
-            public byte lfoPackedOpts;   //116  |  LPMS |      LFW      |LKS| LF PT MOD SNS 0-7   WAVE 0-5,  SYNC 0-1
+            public byte lfoPackedOpts;   //116  |  LPMS |      LFW      |LKS| LFO PITCH MOD SENS 0-7,   WAVE 0-5,  SYNC 0-1
 
             readonly public bool LFOKeySync {get=> (lfoPackedOpts & 1) == 1;}
             readonly public LFOWaves LFOWaveform {get=>  (LFOWaves)((lfoPackedOpts >> 1) & 0x7);}
