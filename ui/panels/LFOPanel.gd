@@ -13,7 +13,7 @@ func _ready():
 
 	#Set up LFO.
 	for o in $LFO.get_children():
-		if !o is Slider:  continue
+		if !o is EGSlider:  continue
 		o.connect("value_changed", self, "set_lfo", [o.associated_property])
 
 	$LFO/WavePanel/Duty.connect("value_changed", self, "set_lfo", [$LFO/WavePanel/Duty.associated_property])
@@ -21,6 +21,20 @@ func _ready():
 
 	for i in global.waves.size():
 		$LFO/WavePanel/Popup/G.get_child(i).connect("pressed", self, "_on_Popup_button_pressed", [i])
+
+	#Set up a bit of theming
+	var check = AtlasTexture.new()
+	var uncheck = AtlasTexture.new()
+	
+	check.atlas = preload("res://gfx/ui/radio_check.png")
+	uncheck.atlas = preload("res://gfx/ui/radio_check.png")
+	uncheck.region = Rect2(0,0,16,16)
+	check.region = Rect2(16,0,16,16)
+	
+	for o in [$LFO/Sync.get_popup(), $LFO/DropDown.get_popup()]:
+		o.add_icon_override("radio_unchecked", uncheck)
+		o.add_icon_override("radio_checked", check)
+	
 
 
 	if Engine.get_idle_frames() == 0:  yield(get_tree(), "idle_frame")
