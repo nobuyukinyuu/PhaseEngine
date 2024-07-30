@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=2]
+[gd_scene load_steps=36 format=2]
 
 [ext_resource path="res://gfx/ui/envelope_editor/icon_loop.png" type="Texture" id=1]
 [ext_resource path="res://gfx/ui/envelope_editor/icon_sustain.png" type="Texture" id=2]
@@ -23,6 +23,7 @@
 [ext_resource path="res://ui/FlatButton.theme" type="Theme" id=21]
 [ext_resource path="res://ui/panels/LinearPanel.gd" type="Script" id=22]
 [ext_resource path="res://ui/envelope_editor/TimeRuler.tscn" type="PackedScene" id=23]
+[ext_resource path="res://ui/TabContainer.theme" type="Theme" id=24]
 
 [sub_resource type="StyleBoxFlat" id=12]
 bg_color = Color( 0.447059, 0.172549, 0.145098, 1 )
@@ -572,3 +573,29 @@ tick_count = 32
 associated_property = "tl"
 bind_abilities = 1
 useExpTicks = true
+
+[node name="TabContainer" type="TabContainer" parent="." index="12"]
+margin_left = 360.0
+margin_top = 8.0
+margin_right = 464.0
+margin_bottom = 352.0
+theme = ExtResource( 24 )
+custom_fonts/font = ExtResource( 17 )
+tab_align = 0
+
+[node name="A" type="Container" parent="TabContainer" index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 1.0
+margin_top = 21.0
+margin_right = -1.0
+margin_bottom = -1.0
+
+[node name="B" type="Container" parent="TabContainer" index="1"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
