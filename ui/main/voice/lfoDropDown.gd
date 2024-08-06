@@ -1,5 +1,6 @@
 extends MenuButton
-var previous_index = 1
+enum {FROM_PRESET, AUTO_KNEE, MANUAL} #Determines how to set the frequency and knee in the UI.
+var previous_index = AUTO_KNEE
 
 func _ready():
 	var s = get_popup()
@@ -26,19 +27,19 @@ func _on_id_pressed(index):
 	get_popup().set_item_checked(previous_index, false)
 	get_popup().set_item_checked(index, true)
 
-	match index:
-		1:
+	match index-1:
+		FROM_PRESET:
 			get_parent().get_node("Speed").visible = true
 			get_parent().get_node("Knee").visible = false
 			get_parent().get_node("Frequency").visible = false
-		2, 3:
+		AUTO_KNEE, MANUAL:
 			get_parent().get_node("Knee").disabled = index==2
 			
 			get_parent().get_node("Speed").visible = false
 			get_parent().get_node("Knee").visible = true
 			get_parent().get_node("Frequency").visible = true
 			
-		_:
+		_: #Default
 			pass
 
 	previous_index = index

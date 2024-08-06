@@ -570,17 +570,6 @@ custom_styles/hover = SubResource( 7 )
 custom_styles/normal = SubResource( 8 )
 icon = ExtResource( 28 )
 
-[node name="+Delay" parent="LTab/LFO" instance=ExtResource( 1 )]
-margin_left = 7.0
-margin_top = 45.0
-margin_right = 255.0
-margin_bottom = 65.0
-rect_min_size = Vector2( 112, 20 )
-max_value = 32767.0
-exp_edit = true
-associated_property = "Delay"
-special_display = 2
-
 [node name="Speed" parent="LTab/LFO" instance=ExtResource( 1 )]
 margin_left = 31.0
 margin_top = 13.0
@@ -663,7 +652,6 @@ rect_pivot_offset = Vector2( 9, 12 )
 theme = SubResource( 10 )
 max_value = 5.0
 step = 0.01
-exp_edit = true
 allow_greater = true
 editable = false
 title = "Knee"
@@ -674,6 +662,17 @@ point_outwards = true
 title_align = Vector2( 0.3, -0.1 )
 value_font = ExtResource( 10 )
 disabled = true
+
+[node name="+Delay" parent="LTab/LFO" instance=ExtResource( 1 )]
+margin_left = 7.0
+margin_top = 45.0
+margin_right = 255.0
+margin_bottom = 65.0
+rect_min_size = Vector2( 112, 20 )
+max_value = 32767.0
+exp_edit = true
+associated_property = "Delay"
+special_display = 2
 
 [node name="DropDown" type="MenuButton" parent="LTab/LFO"]
 margin_left = 7.0
@@ -801,6 +800,7 @@ icon = ExtResource( 33 )
 [connection signal="timeout" from="FMPreview/Timer" to="FMPreview" method="_on_Timer_timeout"]
 [connection signal="gui_input" from="LTab/LFO/WavePanel/Preview/Panel" to="LTab" method="_on_Preview_gui_input"]
 [connection signal="item_selected" from="LTab/LFO/Sync" to="LTab" method="_on_Sync_item_selected"]
+[connection signal="value_changed" from="LTab/LFO/+Delay" to="LTab" method="_on_LFO_Delay_value_changed"]
 [connection signal="pressed" from="Btn/ReloadBank" to="IO" method="reopen_bank"]
 [connection signal="pressed" from="Btn/Load" to="IO" method="open"]
 [connection signal="pressed" from="Btn/Save" to="IO" method="save"]

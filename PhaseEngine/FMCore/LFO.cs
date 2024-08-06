@@ -19,7 +19,7 @@ namespace PhaseEngine
 
         //User set values.
         public ushort duty=32767;
-        int delay = 0;
+        int delay = 0; int knee = 0;  //How long before starting to employ and fully employ LFO.
         byte speed = 0;  //Used for serialization and reference when loading an LFO
         public bool invert;  //User-specified flipping of the waveform.
         public float pmd;  //User specified pitch modulation depth.
@@ -30,7 +30,8 @@ namespace PhaseEngine
         public byte wavetable_bank;
 
         //Sets and returns the delay time in millisecs.
-        public int Delay {get => (int)(delay / Global.MixRate * 1000); set => delay=(int)(value * Global.MixRate / 1000);}  
+        public int Delay {get => (int)(delay / Global.MixRate * 1000); set  {delay=(int)(value * Global.MixRate / 1000); SetKnee(value);} }  
+        public int Knee {get => (int)(knee / Global.MixRate * 1000); set => knee=(int)(value * Global.MixRate / 1000);}
         public byte Speed{get => speed;  set=> SetSpeed(value);}
 
         internal int SyncType { get=> release_sync? 3: delay_sync? 2: osc_sync? 1:0; 
@@ -47,6 +48,11 @@ namespace PhaseEngine
         }
 
 
+        public void SetKnee(float amtSecs)  //Sets the knee based on the delay value.
+        {
+            var input = 34.2471 * Math.Log(5.407685402494024 * (0.123569 + amtSecs/1000.0));
+            Knee = (int)(Math.Min(0.020562 + 0.0280046 * Math.Pow(1.04673, input-0.5), 5) * 1000);
+        }
         public void SetSpeed(byte speed)
         {
             this.speed = speed;
@@ -76,6 +82,7 @@ namespace PhaseEngine
 
             if (delay_sync && delay_counter == delay)  
             {  //The following routine sets up the buffer to realign the LFO in the middle of the phase to mitigate pops and clicks.
+               //TODO:  When knee is implemented, consider leaving this up to the osc_sync setting.
                 phase = -256 << Global.FRAC_PRECISION_BITS;  //Reset phase on delay ending
                 cycle_counter = 0;
                 lastClockedVolume = operatorOutputSample();
@@ -124,15 +131,25 @@ namespace PhaseEngine
             // var ratio = AMD/1023.0f;
             // short pushupValue = (short)(0x1FFF*(ratio));
 
+
+            if (delay_counter < delay + knee) //FIXME
+            {
+                var amt = (delay_counter-delay)/(float)knee;
+                output = (short)Tools.Lerp(-0x1FE8, output, amt);
+                // output = (short)(output*amt);
+            }
+
             var ratio = Tables.amdScaleRatio[amd];
             short pushupValue = Tables.amdPushupRatio[amd];
 
             output = (short)(output*ratio);  //Grab the 0-1 value from the reciprocal table and apply it to the output to scale it down.
             output += pushupValue;  //Waveform must always be above 0. Scale the result up to be between 0-0x3FFF.
+
+                
             output >>= 4;  //Scale down to 0-1023.
 
             // output = (short)Tools.Clamp(output, 0, Envelope.TL_MAX);  //TODO:  Figure out if this can be made more efficient
-            
+
             return (ushort) output; 
         }
 
@@ -146,8 +163,12 @@ namespace PhaseEngine
             if (cycle_counter!=0) return false;  //Don't bother recalculating the pitch if we're not clock-ready.  Lowers recalc cost.
             if (delay_counter < delay) return false;
 
+            var knee_vol = 1.0f;
+            if (delay_counter < delay + knee) 
+                knee_vol = (delay_counter-delay)/(float)knee ;
+
             //Grab a sample volume from the oscillator, then grab the float from the float table.  This value can be 0 to 8192 (technically 8168 from exp table).
-            int volume = (int)(lastClockedVolume * pmd); 
+            int volume = (int)(lastClockedVolume * pmd * knee_vol); 
             var ratio = flip ^ invert?  Tables.vol2pitchUp[volume] : Tables.vol2pitchDown[volume];
 
             //Apply ratio to the input.

@@ -125,3 +125,17 @@ func switch_bank_ui(on):
 	$LFO/WavePanel/Bank.visible = on
 
 	if on:  $LFO/WavePanel/Bank.check_banks()
+
+
+func _on_LFO_Delay_value_changed(value):
+	#Set the knee based off values estimated from DX7 LFO tables
+	if $LFO/DropDown.get_index() != $LFO/DropDown.MANUAL:
+		#First use the inverse of the operation used to produce the input value of 0-100.
+		#This corresponds to the approximate value needed to produce the same length delay on a DX7.
+		var input = 34.2471 * log(5.407685402494024 * (0.123569 + value/1000.0))
+		
+		#Now, feed the input value to our knee output function, which calculates the value of a knee
+		#For a given input.
+		$LFO/Knee.value = min(0.020562 + 0.0280046 * pow(1.04673, input-0.5), 5)
+
+
