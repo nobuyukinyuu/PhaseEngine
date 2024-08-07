@@ -314,6 +314,7 @@ namespace PhaseEngine
                             f.wavetable = voice.wavetable;
                             break;
                         case OpBase.Intents.BITWISE:  //Extends FM_OP
+                            //FIXME:  CONSIDER SETTING OpFuncType HERE
                             var op2 = new BitwiseOperator();
                             ops[i] = op2;
                             op2.eg.Configure(voice.egs[i]);

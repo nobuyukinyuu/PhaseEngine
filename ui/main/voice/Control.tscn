@@ -287,7 +287,6 @@ tab_align = 0
 script = ExtResource( 39 )
 
 [node name="Metadata" type="Control" parent="LTab"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 1.0
@@ -382,6 +381,7 @@ title_align = Vector2( 0.3, -0.1 )
 value_font = ExtResource( 7 )
 
 [node name="LFO" type="Control" parent="LTab"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 1.0

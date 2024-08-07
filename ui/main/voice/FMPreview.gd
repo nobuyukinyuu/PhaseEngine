@@ -32,7 +32,8 @@ func _draw():
 	var sz = pts.size()/3
 	for i in range(1,max(0,sz-1)):
 		var h = rect_size.y/2 #Midline
-		var h2 = 0.75 if not c else 4.0/float(c.connections_to_output()) * 0.75 #Volume scalar
+#		var h2 = 0.75 if not c else 4.0/float(c.connections_to_output()) * 0.75 #Volume scalar
+		var h2 = 0.75 if not c else 4.0/float(c.GetOutputScale(true)) * 0.75 #Volume scalar
 		var pt = Vector2(i,  pts[i] * h2 * h + h)
 		var p2 = Vector2(i+1,  pts[i+1] * h2 * h + h)
 		var a = Vector2(i, pts[i+sz] * h2 * h + h) #min
