@@ -15,6 +15,8 @@ func _ready():
 	for o in $LFO.get_children():
 		if !o is EGSlider:  continue
 		o.connect("value_changed", self, "set_lfo", [o.associated_property])
+	$LFO/Frequency.connect("value_changed", self, "set_lfo", ["Frequency"])
+	$LFO/Knee.connect("value_changed", self, "set_knee")
 
 	$LFO/WavePanel/Duty.connect("value_changed", self, "set_lfo", [$LFO/WavePanel/Duty.associated_property])
 	$LFO/WavePanel/Invert.connect("toggled", self, "set_lfo", ["invert"])
@@ -41,8 +43,10 @@ func _ready():
 	reinit()
 
 
-func set_lfo(value, property):
+func set_lfo(value, property):  #Called by any LFO slider when it changes.
 	get_node(owner.chip_loc).SetLFO(property, value)
+func set_knee(value):  #Called by any LFO slider when it changes.
+	get_node(owner.chip_loc).SetLFO("Knee", value*1000)
 
 func set_meta(text, property):
 	if property == "desc":  text = $Metadata/Desc.text
@@ -69,6 +73,19 @@ func reinit():
 
 	$"LFO/+Delay".value = pull(l, "delay", 0)
 	$LFO/Speed.value = pull(l,"speed", 19)
+	$LFO/Frequency.value = pull(l, "freq", 1)
+	$LFO/Knee.value = pull(l, "knee", 500) / 1000.0
+	
+	#Determine the LFO speed UI to switch to.
+	var switch_to = $LFO/DropDown.FROM_PRESET
+	if l.has("freq"):  switch_to = $LFO/DropDown.MANUAL_FREQUENCY
+	$LFO/DropDown._on_id_pressed(switch_to)
+
+	#Determine whether to enable the knee.
+	if l.has("knee") != $LFO/DropDown.knee_is_manual:
+		$LFO/DropDown._on_id_pressed($LFO/DropDown.KNEE)
+	
+	
 	$"LFO/Pitch Depth".value = pull(l, "pmd", 0)
 	$"LFO/Amplitude Depth".value = pull(l, "amd", 0x3FF)
 
@@ -129,7 +146,7 @@ func switch_bank_ui(on):
 
 func _on_LFO_Delay_value_changed(value):
 	#Set the knee based off values estimated from DX7 LFO tables
-	if $LFO/DropDown.get_index() != $LFO/DropDown.MANUAL:
+	if !$LFO/DropDown.knee_is_manual:
 		#First use the inverse of the operation used to produce the input value of 0-100.
 		#This corresponds to the approximate value needed to produce the same length delay on a DX7.
 		var input = 34.2471 * log(5.407685402494024 * (0.123569 + value/1000.0))
@@ -137,5 +154,5 @@ func _on_LFO_Delay_value_changed(value):
 		#Now, feed the input value to our knee output function, which calculates the value of a knee
 		#For a given input.
 		$LFO/Knee.value = min(0.020562 + 0.0280046 * pow(1.04673, input-0.5), 5)
-
+		set_knee($LFO/Knee.value)
 

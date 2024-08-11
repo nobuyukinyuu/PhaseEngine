@@ -423,10 +423,10 @@ value = 32767.0
 associated_property = "duty"
 
 [node name="Bank" parent="LTab/LFO/WavePanel" instance=ExtResource( 13 )]
-margin_left = 71.0
-margin_top = 13.0
-margin_right = 201.0
-margin_bottom = 27.0
+margin_left = 5.0
+margin_top = 145.0
+margin_right = 121.0
+margin_bottom = 159.0
 
 [node name="Preview" type="TextureRect" parent="LTab/LFO/WavePanel"]
 margin_left = 219.0
@@ -573,11 +573,12 @@ icon = ExtResource( 28 )
 [node name="Speed" parent="LTab/LFO" instance=ExtResource( 1 )]
 margin_left = 31.0
 margin_top = 13.0
-margin_right = 151.0
+margin_right = 103.0
 margin_bottom = 33.0
 rect_min_size = Vector2( 64, 20 )
 max_value = 127.0
 value = 19.0
+exp_edit = true
 associated_property = "Speed"
 special_display = 3
 
@@ -631,9 +632,10 @@ margin_right = 87.0
 margin_bottom = 65.0
 rect_pivot_offset = Vector2( 9, 12 )
 theme = SubResource( 10 )
-max_value = 5.0
+min_value = 0.01
+max_value = 10.0
 step = 0.01
-exp_edit = true
+value = 0.01
 allow_greater = true
 title = "Frequency"
 travel_multiplier = 10.0
@@ -643,10 +645,9 @@ point_outwards = true
 value_font = ExtResource( 10 )
 
 [node name="Knee" parent="LTab/LFO" instance=ExtResource( 3 )]
-visible = false
-margin_left = 103.0
+margin_left = 107.0
 margin_top = 17.0
-margin_right = 151.0
+margin_right = 155.0
 margin_bottom = 65.0
 rect_pivot_offset = Vector2( 9, 12 )
 theme = SubResource( 10 )

@@ -30,12 +30,21 @@ namespace PhaseEngine
         public byte wavetable_bank;
 
         //Sets and returns the delay time in millisecs.
-        public int Delay {get => (int)(delay / Global.MixRate * 1000); set  {delay=(int)(value * Global.MixRate / 1000); SetKnee(value);} }  
+        public int Delay {get => (int)(delay / Global.MixRate * 1000); set  {delay=(int)(value * Global.MixRate / 1000); 
+                if(!speedType.HasFlag(SpeedTypes.ManualKnee))  SetKnee(value);} }  
         public int Knee {get => (int)(knee / Global.MixRate * 1000); set => knee=(int)(value * Global.MixRate / 1000);}
         public byte Speed{get => speed;  set=> SetSpeed(value);}
+        public double Frequency{get => pg.BaseFrequency;  set=> SetFrequency(value);}
 
+
+        //Used to specify how frequency and knee is described during deserialization.
+        [Flags] public enum SpeedTypes {Preset, FromFrequency, ManualKnee, ManualKneeAndFrequency}
+        public SpeedTypes speedType = SpeedTypes.Preset;
+
+        //Used to specify how the oscillator syncs to the last key pressed for serialization.
         internal int SyncType { get=> release_sync? 3: delay_sync? 2: osc_sync? 1:0; 
-                set{ {osc_sync=value>0;  delay_sync=value>1;  release_sync=value>2;}} }  //For serialization
+                set{ {osc_sync=value>0;  delay_sync=value>1;  release_sync=value>2;}} }
+
 
         // public LFO()  {Init();}
         public LFO(byte speed=19)  {Init(speed);}
@@ -48,12 +57,15 @@ namespace PhaseEngine
         }
 
 
-        public void SetKnee(float amtSecs)  //Sets the knee based on the delay value.
-        {
-            var input = 34.2471 * Math.Log(5.407685402494024 * (0.123569 + amtSecs/1000.0));
+        public void SetFrequency(double hz) { //Manually sets the frequency from a given Hz rate.
+            pg = Increments.FromFreq(hz);
+            pg.Recalc(); 
+        }
+        public void SetKnee(float delayMillisecs) { //Automatically sets the knee based on the delay value.
+            var input = 34.2471 * Math.Log(5.407685402494024 * (0.123569 + delayMillisecs / 1000.0));
             Knee = (int)(Math.Min(0.020562 + 0.0280046 * Math.Pow(1.04673, input-0.5), 5) * 1000);
         }
-        public void SetSpeed(byte speed)
+        public void SetSpeed(byte speed) //Automatically sets the frequency based off the LFO speed table.
         {
             this.speed = speed;
             pg = Increments.FromFreq(Tables.LFOSpeed[speed]);  
@@ -299,7 +311,14 @@ namespace PhaseEngine
             if (duty!=32767) o.AddPrim("duty", duty);
             if (wavetable_bank>0) o.AddPrim("wavetable_bank", wavetable_bank);
             o.AddPrim("delay", Delay);  //Delay is tied to MixRate so we should get the independent value.
-            o.AddPrim("speed", Speed);  //Speed is tied to MixRate so we should get the independent value.
+
+            if (speedType.HasFlag(SpeedTypes.FromFrequency))  o.AddPrim("freq", pg.BaseFrequency);
+            else o.AddPrim("speed", Speed);
+           
+            if (speedType.HasFlag(SpeedTypes.ManualKnee)) //Manual knee specified.
+                    o.AddPrim("knee", Knee);  //Knee is tied to MixRate so we should get the independent value.
+
+
             o.AddPrim("invert", invert);
             o.AddPrim("pmd", pmd);
             o.AddPrim("amd", AMD);  //Amp depth is specified in terms easier to use a LUT with.  Grab the user-friendly value instead.
@@ -316,8 +335,25 @@ namespace PhaseEngine
            
             if (j.HasItem("duty")) j.Assign("duty", ref duty); else duty=32767;
             wavetable_bank = (byte) j.GetItem("wavetable_bank", 0); //Reset if the tag doesn't exist so a channel doesn't reuse a previous value.
+
             Delay = j.GetItem("delay", Delay);  //Convert delay and speed values to reflect our mix rate.
-            Speed = (byte) j.GetItem("speed", Speed);
+
+            speedType = SpeedTypes.Preset; //Default to speed preset. We'll update this as we pull info from the JSON.
+            if (j.HasItem("speed"))  Speed = (byte) j.GetItem("speed", Speed);
+            if (j.HasItem("freq"))  
+            {
+                speedType |= SpeedTypes.FromFrequency;
+                Frequency = j.GetItem("freq", (float)Frequency);
+            }
+
+            if (j.HasItem("knee")) {
+                speedType |= SpeedTypes.ManualKnee;
+                Knee = j.GetItem("knee", Knee);
+            } else { //Set the knee automatically based on the delay value.
+                SetKnee(Delay);
+            }
+
+
             j.Assign("invert", ref invert);
             j.Assign("pmd", ref pmd);
 

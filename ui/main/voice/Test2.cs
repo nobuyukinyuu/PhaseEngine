@@ -459,6 +459,7 @@ public class Test2 : Label
     }
 
     public void SetLFO(string property, float val){ c.Voice.lfo.SetVal(property, val); }
+    public void SetLFOSpeedType(int val){ c.Voice.lfo.speedType = (LFO.SpeedTypes)val; }
 
     // Called from EG controls to bus to the appropriate tuning properties.
     public void SetPG(int opTarget, string property, float val)
@@ -739,14 +740,10 @@ public class Test2 : Label
         }
     public float GetOutputScale(bool countMuted=true) //Used to score carriers by loudness, to provide the preview a scale factor
     {
-
         float score=0;
-
-        float Score(byte opNum)
-        {
+        float Score(byte opNum) {
             float totalScore=0;
-            switch(c.Voice.alg.intent[opNum])
-            {
+            switch(c.Voice.alg.intent[opNum]) {
                 case OpBase.Intents.FM_OP: case OpBase.Intents.FM_HQ: //FM ops have a default score of 1. Stacking modulators only changes phase, not amplitude.
                     totalScore++;
                     break;
@@ -768,6 +765,10 @@ public class Test2 : Label
                 case OpBase.Intents.BITWISE:  //Bitwise ops are an additive process, so their score can be from 0-4 before rollover.
                     float bitwiseScore=0; 
                     foreach(byte modulator in GetModulators(opNum))  bitwiseScore += Score(modulator);
+
+                    var aux_func = c.Voice.egs[opNum].aux_func; //OR and XOR operations can produce output with no modulators, so account for this in the score.
+                    if (bitwiseScore==0 && (aux_func == 1 || aux_func == 2)) bitwiseScore = 1; 
+
                     totalScore += (float)Math.Min(bitwiseScore, 4);
                     break;
                 case OpBase.Intents.WAVEFOLDER:  //Wavefolding ops will never exceed a 14-bit value, so its score can be from 0-1.
@@ -784,7 +785,7 @@ public class Test2 : Label
         }
 
         foreach (byte carrier in GetCarriers()) score += Score(carrier);
-        return score;
+        return score==0?  1.0f: score;  //Prevent divide by zero errors by assuming the output size is at least 1
     }
 
 
