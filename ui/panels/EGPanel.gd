@@ -207,6 +207,8 @@ func refresh_envelope_preview():
 	$EnvelopeDisplay.al = levels[0] / global.L_MAX
 	$EnvelopeDisplay.dl = levels[1] / global.L_MAX
 	$EnvelopeDisplay.sl = levels[2] / global.L_MAX
+	
+	$EnvelopeDisplay.call_deferred("update_env")
 
 #Updates a single part of the envelope preview.
 const env_map = {"ar":"Attack", "dr":"Decay", "sr":"Sustain", "rr":"Release"}

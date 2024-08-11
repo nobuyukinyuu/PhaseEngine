@@ -81,7 +81,7 @@ namespace PhaseEngine
 
         //=============Oscillator output types.  Either standard waveform (log domain), noise, or wavetable sample.=========================
 
-        public short ComputeWavetableFeedback(ushort modulation, ushort am_offset)
+        public new short ComputeWavetableFeedback(ushort modulation, ushort am_offset)
         {
             var avg = (fbBuf[0] + fbBuf[1]) * Tables.fbRatio[eg.feedback];
             var output = ComputeWavetable(unchecked((ushort)(avg+modulation)), am_offset);

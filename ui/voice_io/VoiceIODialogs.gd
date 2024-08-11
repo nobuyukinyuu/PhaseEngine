@@ -51,7 +51,6 @@ func _on_Open_file_selected(path):
 	busy = true
 
 	var list = c.RequestVoiceImport(path)
-	
 	if !list: 
 		OS.alert("Import failed.")
 		busy = false

@@ -1,4 +1,4 @@
-[gd_scene load_steps=54 format=2]
+[gd_scene load_steps=56 format=2]
 
 [ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=1]
 [ext_resource path="res://ui/kanbanScroll/Column.tscn" type="PackedScene" id=2]
@@ -18,6 +18,7 @@
 [ext_resource path="res://ui/TabContainer.theme" type="Theme" id=16]
 [ext_resource path="res://ui/FileDialog.theme" type="Theme" id=17]
 [ext_resource path="res://ui/main/voice/VoiceMain.gd" type="Script" id=18]
+[ext_resource path="res://ui/responseCurve/PresetMenu.theme" type="Theme" id=19]
 [ext_resource path="res://gfx/wave/0.png" type="Texture" id=20]
 [ext_resource path="res://gfx/wave/8a.png" type="Texture" id=21]
 [ext_resource path="res://gfx/wave/7.png" type="Texture" id=22]
@@ -40,6 +41,7 @@
 [ext_resource path="res://ui/panels/LFOPanel.gd" type="Script" id=39]
 [ext_resource path="res://ui/main/voice/FMPreview.gd" type="Script" id=40]
 [ext_resource path="res://ui/main/voice/WaveformBanksTab.tscn" type="PackedScene" id=41]
+[ext_resource path="res://ui/main/voice/lfoDropDown.gd" type="Script" id=42]
 
 [sub_resource type="Animation" id=1]
 resource_name = "NoteOn"
@@ -411,20 +413,20 @@ rect_min_size = Vector2( 56, 20 )
 max_value = 1023.0
 
 [node name="Duty" parent="LTab/LFO/WavePanel" instance=ExtResource( 1 )]
-margin_left = 69.0
-margin_top = 4.0
-margin_right = 205.0
-margin_bottom = 24.0
+margin_left = 5.0
+margin_top = 136.0
+margin_right = 125.0
+margin_bottom = 156.0
 rect_min_size = Vector2( 64, 20 )
 max_value = 65535.0
 value = 32767.0
 associated_property = "duty"
 
 [node name="Bank" parent="LTab/LFO/WavePanel" instance=ExtResource( 13 )]
-margin_left = 71.0
-margin_top = 13.0
-margin_right = 201.0
-margin_bottom = 27.0
+margin_left = 5.0
+margin_top = 145.0
+margin_right = 121.0
+margin_bottom = 159.0
 
 [node name="Preview" type="TextureRect" parent="LTab/LFO/WavePanel"]
 margin_left = 219.0
@@ -432,9 +434,6 @@ margin_top = 4.0
 margin_right = 251.0
 margin_bottom = 28.0
 texture = ExtResource( 20 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Panel" type="Panel" parent="LTab/LFO/WavePanel/Preview"]
 show_behind_parent = true
@@ -447,16 +446,13 @@ __meta__ = {
 }
 
 [node name="Invert" type="CheckBox" parent="LTab/LFO/WavePanel"]
-margin_left = 5.0
+margin_left = 157.0
 margin_top = 8.0
-margin_right = 59.0
+margin_right = 211.0
 margin_bottom = 26.0
 theme = ExtResource( 15 )
 custom_fonts/font = ExtResource( 11 )
 text = "Flip"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Popup" type="PopupDialog" parent="LTab/LFO/WavePanel"]
 margin_left = 210.0
@@ -574,6 +570,100 @@ custom_styles/hover = SubResource( 7 )
 custom_styles/normal = SubResource( 8 )
 icon = ExtResource( 28 )
 
+[node name="Speed" parent="LTab/LFO" instance=ExtResource( 1 )]
+margin_left = 31.0
+margin_top = 13.0
+margin_right = 103.0
+margin_bottom = 33.0
+rect_min_size = Vector2( 64, 20 )
+max_value = 127.0
+value = 19.0
+exp_edit = true
+associated_property = "Speed"
+special_display = 3
+
+[node name="Sync" type="OptionButton" parent="LTab/LFO"]
+margin_left = 135.0
+margin_top = 149.0
+margin_right = 254.0
+margin_bottom = 163.0
+custom_fonts/font = ExtResource( 11 )
+custom_styles/hover = SubResource( 9 )
+custom_styles/pressed = SubResource( 9 )
+custom_styles/focus = SubResource( 9 )
+custom_styles/normal = SubResource( 9 )
+text = "None"
+items = [ "None", null, false, 0, null, "Oscillator", null, false, 1, null, "End of Delay", null, false, 2, null, "On Release", null, false, 3, null ]
+selected = 0
+
+[node name="Label" type="Label" parent="LTab/LFO/Sync"]
+margin_top = -11.0
+margin_right = 120.0
+custom_fonts/font = ExtResource( 9 )
+text = "Sync"
+align = 2
+
+[node name="Pitch Depth" parent="LTab/LFO" instance=ExtResource( 1 )]
+margin_left = 7.0
+margin_top = 109.0
+margin_right = 255.0
+margin_bottom = 129.0
+rect_min_size = Vector2( 112, 20 )
+max_value = 1.0
+step = 0.001
+associated_property = "pmd"
+special_display = 4
+
+[node name="Amplitude Depth" parent="LTab/LFO" instance=ExtResource( 1 )]
+margin_left = 7.0
+margin_top = 77.0
+margin_right = 255.0
+margin_bottom = 97.0
+rect_min_size = Vector2( 64, 20 )
+max_value = 1023.0
+value = 1023.0
+associated_property = "AMD"
+
+[node name="Frequency" parent="LTab/LFO" instance=ExtResource( 3 )]
+visible = false
+margin_left = 39.0
+margin_top = 17.0
+margin_right = 87.0
+margin_bottom = 65.0
+rect_pivot_offset = Vector2( 9, 12 )
+theme = SubResource( 10 )
+min_value = 0.01
+max_value = 10.0
+step = 0.01
+value = 0.01
+allow_greater = true
+title = "Frequency"
+travel_multiplier = 10.0
+notch = 0.5
+thickness = 0.4
+point_outwards = true
+value_font = ExtResource( 10 )
+
+[node name="Knee" parent="LTab/LFO" instance=ExtResource( 3 )]
+margin_left = 107.0
+margin_top = 17.0
+margin_right = 155.0
+margin_bottom = 65.0
+rect_pivot_offset = Vector2( 9, 12 )
+theme = SubResource( 10 )
+max_value = 5.0
+step = 0.01
+allow_greater = true
+editable = false
+title = "Knee"
+travel_multiplier = 10.0
+notch = 0.5
+thickness = 0.4
+point_outwards = true
+title_align = Vector2( 0.3, -0.1 )
+value_font = ExtResource( 10 )
+disabled = true
+
 [node name="+Delay" parent="LTab/LFO" instance=ExtResource( 1 )]
 margin_left = 7.0
 margin_top = 45.0
@@ -585,63 +675,26 @@ exp_edit = true
 associated_property = "Delay"
 special_display = 2
 
-[node name="Speed" parent="LTab/LFO" instance=ExtResource( 1 )]
+[node name="DropDown" type="MenuButton" parent="LTab/LFO"]
 margin_left = 7.0
-margin_top = 77.0
-margin_right = 255.0
-margin_bottom = 97.0
-rect_min_size = Vector2( 64, 20 )
-max_value = 127.0
-value = 19.0
-associated_property = "Speed"
-special_display = 3
+margin_top = 9.0
+margin_right = 23.0
+margin_bottom = 33.0
+rect_min_size = Vector2( 16, 18 )
+theme = ExtResource( 15 )
+text = "}"
+flat = false
+script = ExtResource( 42 )
 
-[node name="Sync" type="OptionButton" parent="LTab/LFO"]
-margin_left = 8.0
-margin_top = 149.0
-margin_right = 127.0
-margin_bottom = 163.0
-custom_fonts/font = ExtResource( 11 )
-custom_styles/hover = SubResource( 9 )
-custom_styles/pressed = SubResource( 9 )
-custom_styles/focus = SubResource( 9 )
-custom_styles/normal = SubResource( 9 )
-text = "None"
-items = [ "None", null, false, 0, null, "Oscillator", null, false, 1, null, "End of Delay", null, false, 2, null, "On Release", null, false, 3, null ]
-selected = 0
+[node name="Submenu" type="PopupMenu" parent="LTab/LFO/DropDown"]
+margin_left = 32.0
+margin_right = 152.0
+margin_bottom = 138.0
+theme = ExtResource( 19 )
+items = [ "Item 0", null, 0, false, false, 0, 0, null, "", false ]
 __meta__ = {
 "_edit_use_anchors_": false
 }
-
-[node name="Label" type="Label" parent="LTab/LFO/Sync"]
-margin_top = -11.0
-margin_right = 119.0
-custom_fonts/font = ExtResource( 9 )
-text = "Sync"
-align = 2
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Pitch Depth" parent="LTab/LFO" instance=ExtResource( 1 )]
-margin_left = 135.0
-margin_top = 141.0
-margin_right = 255.0
-margin_bottom = 161.0
-rect_min_size = Vector2( 112, 20 )
-max_value = 1.0
-step = 0.001
-associated_property = "pmd"
-
-[node name="Amplitude Depth" parent="LTab/LFO" instance=ExtResource( 1 )]
-margin_left = 7.0
-margin_top = 109.0
-margin_right = 255.0
-margin_bottom = 129.0
-rect_min_size = Vector2( 64, 20 )
-max_value = 1023.0
-value = 1023.0
-associated_property = "AMD"
 
 [node name="Waveforms" parent="LTab" instance=ExtResource( 41 )]
 visible = false
@@ -748,6 +801,7 @@ icon = ExtResource( 33 )
 [connection signal="timeout" from="FMPreview/Timer" to="FMPreview" method="_on_Timer_timeout"]
 [connection signal="gui_input" from="LTab/LFO/WavePanel/Preview/Panel" to="LTab" method="_on_Preview_gui_input"]
 [connection signal="item_selected" from="LTab/LFO/Sync" to="LTab" method="_on_Sync_item_selected"]
+[connection signal="value_changed" from="LTab/LFO/+Delay" to="LTab" method="_on_LFO_Delay_value_changed"]
 [connection signal="pressed" from="Btn/ReloadBank" to="IO" method="reopen_bank"]
 [connection signal="pressed" from="Btn/Load" to="IO" method="open"]
 [connection signal="pressed" from="Btn/Save" to="IO" method="save"]

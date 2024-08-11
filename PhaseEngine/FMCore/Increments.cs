@@ -19,6 +19,7 @@ namespace PhaseEngine
 
         public SortedList<string, TrackerEnvelope> BoundEnvelopes {get;set;}
 
+        public double BaseFrequency {get=>base_hz;}
         internal double hz, base_hz;
         internal double tuned_hz; //Frequency of base_hz * coarse * fine + detune; the tuning without any external modifiers from lfo/controllers
 

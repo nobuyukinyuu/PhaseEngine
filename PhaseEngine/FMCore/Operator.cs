@@ -381,10 +381,10 @@ namespace PhaseEngine
     {
         public delegate short OpFunc(short modulation, short oscOutput); //Function of the operator.
         OpFunc BitwiseOp;
-        public static readonly OpFunc[] operations = {OP_AND, OP_OR, OP_XOR, OP_RINGMOD};
+        public static readonly OpFunc[] operations = {OP_AND, OP_OR, OP_XOR, OP_RINGMOD, OP_MOD, OP_INVMOD, OP_ROL, OP_ROR};
         public byte OpFuncType {get => eg.aux_func;  set { if (value<operations.Length)  {BitwiseOp = operations[value]; eg.aux_func=value;} }}
 
-        public BitwiseOperator():base() {intent=Intents.BITWISE; BitwiseOp=OP_OR;}
+        public BitwiseOperator():base() {intent=Intents.BITWISE; BitwiseOp=OP_AND;}
 
         public override short RequestSample(ushort modulation = 0, ushort am_offset = 0)
         {
@@ -395,7 +395,37 @@ namespace PhaseEngine
         public static short OP_AND(short modulation, short input) {return (short)(input & modulation);}
         public static short OP_OR(short modulation, short input) {return (short)(input | modulation);}
         public static short OP_XOR(short modulation, short input) {return (short)(input ^ modulation);}
+
         public static short OP_RINGMOD(short modulation, short input) {return (short)(input * modulation >> 13);}
+        public static short OP_MOD(short modulation, short input) {return (short)(input % (modulation|1));}
+        public static short OP_INVMOD(short modulation, short input) {return (short)(input % (Tools.Sign(modulation) * (0x1FFF - Tools.Abs(modulation))|1));}
+
+        public static short OP_ROR(short modulation, short input) {return (short)Rotate(input, modulation, ROR16);}
+        public static short OP_ROL(short modulation, short input) {return (short)Rotate(input, modulation, ROL16);}
+ 
+        static int ROR16(int x, int amt) => (x >> amt | (x << (16 - amt))) & 0xFFFF;
+        static int ROL16(int x, int amt) => (x << amt | (x >> (16 - amt))) & 0xFFFF;
+        static short Rotate(int input, int modulation, Func<int,int,int> ROTF)
+        {
+
+            const byte WINDOW = 4;  //The number of bits to evaluate in a chunk.
+            const ushort WINDOW_MASK = (1<<WINDOW) -1; //A bitmask of all 1s the width of the window
+            const ushort MSB = 12;  //The most significant amount of bits to apply the operation to. All bits above this remain untouched.
+
+            var output=0;
+            for (short i=0; i<MSB; i+=WINDOW) //Split the modulation into bite sized chunks to determine how much to rotate the carrier input.
+            {
+                var amt = (modulation>>i) & WINDOW_MASK;  //Rotation value 0 to WINDOW_MASK
+                var val = ROTF(input, (amt + i)%16 ) & WINDOW_MASK;  //rotate the input window n bits we're interested in
+                output |= val<<i;  //Apply rotated window to the output mask.
+            }
+
+            //Knock out the LSBs from the input and replace them with the output mask.
+            input &= ~((1<<MSB)-1);
+            output |= input; 
+
+            return (short)(output);
+        }
 
     }
 

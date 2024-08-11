@@ -3,6 +3,7 @@ using System;
 using PhaseEngine;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Security.Cryptography.X509Certificates;
 
 public class Test2 : Label
 {
@@ -458,6 +459,7 @@ public class Test2 : Label
     }
 
     public void SetLFO(string property, float val){ c.Voice.lfo.SetVal(property, val); }
+    public void SetLFOSpeedType(int val){ c.Voice.lfo.speedType = (LFO.SpeedTypes)val; }
 
     // Called from EG controls to bus to the appropriate tuning properties.
     public void SetPG(int opTarget, string property, float val)
@@ -736,6 +738,55 @@ public class Test2 : Label
         var output=new byte[m.Count]; 
         m.CopyTo(output); return output;
         }
+    public float GetOutputScale(bool countMuted=true) //Used to score carriers by loudness, to provide the preview a scale factor
+    {
+        float score=0;
+        float Score(byte opNum) {
+            float totalScore=0;
+            switch(c.Voice.alg.intent[opNum]) {
+                case OpBase.Intents.FM_OP: case OpBase.Intents.FM_HQ: //FM ops have a default score of 1. Stacking modulators only changes phase, not amplitude.
+                    totalScore++;
+                    break;
+                case OpBase.Intents.FILTER: //Filters can have nothing connected to them so their score starts at 0 tops off at Filter.GAIN_MAX.
+                    float filterScore=0; 
+                    foreach(byte modulator in GetModulators(opNum))  filterScore += Score(modulator);
+
+                    //Determine whether gain plays a role in the final score.                    
+                    switch((Filter.FilterType)c.Voice.egs[opNum].aux_func)
+                    {
+                        case Filter.FilterType.PEAKING:  case Filter.FilterType.LOWSHELF:  case Filter.FilterType.HISHELF:
+                            totalScore += (float)Math.Min(filterScore * Math.Max(c.Voice.egs[opNum].gain, 1.0), Filter.GAIN_MAX);
+                            break;
+                        default:
+                            totalScore += (float)Math.Min(filterScore, Filter.GAIN_MAX);
+                            break;
+                    }
+                    break;
+                case OpBase.Intents.BITWISE:  //Bitwise ops are an additive process, so their score can be from 0-4 before rollover.
+                    float bitwiseScore=0; 
+                    foreach(byte modulator in GetModulators(opNum))  bitwiseScore += Score(modulator);
+
+                    var aux_func = c.Voice.egs[opNum].aux_func; //OR and XOR operations can produce output with no modulators, so account for this in the score.
+                    if (bitwiseScore==0 && (aux_func == 1 || aux_func == 2)) bitwiseScore = 1; 
+
+                    totalScore += (float)Math.Min(bitwiseScore, 4);
+                    break;
+                case OpBase.Intents.WAVEFOLDER:  //Wavefolding ops will never exceed a 14-bit value, so its score can be from 0-1.
+                    float waveFoldScore=0;
+                    foreach(byte modulator in GetModulators(opNum))  waveFoldScore += Score(modulator);
+                    totalScore += (float)Math.Min(waveFoldScore, 1);
+                    break;
+
+                default:  //Assume any unknown operators are outputting a 14-bit value.
+                    totalScore++;
+                    break;
+            }
+            return totalScore;
+        }
+
+        foreach (byte carrier in GetCarriers()) score += Score(carrier);
+        return score==0?  1.0f: score;  //Prevent divide by zero errors by assuming the output size is at least 1
+    }
 
 
     /////////////////////////////    WAVEFORM    //////////////////////////////
