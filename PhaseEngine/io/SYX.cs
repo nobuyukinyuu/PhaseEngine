@@ -79,9 +79,19 @@ namespace PhaseEngine
                             
                             //// LFO ////
                             v.lfo.AMD = (short) Map(p.lfoAMD, Envelope.L_MAX);
-                            v.lfo.Delay = p.lfoDelay;  //FIXME: Produce a delay table for DX7 and map it to our engine
-                            v.lfo.SetSpeed(p.lfoSpeed); //FIXME
-                            v.lfo.SyncType = p.LFOKeySync? 2: 0; //Sync to end of delay period
+
+                            //Based on lfo.cc from music-synthesizer-for-android; ©2013 Google Inc. Apache License 2.0.
+                            double lfoRate(int rate){ //Get the oscillator length in seconds from a DX7 rate [0..99]
+                                int sr = rate == 0 ? 1 : (165 * rate) >> 6;
+                                sr *= sr < 160 ? 11 : (11 + ((sr - 160) >> 4));
+                                return 170.5/(double)sr;
+                            }
+                            v.lfo.Knee = (int) (0.020562 + 0.0280046 * Math.Pow(1.04673, p.lfoDelay) * 1000); //Regression curve fit of DX7 knee value
+                            v.lfo.Delay = (int) (-0.124569 + 0.184922 * Math.Pow(1.02963, p.lfoDelay) * 1000) - v.lfo.Knee; //Regression curve fit of DX7 delay value
+                            v.lfo.Frequency = 1.0 / lfoRate(p.lfoSpeed);
+                            v.lfo.speedType = LFO.SpeedTypes.ManualKneeAndFrequency;
+
+                            v.lfo.SyncType = p.LFOKeySync? 2: 0; //Sync to end of delay period if DX LFO Sync is enabled.
                             v.lfo.pmd = Tools.Remap(p.lfoPMD, 0, 99, 0, 1.0f) * PMS_MAP[p.LFO_PMS];
 
                             if (p.LFOWaveform == LFOWaves.SawDown) v.lfo.invert = true;
@@ -108,7 +118,7 @@ namespace PhaseEngine
                                 eg.sl = LvMap(op.EG_L3);
                                 eg.rl = LvMap(op.EG_L4);
                                 //Rates
-                                eg.ar = (byte)Map(op.EG_R1, 32);
+                                eg.ar = (byte)Map(op.EG_R1, 25);
                                 eg.dr = (byte)Map(op.EG_R2, 32);
                                 eg.sr = (byte)Map(op.EG_R3, 32);
                                 eg.rr = (byte)Map(op.EG_R4, Envelope.R_MAX);
@@ -162,7 +172,7 @@ namespace PhaseEngine
         }
 
         // public static ushort LvMap(int input) => (ushort)(((int)(Tools.Remap(input, 0, 99, Envelope.L_MAX, 0)) << 1) & Envelope.L_MAX);
-        public static ushort LvMap(int input) => (ushort)Tools.Remap(input, 0, 99, Envelope.L_MAX, 0);
+        public static ushort LvMap(int input) => (ushort)Tools.Remap(input, 0, 99, 820, 16);
         
         public static int Map(int input, int outMax) => (int)Math.Round(Tools.Remap(input, 0, 99, 0, outMax));
 

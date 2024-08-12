@@ -94,7 +94,7 @@ namespace PhaseEngine
 
             if (delay_sync && delay_counter == delay)  
             {  //The following routine sets up the buffer to realign the LFO in the middle of the phase to mitigate pops and clicks.
-               //TODO:  When knee is implemented, consider leaving this up to the osc_sync setting.
+               //TODO:  Consider leaving this up to the osc_sync setting.
                 phase = -256 << Global.FRAC_PRECISION_BITS;  //Reset phase on delay ending
                 cycle_counter = 0;
                 lastClockedVolume = operatorOutputSample();

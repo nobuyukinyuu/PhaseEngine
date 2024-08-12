@@ -74,7 +74,7 @@ func reinit():
 	$"LFO/+Delay".value = pull(l, "delay", 0)
 	$LFO/Speed.value = pull(l,"speed", 19)
 	$LFO/Frequency.value = pull(l, "freq", 1)
-	$LFO/Knee.value = pull(l, "knee", 500) / 1000.0
+	$LFO/Knee.value = pull(l, "knee", 1) / 1000.0
 	
 	#Determine the LFO speed UI to switch to.
 	var switch_to = $LFO/DropDown.FROM_PRESET
