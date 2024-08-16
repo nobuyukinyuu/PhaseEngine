@@ -60,7 +60,7 @@ namespace PhaseEngine
                     var o = (JSONObject)json;
                     var version = o.GetItem("FORMAT", -1);
                     if (version==-1) throw new PE_ImportException(IOErrorFlags.Unsupported, "PHV: No format version info found");
-                    if (version != 10)  throw new PE_ImportException(IOErrorFlags.Unsupported, 
+                    if (version > 11)  throw new PE_ImportException(IOErrorFlags.Unsupported, 
                             $"The version is incorrect. Expecting {Global.FORMAT_VERSION}; Got {version}");
                     //TODO:  Look into some forward-compatibility options
 
