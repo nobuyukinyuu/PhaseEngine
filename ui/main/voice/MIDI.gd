@@ -42,11 +42,11 @@ func _input(event):
 
 #				print("Pitch: %s\nVelocity: %s\nPressure: %s\n" % [event.pitch, event.velocity, event.pressure])
 				emit_signal("note_on", event.pitch, event.velocity)
+				owner.get_node("RLWarning").check_for_fixes() #Check to see if we have any stuck note issues.
 
 			MIDI_MESSAGE_NOTE_OFF:
 #				$"../Audio".TurnOffNote(event.pitch)
 				emit_signal("note_off", event.pitch)
-				
 
 			MIDI_MESSAGE_PITCH_BEND:
 				var pitch_amt = (event.pitch+0.5) / 8192.0 - 1
@@ -62,10 +62,11 @@ func _process(_delta):
 		for i in note_keys[octave].size():
 			var n = note_names[i] + str(octave)
 			var notenum = key_to_notenum[n]
-			if Input.is_action_just_pressed(n):  #note was pressed or released.			
+			if Input.is_action_just_pressed(n):  #note was pressed or released.
 				print(n, " Pitch: %s" % [notenum])
 				emit_signal("note_on", notenum, 127)
-					
+				owner.get_node("RLWarning").check_for_fixes() #Check to see if we have any stuck note issues.
+
 			elif Input.is_action_just_released(n):
 				emit_signal("note_off", notenum)
 

@@ -36,7 +36,7 @@ namespace PhaseEngine
         //PhaseEngine max detune creates a ringing oscillation once per second at 440hz. Most other implementations' max detune (-3 to +3) is ever-so-slightly slower.
         //A detune value of 1 in other cores is close to 1/6 the value (or 16.667%) of max detune here, or around 6 seconds at 440hz.  Detune in other cores does NOT
         //scale linearly with notes, however.  Since it's an adjustment to fnum and increment lookup tables, detune will never be *perfectly* aligned.
-        //Detune at 1760hz seems to be 3s when expected to be closer to 3s at 880hz.  Might implement a scaling factor to offset this at NoteOn based on distance from A440.
+        //Detune at 1760hz seems to be 3s when expected to be closer to 3s at 880hz.  A scaling factor to offset this is implemented at NoteOn based on distance from A440.
 
         //NOTE:  According to this issue, the DX7II manual claims the detune range is ±2 cents....
         //https://github.com/asb2m10/dexed/issues/88
@@ -45,7 +45,7 @@ namespace PhaseEngine
 
         //Percentage values.  Randomness is calculated by maximum range from detune to zero detune (100%=anywhere from current detune to no detune).
         internal double _detune, detune_current;
-        public float detune_randomness;  
+        public float detune_randomness, _detune_readable;  
 
         //User-friendly detune value from -1.0 to 1.0.  Use if you want your detune to conform to PhaseEngine's standard.
         public float Detune {
@@ -58,13 +58,21 @@ namespace PhaseEngine
                     output = -Tools.InverseLerp(1, DETUNE_MIN, _detune);
                 return (float)output;
             } set {
+                _detune_readable = value;
                 _detune = Tools.Lerp(1, value>0? DETUNE_MAX : DETUNE_MIN, Math.Abs(value));
                 detune_current = _detune;  //Also set the current detune, since applying random is not done on recalc
             }
         }        
         //Applies a random detune value based on the current randomness parameter and the max specified detune level.
         public void ApplyDetuneRandomness()
-        { detune_current = Tools.Lerp(_detune, 1.0,  (XorShift64Star.NextDouble()) * detune_randomness); }
+        { detune_current = Tools.Lerp(_detune, 1.0,  XorShift64Star.NextDouble() * detune_randomness); }
+        public void ApplyDetuneRandomness(byte midi_note) //Adjusts the detune based off a flattened detune curve, sorta like a real DX7...
+        {
+            var d = _detune_readable;
+            var val = Tools.Lerp(1, d >0? DETUNE_MAX : DETUNE_MIN, Math.Abs(d * Tables.detuneScaleFactor[midi_note]));
+            detune_current = Tools.Lerp(val, 1.0,  XorShift64Star.NextDouble() * detune_randomness); 
+        }
+
 #endregion
 
 #region io / static constructors

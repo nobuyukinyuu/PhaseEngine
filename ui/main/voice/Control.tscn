@@ -1,4 +1,4 @@
-[gd_scene load_steps=56 format=2]
+[gd_scene load_steps=60 format=2]
 
 [ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=1]
 [ext_resource path="res://ui/kanbanScroll/Column.tscn" type="PackedScene" id=2]
@@ -18,7 +18,7 @@
 [ext_resource path="res://ui/TabContainer.theme" type="Theme" id=16]
 [ext_resource path="res://ui/FileDialog.theme" type="Theme" id=17]
 [ext_resource path="res://ui/main/voice/VoiceMain.gd" type="Script" id=18]
-[ext_resource path="res://ui/responseCurve/PresetMenu.theme" type="Theme" id=19]
+[ext_resource path="res://gfx/ui/icon_adsr.svg" type="Texture" id=19]
 [ext_resource path="res://gfx/wave/0.png" type="Texture" id=20]
 [ext_resource path="res://gfx/wave/8a.png" type="Texture" id=21]
 [ext_resource path="res://gfx/wave/7.png" type="Texture" id=22]
@@ -42,6 +42,9 @@
 [ext_resource path="res://ui/main/voice/FMPreview.gd" type="Script" id=40]
 [ext_resource path="res://ui/main/voice/WaveformBanksTab.tscn" type="PackedScene" id=41]
 [ext_resource path="res://ui/main/voice/lfoDropDown.gd" type="Script" id=42]
+[ext_resource path="res://gfx/ui/godot_icons/icon_node_warning.svg" type="Texture" id=43]
+[ext_resource path="res://gfx/ui/icon_speaker_none.svg" type="Texture" id=44]
+[ext_resource path="res://ui/main/voice/RLWarning.gd" type="Script" id=45]
 
 [sub_resource type="Animation" id=1]
 resource_name = "NoteOn"
@@ -75,6 +78,9 @@ tracks/1/keys = {
 [sub_resource type="AudioStreamGenerator" id=2]
 mix_rate = 48000.0
 buffer_length = 0.05
+
+[sub_resource type="StyleBoxEmpty" id=14]
+content_margin_left = 4.0
 
 [sub_resource type="StyleBoxFlat" id=3]
 bg_color = Color( 0, 0, 0, 0.376471 )
@@ -217,9 +223,9 @@ script = ExtResource( 14 )
 unique_name_in_owner = true
 self_modulate = Color( 1, 1, 1, 0.568627 )
 margin_left = 12.0
-margin_top = 256.0
+margin_top = 248.0
 margin_right = 268.0
-margin_bottom = 384.0
+margin_bottom = 376.0
 text = "Output:"
 script = ExtResource( 40 )
 
@@ -230,12 +236,15 @@ autostart = true
 [node name="Channels" type="Label" parent="."]
 modulate = Color( 1, 1, 1, 0 )
 margin_left = 12.0
-margin_top = 256.0
+margin_top = 248.0
 margin_right = 276.0
-margin_bottom = 400.0
+margin_bottom = 392.0
 custom_colors/font_color = Color( 0.952941, 0.952941, 0.952941, 0.552941 )
 text = "WAVEFORM DISPLAY"
 script = ExtResource( 12 )
+__meta__ = {
+"_edit_lock_": true
+}
 
 [node name="Player" type="AudioStreamPlayer" parent="Channels"]
 stream = SubResource( 2 )
@@ -251,6 +260,28 @@ grow_horizontal = 0
 grow_vertical = 0
 align = 2
 valign = 2
+
+[node name="RLWarning" type="MenuButton" parent="."]
+visible = false
+margin_left = 242.0
+margin_top = 248.0
+margin_right = 266.0
+margin_bottom = 272.0
+hint_tooltip = "The voice has a carrier to output which has an audible release level. 
+or has an infinite release time. Note priorities may not work.
+
+To silence all notes, click here."
+theme = ExtResource( 17 )
+custom_styles/normal = SubResource( 14 )
+icon = ExtResource( 43 )
+items = [ "Output", null, 0, false, true, 0, 0, null, "", true, "Silence All", ExtResource( 44 ), 0, false, false, 1, 0, null, "", false, "Envelope", null, 0, false, false, 2, 0, null, "", true ]
+script = ExtResource( 45 )
+
+[node name="Submenu" type="PopupMenu" parent="RLWarning"]
+margin_top = 32.0
+margin_right = 135.0
+margin_bottom = 144.0
+items = [ "Release Levels", null, 0, false, false, 240, 0, null, "", true, "All Levels", ExtResource( 19 ), 0, false, false, 241, 0, null, "", false, "Release Rates", null, 0, false, false, 250, 0, null, "", true, "All Rates", ExtResource( 19 ), 0, false, false, 251, 0, null, "", false ]
 
 [node name="Kanban" type="HBoxContainer" parent="."]
 anchor_bottom = 1.0
@@ -277,9 +308,9 @@ chip_loc = NodePath("../../VoiceTab/Channels")
 
 [node name="LTab" type="TabContainer" parent="."]
 margin_left = 8.0
-margin_top = 368.0
+margin_top = 360.0
 margin_right = 272.0
-margin_bottom = 560.0
+margin_bottom = 552.0
 rect_min_size = Vector2( 264, 0 )
 theme = ExtResource( 16 )
 custom_styles/panel = SubResource( 3 )
@@ -287,7 +318,6 @@ tab_align = 0
 script = ExtResource( 39 )
 
 [node name="Metadata" type="Control" parent="LTab"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 1.0
@@ -302,9 +332,6 @@ margin_right = 127.0
 margin_bottom = 33.0
 custom_fonts/font = ExtResource( 11 )
 text = "Name:"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Name" type="LineEdit" parent="LTab/Metadata"]
 margin_left = 127.0
@@ -315,9 +342,6 @@ size_flags_horizontal = 3
 theme = ExtResource( 17 )
 custom_fonts/font = ExtResource( 9 )
 placeholder_text = "(Instrument)"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Label2" type="Label" parent="LTab/Metadata"]
 margin_left = 15.0
@@ -326,9 +350,6 @@ margin_right = 127.0
 margin_bottom = 61.0
 custom_fonts/font = ExtResource( 11 )
 text = "Description:"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Desc" type="TextEdit" parent="LTab/Metadata"]
 margin_left = 127.0
@@ -340,9 +361,6 @@ theme = ExtResource( 17 )
 custom_fonts/font = ExtResource( 8 )
 wrap_enabled = true
 caret_blink = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Gain" parent="LTab/Metadata" instance=ExtResource( 3 )]
 margin_left = 15.0
@@ -382,6 +400,7 @@ title_align = Vector2( 0.3, -0.1 )
 value_font = ExtResource( 7 )
 
 [node name="LFO" type="Control" parent="LTab"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 1.0
@@ -686,16 +705,6 @@ text = "}"
 flat = false
 script = ExtResource( 42 )
 
-[node name="Submenu" type="PopupMenu" parent="LTab/LFO/DropDown"]
-margin_left = 32.0
-margin_right = 152.0
-margin_bottom = 138.0
-theme = ExtResource( 19 )
-items = [ "Item 0", null, 0, false, false, 0, 0, null, "", false ]
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="Waveforms" parent="LTab" instance=ExtResource( 41 )]
 visible = false
 margin_right = -1.0
@@ -723,9 +732,9 @@ chip_loc = NodePath("../Channels")
 
 [node name="Btn" type="HBoxContainer" parent="."]
 margin_left = 12.0
-margin_top = 568.0
+margin_top = 560.0
 margin_right = 274.0
-margin_bottom = 592.0
+margin_bottom = 584.0
 theme = ExtResource( 17 )
 __meta__ = {
 "_edit_group_": true
@@ -799,6 +808,7 @@ hint_tooltip = "Arrange operators by type into columns."
 icon = ExtResource( 33 )
 
 [connection signal="timeout" from="FMPreview/Timer" to="FMPreview" method="_on_Timer_timeout"]
+[connection signal="about_to_show" from="RLWarning" to="RLWarning" method="_on_RLWarning_about_to_show"]
 [connection signal="gui_input" from="LTab/LFO/WavePanel/Preview/Panel" to="LTab" method="_on_Preview_gui_input"]
 [connection signal="item_selected" from="LTab/LFO/Sync" to="LTab" method="_on_Sync_item_selected"]
 [connection signal="value_changed" from="LTab/LFO/+Delay" to="LTab" method="_on_LFO_Delay_value_changed"]

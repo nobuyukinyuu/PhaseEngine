@@ -163,8 +163,6 @@ namespace PhaseEngine
             var stride = (period/(double)size);
             var strideCount = stride;
             // var preview = this.preview;  //Reduce memory thrash by using our own Channel instance
-            // c.SetVoice(this);
-            // c.disableLFO = disableLFO;
 
             //If the channel contains filters or bitwise funcs, they need to be recalculated.
             for (int i=0; i<opCount; i++)
@@ -178,7 +176,11 @@ namespace PhaseEngine
                 }
             }
 
+
             preview.NoteOn(0, 64);  //preview.NoteOn
+            if (disableLFO)   //Mess with the operators in the preview channel to not be AMS sensitive
+                for (int i=0; i<preview.ops.Length; i++)   preview.ops[i].eg.ams = 0;
+
             int bindTicks=0;
             for (int i=0; oc<size && i<period; i++)  //Don't exceed our preview period and keep going until all output checks are completed
             {
@@ -195,7 +197,7 @@ namespace PhaseEngine
                       }
                 }
 
-                //Assign minmaxes
+                //Assign minmaxes (Y range for the given pixel slice)
                 var sample = Tables.short2float[preview.RequestSample() + Tables.SIGNED_TO_INDEX];
                 output[oc+size] = Math.Min(sample, output[oc+size]);
                 output[oc+(size<<1)] = Math.Max(sample, output[oc+(size<<1)]);
@@ -216,10 +218,10 @@ namespace PhaseEngine
                 }
                 strideCount--;
 
-
                 preview.Clock();
             }
             preview.NoteOff();
+
             return output;
         }
 

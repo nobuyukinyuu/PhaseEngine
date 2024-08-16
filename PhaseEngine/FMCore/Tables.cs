@@ -69,6 +69,10 @@ namespace PhaseEngine
         public static readonly ushort[] vol2attenuationHQ = new ushort[short.MaxValue+1]; //128kb. Increase table size if SINE_TABLE_BITS exceeds 15
         public static readonly uint[,] egHQincrementRates = new uint[4, Envelope.R_MAX]; //ADSR precalc increment estimations from curve-fit
 
+        //Increment detune effect softener table (used to adjust detune amounts during pg calc events to be scaled less than other increments values, similar to DX7)
+        public static readonly double[] detuneScaleFactor = new double[128]; //Adjusted per MIDI note on a NoteOn event....
+
+
 
         static Tables()
         {
@@ -141,6 +145,23 @@ namespace PhaseEngine
             {
                 amdScaleRatio[i] = 1.0f - i / (float)Envelope.L_MAX;  // Value from 1.0f-0 representing how much to scale volume by from the raw AMD value
                 amdPushupRatio[i] = (short)(0x1FFF * amdScaleRatio[i]); 
+            }
+
+            //Generate the detune softener table.  The measurements were made off a DX7 emulator.
+            //Starting at A220 at zero and progressing one octave per X, we measure the ringing time of two sines, one at 0 detune and one at +7.
+            //A regression curve fit of these values was caluclated, and normalized such that the value at A440 (x=1) is 1.0.
+            //The ratio to get the normalized amount per octave to the 2^-x value is how much to divide the detune amount by.
+            double adjust(double octave)
+            {
+                var center = Math.Pow(2, -(octave-1));
+                // return (-0.493405 * Tools.Log2(12.0339 * octave + 28.9759) + 3.27801) * 1.5763220079897290885409659669923 * center;
+                return Math.Max(0.5, (-0.493405 * Tools.Log2(15.3931 * octave + 37.0645) + 3.45325) * 1.5763228428065958104576391828948 / center);
+            }
+            const int NOTE_A4 = 69;  //nice
+            for (int i=0; i<detuneScaleFactor.Length; i++)
+            {
+                if(i<30)  detuneScaleFactor[i] = 2;  //Any lower than this and our regression curve goes into NaN territory
+                else detuneScaleFactor[i] = 1.0 / adjust((i-NOTE_A4)/12.0+1); 
             }
 
 

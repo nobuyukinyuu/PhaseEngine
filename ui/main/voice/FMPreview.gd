@@ -73,13 +73,14 @@ func flip_on(var preview_on, var shim_from_midi=null):
 			recalc()
 #			print("Rendering")
 			$Timer.paused = true
+			
 	else:  #Show oscilloscope.  Function was called from midi event or otherwise 
 		should_be_visible = false
 		$Timer.paused = false
 		if should_be_visible != previous_visible_state:  
 			anim.play("NoteOn")
 #			print("Playing")
-			
 
+			
 	previous_visible_state = should_be_visible
 		

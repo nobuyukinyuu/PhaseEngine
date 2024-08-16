@@ -146,7 +146,7 @@ namespace PhaseEngine
                     if (!op.pg.fixedFreq)
                     {
                         op.pg.NoteSelect(this.midi_note);
-                        op.pg.ApplyDetuneRandomness();  //Select a detune amount based on specified level of randomness
+                        op.pg.ApplyDetuneRandomness(this.midi_note);  //Select a detune amount based on specified level of randomness
                     }
 
                     op.pg.Recalc();
@@ -232,32 +232,6 @@ namespace PhaseEngine
             lastSample = (short)Math.Clamp(output, short.MinValue, short.MaxValue);
         }
 
-    // void TechniqueFM(byte src_op, ref int output)
-    // {
-    //     //First, convert the source op's accumulated phase up to this point into its sample result value.
-    //     //For termini (top of an op stack), the phase accumulated in the cache will always be 0.
-    //     var modulation = ops[src_op].RequestSample( (ushort)cache[src_op], am_offset );
-
-    //     int c = voice.alg.connections[ src_op ];  //Get Connections for the source operator.
-    //     if (c==0)  //Source op isn't connected to anything, so we assume it's connected to output.
-    //     {
-    //         output += ops[src_op].eg.bypass? cache[src_op] : modulation;  //Accumulate total.
-    //         return;
-    //     }
-
-    //     //Source op has connections. Mix down the sample results to its connections.
-    //     for(byte dest_op=0; c>0; dest_op++)  //Crunch the connection bitmask down, one bit at a time, until there's no more connections.
-    //     {
-    //         unchecked 
-    //         {
-    //             if ( (c & 1) == 1)  
-    //             { //Flag is set. The destination op receives modulation from the source op and is added to the total output cache for that operator.
-    //                 if (!ops[src_op].eg.bypass)  cache[dest_op] += modulation;  else  cache[dest_op] = cache[src_op];
-    //             }
-    //             c >>= 1; //Crunch down and process next position. Loop continues until the connection mask has no more connections.
-    //         }
-    //     }
-    // }
 
 
 

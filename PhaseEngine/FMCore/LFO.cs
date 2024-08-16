@@ -8,7 +8,7 @@ namespace PhaseEngine
     {
         public delegate int scaleFunc(int input = 0); //Used to process attenuation to volume scaling in PM
 
-        const int divider_max_count=6; //How often the LFO clocks.  The clock counter counts up to this number before recalculating the increment.
+        const int divider_max_count=4; //How often the LFO clocks.  The clock counter counts up to this number before recalculating the increment.
         byte cycle_counter;
         long delay_counter;  //Clocks up from sync point to determine when to start LFO
 
@@ -47,7 +47,8 @@ namespace PhaseEngine
 
 
         // public LFO()  {Init();}
-        public LFO(byte speed=19)  {Init(speed);}
+        public LFO(byte speed=19) => Init(speed);
+        public LFO(double frequency) => Init(frequency);
 
         void Init(byte speed=19)  //Speed of LFO defaults to ~1.25s
         {
@@ -55,7 +56,12 @@ namespace PhaseEngine
             operatorOutputSample = OperatorType_LogOutput;
             SetSpeed(speed);
         }
-
+        void Init(double frequency)
+        {
+            intent = Intents.LFO;
+            operatorOutputSample = OperatorType_LogOutput;
+            SetFrequency(frequency);
+        }
 
         public void SetFrequency(double hz) { //Manually sets the frequency from a given Hz rate.
             pg = Increments.FromFreq(hz);
