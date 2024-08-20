@@ -401,7 +401,7 @@ namespace PhaseEngine
         public static short OP_INVMOD(short modulation, short input) {return (short)(input % (Tools.Sign(modulation) * (0x1FFF - Tools.Abs(modulation))|1));}
 
         public static short OP_ROR(short modulation, short input) {return (short)Rotate(input, modulation, ROR16);}
-        public static short OP_ROL(short modulation, short input) {return (short)Rotate(input, modulation, ROL16);}
+        public static short OP_ROL(short modulation, short input) {return (short)Rotate(modulation, input, ROL16);}
  
         static int ROR16(int x, int amt) => (x >> amt | (x << (16 - amt))) & 0xFFFF;
         static int ROL16(int x, int amt) => (x << amt | (x >> (16 - amt))) & 0xFFFF;

@@ -116,7 +116,7 @@ namespace PhaseEngine
                                 eg.al = LvMap(op.EG_L1);
                                 eg.dl = LvMap(op.EG_L2);
                                 eg.sl = LvMap(op.EG_L3);
-                                eg.rl = LvMap(op.EG_L4);
+                                eg.rl = LvMap(op.EG_L4, Envelope.L_MAX);  //Adjust on full scale to prevent stuck notes
                                 //Rates
                                 eg.ar = (byte)Map(op.EG_R1, 25);
                                 eg.dr = (byte)Map(op.EG_R2, 32);
@@ -172,7 +172,7 @@ namespace PhaseEngine
         }
 
         // public static ushort LvMap(int input) => (ushort)(((int)(Tools.Remap(input, 0, 99, Envelope.L_MAX, 0)) << 1) & Envelope.L_MAX);
-        public static ushort LvMap(int input) => (ushort)Tools.Remap(input, 0, 99, 820, 16);
+        public static ushort LvMap(int input, int outmin=820) => (ushort)Tools.Remap(input, 0, 99, outmin, 16);
         
         public static int Map(int input, int outMax) => (int)Math.Round(Tools.Remap(input, 0, 99, 0, outMax));
 

@@ -93,7 +93,7 @@ func _on_RLWarning_about_to_show():
 	var runcount=10  #We use this to get unique IDs for each custom menu item.
 	if not levels_to_fix.empty():
 		for i in levels_to_fix:
-			s.add_item("Op.%s  %s" % [i+1, "Release Level"], runcount)
+			s.add_icon_item(icon_ops[i], "Op.%s  %s" % [i+1, "Release Level"], runcount)
 			s.set_item_metadata(s.get_item_index(runcount), i)
 			runcount += 1
 	else:  s.set_item_disabled(s.get_item_index(ALL_LEVELS), true)
