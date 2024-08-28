@@ -136,7 +136,7 @@ func set_from_op(op:int):
 	
 	$Tweak/AMS.value = d["ams"]
 	
-	if $Tweak.has_node("Feedback"):  #Only set this if the control exists (it doesn't on a BitwiseOp)
+	if $Tweak.has_node("Feedback"):  #Only set this if the control exists (it's in a different place in BitwiseOp)
 		$Tweak/Feedback.value = d["feedback"]
 	elif $More/P/V.has_node("Feedback"):
 		$More/P/V/Feedback.value = d["feedback"]

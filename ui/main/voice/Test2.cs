@@ -451,12 +451,8 @@ public class Test2 : Label
         }
     }
 
-    public bool SetOpIntent(int opTarget, int _intent)
-    {
-        var intent = (OpBase.Intents) _intent;
-        return c.UpdateIntent((byte)opTarget, (OpBase.Intents) _intent);
+    public bool SetOpIntent(int opTarget, int intent) => c.UpdateIntent((byte)opTarget, (OpBase.Intents) intent);
 
-    }
 
     public void SetLFO(string property, float val){ c.Voice.lfo.SetVal(property, val); }
     public void SetLFOSpeedType(int val){ c.Voice.lfo.speedType = (LFO.SpeedTypes)val; }

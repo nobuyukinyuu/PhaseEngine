@@ -117,9 +117,6 @@ namespace PhaseEngine
             // ushort phase = (ushort)((this.phase >> Global.FRAC_PRECISION_BITS) + modulation);
             ushort phase = (ushort)( (this.phase >> (Global.FRAC_PRECISION_BITS)) + (modulation<<5) );
             
-            //FIXME:  LFO calculations need to be translated to HQ attenuation values.  This func needs a rewrite since it depends on 10-bit egAttenuation.
-            // ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);  
-
             // // SineHQ's table spits out up to 15 bit precision values, which we convert to attenuation values to add the EG and osc attenuation values together.
             // int result = Tables.vol2attenuationHQ[ Oscillator.SineHQ(phase, eg.duty, ref flip, __makeref(this.phase)) ];
 
@@ -139,10 +136,9 @@ namespace PhaseEngine
             //Now scale up to the 14-bit volume the other operators expect for backwards compatibility. The extra precision bits will go elsewhere
             //So that they can be mixed into other HQ operators by the chip's channel mixer.
             if (flip) env_vol = -env_vol;
-            env_vol *= 0x2000;
-            return (short)env_vol;
+            env_vol *= 0x2000;  //8192
+            return (short)env_vol;  //Lops off the decimal component
 
-            // return oscillator.Generate(unchecked(phase >> Global.FRAC_PRECISION_BITS), duty, ref flip);
         }
 
         //Produces a value taking into account the LFO state and TL.
@@ -275,32 +271,33 @@ namespace PhaseEngine
             uint increment = get_eg_increment(rate, egStatus);
 
 
+            const int MAX_ATTENUATION = 0x7FE0 << EG_LEVEL_PRECISION;
             // attack is the only one that increases
             if (egStatus == EGStatus.ATTACK)
             {
                 var amt = ((~egAttenuation * increment) >> EG_LEVEL_PRECISION) << 8;
-                egAttenuation2 += amt;
-                // egAttenuation2 = (uint) Math.Max(egAttenuation2-increment, 0);
+                egAttenuation2 = Tools.Clamp(egAttenuation2+amt, 0, MAX_ATTENUATION);
+                
 
             } else if (eg.rising[(int)egStatus]) {  //Decrement.
                 egAttenuation2 = (uint) Math.Max(egAttenuation2-increment, 0);
             } else {  //Most envelope states simply increase the attenuation by the increment previously determined
                 egAttenuation2 += increment;
+
+                if (egAttenuation2 >= MAX_ATTENUATION) 
+                    egAttenuation2 = MAX_ATTENUATION;
             }
 
             // clamp the final attenuation.  TODO:  Consider if the value 32767 is necessary or if we can go full 16-bit unsigned
-            const int MAX_ATTENUATION = 0x7FE0 << EG_LEVEL_PRECISION;
-            if (egAttenuation2 >= MAX_ATTENUATION) 
-                egAttenuation2 = MAX_ATTENUATION;
-
             egAttenuation = (ushort)(egAttenuation2 >> EG_LEVEL_PRECISION >> 5);
             if (egAttenuation >= 0x400)
                 egAttenuation = 0x3FF;
+
         }
 
         static int BaseSecs(EGStatus status) => status switch 
         {  //outputs the number of seconds we expect the longest finite envelope state to take.  Used to calculate HQ EG increments.
-            EGStatus.ATTACK => 30,
+            EGStatus.ATTACK => 12, //Tested
             EGStatus.DECAY => 240,
             EGStatus.SUSTAINED => 240,
             EGStatus.RELEASED => 240,
