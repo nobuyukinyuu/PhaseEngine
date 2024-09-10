@@ -403,7 +403,7 @@ public class Test2 : Label
                 return GetOscType(opTarget);
             case OpBase.Intents.FILTER:
             case OpBase.Intents.BITWISE:
-                return c.Voice.egs[opTarget].aux_func;
+                return (byte)c.Voice.egs[opTarget].aux_func;
             case OpBase.Intents.WAVEFOLDER:  //Return an encoded value corresponding to gain instead.
                 var whole = (int)c.Voice.egs[opTarget].gain;
                 var frac = (int)Math.Round((c.Voice.egs[opTarget].gain - whole) * 10);
@@ -503,6 +503,9 @@ public class Test2 : Label
                 op?.eg.ChangeValue(property, val);
             }
     }
+    //Called from EG controls on an HQ Operator to indicate there is auxiliary rate envelope decimal data to set.
+    // public void GetRateExtension(int opTarget, string property, float val) => c.Voice.GetRateExtension(opTarget, property);
+    public void SetRateExtension(int opTarget, string property, float val) => c.Voice.SetRateExtension(opTarget, property, val);
 
     public void SetFixedFreq(int opTarget, bool isFixed) { c.Voice.pgs[opTarget].fixedFreq = isFixed; } //Used when fixed/ratio toggled
     public void SetFrequency(int opTarget, float freq)

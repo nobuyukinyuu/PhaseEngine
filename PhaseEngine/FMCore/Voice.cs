@@ -1,6 +1,8 @@
 using System;
 using PhaseEngine;
 using PE_Json;
+using System.Diagnostics;
+
 
 #if GODOT
 using Godot;
@@ -171,7 +173,7 @@ namespace PhaseEngine
                 {
                     case OpBase.Intents.BITWISE:
                         var op = preview.ops[i] as BitwiseOperator;
-                        op.OpFuncType = egs[i].aux_func;  //Property has hidden side effect of setting func
+                        op.OpFuncType = (byte)egs[i].aux_func;  //Property has hidden side effect of setting func
                         break;
                 }
             }
@@ -273,6 +275,35 @@ namespace PhaseEngine
             eg.ChangeValue(property, val);
         }
 
+        //Called from EG controls on an HQ Operator to indicate there is auxiliary rate envelope decimal data to set.
+        public void SetRateExtension(int opTarget, string property, float val) 
+        {
+        if (opTarget >= opCount) return;
+        if (alg.intent[opTarget] != OpBase.Intents.FM_HQ) {
+            System.Diagnostics.Debug.Print(
+                $"Attempt to set rate extensions on operator {opTarget}, which has intent {alg.intent[opTarget].ToString()}. (Expecting FM_HQ)");
+            return;
+        }
+        var eg = egs[opTarget];
+
+        // First, get the fractional component as a value from 0-255.
+        var whole = Math.Abs(Math.Truncate(val));
+        var frac = (byte)((Math.Abs(val) - whole) * 256);
+        // Next, determine which part to knock out and replace.
+        var env =  property switch {
+            "ar" => 0,
+            "dr" => 1,
+            "sr" => 2,
+            "rr" => 3,
+            _    => 0
+        };
+        
+        int mask = ~(255 << (env*8));  //All 1s except the knockout part.
+        var frac_bits = frac << (env*8); //The part to apply after masking out the knockout bits.
+        eg.aux_func = (eg.aux_func & mask) | frac_bits;  //32 bits HQ_OP decimal extension data, 8 bits for each: AR|DR|SR|RR
+        eg.rates[env] = (byte)whole;
+    }
+
         internal void ResetIntents(bool toDefault=false)
         {
             for (byte i=0; i<opCount; i++)
@@ -285,9 +316,10 @@ namespace PhaseEngine
             var oldIntent = alg.intent[opTarget];
             alg.SetIntent(opTarget, intent);
 
-            if (oldIntent == OpBase.Intents.FM_HQ && intent != OpBase.Intents.FM_HQ)  
-                //Old intent was HQ, shrink down FB levels.
+            if (oldIntent == OpBase.Intents.FM_HQ && intent != OpBase.Intents.FM_HQ)
+            {   //Old intent was HQ, shrink down FB levels.
                 egs[opTarget].feedback = (byte)Math.Round(egs[opTarget].feedback/25.5);
+            }
             else if (intent == OpBase.Intents.FM_HQ && oldIntent != OpBase.Intents.FM_HQ)
             {   //Increase the feedback and AMS levels to extended values
                 egs[opTarget].feedback = (byte)Math.Min(Math.Round(egs[opTarget].feedback*25.5), 255);
@@ -302,6 +334,8 @@ namespace PhaseEngine
                     if (oldIntent==OpBase.Intents.WAVEFOLDER || oldIntent==OpBase.Intents.FILTER)
                         egs[opTarget].duty = 32767;  //Reset duty cycle to default.
                     egs[opTarget].osc_sync = true;  //Enable oscillator sync to reduce popping.
+
+                    if (intent==OpBase.Intents.FM_HQ) egs[opTarget].aux_func = 0; //We use aux_func in FM_HQ to add fidelity to the rate envelopes.
                     break;
 
                 case OpBase.Intents.WAVEFOLDER:

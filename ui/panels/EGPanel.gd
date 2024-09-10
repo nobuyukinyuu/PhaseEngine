@@ -7,6 +7,8 @@ class_name EGPanel
 onready var rTables = [$KSR, $Velocity, $KSL]
 signal changed
 
+var op_intent = global.OpIntent.FM_OP #Updated in set_from_op, used to modify parts of this script.
+
 func _ready():
 	for o in $Tune.get_children():
 		if !o is Slider:  continue
@@ -16,7 +18,7 @@ func _ready():
 
 	for o in $Rates.get_children():
 		if !o is Slider:  continue
-		o.connect("value_changed", self, "setEG", [o.associated_property])
+		o.connect("value_changed", self, "setRate", [o.associated_property])
 		o.connect("value_changed", self, "update_env", [o])
 
 	var fb:EGSlider
@@ -73,13 +75,20 @@ func _ready():
 #Bus operator values from the C# Chip handler.  
 func set_from_op(op:int):
 	var eg = get_node(chip_loc)
+	op_intent = eg.GetOpIntent(op)
 
 	#Increase the resolution of feedback if we're an HQ Operator
-	if eg.GetOpIntent(op) == global.OpIntent.FM_HQ:
+	if op_intent == global.OpIntent.FM_HQ:
 		var fb:EGSlider = $Tweak/Feedback
 		fb.special_display = fb.SpecialDisplay.PERCENT
 		fb.max_value = 255
 
+		for o in [$Rates/Attack, $Rates/Decay, $Rates/Sustain, $Rates/Release]:
+			var s:EGSlider = o
+#			s.special_display = s.SpecialDisplay.CUSTOM
+#			s.display_strings = global.HQ_REL_LABELS if o== $Rates/Release else global.HQ_ADS_LABELS
+#			s.max_value = 255
+			s.step = 0.1    #FIXME:  make it 0.01
 
 	var d = eg.GetOpValues(0, op)  #EG dictionary
 	var d2 = eg.GetOpValues(1, op) #PG dictionary
@@ -119,10 +128,15 @@ func set_from_op(op:int):
 		btn.init_table(parse_json(data))
 	
 	var rates = d["rates"]
-	$"Rates/Attack".value = rates[0]
-	$"Rates/Decay".value = rates[1]
-	$"Rates/Sustain".value = rates[2]
-	$"Rates/Release".value = rates[3]
+	var salt = [0,0,0,0]
+	if op_intent == global.OpIntent.FM_HQ:
+		for i in 4:
+			salt[i] = (int(d["aux_func"]) >> (i*8) & 255) / 256.0
+	
+	$"Rates/Attack".value = rates[0] + salt[0]
+	$"Rates/Decay".value = rates[1] + salt[1]
+	$"Rates/Sustain".value = rates[2] + salt[2]
+	$"Rates/Release".value = rates[3] + salt[3]
 	
 	
 	$"Rates/+Delay".value = d["delay"]
@@ -246,6 +260,16 @@ func setPG(value, property):
 #		$Tune/Detune.value = value
 	get_node(chip_loc).SetPG(operator, property, value)
 	global.emit_signal("op_tab_value_changed")
+
+func setRate(value, property):  
+	get_node(chip_loc).SetEG(operator, property, floor(value))
+
+	#Sets the decimal extension portion of HQ Ops' rate envelopes.
+	if op_intent == global.OpIntent.FM_HQ:
+		get_node(chip_loc).SetRateExtension(operator, property, value)
+
+	global.emit_signal("op_tab_value_changed")
+	pass
 
 func set_oscillator(value):
 	get_node(chip_loc).SetOscillator(operator, value)

@@ -51,7 +51,7 @@ namespace PhaseEngine
         public bool osc_sync=true;  //Oscillator sync.  Oscillator phase will reset on NoteOn if true.
         public double phase_offset;  //Percentage of phase offset.
 
-        public byte aux_func;  //ONLY used for bitwise function operators, filters etc as an additional value specifier.
+        public int aux_func;  //ONLY used for bitwise function operators, filters etc as an additional value specifier.
 
        //Response tables.  These are references from the canonical Voice.
         public RateTable ksr = new RateTable();

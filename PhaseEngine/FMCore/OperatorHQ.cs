@@ -264,8 +264,8 @@ namespace PhaseEngine
                 break;
             }
 
-            // determine our raw 5-bit rate value
-            byte rate = eg.rates[(byte) egStatus];
+            // determine our rate value.  Extra precision is pulled from 8 bits of the aux_func value.
+            float rate = eg.rates[(byte) egStatus] + ((eg.aux_func>>((byte)egStatus*8)) & 255) / (egStatus == EGStatus.RELEASED? 256.0f: 128.0f);
 
             // determine the increment based on the non-fractional part of env_counter
             uint increment = get_eg_increment(rate, egStatus);
@@ -295,8 +295,12 @@ namespace PhaseEngine
 
         }
 
-        static int BaseSecs(EGStatus status) => status switch 
-        {  //outputs the number of seconds we expect the longest finite envelope state to take.  Used to calculate HQ EG increments.
+        
+
+        //Consider the following:  Case switches are converted at compile time to constant hash jump tables.
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static int BaseSecs(EGStatus status) => status switch {
+            //outputs the number of seconds we expect the longest finite envelope state to take.  Used to calculate HQ EG increments.
             EGStatus.ATTACK => 12, //Tested
             EGStatus.DECAY => 240,
             EGStatus.SUSTAINED => 240,
@@ -306,9 +310,10 @@ namespace PhaseEngine
 
         public const int EG_LEVEL_PRECISION = 16;  //Fixed point decimal precision bits for the state of the EG attenuation status
         //FIXME:  GENERATE THESE CURVES IN TABLES.cs AND RETREIVE THEM THAT WAY BASED ON CURRENT EGSTATUS RATE
-        static uint get_eg_increment(int rate, EGStatus egStatus)
+        static uint get_eg_increment(float rate, EGStatus egStatus)
         {
             if (rate==0) return 0;
+            // double rate = adsr_rate;
             //Retrieve the base seconds of the envelope state based on the rate and convert to number of samples..
             var base_samples = (BaseSecs(egStatus) / Math.Pow(1.2, rate-1)) * Global.MixRate/3;  //The 3 is for the number of clock cycles it takes to run the EGClock
             //Now get the increment as a reciprocal plus our number of fixed point decimal places.....

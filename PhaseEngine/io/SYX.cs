@@ -102,6 +102,7 @@ namespace PhaseEngine
                             for (int j=0; j<p.ops.Length; j++)
                             {
                                 var idx = presetMap[p.algorithm][j]; //Target operator index on the PhaseEngine side
+                                v.SetIntent(idx, OpBase.Intents.FM_HQ);  //We need the higher fidelity for EG rate emulation
                                 var op = p.ops[j];
                                 var eg = v.egs[idx];
                                 var pg = Increments.Prototype();
@@ -109,7 +110,12 @@ namespace PhaseEngine
                                 //// Envelope ////
                                 eg.osc_sync = p.OscKeySync; //DX7 osc sync is global, but ours is per-operator
                                 eg.ams = (byte)(op.AMS << 1); //DX7 AMS is 0-3. Map it to values closer to ours
-                                if(feedbackOperatorForPreset[p.algorithm] == j)  eg.feedback=p.Feedback;
+                                if(feedbackOperatorForPreset[p.algorithm] == j)  
+                                {
+                                    eg.feedback=p.Feedback;
+                                    if (v.alg.intent[idx]==OpBase.Intents.FM_HQ) eg.feedback *= 32;
+                                }
+                            
                                 
                                 //Levels
                                 eg.tl = LvMap(op.outputLevel);
@@ -118,14 +124,27 @@ namespace PhaseEngine
                                 eg.sl = LvMap(op.EG_L3);
                                 eg.rl = LvMap(op.EG_L4, Envelope.L_MAX);  //Adjust on full scale to prevent stuck notes
                                 //Rates
-                                eg.ar = (byte)Map(op.EG_R1, 25);
-                                eg.dr = (byte)Map(op.EG_R2, 32);
-                                eg.sr = (byte)Map(op.EG_R3, 32);
-                                eg.rr = (byte)Map(op.EG_R4, Envelope.R_MAX);
+                                v.SetRateExtension(idx, "ar", Map(op.EG_R1, 24));
+                                v.SetRateExtension(idx, "dr", Map(op.EG_R2, 32));
+                                v.SetRateExtension(idx, "sr", Map(op.EG_R3, 32));
+                                v.SetRateExtension(idx, "rr", Map(op.EG_R4, Envelope.R_MAX));
 
                                 //rTables
                                 eg.velocity = new VelocityTable(); eg.velocity.ceiling = Tools.Remap(op.VelocitySensitivity, 0,7,0,100);
-                                //TODO:  RATE CURVE SCALING
+                                eg.ksr = new RateTable(); eg.ksr.ceiling = Tools.Remap(op.RateScale, 0,7,0, 100); //FIXME: Check for accuracy
+                               
+                                //TODO:  LEVEL CURVE SCALING
+                                //Since rTables can only ADD to attenuation, to deal with positive level scaling values, we have to determine
+                                //The largest value we'd have to scale up a note by and adjust the TL accordingly. Usually this will mean a TL
+                                // will become 0 and the KSL table scaled to account for the difference.  DX7 only scales in key groups of
+                                // 3 semitones each, but we'll interpolate these values based on the curve type to try to enhance the sound.
+                                const double LN_RATIO = 256/12.0; //256 units of PhaseEngine attenuation == -24dB per octave. 
+                                const double EX_RATIO = 1024/96.0; //Corresponds to a 50% volume decrease (-6dB) every 2 octaves on our log2 scale.
+                                const byte LN_MAX = 48;  //Number of notes until the linear attenuator maxes out its ability to attenuate. 
+                                const byte EX_MAX = 79;  //Number of notes until the exp attenuator maxes out its ability to attenuate. (maybe 72?)
+
+                                ushort lnScale(int x) => (ushort)Math.Round(x*LN_RATIO);
+                                ushort exScale(int x) => (ushort)(Math.Round(Math.Pow(2, (x+10)/12)-1) * EX_RATIO); //Rough fit to measurements
 
                                 //// Increments ////
                                 if (op.FrequencyMode == OscModes.Fixed)
@@ -174,7 +193,7 @@ namespace PhaseEngine
         // public static ushort LvMap(int input) => (ushort)(((int)(Tools.Remap(input, 0, 99, Envelope.L_MAX, 0)) << 1) & Envelope.L_MAX);
         public static ushort LvMap(int input, int outmin=820) => (ushort)Tools.Remap(input, 0, 99, outmin, 16);
         
-        public static int Map(int input, int outMax) => (int)Math.Round(Tools.Remap(input, 0, 99, 0, outMax));
+        public static float Map(int input, int outMax) => Tools.Remap(input, 0, 99, 0, outMax);
 
         public override string ToString()
         {

@@ -9,6 +9,8 @@ var last_bank = {}
 
 var busy = false #Used to prevent multiple load attempts when OS.Alert is used
 
+onready var q = get_node("%QuickAccess")
+
 func _ready():
 	#Convert the chip location to an absolute location!!
 	#Otherwise, the value specified in the editor will only be valid for us and none of our children.
@@ -26,10 +28,15 @@ func _ready():
 	#Connect to the bank selector.
 	$BankSelect.connect("voice_selected", self, "load_bank")
 
+
+	hook_quick_access($Open)
+	hook_quick_access($Save)
+
 	#DEBUG:  REMOVE ME
 	$Open.current_path = "d:/music/mod/nerd/bambooTracker/"
 
 func open():
+	q.rect_position.x = $Open.rect_size.x
 	$Open.popup_centered()
 
 func save():
@@ -40,6 +47,10 @@ func reopen_bank():
 
 
 func _on_Open_file_selected(path):
+	#Add MRUD to the quick dialog
+	q.add_mrud(path.get_base_dir())
+	q.save()
+	
 	var c = get_node(chip_loc)
 	if !c:  return
 
@@ -96,4 +107,18 @@ func paste(data:String, normalize=false):
 
 
 
+func hook_quick_access(dlg:FileDialog):
+	#Find the hbox, we're about to get medieval
+	for o in dlg.get_children():
+		if not o is VBoxContainer:  continue
+		var h = o.get_child(0)  #Should be the top hbox.
+		var p = preload("res://ui/main/QuickAccessButton.tscn").instance()
+		h.add_child(p)
+		p.owner = self
+		p.connect("pressed", self, "_on_quick_access_pressed", [dlg])
 
+
+func _on_quick_access_pressed(caller:FileDialog):
+	q.last_window = caller
+	q.refresh(q.MRUDS)
+	q.popup()

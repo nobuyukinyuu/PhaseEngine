@@ -1,0 +1,182 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://ui/FileDialog.theme" type="Theme" id=1]
+[ext_resource path="res://ui/main/QuickAccess.gd" type="Script" id=2]
+[ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=3]
+[ext_resource path="res://gfx/ui/envelope_editor/icon_remove_point.png" type="Texture" id=4]
+[ext_resource path="res://gfx/ui/godot_icons/icon_non_favorite.svg" type="Texture" id=5]
+[ext_resource path="res://gfx/ui/godot_icons/icon_favorites.svg" type="Texture" id=6]
+[ext_resource path="res://gfx/ui/godot_icons/icon_move_down.svg" type="Texture" id=7]
+[ext_resource path="res://gfx/ui/godot_icons/icon_move_up.svg" type="Texture" id=8]
+
+[sub_resource type="StyleBoxFlat" id=12]
+bg_color = Color( 0.0313726, 0.0313726, 0.0627451, 1 )
+border_width_left = 1
+border_width_top = 24
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0, 0.678431, 0.913725, 1 )
+border_blend = true
+corner_radius_top_left = 8
+corner_radius_top_right = 3
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 3
+expand_margin_top = 20.0
+shadow_size = 6
+shadow_offset = Vector2( 0, 4 )
+
+[sub_resource type="StyleBoxFlat" id=13]
+content_margin_left = 2.0
+content_margin_top = 4.0
+draw_center = false
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.8, 0.8, 0.8, 0.12549 )
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="QuickAccess" type="WindowDialog"]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -1024.0
+margin_right = -704.0
+margin_bottom = 400.0
+rect_min_size = Vector2( 256, 400 )
+theme = ExtResource( 1 )
+custom_styles/panel = SubResource( 12 )
+popup_exclusive = true
+resizable = true
+script = ExtResource( 2 )
+
+[node name="Title" type="Label" parent="."]
+anchor_right = 1.0
+margin_top = -24.0
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 1
+custom_constants/shadow_offset_y = 1
+custom_fonts/font = ExtResource( 3 )
+text = "Quick Access"
+align = 1
+valign = 1
+
+[node name="V" type="VSplitContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 8.0
+margin_top = 8.0
+margin_right = -8.0
+margin_bottom = -8.0
+custom_constants/separation = 8
+
+[node name="Faves" type="VBoxContainer" parent="V"]
+margin_right = 304.0
+margin_bottom = 128.0
+rect_min_size = Vector2( 0, 128 )
+custom_constants/separation = 4
+
+[node name="Label" type="Label" parent="V/Faves"]
+margin_right = 304.0
+margin_bottom = 8.0
+custom_fonts/font = ExtResource( 3 )
+text = "Favorites:"
+
+[node name="List" type="ItemList" parent="V/Faves"]
+margin_top = 12.0
+margin_right = 304.0
+margin_bottom = 65.0
+custom_constants/vseparation = 6
+custom_styles/bg = SubResource( 13 )
+items = [ "D:/Projects/Godot/Code/PhaseEngine/voice", null, false, "Item 1", null, false ]
+auto_height = true
+
+[node name="H2" type="HBoxContainer" parent="V/Faves"]
+margin_top = 69.0
+margin_right = 304.0
+margin_bottom = 87.0
+
+[node name="btnUp" type="Button" parent="V/Faves/H2"]
+margin_right = 42.0
+margin_bottom = 18.0
+text = "Up"
+icon = ExtResource( 8 )
+
+[node name="btnDown" type="Button" parent="V/Faves/H2"]
+margin_left = 48.0
+margin_right = 106.0
+margin_bottom = 18.0
+text = "Down"
+icon = ExtResource( 7 )
+
+[node name="Control" type="Control" parent="V/Faves/H2"]
+margin_left = 112.0
+margin_right = 152.0
+margin_bottom = 18.0
+size_flags_horizontal = 3
+
+[node name="btnRemove" type="Button" parent="V/Faves/H2"]
+margin_left = 158.0
+margin_right = 304.0
+margin_bottom = 18.0
+text = "Remove Favorite"
+icon = ExtResource( 5 )
+
+[node name="MRUDs" type="VBoxContainer" parent="V"]
+margin_top = 136.0
+margin_right = 304.0
+margin_bottom = 384.0
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="V/MRUDs"]
+margin_right = 304.0
+margin_bottom = 8.0
+custom_fonts/font = ExtResource( 3 )
+text = "Most Recently Used:"
+
+[node name="List" type="ItemList" parent="V/MRUDs"]
+margin_top = 20.0
+margin_right = 304.0
+margin_bottom = 218.0
+size_flags_vertical = 3
+custom_constants/vseparation = 6
+custom_styles/bg = SubResource( 13 )
+
+[node name="H" type="HBoxContainer" parent="V/MRUDs"]
+margin_top = 230.0
+margin_right = 304.0
+margin_bottom = 248.0
+
+[node name="btnRmDir" type="Button" parent="V/MRUDs/H"]
+margin_right = 154.0
+margin_bottom = 18.0
+text = "Remove From List"
+icon = ExtResource( 4 )
+
+[node name="Control2" type="Control" parent="V/MRUDs/H"]
+margin_left = 160.0
+margin_right = 176.0
+margin_bottom = 18.0
+size_flags_horizontal = 3
+
+[node name="btnAddFave" type="Button" parent="V/MRUDs/H"]
+margin_left = 182.0
+margin_right = 304.0
+margin_bottom = 18.0
+text = "Add Favorite"
+icon = ExtResource( 6 )
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.1
+
+[connection signal="visibility_changed" from="." to="." method="_on_QuickAccess_visibility_changed"]
+[connection signal="item_activated" from="V/Faves/List" to="." method="_on_List_item_activated" binds= [ 1 ]]
+[connection signal="pressed" from="V/Faves/H2/btnUp" to="." method="_on_btnUp_pressed"]
+[connection signal="pressed" from="V/Faves/H2/btnDown" to="." method="_on_btnDown_pressed"]
+[connection signal="pressed" from="V/Faves/H2/btnRemove" to="." method="_on_btnRemove_pressed"]
+[connection signal="item_activated" from="V/MRUDs/List" to="." method="_on_List_item_activated" binds= [ 2 ]]
+[connection signal="pressed" from="V/MRUDs/H/btnRmDir" to="." method="_on_btnRmDir_pressed"]
+[connection signal="pressed" from="V/MRUDs/H/btnAddFave" to="." method="_on_btnAddFave_pressed"]
+[connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]

@@ -284,7 +284,7 @@ namespace PhaseEngine
                             var f = new Filter();
                             ops[i] = f;
                             f.eg.Configure(voice.egs[i]);
-                            f.SetOscillatorType(f.eg.aux_func);  //TODO:  Check if values out of range cause the filter to freak out
+                            f.SetOscillatorType((byte)f.eg.aux_func);  //TODO:  Check if values out of range cause the filter to freak out
                             f.wavetable = voice.wavetable;
                             break;
                         case OpBase.Intents.BITWISE:  //Extends FM_OP

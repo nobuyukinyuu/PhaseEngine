@@ -7,7 +7,7 @@ const ENV_TITLE = "[ Op%s ] %s Envelope"
 const FOLLOW_TITLE = "[ Op%s ] %s Key Mapping"
 const VEL_TITLE = "[ Op%s ] %s Velocity Table"
 
-enum {NONE=0, ENVELOPE=1, KEY_FOLLOW=2, VELOCITY_TABLE=4, ALL=0x7} #BindAbilities
+enum {NONE=0, ENVELOPE=1, KEY_FOLLOW=2, VELOCITY_TABLE=4, MOD_WHEEL=8, ALL=0xF} #BindAbilities
 const WINDOW_TITLE = {ENVELOPE: ENV_TITLE, KEY_FOLLOW: FOLLOW_TITLE, VELOCITY_TABLE: VEL_TITLE}
 enum {LOC_TYPE_UNDEFINED=-1, LOC_TYPE_EG, LOC_TYPE_PG}
 

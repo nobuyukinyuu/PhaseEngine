@@ -55,7 +55,7 @@ func _ready():
 
 	p.add_separator()
 	p.add_icon_item(preload("res://gfx/ui/icon_reset.svg"), "Default", 0xFF)
-	p.set_item_accelerator(12, KEY_D)  #Be sure to update this if Default moves
+	p.set_item_accelerator(12, KEY_D | KEY_MASK_SHIFT)  #Be sure to update this if Default moves
 
 	p.rect_size.x += 32
 
@@ -139,7 +139,8 @@ func _on_EaseMenu_index_pressed(curveType, parent_index, descending):
 					tbl[i] = 1 / pow(2, (pos)/12.0) * global.RTABLE_SIZE
 				else:
 					var pos = range_lerp(i, startpos, endpos-1, 0, 10) 
-					tbl[i] = pow(2, (pos)) 
+					tbl[i] = pow(2, (pos))
+		
 				
 #	if reinterpolate:
 #		print("Reinterpolating positions %s to %s with values %s to %s...." % [startpos,endpos,startval,endval])

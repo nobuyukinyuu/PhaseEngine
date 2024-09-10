@@ -382,7 +382,7 @@ namespace PhaseEngine
         public delegate short OpFunc(short modulation, short oscOutput); //Function of the operator.
         OpFunc BitwiseOp;
         public static readonly OpFunc[] operations = {OP_AND, OP_OR, OP_XOR, OP_RINGMOD, OP_MOD, OP_INVMOD, OP_ROL, OP_ROR};
-        public byte OpFuncType {get => eg.aux_func;  set { if (value<operations.Length)  {BitwiseOp = operations[value]; eg.aux_func=value;} }}
+        public byte OpFuncType {get => (byte)eg.aux_func;  set { if (value<operations.Length)  {BitwiseOp = operations[value]; eg.aux_func=value;} }}
 
         public BitwiseOperator():base() {intent=Intents.BITWISE; BitwiseOp=OP_AND;}
 
@@ -397,8 +397,14 @@ namespace PhaseEngine
         public static short OP_XOR(short modulation, short input) {return (short)(input ^ modulation);}
 
         public static short OP_RINGMOD(short modulation, short input) {return (short)(input * modulation >> 13);}
-        public static short OP_MOD(short modulation, short input) {return (short)(input % (modulation|1));}
-        public static short OP_INVMOD(short modulation, short input) {return (short)(input % (Tools.Sign(modulation) * (0x1FFF - Tools.Abs(modulation))|1));}
+
+
+#pragma warning disable CS0675 // Bitwise-or operator used on a sign-extended operand
+        public static short OP_MOD(short modulation, short input) => (short)(input % (modulation|(modulation==0).ToByte()));
+        public static short OP_INVMOD(short modulation, short input) {
+            var operand = Tools.Sign(modulation) * (0x1FFF - Tools.Abs(modulation));
+            return (short)(input % (operand|(operand==0).ToByte()));}
+#pragma warning restore CS0675 // Bitwise-or operator used on a sign-extended operand
 
         public static short OP_ROR(short modulation, short input) {return (short)Rotate(input, modulation, ROR16);}
         public static short OP_ROL(short modulation, short input) {return (short)Rotate(modulation, input, ROL16);}

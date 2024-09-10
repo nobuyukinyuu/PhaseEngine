@@ -219,7 +219,8 @@ namespace PhaseEngine
         public static bool ToBool(this ulong x) {return x>0;}
         public static bool ToBool(this byte x) {return x>0;}
 
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //Unsafe casting using pointers but actually this is what we want to branchlessly get nonzero values
+        unsafe public static byte ToByte(this bool input) => *((byte*)(&input));
 
 
 

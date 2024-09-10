@@ -25,6 +25,7 @@ const OPERATOR_TAB_GROUP = 8  #Possible future use for if we're listing LFOs and
 
 var periods = []  #Size 128 +1
 
+#FIXME:  waves doesn't seem to have much of an actual use outside of defining oscillator signals. Remove?
 var waves=[0,2,1,3,5,6,7, "8a", 8, 9]  #Make sure this matches the waveFuncs list in Oscillator.cs
 var wave_img = []
 
@@ -86,6 +87,10 @@ func get_modeless_popup(name:String, context=Contexts.VOICE):
 		printerr("Couldn't find a proper context! ", path)
 
 	return null
+
+func reparent_node(source, target):
+	source.get_parent().remove_child(source)
+	target.add_child(source, true)
 
 func _ready():
 	# Generate the period frequencies of every note based on center tuning (A-4) at 440hz
@@ -230,3 +235,4 @@ func inv_xerp(A,B,min_value, max_value, value):  #Proper inv_xerp from godot
 	else:
 		value = clamp(value, min_value, max_value)
 		return clamp((value - A) / (B - A), 0, 1)
+

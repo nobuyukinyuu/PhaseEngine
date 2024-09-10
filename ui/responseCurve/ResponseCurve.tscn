@@ -228,9 +228,6 @@ custom_styles/pressed = SubResource( 5 )
 custom_styles/normal = SubResource( 5 )
 flat = false
 script = ExtResource( 23 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="EaseSubmenu" type="PopupMenu" parent="btnPresets"]
 margin_left = 32.0

@@ -1,7 +1,7 @@
 extends Panel
 var bankline:LineEdit  #LineEdit control for wave bank
 
-const CUSTOM=9  #Microsample oscillator index
+const CUSTOM=9  #Microsample oscillator oscType index
 
 func _ready():
 	
