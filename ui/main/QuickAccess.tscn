@@ -90,7 +90,6 @@ margin_right = 304.0
 margin_bottom = 65.0
 custom_constants/vseparation = 6
 custom_styles/bg = SubResource( 13 )
-items = [ "D:/Projects/Godot/Code/PhaseEngine/voice", null, false, "Item 1", null, false ]
 auto_height = true
 
 [node name="H2" type="HBoxContainer" parent="V/Faves"]
