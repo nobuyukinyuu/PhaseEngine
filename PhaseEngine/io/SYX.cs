@@ -239,7 +239,7 @@ namespace PhaseEngine
                                 v.pgs[pe_opIndex].Configure(pg);                                
                             } //End Operator loop
                             
-                            //Feedback
+                            //// Feedback ////
                             var fb = p.Feedback * (v.alg.intent[feedbackOperatorForPreset[p.algorithm]]==OpBase.Intents.FM_HQ? 25.5 : 1.0);
                             switch(sysex.voices[i].algorithm){ //Algorithms 4 and 6 have special feedback stacks which we'll handle here.
                                 case 3:  //3-op stack, we'll split the feedback into 3rds and apply a bit to each operator.
@@ -253,7 +253,7 @@ namespace PhaseEngine
                                     v.egs[5].feedback = (byte)(fb / 2.0);
                                     break;
                                 default:
-                                    v.egs[feedbackOperatorForPreset[p.algorithm]].feedback=(byte)fb;
+                                    v.egs[presetMap[p.algorithm][feedbackOperatorForPreset[p.algorithm]]].feedback=(byte)fb;
                                     break;
                             }                            
 
