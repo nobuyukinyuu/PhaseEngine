@@ -86,8 +86,12 @@ namespace PhaseEngine
                                 sr *= sr < 160 ? 11 : (11 + ((sr - 160) >> 4));
                                 return 170.5/(double)sr;
                             }
-                            v.lfo.Knee = (int) (0.020562 + 0.0280046 * Math.Pow(1.04673, p.lfoDelay) * 1000); //Regression curve fit of DX7 knee value
-                            v.lfo.Delay = (int) (-0.124569 + 0.184922 * Math.Pow(1.02963, p.lfoDelay) * 1000) - v.lfo.Knee; //Regression curve fit of DX7 delay value
+
+                            if (p.lfoDelay > 0)
+                            {
+                                v.lfo.Knee = (int) (0.020562 + 0.0280046 * Math.Pow(1.04673, p.lfoDelay) * 1000); //Regression curve fit of DX7 knee value
+                                v.lfo.Delay = (int) (-0.124569 + 0.184922 * Math.Pow(1.02963, p.lfoDelay) * 1000) - v.lfo.Knee; //Fit of DX7 delay value
+                            }
                             v.lfo.Frequency = 1.0 / lfoRate(p.lfoSpeed);
                             v.lfo.speedType = LFO.SpeedTypes.ManualKneeAndFrequency;
 
@@ -101,20 +105,16 @@ namespace PhaseEngine
                             //// Operators ////
                             for (int j=0; j<p.ops.Length; j++)
                             {
-                                var idx = presetMap[p.algorithm][j]; //Target operator index on the PhaseEngine side
-                                v.SetIntent(idx, OpBase.Intents.FM_HQ);  //We need the higher fidelity for EG rate emulation
+                                var pe_opIndex = presetMap[p.algorithm][j]; //Target operator index on the PhaseEngine side
+                                v.SetIntent(pe_opIndex, OpBase.Intents.FM_HQ);  //We need the higher fidelity for EG rate emulation
                                 var op = p.ops[j];
-                                var eg = v.egs[idx];
+                                var eg = v.egs[pe_opIndex];
                                 var pg = Increments.Prototype();
 
                                 //// Envelope ////
                                 eg.osc_sync = p.OscKeySync; //DX7 osc sync is global, but ours is per-operator
-                                eg.ams = (byte)(op.AMS << 1); //DX7 AMS is 0-3. Map it to values closer to ours
-                                if(feedbackOperatorForPreset[p.algorithm] == j)  
-                                {
-                                    eg.feedback=p.Feedback;
-                                    if (v.alg.intent[idx]==OpBase.Intents.FM_HQ) eg.feedback *= 32;
-                                }
+                                eg.ams = (byte)(op.AMS * 2); //DX7 AMS is 0-3. Map it to values closer to ours. (For Dexed, *3, for dx7, *2)
+                                //Feedback is set outside of this loop after the intents are set.  See below.
                             
                                 
                                 //Levels
@@ -123,17 +123,24 @@ namespace PhaseEngine
                                 eg.dl = LvMap(op.EG_L2);
                                 eg.sl = LvMap(op.EG_L3);
                                 eg.rl = LvMap(op.EG_L4, Envelope.L_MAX);  //Adjust on full scale to prevent stuck notes
+
+                                // float Ease(float t) {return t;} //Linear
+                                // float Ease(float t) {var sq=t*t; return sq / (2.0f * (sq - t) + 1.0f);}  //Parametric
+                                // float Ease(float t) {return t * t * (3.0f - 2.0f * t);}  //Cubic Bezier
+                                // float Ease(float t) {return t < 0.5f? 2.0f * t*t : -1.0f + (4.0f - 2.0f * t) * t;} //Quadratic
+                                float Ease(float t) {return (float)Math.Pow(t, 1.3); } //Custom
+
                                 //Rates
-                                v.SetRateExtension(idx, "ar", Map(op.EG_R1, 24));
-                                v.SetRateExtension(idx, "dr", Map(op.EG_R2, 32));
-                                v.SetRateExtension(idx, "sr", Map(op.EG_R3, 32));
-                                v.SetRateExtension(idx, "rr", Map(op.EG_R4, Envelope.R_MAX));
+                                v.SetRateExtension(pe_opIndex, "ar", Tools.Remap(Ease(op.EG_R1/99.0f), 0, 1, 0, 31));
+                                v.SetRateExtension(pe_opIndex, "dr", Map(op.EG_R2, 32));
+                                v.SetRateExtension(pe_opIndex, "sr", Map(op.EG_R3, 32));
+                                v.SetRateExtension(pe_opIndex, "rr", Map(op.EG_R4, Envelope.R_MAX));
 
                                 //rTables
                                 eg.velocity = new VelocityTable(); eg.velocity.ceiling = Tools.Remap(op.VelocitySensitivity, 0,7,0,100);
                                 eg.ksr = new RateTable(); eg.ksr.ceiling = Tools.Remap(op.RateScale, 0,7,0, 100); //FIXME: Check for accuracy
+                                eg.ksl = new LevelTable();
                                
-                                //TODO:  LEVEL CURVE SCALING
                                 //Since rTables can only ADD to attenuation, to deal with positive level scaling values, we have to determine
                                 //The largest value we'd have to scale up a note by and adjust the TL accordingly. Usually this will mean a TL
                                 // will become 0 and the KSL table scaled to account for the difference.  DX7 only scales in key groups of
@@ -142,9 +149,66 @@ namespace PhaseEngine
                                 const double EX_RATIO = 1024/96.0; //Corresponds to a 50% volume decrease (-6dB) every 2 octaves on our log2 scale.
                                 const byte LN_MAX = 48;  //Number of notes until the linear attenuator maxes out its ability to attenuate. 
                                 const byte EX_MAX = 79;  //Number of notes until the exp attenuator maxes out its ability to attenuate. (maybe 72?)
+                                static ushort lnScale(int x) => (ushort)Math.Round(x*LN_RATIO);
+                                static ushort exScale(int x) => (ushort)Math.Min((Math.Pow(2, (x+10)/12)-1) * EX_RATIO, Envelope.L_MAX); //Rough fit to measurements
 
-                                ushort lnScale(int x) => (ushort)Math.Round(x*LN_RATIO);
-                                ushort exScale(int x) => (ushort)(Math.Round(Math.Pow(2, (x+10)/12)-1) * EX_RATIO); //Rough fit to measurements
+                                int UnscaledValue(CurveScaleType curve, int pos) => curve switch {
+                                    CurveScaleType.LinMinus => lnScale(pos),
+                                    CurveScaleType.ExpMinus => exScale(pos),
+                                    CurveScaleType.LinPlus => -lnScale(pos),
+                                    CurveScaleType.ExpPlus => -exScale(pos),
+                                    _ => throw new Exception($"SYX.cs:  Unknown CurveScaleType! Op{j+1}: Right side, Voice {i}: {v.name})"),
+                                };
+                                static ushort CurveMax(CurveScaleType curve) => curve switch {
+                                    CurveScaleType.LinMinus =>  LN_MAX,     CurveScaleType.LinPlus =>  LN_MAX,
+                                    CurveScaleType.ExpMinus => EX_MAX,      CurveScaleType.ExpPlus => EX_MAX,
+                                _ => 0 };
+
+                                const byte TRANSPOSE = 48 - NOTE_C3; //Amount needed to add to sysex note to create the equivalent midi_note.
+                                var note_num = op.levelScalingBreakPoint + TRANSPOSE; //The highest DX7 can go is C-8 (99). So the higest we go is 108.
+
+                                bool commonScale = op.scaleLeftDepth == op.scaleRightDepth;  //We can skip the lerp step if the scales are the same.
+                                if (commonScale) eg.ksl.ceiling = (float)Math.Round(op.scaleLeftDepth * 1.01);
+                                else  eg.ksl.ceiling = 100;
+
+                                //If we encounter Plus curves (adds volume, subtracts attenuation), to convert to rTables we must lift the entire curve
+                                //by a specific amount. That amount is the lowest attenuation value achieved by the curve. Then, we subtract the lift
+                                //from the operator's total attenuation level (TL).
+                                int lowest=0, highest=0;  //Indices of the highest and lowest value found.
+                                double[] intermediate = new double[128]; //Create Intermediate values to transform later.
+                                for(int c_idx=0; c_idx<128; c_idx++)
+                                {
+                                    var dist = Math.Abs(c_idx-note_num); //Distance from the breakpoint note.
+                                    double val = 0;
+                                    if (c_idx<note_num) //Left Curve
+                                    {
+                                        val = UnscaledValue(op.CurveScaleLeft, dist);
+                                        if (!commonScale) //Scale the value.
+                                            val *= op.scaleLeftDepth / 99.0;
+
+                                    } else {            //Right Curve
+                                       val = UnscaledValue(op.CurveScaleRight, dist);
+                                        if (!commonScale) //Scale the value.
+                                            val *= op.scaleRightDepth / 99.0;
+                                    }
+
+                                    intermediate[c_idx] = (int)Math.Truncate(val);
+                                    if(intermediate[c_idx] > intermediate[highest])     highest = c_idx;
+                                    if(intermediate[c_idx] < intermediate[lowest])      lowest  = c_idx;
+                                }
+
+                                //Now that we have the highest and lowest values, determine if we need to lift, and have room for the full lift amount.
+                                //If we don't need to lift and the scaling value is common, then we can use rTables' built-in scaling. Otherwise, we have
+                                //we have to get as close to possible as matching the values around the breakpoint note by using TL as our lift value.
+                                var lift = 0;
+                                if(intermediate[lowest]<0)
+                                {
+                                    lift = (intermediate[highest] - intermediate[lowest] > Envelope.L_MAX)?  eg.tl : (int)-intermediate[lowest];
+                                    eg.tl = (ushort) Math.Clamp(eg.tl - lift, 0, Envelope.L_MAX);
+                                }
+                                    for(int c_idx=0; c_idx<128; c_idx++) 
+                                        eg.ksl[c_idx] = (ushort)Math.Clamp(intermediate[c_idx] + lift, 0, Envelope.L_MAX);
+
 
                                 //// Increments ////
                                 if (op.FrequencyMode == OscModes.Fixed)
@@ -172,9 +236,27 @@ namespace PhaseEngine
                                 }
                                 pg.Detune = Tools.Remap(op.Detune, -7, 7, -1.0f, 1.0f);
 
-                                v.pgs[idx].Configure(pg);                                
-                            }
+                                v.pgs[pe_opIndex].Configure(pg);                                
+                            } //End Operator loop
                             
+                            //Feedback
+                            var fb = p.Feedback * (v.alg.intent[feedbackOperatorForPreset[p.algorithm]]==OpBase.Intents.FM_HQ? 25.5 : 1.0);
+                            switch(sysex.voices[i].algorithm){ //Algorithms 4 and 6 have special feedback stacks which we'll handle here.
+                                case 3:  //3-op stack, we'll split the feedback into 3rds and apply a bit to each operator.
+                                    // eg.feedback = (byte)(fb / 3.0);
+                                    v.egs[1].feedback = (byte)(fb / 3.0);
+                                    v.egs[3].feedback = (byte)(fb / 3.0);
+                                    v.egs[5].feedback = (byte)(fb / 3.0);
+                                    break;
+                                case 5: //2-op stack with feedback, we'll split the feedback in half and apply it to each operator.
+                                    v.egs[2].feedback = (byte)(fb / 2.0);
+                                    v.egs[5].feedback = (byte)(fb / 2.0);
+                                    break;
+                                default:
+                                    v.egs[feedbackOperatorForPreset[p.algorithm]].feedback=(byte)fb;
+                                    break;
+                            }                            
+
 
                             //TODO:  IMPORT AND CONVERT EVERY OTHER PROPERTY
                             bank[i] = v.ToJSONString();
@@ -193,7 +275,7 @@ namespace PhaseEngine
         // public static ushort LvMap(int input) => (ushort)(((int)(Tools.Remap(input, 0, 99, Envelope.L_MAX, 0)) << 1) & Envelope.L_MAX);
         public static ushort LvMap(int input, int outmin=820) => (ushort)Tools.Remap(input, 0, 99, outmin, 16);
         
-        public static float Map(int input, int outMax) => Tools.Remap(input, 0, 99, 0, outMax);
+        public static float Map(float input, float outMax) => Tools.Remap(input, 0, 99, 0, outMax);
 
         public override string ToString()
         {
@@ -376,7 +458,7 @@ namespace PhaseEngine
 
 
    //////////////////////////////////////////////// STRUCTS //////////////////////////////////////////////// 
-        const int NOTE_C3 = 0x27; //39. This is the default breakpoint for DX7. Notes go down to A-0; We need to translate breakpoints to MIDI note numbers.
+        public const int NOTE_C3 = 0x27; //39. This is the default breakpoint for DX7. Notes go down to A-0; We need to translate breakpoints to MIDI note numbers.
         struct PackedOperator
         {
             //Rates

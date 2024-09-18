@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using PhaseEngine;
 
 namespace PhaseEngine 
@@ -30,13 +31,7 @@ namespace PhaseEngine
 
         public override void Clock()
         {
-            phase += pg.increment;  
-
-            //Clock the cached envelopes.
-            //If it's time to update call BindManager.Update().
-            // BindManager.Update(this, eg, BindManager.NO_ACTION);
-
-            
+            phase += pg.increment;
 
             // increment the envelope count; low two bits are the subcount, which
             // only counts to 3, so if it reaches 3, count one more time
@@ -254,7 +249,8 @@ namespace PhaseEngine
                 }
                 break;
             case EGStatus.RELEASED:
-                target = Envelope.L_MAX;  //Max attenuation until a different release level is supported (which may be never)
+                // target = Envelope.L_MAX;  //Max attenuation until a different release level is supported (which may be never)
+                target = eg.levels[(int)EGStatus.RELEASED];  //Max attenuation until a different release level is supported (which may be never)
                 if ( ((egAttenuation >= target) && !eg.rising[(int)EGStatus.RELEASED]) | (eg.rising[(int)EGStatus.RELEASED] && (egAttenuation <= target)))  
                 {
                     egStatus = EGStatus.INACTIVE;
@@ -266,6 +262,7 @@ namespace PhaseEngine
 
             // determine our rate value.  Extra precision is pulled from 8 bits of the aux_func value.
             float rate = eg.rates[(byte) egStatus] + ((eg.aux_func>>((byte)egStatus*8)) & 255) / (egStatus == EGStatus.RELEASED? 256.0f: 128.0f);
+            // float rate = eg.rates[(byte) egStatus];
 
             // determine the increment based on the non-fractional part of env_counter
             uint increment = get_eg_increment(rate, egStatus);
@@ -275,8 +272,15 @@ namespace PhaseEngine
             // attack is the only one that increases
             if (egStatus == EGStatus.ATTACK)
             {
-                var amt = ((~egAttenuation * increment) >> EG_LEVEL_PRECISION) << 8;
+                // var amt = ((~egAttenuation * increment) >> EG_LEVEL_PRECISION) << 8;
+
+                //FIXME????? WEIRD AND HACKY ALTERNATIVE DONE TO MAKE TIME OUTPUTS MATCH NORMAL OPERATOR
+                var amt = (~egAttenuation2 * increment) >> 28;
+                // amt = (long)(amt * 0.43349223970429271698464778124127);
+                amt = (long)(amt * 0.65);
+                
                 egAttenuation2 = Tools.Clamp(egAttenuation2+amt, 0, MAX_ATTENUATION);
+                
                 
 
             } else if (eg.rising[(int)egStatus]) {  //Decrement.
@@ -299,14 +303,33 @@ namespace PhaseEngine
 
         //Consider the following:  Case switches are converted at compile time to constant hash jump tables.
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static int BaseSecs(EGStatus status) => status switch {
+        static double BaseSecs(EGStatus status) => status switch {
             //outputs the number of seconds we expect the longest finite envelope state to take.  Used to calculate HQ EG increments.
-            EGStatus.ATTACK => 12, //Tested
-            EGStatus.DECAY => 240,
-            EGStatus.SUSTAINED => 240,
-            EGStatus.RELEASED => 240,
+            EGStatus.ATTACK => 18.56, //Tested on PhaseEngine
+            EGStatus.DECAY => 260,
+            EGStatus.SUSTAINED => 261.9, //Tested on PhaseEngine
+            EGStatus.RELEASED => 260,
             _ => 240
         };
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double Flatness(EGStatus status) => status switch {
+            //outputs the number of seconds we expect the longest finite envelope state to take.  Used to calculate HQ EG increments.
+            EGStatus.ATTACK => 1, 
+            EGStatus.DECAY => 0.26,
+            EGStatus.SUSTAINED => 0.268,
+            EGStatus.RELEASED => 0.26,
+            _ => 1
+        };
+
+        public static readonly double[] _ARs = new double[] { //AR lengths, in seconds, from normal PhaseEngine operators, converted to increments.
+            240.0, 18.56, 9.28, 6.207, 4.64, 3.103, 2.319, 1.551, 
+            1.159, 0.775, 0.579, 0.387, 0.289, 0.194, 0.144, 0.0965,
+            3479/48000.0, 2326/48000.0, 1735/48000.0, 1162/48000.0, 864/48000.0, 580/48000.0, 438/48000.0, 290/48000.0, 
+            220/48000.0, 153/48000.0, 124/48000.0, 84/48000.0, 66/48000.0, 55/48000.0, 48/48000.0, 42/48000.0,
+            24/48000.0, 1/48000.0 //Value 32-33 is safety for lerps
+        };
+
+        static uint ToIncrement(double secs) => (uint)Tools.ToFixedPoint((float)(1.0/(secs * (Global.MixRate/3.0)) * 0x7FFF), EG_LEVEL_PRECISION);
 
         public const int EG_LEVEL_PRECISION = 16;  //Fixed point decimal precision bits for the state of the EG attenuation status
         //FIXME:  GENERATE THESE CURVES IN TABLES.cs AND RETREIVE THEM THAT WAY BASED ON CURRENT EGSTATUS RATE
@@ -315,11 +338,25 @@ namespace PhaseEngine
             if (rate==0) return 0;
             // double rate = adsr_rate;
             //Retrieve the base seconds of the envelope state based on the rate and convert to number of samples..
-            var base_samples = (BaseSecs(egStatus) / Math.Pow(1.2, rate-1)) * Global.MixRate/3;  //The 3 is for the number of clock cycles it takes to run the EGClock
-            //Now get the increment as a reciprocal plus our number of fixed point decimal places.....
-            base_samples = 1.0 / base_samples * 0x7FFF;  
-            return (uint)Tools.ToFixedPoint((float)base_samples, EG_LEVEL_PRECISION);
-            
+            // var base_samples = (BaseSecs(egStatus) / Math.Pow(1.2, rate-1)) * Global.MixRate/3;  //The 3 is for the number of clock cycles it takes to run the EGClock
+
+            switch(egStatus)
+            {
+                case EGStatus.ATTACK:
+                    Debug.Assert(rate>=0);  //We're not going to get the absolute value of rate in order to split it into whole/frac
+                    var n = rate/2.0;
+                    var whole = (int)Math.Truncate(n);
+                    var frac = n - whole;
+                    var increment = ToIncrement(Tools.Lerp(_ARs[whole], _ARs[whole+1], frac));
+                    return increment;
+                default:
+                    //Dividing by 3 is for the number of clock cycles it takes to run the EGClock
+                    var base_samples = BaseSecs(egStatus) / Math.Pow(2, Flatness(egStatus) * (rate-1)) * Global.MixRate/3;
+
+                    //Now get the increment as a reciprocal plus our number of fixed point decimal places.....
+                    base_samples = 1.0 / base_samples * 0x7FFF;  
+                    return (uint)Tools.ToFixedPoint((float)base_samples, EG_LEVEL_PRECISION);
+            }            
         }
 
         //-------------------------------------------------

@@ -40,7 +40,8 @@ func _input(event):
 		match event.message:
 			MIDI_MESSAGE_NOTE_ON:
 
-#				print("Pitch: %s\nVelocity: %s\nPressure: %s\n" % [event.pitch, event.velocity, event.pressure])
+				print("Pitch (%s%s): %s\nVelocity: %s\n" % [
+						note_names[event.pitch%12], event.pitch/12-1, event.pitch, event.velocity])
 				emit_signal("note_on", event.pitch, event.velocity)
 				owner.get_node("RLWarning").check_for_fixes() #Check to see if we have any stuck note issues.
 
