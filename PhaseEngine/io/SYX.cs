@@ -76,6 +76,8 @@ namespace PhaseEngine
                             Voice v = new Voice(6);
                             v.name = sysex.voices[i].name/*.Trim()*/;
                             v.SetPresetAlgorithm(sysex.voices[i].algorithm);
+
+                            v.Gain = 2/3f * (7 - v.alg.NumberOfConnectionsToOutput) + 1/3f; //Volume compensation
                             
                             //// LFO ////
                             v.lfo.AMD = (short) Map(p.lfoAMD, Envelope.L_MAX);
@@ -98,7 +100,7 @@ namespace PhaseEngine
                             v.lfo.SyncType = p.LFOKeySync? 2: 0; //Sync to end of delay period if DX LFO Sync is enabled.
                             v.lfo.pmd = Tools.Remap(p.lfoPMD, 0, 99, 0, 1.0f) * PMS_MAP[p.LFO_PMS];
 
-                            if (p.LFOWaveform == LFOWaves.SawDown) v.lfo.invert = true;
+                            if (p.LFOWaveform == LFOWaves.SawUp) v.lfo.invert = true;
                             v.lfo.SetOscillatorType(oscTypes[p.LFOWaveform]);
 
 
@@ -201,9 +203,13 @@ namespace PhaseEngine
                                 //If we don't need to lift and the scaling value is common, then we can use rTables' built-in scaling. Otherwise, we have
                                 //we have to get as close to possible as matching the values around the breakpoint note by using TL as our lift value.
                                 var lift = 0;
-                                if(intermediate[lowest]<0)
+
+
+                                // // FIXME:  BROKEN IMPLEMENTATION relies on prescaled values. Un-prescaled this lift won't work.
+                                // //         Consider premultiplying lift by 1/100 the ceiling amount.
+                                if(intermediate[lowest]<0 && eg.ksl.ceiling == 100)
                                 {
-                                    lift = (intermediate[highest] - intermediate[lowest] > Envelope.L_MAX)?  eg.tl : (int)-intermediate[lowest];
+                                    lift = (intermediate[highest] - intermediate[lowest] > eg.tl)?  eg.tl : (int)-intermediate[lowest];
                                     eg.tl = (ushort) Math.Clamp(eg.tl - lift, 0, Envelope.L_MAX);
                                 }
                                     for(int c_idx=0; c_idx<128; c_idx++) 
@@ -222,7 +228,6 @@ namespace PhaseEngine
 
                                     pg.FreqSelect(freq);
                                 } else {  //Ratio mode
-                                    // FIXME:  op.CoarseFrequency goes up to 32; check if we should change our mult vals
                                     pg.mult = op.CoarseFrequency==0? 0.5f : op.CoarseFrequency ; 
 
                                     // FineFrequency is a 0-99 value multiplier from 1x-2x of our mult.
@@ -253,7 +258,7 @@ namespace PhaseEngine
                                     v.egs[5].feedback = (byte)(fb / 2.0);
                                     break;
                                 default:
-                                    v.egs[presetMap[p.algorithm][feedbackOperatorForPreset[p.algorithm]]].feedback=(byte)fb;
+                                    v.egs[presetMap[p.algorithm][feedbackOperatorForPreset[p.algorithm]]].feedback = (byte)fb;
                                     break;
                             }                            
 
@@ -273,7 +278,8 @@ namespace PhaseEngine
         }
 
         // public static ushort LvMap(int input) => (ushort)(((int)(Tools.Remap(input, 0, 99, Envelope.L_MAX, 0)) << 1) & Envelope.L_MAX);
-        public static ushort LvMap(int input, int outmin=820) => (ushort)Tools.Remap(input, 0, 99, outmin, 16);
+        public static ushort LvMap(int input, int outmin=820) => (ushort)Tools.Remap(LvEase(input,1.0), 0, 99, outmin, 16);
+        public static double LvEase(int dx_lvl, double amt) => Math.Pow(dx_lvl/100.0, amt)*100.0; //Eases the DX level curve slightly
         
         public static float Map(float input, float outMax) => Tools.Remap(input, 0, 99, 0, outMax);
 
