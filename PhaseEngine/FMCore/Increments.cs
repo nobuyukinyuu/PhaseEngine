@@ -108,7 +108,7 @@ namespace PhaseEngine
         {
             var o = new Increments();
             o.NoteSelect(note);
-            o.increment = o.noteIncrement;
+            o.increment = o.noteIncrement; //TODO: add in tuned increment
             return o;
         }
         public static Increments FromFreq(double freq)

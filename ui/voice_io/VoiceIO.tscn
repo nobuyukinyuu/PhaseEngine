@@ -86,7 +86,6 @@ __meta__ = {
 
 [node name="QuickAccess" parent="." instance=ExtResource( 3 )]
 unique_name_in_owner = true
-visible = false
 
 [connection signal="file_selected" from="Open" to="." method="_on_Open_file_selected"]
 [connection signal="file_selected" from="Save" to="." method="_on_Save_file_selected"]

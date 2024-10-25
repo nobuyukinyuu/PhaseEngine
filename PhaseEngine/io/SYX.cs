@@ -119,7 +119,7 @@ namespace PhaseEngine
                                 //Feedback is set outside of this loop after the intents are set.  See below.
                             
                                 
-                                //Levels
+                                //// Levels ////
                                 eg.tl = LvMap(op.outputLevel);
                                 eg.al = LvMap(op.EG_L1);
                                 eg.dl = LvMap(op.EG_L2);
@@ -132,13 +132,37 @@ namespace PhaseEngine
                                 // float Ease(float t) {return t < 0.5f? 2.0f * t*t : -1.0f + (4.0f - 2.0f * t) * t;} //Quadratic
                                 float Ease(float t) {return (float)Math.Pow(t, 1.3); } //Custom
 
-                                //Rates
+                                //// Rates ////
                                 v.SetRateExtension(pe_opIndex, "ar", Tools.Remap(Ease(op.EG_R1/99.0f), 0, 1, 0, 31));
                                 v.SetRateExtension(pe_opIndex, "dr", Map(op.EG_R2, 32));
                                 v.SetRateExtension(pe_opIndex, "sr", Map(op.EG_R3, 32));
                                 v.SetRateExtension(pe_opIndex, "rr", Map(op.EG_R4, Envelope.R_MAX));
 
-                                //rTables
+                                //Determine at this point if we need this operator to be HQ or not based on the float distance from a canonical rate.
+                                //If all of the rates are within 0.2 of an integer then we can lower the quality to save CPU.
+                                //FIXME:  Maybe let the user specify whether they want the precision loss or not
+                                var shouldConvert = true;
+                                var rates = new string[]{"ar", "dr", "sr", "rr"};
+                                foreach (string r in rates)
+                                {
+                                    var rate = v.GetRateExtension(pe_opIndex, r);
+                                    if (rate - Math.Truncate(rate) > 0.2 && rate - Math.Truncate(rate) < 0.8 )
+                                    {
+                                        switch(r){ //If any of these rates are fast enough, no one will notice the loss in fidelity. Continue checking.
+                                            case "sr":
+                                                if (rate>24) continue; break;
+                                            case "rr":
+                                                if (rate>40) continue; break;
+                                        }
+                                        shouldConvert = false;
+                                        break; //Exit early
+                                    }
+                                } if (shouldConvert) {
+                                    foreach (string r in rates) v.SetRateExtension(pe_opIndex, r, (float)Math.Round(v.GetRateExtension(pe_opIndex, r)));
+                                    v.SetIntent(pe_opIndex, OpBase.Intents.FM_OP); //Return operator to normal quality.
+                                }
+
+                                //// rTables ////
                                 eg.velocity = new VelocityTable(); eg.velocity.ceiling = Tools.Remap(op.VelocitySensitivity, 0,7,0,100);
                                 eg.ksr = new RateTable(); eg.ksr.ceiling = Tools.Remap(op.RateScale, 0,7,0, 100); //FIXME: Check for accuracy
                                 eg.ksl = new LevelTable();
@@ -245,7 +269,7 @@ namespace PhaseEngine
                             } //End Operator loop
                             
                             //// Feedback ////
-                            var fb = p.Feedback * (v.alg.intent[feedbackOperatorForPreset[p.algorithm]]==OpBase.Intents.FM_HQ? 25.5 : 1.0);
+                            var fb = p.Feedback * (v.alg.intent[presetMap[p.algorithm][feedbackOperatorForPreset[p.algorithm]]]==OpBase.Intents.FM_HQ? 25.5 : 1.0);
                             switch(sysex.voices[i].algorithm){ //Algorithms 4 and 6 have special feedback stacks which we'll handle here.
                                 case 3:  //3-op stack, we'll split the feedback into 3rds and apply a bit to each operator.
                                     // eg.feedback = (byte)(fb / 3.0);
@@ -277,18 +301,15 @@ namespace PhaseEngine
             return err;
         }
 
+
+   /////////////////////////////////////////////// GLUE /////////////////////////////////////////////// 
         // public static ushort LvMap(int input) => (ushort)(((int)(Tools.Remap(input, 0, 99, Envelope.L_MAX, 0)) << 1) & Envelope.L_MAX);
         public static ushort LvMap(int input, int outmin=820) => (ushort)Tools.Remap(LvEase(input,1.0), 0, 99, outmin, 16);
         public static double LvEase(int dx_lvl, double amt) => Math.Pow(dx_lvl/100.0, amt)*100.0; //Eases the DX level curve slightly
         
         public static float Map(float input, float outMax) => Tools.Remap(input, 0, 99, 0, outMax);
 
-        public override string ToString()
-        {
-            return base.ToString();
-        }
 
-   /////////////////////////////////////////////// GLUE /////////////////////////////////////////////// 
         private static Dictionary<int, int> transpose_cache = new Dictionary<int, int>(100);
         protected static int GetTranspose(int input, bool shortcircuit=true)
         { //Gets a dx7 fine value and returns the corresponding PhaseEngine coarse/fine transpose table index.

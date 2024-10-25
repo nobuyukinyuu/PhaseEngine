@@ -8,7 +8,7 @@ signal pitch_bend
 #Default keys for keyboard controls.
 const note_names = ["C-", "C#", "D-", "D#", "E-", "F-", "F#", "G-", "G#", "A-", "A#", "B-", ]
 const note_keys = [
-		["q","w","e","r","t","y","u","i","o","p","braceleft", "braceright"],
+		["q","w","e","r","t","y","u","i","o","p","bracketleft", "bracketright"],
 		["a","s","d","f","g","h","j","k","l","semicolon", "Apostrophe", "backslash"],
 		["z","x","c","v","b","n","m", "comma" ,"period", "slash"],
 	]

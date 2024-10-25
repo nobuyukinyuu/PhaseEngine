@@ -88,7 +88,8 @@ func set_from_op(op:int):
 
 	else:  #Show multiplier.
 		#Detune is not considered here since we only have 2 sigdigs..
-		var mult = d2["tuned_hz"] / d2.get("base_hz", 440.0)
+#		var mult = d2.get("tuned_hz", 440.0) / d2.get("base_hz", 440.0)
+		var mult = d2.get("mult", 1) * pow(2, d2.get("coarse", 0)/12.0 + d2.get("fine", 0)/1200.0)
 		$V/H/Hz.text = "%*.*fx" % [3, 2, mult]
 
 

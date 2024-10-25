@@ -45,6 +45,8 @@ func clean(which):
 		if arr.empty():  continue
 		for i in range(0, arr.size()): #If we can't find the last entry checked in the list, add unique.
 			var next_unique = arr[i]
+			if OS.get_name() == "Windows" or OS.get_name() == "OSX":  #Case-insensitive filesystem
+				next_unique = next_unique.to_lower()
 			if find_in(uniques, next_unique)>=0:  continue  #Already have this unique. Move on.
 			
 			var is_unique = find_in(arr, next_unique, 0.99, i+1)

@@ -303,6 +303,20 @@ namespace PhaseEngine
         eg.aux_func = (eg.aux_func & mask) | frac_bits;  //32 bits HQ_OP decimal extension data, 8 bits for each: AR|DR|SR|RR
         eg.rates[env] = (byte)whole;
     }
+    public float GetRateExtension(int opTarget, string property)
+    {
+        var env =  property switch {
+            "ar" => 0,
+            "dr" => 1,
+            "sr" => 2,
+            "rr" => 3,
+            _    => throw new ArgumentException($"GetRateExtension: Property must be one of either 'ar', 'dr', 'sr', or 'rr'. Got {property}"),
+        };
+        
+        var eg=egs[opTarget];
+        var frac_bits = (eg.aux_func >> (env*8)) & 255;
+        return eg.rates[env] + frac_bits/255f;
+    }
 
         internal void ResetIntents(bool toDefault=false)
         {
