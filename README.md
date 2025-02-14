@@ -19,8 +19,9 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 * Envelopes with target audio levels for each phase, more like DX-style synths
 * Envelope hold phase after initial attack and before initial decay, similar to the initial delay phase in gdsFM. Stays constant under rate scaling.
 * All FM operators support Reface-style operator feedback.
+* High-quality FM operators with more granular (though still YM-based) envelope timing and attenuation fidelity, 8-bit feedback, and higher fidelity oscillator lookup tables.
 * More traditional noise generators, including an LFSR-based generator with selectable periodicity (create more buzzing effects) similar to 2a03, etc.
-* Variable length wavetables from 32 samples up to 1024 samples per bank.  Selectable sample bank per-oscillator for FM and bitwise ops.
+* Variable length wavetables from 32 samples up to 32k samples per bank.  Selectable sample bank per-oscillator for FM and bitwise ops.
 * Parameter automation bind system, allowing instruments to adjust their parameters over time using a tracker envelope-like interface
 
 ## Different
@@ -51,4 +52,3 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 ## May or may not be implemented or come back
 * Wider range of sampling options
 * Multitimbral operation (for now, multiple chip instances syncing their clocks should suffice)
-* High-quality oscillator lookup table support (greater than 10-bit), for richer timbres

@@ -85,6 +85,7 @@ func _draw():
 	var h = ruler_pos()
 	for i in 3:
 		var x = ms2offset(pts[i])
+		if x < 0 or x > rect_size.x:  continue
 		draw_line(Vector2(x, 0), Vector2(x, h), element_color)
 		draw_pt(i, x)
 

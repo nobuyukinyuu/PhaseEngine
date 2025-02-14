@@ -17,3 +17,8 @@ func _ready():
 	get_node("%ZoomBar/Slider").connect("value_changed", $P/TimeRuler, "set_zoom")
 	get_node("%Offset").connect("value_changed", $P/TimeRuler, "set_offset")
 	
+
+func set_disable_buttons(disabled:bool):  #Enables or disables timeline edit buttons.
+	for button in $P/Btn.get_children():
+		if not button is Button:  continue
+		button.disabled = disabled
