@@ -7,7 +7,7 @@ namespace PhaseEngine
     
     public abstract class OpBase : IBindableDataConsumer  //Base for operator, LFO and filter classes
     {
-        public enum Intents { LFO=-1, NONE, FM_OP, FM_HQ, FILTER, BITWISE, WAVEFOLDER, LINEAR };
+        public enum Intents { LFO=-1, NONE, FM_OP, FM_HQ, FILTER, BITWISE, WAVEFOLDER, MORPH, PD_OP };
         public Intents intent = Intents.NONE;
 
 
@@ -391,7 +391,7 @@ namespace PhaseEngine
             return BitwiseOp(operatorOutputSample(0, am_offset), (short)modulation);  //Modulation sent to us is the sample value of previous operator.
         }
 
-        //Bitwise Funcs.   TODO:  Implement ROR/ROL?  
+        //Bitwise Funcs.
         public static short OP_AND(short modulation, short input) {return (short)(input & modulation);}
         public static short OP_OR(short modulation, short input) {return (short)(input | modulation);}
         public static short OP_XOR(short modulation, short input) {return (short)(input ^ modulation);}
@@ -413,7 +413,6 @@ namespace PhaseEngine
         static int ROL16(int x, int amt) => (x << amt | (x >> (16 - amt))) & 0xFFFF;
         static short Rotate(int input, int modulation, Func<int,int,int> ROTF)
         {
-
             const byte WINDOW = 4;  //The number of bits to evaluate in a chunk.
             const ushort WINDOW_MASK = (1<<WINDOW) -1; //A bitmask of all 1s the width of the window
             const ushort MSB = 12;  //The most significant amount of bits to apply the operation to. All bits above this remain untouched.

@@ -15,7 +15,8 @@ const OpIntentIcons = [
 			preload("res://gfx/ui/ops/icon_filter_symbol.svg"),
 			preload("res://gfx/ui/ops/icon_bitwise.svg"),
 			preload("res://gfx/ui/ops/icon_wavefolder.svg"),
-			preload("res://gfx/ui/ops/icon_linear.svg"),
+			preload("res://gfx/ui/ops/icon_wavetable.svg"),
+			preload("res://gfx/ui/ops/icon_pd.svg"),
 ]
 
 const mixRate = 48000.0  #Also set in Constants.cs for the c# backend.  This is used for UI calculations only

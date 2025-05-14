@@ -136,7 +136,60 @@ namespace PhaseEngine
 
                 if ( Tools.BIT(input, 8).ToBool() )
                     input = (ushort) ~input;
+
+                // return (ushort) Math.Min(2* Tables.s_sin_table[input & 0xff], 0x859); //OPX Sin^2
                 return Tables.s_sin_table[input & 0xff];
+          }
+        }
+
+        //Potential new saw operator which can compensate for the duty cycle.  This is a logarithmic sawtooth wave that can be shaped by the duty cycle.
+        public static ushort LogSaw2(ulong input, ushort duty, ref bool flip, TypedReference auxdata)
+        {
+        //   unchecked {
+            var phase = (ushort)(input); //for ushort based osc
+
+            var auxdata2 = __refvalue(auxdata, long);
+            var inc = (auxdata2 >> Global.FRAC_PRECISION_BITS);
+            // var output = phase < 0x8000?  ((32768-phase)&65535) / 32768.0 - 1.0 : (0x1001-phase) / 32768.0;
+
+
+            flip = phase > duty; 
+            if (flip)  //Adjust the duty cycle and phase accordingly
+            {
+                duty = (ushort)(ushort.MaxValue - duty);
+                phase += duty;
+            }
+
+            input = (ulong)( (ushort)(phase*Tables.dutyRatio[duty])>>1);  
+            if (flip)
+                input = (ushort)(input^0x7fff);
+
+            var output = input / 32768.0 - 1.0;
+            var bump1=(PolyBLEP(input&65535, inc&65535));
+            output -= bump1;
+            
+            return (ushort)Math.Min(Tables.vol2attenuation[(int)Math.Abs(output*8191)] <<3, 0x7FF);
+
+        //   }
+        }
+
+
+        // Logarithmic sawtooth wave that can be shaped by the duty cycle.
+        public static ushort LogSaw(ulong input, ushort duty, ref bool flip, TypedReference auxdata)
+        {
+          unchecked {
+            var phase = (ushort)(input);
+
+            flip = phase > duty; 
+            if (flip)  //Adjust the duty cycle and phase accordingly
+            {
+                duty = (ushort)(ushort.MaxValue - duty);
+                phase += duty;
+            }
+                input = (ulong)( (ushort)(phase*Tables.dutyRatio[duty]) >> 4);
+
+            if (flip) input = (ulong)(0x1001-(ushort)input & 0x1fff);
+            return (ushort) (input);
           }
         }
 

@@ -208,7 +208,6 @@ namespace PhaseEngine
 
                 vol2attenuationHQ[0] = 16384;
 
-
             // for(int i=0; i<64; i++)
             // {
             //     Godot.GD.Print(get_eg_increment(i) >> EG_LEVEL_PRECISION);
