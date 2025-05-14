@@ -52,3 +52,7 @@ An experimental FM-synth written in C# intended to be the successor to [gdsFM](h
 ## May or may not be implemented or come back
 * Wider range of sampling options
 * Multitimbral operation (for now, multiple chip instances syncing their clocks should suffice)
+
+# Build requirements
+* Godot 3.x  (Preferably version 3.5 or higher),  Mono version
+* `dotnet` CLI or MSBuild
