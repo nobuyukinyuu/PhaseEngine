@@ -44,6 +44,11 @@ func _ready():
 	$Duty.connect("bind_requested", self, "bind_val", [$Duty, "duty", true])
 	$Duty.connect("unbind_requested", self, "bind_val", [$Duty, "duty", false])
 
+	var xp:EGSlider = $"More/P/V/Exponent"
+	xp.connect("value_changed", self, "setEG", ["gain"])
+	xp.connect("bind_requested", self, "bind_val", [xp, "gain", true])
+	xp.connect("unbind_requested", self, "bind_val", [xp, "gain", false])
+
 	
 	$"More/P/V/Phase Offset".connect("value_changed", self, "setEG", ["phase_offset"])
 	$"More/P/V/Increment Offset".connect("value_changed", self, "setPG", ["increment_offset"])
@@ -82,6 +87,8 @@ func set_from_op(op:int):
 		var fb:EGSlider = $Tweak/Feedback
 		fb.special_display = fb.SpecialDisplay.PERCENT
 		fb.max_value = 255
+		
+		$More/P/V/Exponent.disabled = true #For now, exponent (logarithmic attenuation) isn't supported
 
 		for o in [$Rates/Attack, $Rates/Decay, $Rates/Sustain, $Rates/Release]:
 			var s:EGSlider = o
@@ -159,6 +166,7 @@ func set_from_op(op:int):
 	$Duty.value = d["duty"]
 
 	$"More/P/V/Phase Offset".value = d["phase_offset"] # Adjusted from EG
+	$"More/P/V/Exponent".value = d["gain"] # ' '
 	$"More/P/V/Increment Offset".value = d2["increment_offset"] # Adjusted from PG
 	$"More/P/V/Detune Randomness".value = d2["detune_randomness"] # ' '
 	$More/P/V/OscSync.pressed = d["osc_sync"]
@@ -191,6 +199,7 @@ func check_binds():  #Goes through all bindable controls and rebinds them to edi
 
 	rebind($Tweak/AMS, LOC_TYPE_EG)
 	rebind($Duty, LOC_TYPE_EG)
+	rebind($More/P/V/Exponent, LOC_TYPE_EG)
 
 
 #Do we need this?  Probably not, I don't think this parameter should be bindable.

@@ -223,7 +223,12 @@ namespace PhaseEngine
         unsafe public static byte ToByte(this bool input) => *((byte*)(&input));
 
 
-
+        /// summary:  Branchless min/max functions.  Probably slower than the built-in ones but good for targets with less cache.
+        /// See https://graphics.stanford.edu/~seander/bithacks.html#IntegerMinOrMax for more details.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Min(int a, int b) { a -= b;  a &= a >> 31;  a += b; return a; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Max(int a, int b) { a -= b;  a &= (~a) >> 31;  a += b; return a; }
 
         /// summary:  Produces a string representing the bitmask of value n.
         public static string ToBinStr(short n, bool insert_space=true)

@@ -165,7 +165,8 @@ namespace PhaseEngine
             //  This would also allow a Linear intent to create morphed tables during Clock() at a rate we can specify as a separate envelope
             var tbl = this.wavetable.GetTable(eg.wavetable_bank);  
             // var samp = (short) oscillator.Generate(phase, eg.duty, ref flip, __makeref(tbl));
-            var samp = (short) Oscillator.Wave2(phase, ref flip, tbl);
+            var samp = (ushort) Oscillator.Wave2(phase, ref flip, tbl);
+            samp = (ushort)Math.Min(samp*eg.gain, Tables.s_sin_table[0]); //Implement exponential gain
    
             // get the attenuation from the envelope generator as a 4.6 value, shifted up to 4.8
             ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);
@@ -207,6 +208,7 @@ namespace PhaseEngine
             // get the absolute value of the sin, as attenuation, as a 4.8 fixed point value
             // ushort sin_attenuation = oscillator.Generate(phase, eg.duty, ref flip, __makeref(pg.hz));
             ushort sin_attenuation = oscillator.Generate(phase, eg.duty, ref flip, __makeref(pg.increment));
+            sin_attenuation = (ushort)Math.Min(sin_attenuation*eg.gain, Tables.s_sin_table[0]); //Implement exponential gain
 
             // get the attenuation from the envelope generator as a 4.6 value, shifted up to 4.8
             ushort env_attenuation = (ushort) (envelope_attenuation(am_offset) << 2);

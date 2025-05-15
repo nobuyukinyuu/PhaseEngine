@@ -64,7 +64,12 @@ namespace PhaseEngine
 
             ushort phase = (ushort) unchecked((n>>BITS));  //Scale result to always be the same octave as other oscillators
             var volume = auxdata2[phase & MASK];
-            volume |= 1;  //Chop a bit off the end; this is done to stop an overflow if the value is MinValue
+
+            #pragma warning disable CS0675 // Bitwise-or operator used on a sign-extended operand
+            // volume |= 1;  //Chop a bit off the end; this is done to stop an overflow if the value is MinValue
+            volume |= (volume==0).ToByte();  //Chop a bit off the end; this is done to stop an overflow if the value is MinValue
+            #pragma warning restore CS0675 // Bitwise-or operator used on a sign-extended operand
+
             var attenuation = Tables.vol2attenuation[Tools.Abs(volume) >> 2]; //Convert sample to 14-bit and get attenuation.
 
             flip = volume < 0;
