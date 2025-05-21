@@ -9,7 +9,7 @@ namespace PhaseEngine
         waveFunc wf = Sine;
         short[] customWaveform = new short[128];
 
-        public static readonly waveFunc[] waveFuncs = {Sine2, Tri, Saw, Pulse, White, Pink, Brown, Noise1, Noise2, Wave};
+        public static readonly waveFunc[] waveFuncs = {Sine2, Tri, Saw3, Pulse, White, Pink, Brown, Noise1, Noise2, Wave};
         public enum oscTypes {Sine, Triangle, Saw, Pulse, White, Pink, Brown, Noise1, Noise2, Wave};
 
         public Oscillator(waveFunc wave)    {wf=wave;}
@@ -150,13 +150,11 @@ namespace PhaseEngine
         //Potential new saw operator which can compensate for the duty cycle.  This is a logarithmic sawtooth wave that can be shaped by the duty cycle.
         public static ushort LogSaw2(ulong input, ushort duty, ref bool flip, TypedReference auxdata)
         {
-        //   unchecked {
             var phase = (ushort)(input); //for ushort based osc
 
             var auxdata2 = __refvalue(auxdata, long);
             var inc = (auxdata2 >> Global.FRAC_PRECISION_BITS);
             // var output = phase < 0x8000?  ((32768-phase)&65535) / 32768.0 - 1.0 : (0x1001-phase) / 32768.0;
-
 
             flip = phase > duty; 
             if (flip)  //Adjust the duty cycle and phase accordingly
@@ -174,8 +172,6 @@ namespace PhaseEngine
             output -= bump1;
             
             return (ushort)Math.Min(Tables.vol2attenuation[(int)Math.Abs(output*8191)] <<3, 0x7FF);
-
-        //   }
         }
 
 
@@ -228,44 +224,32 @@ namespace PhaseEngine
         //     // return unchecked( (ushort)(output * short.MaxValue/4) );
         // }
                 
+        //Sawtooth wave where duty affects the phase of the oscillator.
+        public static ushort Saw3(ulong input, ushort duty, ref bool flip, TypedReference auxdata)
+        {
+            var phase = (ushort)(input); 
 
+            var auxdata2 = __refvalue(auxdata, long);
+            var inc = (auxdata2 >> Global.FRAC_PRECISION_BITS);
 
-        // //Uses arbitrary (default 12) bit lookup table to produce higher quality waveforms.  Disabled by default.
-        // //May need to be paired with a deeper exp table to work properly!!  This would mean it might need a separate operator mode...
-        // public static ushort SineHQ(ulong input, ushort duty, ref bool flip, TypedReference auxdata)
-        // {
-        //     input <<= Tables.SINE_RATIO;
+            flip = phase > duty; 
+            if (flip)  //Adjust the duty cycle and phase accordingly
+            {
+                duty = (ushort)(ushort.MaxValue - duty);
+                phase += duty;
+            }
+
+            input = (ulong)( (ushort)(phase*Tables.dutyRatio[duty])>>1);  
+            if (flip)
+                input = (ushort)(input^0x7fff);
+
+            var output = input / 32768.0 - 1.0;
+            var bump1=(PolyBLEP(input&65535, inc&65535));
+            output -= bump1;
             
-        //     // flip = Tools.BIT(input, Tables.SINE_SIGN_BIT).ToBool();
-
-
-        //     var phase = (ushort)(input);
-        //     flip = phase > duty; 
-        //     if (flip)  //Adjust the duty cycle and phase accordingly
-        //     {
-        //         duty = (ushort)(ushort.MaxValue - duty);
-        //         phase += duty;
-        //     }
-        //     const byte SHIFT_BITS = 7-Tables.SINE_RATIO;
-        //     input = (ulong)( (ushort)(phase*Tables.dutyRatio[duty]) >>SHIFT_BITS);
-
-        //     // if the top bit is set, we're in the second half of the curve
-        //     // which is a mirror image, so invert the index
-        //     if ( Tools.BIT(input, Tables.SINE_HIGH_BIT).ToBool() )
-        //         input = (ushort) ~input;
-
-
-        //     var auxdata2 = __refvalue(auxdata, long);
-        //     var inc = (auxdata2 >> Global.FRAC_PRECISION_BITS);
-        //     // if ( Tools.BIT(input, Tables.SINE_HIGH_BIT-1).ToBool() )
-        //     //     inc = (ushort) ~inc;
- 
-
-        //     // return the value from the table
-        //     return Tables.sin[(input) & Tables.SINE_TABLE_MASK];
-        // }
-
-
+            return Tables.vol2attenuation[(int)Math.Abs(output*8191)];
+            // return (ushort)Math.Min(Tables.vol2attenuation[(int)Math.Abs(output*8191)] , 0x7FF);
+        }
 
         public static ushort Saw(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {

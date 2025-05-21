@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=2]
+[gd_scene load_steps=44 format=2]
 
 [ext_resource path="res://ui/EGCheckBox.tres" type="Theme" id=1]
 [ext_resource path="res://ui/envelopeDisplay/EnvelopeDisplay.tscn" type="PackedScene" id=2]
@@ -22,6 +22,7 @@
 [ext_resource path="res://gfx/wave/5.png" type="Texture" id=20]
 [ext_resource path="res://gfx/wave/7.png" type="Texture" id=21]
 [ext_resource path="res://ui/panels/WaveBankSpinBox.tscn" type="PackedScene" id=22]
+[ext_resource path="res://gfx/ui/mult_div_flat.png" type="Texture" id=23]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.501961, 0.501961, 0.501961, 0.25098 )
@@ -177,6 +178,21 @@ corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
+[sub_resource type="AtlasTexture" id=25]
+atlas = ExtResource( 23 )
+region = Rect2( 16, 0, 16, 16 )
+
+[sub_resource type="AtlasTexture" id=24]
+atlas = ExtResource( 23 )
+region = Rect2( 0, 0, 16, 16 )
+
+[sub_resource type="StyleBoxFlat" id=28]
+bg_color = Color( 1, 1, 1, 0.137255 )
+
+[sub_resource type="StyleBoxEmpty" id=27]
+
+[sub_resource type="StyleBoxEmpty" id=26]
+
 [node name="EGPanel" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -251,6 +267,20 @@ __meta__ = {
 }
 
 [node name="Mult" parent="Tune" instance=ExtResource( 3 )]
+margin_right = 132.0
+rect_min_size = Vector2( 96, 20 )
+size_flags_horizontal = 3
+min_value = 0.5
+max_value = 32.0
+value = 1.0
+exp_edit = true
+tick_count = 5
+ticks_on_borders = false
+associated_property = "mult"
+bind_abilities = 1
+
+[node name="Div" parent="Tune" instance=ExtResource( 3 )]
+visible = false
 margin_right = 132.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
@@ -855,6 +885,20 @@ valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="MultDivToggle" type="CheckBox" parent="."]
+visible = false
+margin_left = 8.0
+margin_top = 80.0
+margin_right = 24.0
+margin_bottom = 96.0
+custom_icons/checked = SubResource( 25 )
+custom_icons/unchecked = SubResource( 24 )
+custom_styles/hover = SubResource( 28 )
+custom_styles/focus = SubResource( 27 )
+custom_styles/hover_pressed = SubResource( 28 )
+custom_styles/normal = SubResource( 26 )
+icon_align = 1
 
 [connection signal="value_changed" from="Frequency/Frequency" to="." method="setFreq"]
 [connection signal="item_selected" from="Frequency/H/Presets" to="Frequency" method="_on_Presets_item_selected"]

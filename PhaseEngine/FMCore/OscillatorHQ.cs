@@ -9,7 +9,7 @@ namespace PhaseEngine
         waveFunc wf = Sine;
         short[] customWaveform = new short[128];
 
-        public static readonly waveFunc[] waveFuncs = {Sine, Tri, Saw, Pulse, White, Pink, Brown, Noise1, Noise2, Wave};
+        public static readonly waveFunc[] waveFuncs = {Sine, Tri, Saw3, Pulse, White, Pink, Brown, Noise1, Noise2, Wave};
         public enum oscTypes {Sine, Triangle, Saw, Pulse, White, Pink, Brown, Noise1, Noise2, Wave};
 
         public OscillatorHQ(waveFunc wave)    {wf=wave;}
@@ -118,7 +118,31 @@ namespace PhaseEngine
             return Tables.sinF[(input) & Tables.SINE_TABLE_MASK];
         }
 
+        //Sawtooth wave where duty affects the phase of the oscillator.
+        public static float Saw3(ulong input, ushort duty, ref bool flip, TypedReference auxdata)
+        {
+            var phase = (ushort)(input); 
 
+            var auxdata2 = __refvalue(auxdata, long);
+            var inc = (auxdata2 >> Global.FRAC_PRECISION_BITS);
+
+            flip = phase > duty; 
+            if (flip)  //Adjust the duty cycle and phase accordingly
+            {
+                duty = (ushort)(ushort.MaxValue - duty);
+                phase += duty;
+            }
+
+            input = (ulong)( (ushort)(phase*Tables.dutyRatio[duty])>>1);  
+            if (flip)
+                input = (ushort)(input^0x7fff);
+
+            var output = input / 32768.0 - 1.0;
+            var bump1=(PolyBLEP(input&65535, inc&65535));
+            output -= bump1;
+            
+            return (float)Math.Abs(output);
+        }
 
         public static float Saw(ulong n, ushort duty, ref bool flip, TypedReference auxdata)
         {
