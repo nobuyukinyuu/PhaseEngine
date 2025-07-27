@@ -6,8 +6,8 @@ const FilterNames = ["None", "Low Pass", "High Pass", "Bandpass (Skirt Gain)", "
 						"Notch", "All-pass", "Peaking" , "Low Shelf", "High Shelf"]
 
 
-enum OpIntent { LFO=-1, NONE, FM_OP, FM_HQ, FILTER, BITWISE, WAVEFOLDER, LINEAR };
-const OpIntentNames = ["NONE", "FM_OP", "FM_HQ", "FILTER", "BITWISE", "WAVEFOLDER", "LINEAR"]
+enum OpIntent { LFO=-1, NONE, FM_OP, FM_HQ, FILTER, BITWISE, WAVEFOLDER, MORPH, PD_OP };
+const OpIntentNames = ["NONE", "FM_OP", "FM_HQ", "FILTER", "BITWISE", "WAVEFOLDER", "MORPH", "PD_OP"]
 const OpIntentIcons = [
 			preload("res://gfx/ui/icon_invalid.svg"), 
 			preload("res://gfx/ui/ops/icon_fm_symbol.svg"),
@@ -44,6 +44,7 @@ signal tab_dropped  #Emitted by a tab drop preview to signal columns to check th
 #signal window_resized
 #signal op_tooltip_needs_data #Emitted by TabGroups when a tooltip needs someone else to populate it (unused?)
 signal op_tab_value_changed #Emitted by tabs to refresh the output preview
+signal op_tab_mute_changed #Emitted by tabs to redraw part of the WiringGrid to indicate bypass/mute.
 signal algorithm_changed  #Emitted by WiringGrid and VoiceMain to refresh the output preview
 signal op_intent_changed  #Emitted by the op intent menu to signal refreshing tabs
 signal request_op_intent_menu  #Emitted by a tab or context menu from wiring grid

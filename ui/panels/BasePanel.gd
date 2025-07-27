@@ -40,6 +40,7 @@ func _on_Mute_toggled(button_pressed, bypass:bool):
 		get_node(chip_loc).SetBypass(operator, button_pressed)
 	else:
 		get_node(chip_loc).SetMute(operator, button_pressed)
+	global.emit_signal("op_tab_mute_changed", operator, bypass, button_pressed)
 	global.emit_signal("op_tab_value_changed")
 
 

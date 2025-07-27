@@ -4,6 +4,7 @@ export (int, 2, 8) var total_ops:int = 4 setget set_ops
 
 const sProto = preload("res://ui/wiringGrid/SlotProto.tscn")
 const spk = preload("res://gfx/ui/icon_speaker.svg")
+const spk_none = preload("res://gfx/ui/icon_speaker_none.svg")
 
 var last_slot_focused=-1 setget reset_focus
 
@@ -22,12 +23,12 @@ func _ready():
 	yield(set_ops(total_ops), "completed")
 
 	reset_default_op_positions(total_ops)
-	
+	global.connect("op_tab_mute_changed", self, "set_mute")
 	update()
 
 
 #Called when the grid needs to be rearranged to reflect a new algorithm entirely.
-#Uses a dictionary format similar to the kind 
+#Uses a dictionary format similar to the kind emitted from Voice.GetAlgorithm().
 func load_from_description(d:Dictionary, from_set_ops=false):
 	if !d.has_all(["connections", "opCount"]):  
 		print("SlotIndicator.gd:  Load from description failed.")
@@ -64,20 +65,36 @@ func load_from_description(d:Dictionary, from_set_ops=false):
 
 
 	clearGridIDs()
+	var no_useable_grid = false
 	if d.has("grid"):
 		for i in ops.size():
 			var p:int = d["grid"][i]  #Expecting format 0bYYYY_XXXX
 			var pos = Vector2(p & 0b1111, p >> 4)
+			
+			#Check if this position is valid. First, check the Y value (level).
+			#WARNING: This doesn't check for operators with a level lower than the number of hops
+			#			the operator needs to reach output.  FIXME?
+			if pos.y >= total_ops:
+			#If the level is invalid then we probably need to reset that entire connection tree.
+				no_useable_grid = true
+				print("SlotIndicator.gd:  Grid description invalid.  Rebuilding...")
+				break
+			elif pos.x >= total_ops:
+			#The position might not be too bad, so we get the Y level and find a free slot in the row.
+				print("SlotIndicator.gd:  Grid position %s for Op%s invalid.  Finding free slot..." % [pos, i+1])
+				pos = free_slot(pos.y)
+
 			ops[i].gridPos = pos
 			setGridID(pos, i)
 	else:  #Oh no!  No grid found.  Probably a preset.  Find a place for every connection.
+		no_useable_grid = true
 
+	if no_useable_grid:
 		#Go through our carriers and find spots for them.
 		for i in carriers:
 			var op = ops[i]
 			op.gridPos = Vector2(op.id, total_ops-1)
 			find_free_slots(op, op.gridPos.y, op.gridPos.x)
-
 
 	restore_grid()
 	redraw_grid()
@@ -99,6 +116,14 @@ func reset_focus(val):
 			n.unfocus()
 			last_slot_focused = -1
 
+func set_mute(operator, bypass, val):
+#	print("%s %s signal from Op%s" % ["Bypass" if bypass else "Mute", val, operator+1])
+	if bypass:
+		ops[operator].bypassed = val
+	else:
+		ops[operator].muted = val
+		
+	update()
 
 #This function is executed any time the UI changes the opNum, including from WiringGrid.gd.
 func set_ops(val, positions_from_chip=null):  #Set the number of operators in the grid.  Property setter.
@@ -195,7 +220,6 @@ func reset_default_op_positions(sz:int):
 		setGridID(p.gridPos, i)
 
 		#Move the op nodes to the new positions.
-#		ops[i].gridPos = p.gridPos
 		ops[i].gridPos.x = i
 		ops[i].gridPos.y = sz-1
 		ops[i].connections = []
@@ -361,7 +385,7 @@ func move_tree(source_op, dest, append_to_dest=true):
 
 
 func find_free_slots(op, level:int, start_from=0):
-	print("Looking for free slot for OP%s on level %s starting at %s..." % [op.id, level, start_from])
+	print("Looking for free slot for Op%s on level %s starting at %s..." % [op.id+1, level, start_from])
 	#Finds free slots for all items on a tree.
 	op.gridPos = free_slot(level, start_from)
 	setGridID(op.gridPos, op.id)
@@ -451,26 +475,96 @@ func find_connection_point(dest):
 
 
 #======================= DRAW ROUTINES ================================
+const indicator_thickness = [3,2,2,1,1,1,1,1]
 func _draw():
-	#Draw the "connection to output" diagram
 	var tile_size = rect_size / total_ops
-	var y = rect_size.y - tile_size.y/4
+	var half = tile_size.x / 2
 
+
+	#Draw mute/bypass statuses.
+	for op in ops:
+		var pos = op.gridPos * tile_size
+		var nudge = tile_size / 8
+		var gap = 4
+		var width = indicator_thickness[ops.size()-1]
+
+		var UL = Vector2(pos.x+nudge.x, pos.y+nudge.y)
+		var UR = Vector2(pos.x+tile_size.x-nudge.x, pos.y+nudge.y)
+		var LL = Vector2(pos.x+nudge.x, pos.y - nudge.y + tile_size.y)
+		var LR = Vector2(pos.x-nudge.x+tile_size.x, pos.y - nudge.y + tile_size.y)
+		var col = ColorN("white", 0.8)
+		var center = pos + tile_size/2
+
+		if op.muted:
+			#Draw the rounded rect.
+			var corner_offset = draw.rounded_rect(self, UL, LR, 0.2, 0, col, width, true) * draw.SQ2/2.0
+			#Draw the solidus.  Stop just short of the center.
+			draw_line(UL + Vector2(corner_offset, corner_offset), 
+					center + Vector2(-gap, -gap),
+					col, width*0.75,true)
+			draw_line(LR + Vector2(-corner_offset, -corner_offset), 
+					center + Vector2(gap, gap),
+					col, width*0.75,true)
+
+#			draw_line(UL, UR,
+#				Color(1,1,1,1), 1.0, true)
+#			draw_line(LL, LR,
+#				Color(1,1,1,1), 1.0, true)
+#			draw_line(UL, LL,
+#				Color(1,1,1,1), 1.0, true)
+#			draw_line(UR, LR,
+#				Color(1,1,1,1), 1.0, true)
+				
+			draw_rect(Rect2(pos, tile_size),ColorN("black", 0.6))
+
+		elif op.bypassed:
+			draw_rect(Rect2(pos, tile_size),ColorN("black", 0.4))
+			for i in range(1, 3):
+				var offset = 4 + i*3
+				draw.dotted_line(self, Vector2(center.x+offset,pos.y+nudge.y), 
+						Vector2(center.x+offset,pos.y+tile_size.y-nudge.y),
+				col, width/2, true, max(1,width/2), width)
+				draw.dotted_line(self, Vector2(center.x-offset,pos.y+nudge.y), 
+						Vector2(center.x-offset,pos.y+tile_size.y-nudge.y),
+				col, width/2, true, max(1,width/2), width)
+
+
+#	#(OLD)  Draw the "connection to output" diagram
+#	for i in total_ops:
+#		var a = Vector2(i * tile_size.x + tile_size.x / 2, y)
+#		var b = Vector2(a.x, rect_size.y + 8)
+#		draw_line(a,b, ColorN("white"),1.0, true)
+
+	#If there are carriers to output, draw the "connection to output" diagram
+	var earliest_x = total_ops
+	var y = rect_size.y - tile_size.y/4 #The starting offset from the bottom of the carrier to output.
 	for i in total_ops:
-		var a = Vector2(i * tile_size.x + tile_size.x / 2, y)
+		var o = ops[i]
+		if o.muted:  continue
+		if o.gridPos.y < total_ops-1:  continue
+
+		if o.gridPos.x < earliest_x:  earliest_x = o.gridPos.x
+		var a = Vector2(o.gridPos.x * tile_size.x + tile_size.x / 2, y)
 		var b = Vector2(a.x, rect_size.y + 8)
 		draw_line(a,b, ColorN("white"),1.0, true)
 
-	y = rect_size.y + 8
-	var half = tile_size.x / 2
-	draw_line(Vector2(half, y), Vector2(rect_size.x, y), ColorN("white"), 1.0, true)
-	draw_texture(spk,Vector2(rect_size.x, y) - Vector2(8,8))
-	
-	#Draw connections.
+	y = rect_size.y + 8  #Change the definition of y to be the bottom of the diagram.
+	if earliest_x < total_ops:
+		draw_line(Vector2(tile_size.x*earliest_x + half, y), Vector2(rect_size.x, y), ColorN("white"), 1.0, true)
+		draw_texture(spk,Vector2(rect_size.x, y) - Vector2(8,8))
+	else:  #No connections to output.
+		draw.dotted_line(self, Vector2(0, y), Vector2(rect_size.x/2 - 8, y), 
+				ColorN("white"), 1.0, true,2,2, Color(0,0,0,0))
+		draw.dotted_line(self, Vector2(rect_size.x/2 + 8, y), Vector2(rect_size.x, y), 
+				ColorN("white"), 1.0, true,2,2, Color(0,0,0,0))
+		draw_texture(spk_none,Vector2(rect_size.x/2, y) - Vector2(8,8))
+
+	#Draw primary connections between operators.
 	for op in ops:
 		for connection in op.connections:
 			draw_connection(op.gridPos, connection.gridPos)
 
+	#Draw manually-made connections over the top of automatically stacked ones.
 	for op in ops:
 		for dest in op.manual_connections:
 			var dist = (half*0.002) * (dest.gridPos.y - op.gridPos.y)
@@ -620,6 +714,8 @@ class opNode:
 	var connections = []
 	var manual_connections = []  #Used to break connections in a tree above as well as make draw offsets
 	var gridPos = Vector2.ONE * -1
+	var muted = false
+	var bypassed = false
 
 	func pos_valid():  return gridPos != Vector2(-1,-1)
 

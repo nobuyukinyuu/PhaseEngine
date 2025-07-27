@@ -3,6 +3,40 @@ const WHITE=Color(1,1,1,1)
 const BLACK=Color(0,0,0,1)
 const TRANS=Color(1,1,1,0)
 
+const SQ2 = 0.707106781  #sqrt(2)/2.0,  45 degrees
+const MAX_ARC_POINT_COUNT = 21
+func rounded_rect(c:CanvasItem, origin:Vector2, dest:Vector2, radius=1.0, point_count=0, color:Color = WHITE,
+				 width:float=1.0, antialiased:bool=false):
+					
+	radius = max(0, radius)
+	#If radius is between 0-1, make the corner radius relative to that percentage of the rect.
+	#Otherwise, assume a corner radius in px.
+	if radius > 0 and radius < 1.0: #Find the shortest axial distance.
+		var x = max(origin.x, dest.x) - min(origin.x, dest.x)
+		var y = max(origin.y, dest.y) - min(origin.y, dest.y)
+		radius = min(x,y) * radius
+		
+	#Determine the number of points in each arc. If the user didn't specify a point_count, let's
+	#Make one based on the size of the corner radius relative to the rest.
+	if point_count < 2:
+		point_count = int(min(MAX_ARC_POINT_COUNT, radius))
+
+	#Start by drawing the arcs. The center of the arc is relative to the radius.
+	var UR = Vector2(dest.x, origin.y)
+	var LL = Vector2(origin.x, dest.y)
+	c.draw_arc(Vector2.ONE*radius + origin, radius, PI, PI + PI/2.0, point_count,color,width,antialiased)
+	c.draw_arc(UR + Vector2(-radius, radius), radius, PI + PI/2.0, TAU, point_count,color,width,antialiased)
+	c.draw_arc(LL + Vector2(radius, -radius), radius, PI/2, PI, point_count,color,width,antialiased)
+	c.draw_arc(dest - Vector2.ONE*radius, radius, 0.0, PI/2.0, point_count,color,width,antialiased)
+
+	#Now draw the lines.
+	c.draw_line(origin + Vector2(0, radius), LL + Vector2(0, -radius), color, width, antialiased)
+	c.draw_line(UR + Vector2(0, radius), dest + Vector2(0, -radius), color, width, antialiased)
+	c.draw_line(origin + Vector2(radius, 0), UR + Vector2(-radius, 0), color, width, antialiased)
+	c.draw_line(LL + Vector2(radius, 0), dest + Vector2(-radius, 0), color, width, antialiased)
+
+	return radius #For functions that want it
+
 func dotted_line(c:CanvasItem, origin:Vector2, dest:Vector2, color:Color = WHITE, 
 				 width:float=1.0, antialiased:bool=false, dotlen=1.0, gaplen=2.0, color2 = BLACK):
 	var angle = (dest-origin).normalized()

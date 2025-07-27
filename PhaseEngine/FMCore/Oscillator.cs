@@ -369,7 +369,7 @@ namespace PhaseEngine
             int output = bval + nextValue;  //This value can overflow to 17-bits, so we have to do an operation to reduce the value next.
 
             //Floating point representation.  The round trip here is expensive, so we do a fixed-point approximation.
-            // output = (int)(output* (32768/(32768f+duty))  ); //Output is reduced by a factor of the maximum possible overflow amount.
+            // output = (int)(output* (32768/(32767.5f+duty))  ); //Output is reduced by a factor of the maximum possible overflow amount.
 
             //Multiply by the duty's preservation factor. This precalculated value is the 16-bit fixed point decimal equivalent of the above 
             output *= Tables.brownDutyPreservationFactor[duty];

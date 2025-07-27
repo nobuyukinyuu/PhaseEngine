@@ -307,12 +307,6 @@ func setFreq(val):
 	global.emit_signal("op_tab_value_changed")
 
 
-func _on_Mute_toggled(button_pressed, bypass:bool):
-	if bypass:
-		get_node(chip_loc).SetBypass(operator, button_pressed)
-	else:
-		get_node(chip_loc).SetMute(operator, button_pressed)
-	global.emit_signal("op_tab_value_changed")
 
 
 #Updates an rTable for this operator.
