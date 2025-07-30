@@ -103,6 +103,7 @@ func paste(data:String, normalize=false):
 	
 	#Reinit everything.
 	owner.reinit_all()
+	global.emit_signal("wavebanks_reset")
 	owner.get_node("WiringGrid").check_if_presets()
 
 
