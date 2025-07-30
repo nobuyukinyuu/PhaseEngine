@@ -2,6 +2,8 @@ using System;
 using PhaseEngine;
 using System.Collections.Generic;
 using PE_Json;
+using System.IO.Compression;
+
 
 #if GODOT
 using Godot;
@@ -113,9 +115,11 @@ namespace PhaseEngine
             {  //Test for empty object.  If so, don't do anything.
                 if (input.Names().Count==0) return false;
                 if (!input.HasItem("data")) throw new ArgumentException("Wavetable has no data.", "input[data]");
-                
+
                 //First, we must retrieve all of the table data from the input string. All samples are in one array, so afterward we must recreate the table.
-                var data = DeflatedZ85ToTable( input.GetItem("data").ToString() );
+                //Try to pull the compression method out of the JSON. If it doesn't exist, default to DEFLATE compression for backwards compatibility.
+                var data = DeflatedZ85ToTable( input.GetItem("data").ToString(),
+                        Enum.Parse<Glue.CompressionMethod>(input.GetItem("compression", "DEFLATE"), true));
 
                 //The bankWidths value determines the size of each sample.  If its length is 1 then every sample has the same size.
                 var numBanks = input.GetItem("size", 0);
@@ -150,6 +154,7 @@ namespace PhaseEngine
             if (NotInUse) return o;
 
             o.AddPrim("size", NumBanks);
+            o.AddPrim("compression", Glue.CompressionMethod.ZStandard);
 
             var bankWidths = new List<byte> ( new byte[]{ (byte)Tools.Ctz(tbl[0].Length) } );  //Set first value to first bank's size.
             var fixedWidth = true;
@@ -201,9 +206,11 @@ namespace PhaseEngine
 
 
             var input2 = Z85.ShortsToBytes(input);  //Convert our delta bank into a bytestream.
-            GD.PrintS("uncompressed", input2.Length);
-            input2 = Glue.Deflate(input2, System.IO.Compression.CompressionMode.Compress);
-            GD.PrintS("compressed", input2.Length);
+
+            //Compress using ZStandard. Format versions prior to v12 used DEFLATE.
+            GD.PrintS("uncompressed", input2.Length);  //DEBUG:  REMOVE ME
+            input2 = Glue.Deflate(input2, System.IO.Compression.CompressionMode.Compress, Glue.CompressionMethod.ZStandard);
+            GD.PrintS("compressed", input2.Length);  //DEBUG:  REMOVE ME
 
             var padAmt = 4 - (input2.Length % 4);
             if (padAmt==4) padAmt = 0;
@@ -218,14 +225,14 @@ namespace PhaseEngine
         }
 
         //DEBUG:  Convert a compressed string back into a table.  Currently assumes only one bank is in the compressed string.
-        public short[] DeflatedZ85ToTable(string input)
+        public short[] DeflatedZ85ToTable(string input, Glue.CompressionMethod compressionMethod)
         {
             //Do the encoding process in reverse.  TODO
             var split = input.Split(",", StringSplitOptions.RemoveEmptyEntries);
             var padAmt = Convert.ToInt32(split[0]);
             var decoded = Z85.Decode(split[1]);
             Array.Resize(ref decoded, decoded.Length - padAmt);
-            var uncompressed = Z85.BytesToShorts( Glue.Deflate(decoded, System.IO.Compression.CompressionMode.Decompress) );
+            var uncompressed = Z85.BytesToShorts( Glue.Deflate(decoded, System.IO.Compression.CompressionMode.Decompress, compressionMethod) );
             
 
 

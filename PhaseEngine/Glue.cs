@@ -7,6 +7,8 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
+using ZstdSharp;
+using System.Diagnostics.Tracing;
 
 namespace PhaseEngine
 {
@@ -16,35 +18,34 @@ namespace PhaseEngine
         /// In GDScript you can use obj.set(prop, val) or obj.get(prop); this is a similar feature for c#.
         /// Any class which implements the interface can use these methods to adjust a field or property of itself (provided it's public..)
         //TODO:  Make this safer
-        public static Type GetValType<T>(this T instance, string propertyName)  
+        public static Type GetValType<T>(this T instance, string propertyName)
         {
-                Type type = typeof(T);
-                var property = type.GetProperty(propertyName);
-                if (property==null)
-                   return type.GetField(propertyName)?.FieldType;
+            Type type = typeof(T);
+            var property = type.GetProperty(propertyName);
+            if (property == null)
+                return type.GetField(propertyName)?.FieldType;
 
-                return property.PropertyType;
-;
-        } 
-        public static object GetVal<T>(this T instance, string memberName)  
-        {
-                Type type = typeof(T);
-                MemberInfo member = type.GetMember(memberName)[0];
-
-                switch(member)
-                {
-                    case FieldInfo field:  return field.GetValue(instance);
-                    case PropertyInfo property:  return property.GetValue(instance);
-                }
-
-            throw new InvalidOperationException($"Data member must be a property or field. Member is instead {member.MemberType.ToString()}");
-        } 
-       public static void SetVal<T>(this T instance, string memberName, object value)  where T:class
+            return property.PropertyType;
+        }
+        public static object GetVal<T>(this T instance, string memberName)
         {
             Type type = typeof(T);
             MemberInfo member = type.GetMember(memberName)[0];
 
-            switch(member)
+            switch (member)
+            {
+                case FieldInfo field: return field.GetValue(instance);
+                case PropertyInfo property: return property.GetValue(instance);
+            }
+
+            throw new InvalidOperationException($"Data member must be a property or field. Member is instead {member.MemberType.ToString()}");
+        }
+        public static void SetVal<T>(this T instance, string memberName, object value) where T : class
+        {
+            Type type = typeof(T);
+            MemberInfo member = type.GetMember(memberName)[0];
+
+            switch (member)
             {
                 case PropertyInfo property:
                     //Try to force unchecked conversion to the target type
@@ -60,12 +61,12 @@ namespace PhaseEngine
             throw new InvalidOperationException($"Data member must be a property or field. Member is instead {member.MemberType.ToString()}");
         }
 
-       public static void SetVal<T>(ref this T instance, string memberName, object value) where T:struct
+        public static void SetVal<T>(ref this T instance, string memberName, object value) where T : struct
         {
             Type type = typeof(T);
             MemberInfo member = type.GetMember(memberName)[0];
 
-            switch(member)
+            switch (member)
             {
                 case PropertyInfo property:
                     //Try to force unchecked conversion to the target type
@@ -107,25 +108,44 @@ namespace PhaseEngine
         }
 
 
+        public enum CompressionMethod { None, DEFLATE, ZStandard };
         //Used by WaveTableData to compress our wavetables into managable chunks for instrument export
-        public static byte[] Deflate(byte[] input, CompressionMode mode=CompressionMode.Decompress)
+        public static byte[] Deflate(byte[] input, CompressionMode mode = CompressionMode.Decompress,
+                CompressionMethod compressionMethod = CompressionMethod.DEFLATE)
         {
-            using (var inputStream = new MemoryStream(input))
+            switch (compressionMethod)
             {
-                using (var outputStream = new MemoryStream())
-                {
-                    using (var deflate = new DeflateStream(mode==CompressionMode.Compress? outputStream : inputStream, mode))
-                    {       
-                        if(mode == CompressionMode.Compress) inputStream.CopyTo(deflate); else deflate.CopyTo(outputStream);
+                case CompressionMethod.DEFLATE:
+                    using (var inputStream = new MemoryStream(input))
+                    {
+                        using (var outputStream = new MemoryStream())
+                        {
+                            using (var deflate = new DeflateStream(mode == CompressionMode.Compress ? outputStream : inputStream, mode))
+                            {
+                                if (mode == CompressionMode.Compress) inputStream.CopyTo(deflate); else deflate.CopyTo(outputStream);
+                            }
+                            return outputStream.ToArray();
+                        }
                     }
-                    return outputStream.ToArray();
-                }
-            }            
+                case CompressionMethod.ZStandard:
+                    if (mode == CompressionMode.Compress)
+                    {
+                        using var compress = new ZstdSharp.Compressor(Compressor.MaxCompressionLevel);
+                        var data = compress.Wrap(input);
+                        return data.ToArray();
+                    } else {
+                        using var compress = new ZstdSharp.Decompressor();
+                        var data = compress.Unwrap(input);
+                        return data.ToArray();
+                    }
+                case CompressionMethod.None:
+                default:  //No compression, just return the input
+                    return input;
+            }
+
         }
-
     }
-
-    public class ObjectPool<T> where T: new()
+    public class ObjectPool<T> where T : new()
     {
         readonly ConcurrentBag<T> _objects;
         readonly Func<T> _objectGenerator;
@@ -134,8 +154,8 @@ namespace PhaseEngine
         // public static ObjectPool<T> Prototype()  //Default ctor convenience func
         // { return new ObjectPool<T>( () => new T()); }
 
-        internal static Func<T> DefaultGenerator() {return () => new T(); }
-        public ObjectPool() : this(DefaultGenerator()) {}
+        internal static Func<T> DefaultGenerator() { return () => new T(); }
+        public ObjectPool() : this(DefaultGenerator()) { }
 
         public ObjectPool(Func<T> objectGenerator)
         {
