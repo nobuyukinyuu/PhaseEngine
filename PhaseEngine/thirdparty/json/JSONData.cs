@@ -189,7 +189,7 @@ namespace PE_Json{
                         // retString.Append(@"\\");
                         retString.Append(@"\u005c");
                     } else if (ch == 47){ //forward slash
-                        retString.Append(@"\/");
+                        retString.Append(@"/");
                     } else if (ch > 127){ //unicode
                         retString.Append(@"\u");
                         retString.Append(IntToHexString(ch));
