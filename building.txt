@@ -1,0 +1,12 @@
+PhaseEngine as of 29 Jul 2025 utilizes ZStd compression where available as a dynamic library.  This may cause builds to fail or the program to crash on export currently due to missing symbols.
+
+To make sure ZStd is available in Godot 3.x builds, you must be aware the following:
+
+* For test builds (running from editor),  ZStdSharp.dll must be in ./.mono/assemblies/[config] where [config] specifies the build configuration (Debug or Release).  This assembly is referenced in the .csproj included with PhaseEngine but the actual library file may not automatically be included.
+
+* Godot 3.x uses an older version of System.Runtime.CompilerServices.Unsafe which is missing the SkipInit<T>() function needed by ZStdSharp to function correctly.  A modern library for CompilerServices.Unsafe must also be in the above folder.  This assembly is also referenced in the .csproj included with PhaseEngine but may not automatically be included in your build configuration.
+
+* When creating export builds, you must also overwrite the default version of System.Runtime.CompilerServices.Unsafe in your export templates (Godot 3.x won't know to do this by itself, even when the file is in the above locations).  The default locations on Windows are %appdata%/Godot/templates/[Version number]/bcl/net_4_x and %appdata%/Godot/templates/[Version number]/bcl/net_4_x_win.  
+
+* In the future, a fallback to DEFLATE compression may be reinstated if the conditions for including ZStd aren't met.  Currently, however, failure to include the correct assemblies will cause PhaseEngine to throw an exception when exporting voices to file or clipboard.
+
