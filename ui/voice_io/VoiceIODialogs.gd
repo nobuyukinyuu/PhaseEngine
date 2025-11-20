@@ -83,7 +83,25 @@ func _on_Open_file_selected(path):
 	busy = false
 	
 func _on_Save_file_selected(path):
-	pass # Replace with function body.
+	#Quick and dirty
+	var c = get_node(chip_loc)
+	if !c:
+		printerr("VoiceIODialogs.gd:  Chip not found! Are we bound to a Chip?")
+		return
+		
+	var output = c.VoiceAsJSONString()
+	
+	var f = File.new()
+	f.open(path, f.WRITE)
+	
+	if f == null:
+		var errno = "VoiceIODialogs: Failed to save %s (Error %s)" % [path.get_file(), f.get_error()]
+		OS.alert(errno)
+		printerr(errno)
+		return
+	
+	f.store_string(output)
+	f.close() #flush
 
 #Activated when $BankSelect/List has chosen a voice selection.
 func load_bank(idx, normalize=false):
