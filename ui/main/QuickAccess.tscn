@@ -87,15 +87,15 @@ text = "Favorites:"
 [node name="List" type="ItemList" parent="V/Faves"]
 margin_top = 12.0
 margin_right = 304.0
-margin_bottom = 65.0
+margin_bottom = 17.0
 custom_constants/vseparation = 6
 custom_styles/bg = SubResource( 13 )
 auto_height = true
 
 [node name="H2" type="HBoxContainer" parent="V/Faves"]
-margin_top = 69.0
+margin_top = 21.0
 margin_right = 304.0
-margin_bottom = 87.0
+margin_bottom = 39.0
 
 [node name="btnUp" type="Button" parent="V/Faves/H2"]
 margin_right = 42.0
@@ -170,6 +170,7 @@ icon = ExtResource( 6 )
 [node name="Timer" type="Timer" parent="."]
 wait_time = 0.1
 
+[connection signal="about_to_show" from="." to="." method="_on_QuickAccess_about_to_show"]
 [connection signal="visibility_changed" from="." to="." method="_on_QuickAccess_visibility_changed"]
 [connection signal="item_activated" from="V/Faves/List" to="." method="_on_List_item_activated" binds= [ 1 ]]
 [connection signal="pressed" from="V/Faves/H2/btnUp" to="." method="_on_btnUp_pressed"]

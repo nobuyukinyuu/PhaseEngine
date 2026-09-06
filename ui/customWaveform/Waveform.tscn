@@ -1,4 +1,4 @@
-[gd_scene load_steps=49 format=2]
+[gd_scene load_steps=54 format=2]
 
 [ext_resource path="res://ui/responseCurve/PresetMenu.theme" type="Theme" id=1]
 [ext_resource path="res://gfx/fonts/numerics_7seg.tres" type="BitmapFont" id=2]
@@ -28,6 +28,10 @@
 [ext_resource path="res://ui/DialogDarkener.stylebox" type="StyleBox" id=26]
 [ext_resource path="res://gfx/fonts/numerics_8x10.tres" type="BitmapFont" id=27]
 [ext_resource path="res://ui/customWaveform/Amplify.gd" type="Script" id=28]
+[ext_resource path="res://gfx/ui/godot_icons/icon_curve_in_out.svg" type="Texture" id=29]
+[ext_resource path="res://gfx/ui/godot_icons/icon_curve_linear.svg" type="Texture" id=30]
+[ext_resource path="res://gfx/ui/envelope_editor/icon_remove_point.png" type="Texture" id=31]
+[ext_resource path="res://ui/main/QAFileDialog.tscn" type="PackedScene" id=32]
 
 [sub_resource type="StyleBoxFlat" id=10]
 bg_color = Color( 0, 0, 0, 0.878431 )
@@ -92,7 +96,9 @@ func _draw():
 	pass
 "
 
-[sub_resource type="StyleBoxEmpty" id=9]
+[sub_resource type="StyleBoxEmpty" id=32]
+
+[sub_resource type="StyleBoxEmpty" id=31]
 
 [sub_resource type="ButtonGroup" id=6]
 
@@ -179,6 +185,7 @@ action = "envelope_remove_pt"
 shortcut = SubResource( 29 )
 
 [node name="CustomWaveform" type="WindowDialog"]
+visible = true
 margin_left = 8.0
 margin_top = 24.0
 margin_right = 304.0
@@ -343,14 +350,11 @@ __meta__ = {
 visible = true
 margin_left = 648.0
 margin_top = 24.0
-margin_right = 984.0
-margin_bottom = 450.0
+margin_right = 1000.0
+margin_bottom = 492.0
 theme = ExtResource( 19 )
 popup_exclusive = true
 window_title = "Import Waveform..."
-__meta__ = {
-"_edit_group_": true
-}
 
 [node name="Margin" type="MarginContainer" parent="WaveImport"]
 anchor_right = 1.0
@@ -364,19 +368,16 @@ custom_constants/margin_right = 16
 custom_constants/margin_top = 16
 custom_constants/margin_left = 16
 custom_constants/margin_bottom = 48
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="V" type="VBoxContainer" parent="WaveImport/Margin"]
 margin_left = 16.0
 margin_top = 16.0
-margin_right = 304.0
-margin_bottom = 344.0
+margin_right = 320.0
+margin_bottom = 386.0
 custom_constants/separation = 8
 
 [node name="Header" type="Label" parent="WaveImport/Margin/V"]
-margin_right = 288.0
+margin_right = 304.0
 margin_bottom = 41.0
 text = "Format:  RIFF Wave
 Size:  0 bytes
@@ -385,39 +386,91 @@ Sample Rate:  44100 Hz, 16-bit"
 
 [node name="Separator" type="Panel" parent="WaveImport/Margin/V"]
 margin_top = 49.0
-margin_right = 288.0
+margin_right = 304.0
 margin_bottom = 50.0
 rect_min_size = Vector2( 0, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="chkSigned" type="CheckButton" parent="WaveImport/Margin/V"]
+[node name="MarginContainer" type="MarginContainer" parent="WaveImport/Margin/V"]
 margin_top = 58.0
-margin_right = 288.0
-margin_bottom = 90.0
-custom_styles/normal = SubResource( 9 )
+margin_right = 304.0
+margin_bottom = 62.0
+rect_min_size = Vector2( 0, 4 )
+
+[node name="ReadBitsAs" type="GridContainer" parent="WaveImport/Margin/V"]
+margin_top = 70.0
+margin_right = 304.0
+margin_bottom = 86.0
+columns = 2
+
+[node name="CheckBox" type="CheckBox" parent="WaveImport/Margin/V/ReadBitsAs"]
+margin_right = 186.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+custom_styles/hover = SubResource( 32 )
+custom_styles/pressed = SubResource( 32 )
+custom_styles/focus = SubResource( 32 )
+custom_styles/normal = SubResource( 32 )
+text = "Read samples as:"
+flat = true
+align = 1
+
+[node name="SpinBox" type="SpinBox" parent="WaveImport/Margin/V/ReadBitsAs"]
+margin_left = 190.0
+margin_right = 304.0
+margin_bottom = 16.0
+theme = ExtResource( 14 )
+min_value = 8.0
+max_value = 32.0
+step = 8.0
+value = 8.0
+exp_edit = true
+suffix = "bits"
+
+[node name="MarginContainer2" type="MarginContainer" parent="WaveImport/Margin/V"]
+margin_top = 94.0
+margin_right = 304.0
+margin_bottom = 98.0
+rect_min_size = Vector2( 0, 4 )
+
+[node name="chkSigned" type="CheckButton" parent="WaveImport/Margin/V"]
+margin_top = 106.0
+margin_right = 304.0
+margin_bottom = 138.0
+custom_styles/hover = SubResource( 31 )
+custom_styles/pressed = SubResource( 31 )
+custom_styles/focus = SubResource( 31 )
+custom_styles/normal = SubResource( 31 )
 pressed = true
-text = "Unsigned / Signed"
+text = "Signed Conversion"
 
 [node name="chkBits" type="CheckButton" parent="WaveImport/Margin/V"]
-margin_top = 98.0
+visible = false
+margin_top = 124.0
 margin_right = 288.0
-margin_bottom = 130.0
-custom_styles/normal = SubResource( 9 )
+margin_bottom = 156.0
+custom_styles/hover = SubResource( 31 )
+custom_styles/pressed = SubResource( 31 )
+custom_styles/focus = SubResource( 31 )
+custom_styles/normal = SubResource( 31 )
 text = "8-bit / 16-bit"
 
 [node name="chkStereo" type="CheckButton" parent="WaveImport/Margin/V"]
-margin_top = 138.0
-margin_right = 288.0
-margin_bottom = 170.0
-custom_styles/normal = SubResource( 9 )
+margin_top = 146.0
+margin_right = 304.0
+margin_bottom = 178.0
+custom_styles/hover = SubResource( 31 )
+custom_styles/pressed = SubResource( 31 )
+custom_styles/focus = SubResource( 31 )
+custom_styles/normal = SubResource( 31 )
 text = "Stereo"
 
 [node name="Separator2" type="Panel" parent="WaveImport/Margin/V"]
-margin_top = 178.0
-margin_right = 288.0
-margin_bottom = 179.0
+margin_top = 186.0
+margin_right = 304.0
+margin_bottom = 187.0
 rect_min_size = Vector2( 0, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -425,15 +478,15 @@ __meta__ = {
 
 [node name="Spacer" type="HSeparator" parent="WaveImport/Margin/V"]
 modulate = Color( 1, 1, 1, 0.313726 )
-margin_top = 187.0
-margin_right = 288.0
-margin_bottom = 195.0
+margin_top = 195.0
+margin_right = 304.0
+margin_bottom = 203.0
 rect_min_size = Vector2( 0, 8 )
 
 [node name="HBoxContainer" type="HBoxContainer" parent="WaveImport/Margin/V"]
-margin_top = 203.0
-margin_right = 288.0
-margin_bottom = 221.0
+margin_top = 211.0
+margin_right = 304.0
+margin_bottom = 229.0
 
 [node name="Label" type="Label" parent="WaveImport/Margin/V/HBoxContainer"]
 margin_top = 5.0
@@ -443,7 +496,7 @@ text = "Stride: "
 
 [node name="txtStride" type="LineEdit" parent="WaveImport/Margin/V/HBoxContainer"]
 margin_left = 70.0
-margin_right = 258.0
+margin_right = 274.0
 margin_bottom = 18.0
 size_flags_horizontal = 3
 align = 2
@@ -463,8 +516,8 @@ group = SubResource( 6 )
 text = "Stride"
 
 [node name="btnSquish" type="Button" parent="WaveImport/Margin/V/HBoxContainer"]
-margin_left = 264.0
-margin_right = 288.0
+margin_left = 280.0
+margin_right = 304.0
 margin_bottom = 18.0
 hint_tooltip = "Automatically set the sampling 
 stride based on the chunk size."
@@ -472,39 +525,49 @@ custom_constants/hseparation = 8
 group = SubResource( 6 )
 icon = ExtResource( 16 )
 
-[node name="Dialog" type="FileDialog" parent="WaveImport"]
-margin_left = 8.0
-margin_top = 8.0
-margin_right = 328.0
-margin_bottom = 400.0
-rect_min_size = Vector2( 320, 392 )
-theme = ExtResource( 19 )
-popup_exclusive = true
-window_title = "Open a File"
-mode = 0
-access = 2
-filters = PoolStringArray( "*.wav; Wave File", "*.raw; Raw data" )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="H2" type="HBoxContainer" parent="WaveImport/Margin/V"]
+margin_top = 237.0
+margin_right = 304.0
+margin_bottom = 255.0
 
-[node name="Darkener" type="Panel" parent="WaveImport/Dialog"]
-show_behind_parent = true
-margin_left = 8.0
-margin_top = 8.0
-margin_right = 312.0
-margin_bottom = 366.0
-mouse_filter = 2
-custom_styles/panel = ExtResource( 26 )
+[node name="Label" type="Label" parent="WaveImport/Margin/V/H2"]
+margin_top = 5.0
+margin_right = 120.0
+margin_bottom = 13.0
+text = "Interpolation: "
+
+[node name="OptionButton" type="OptionButton" parent="WaveImport/Margin/V/H2"]
+margin_left = 126.0
+margin_right = 304.0
+margin_bottom = 18.0
+rect_min_size = Vector2( 0, 18 )
+size_flags_horizontal = 3
+custom_constants/hseparation = 6
+text = "None"
+icon = ExtResource( 31 )
+items = [ "None", ExtResource( 31 ), false, 0, null, "Linear", ExtResource( 30 ), false, 1, null, "Eased", ExtResource( 29 ), false, 2, null ]
+selected = 0
 
 [node name="Darkener" type="Panel" parent="WaveImport"]
 show_behind_parent = true
 margin_left = 8.0
 margin_top = 8.0
-margin_right = 328.0
-margin_bottom = 400.0
+margin_right = 344.0
+margin_bottom = 442.0
 mouse_filter = 2
 custom_styles/panel = ExtResource( 26 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="QAFileDialog" parent="WaveImport" instance=ExtResource( 32 )]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 344.0
+margin_bottom = 442.0
+rect_min_size = Vector2( 320, 70 )
+filters = PoolStringArray( "*.wav; Wave File", "*.raw; Raw data" )
+quick_access_category = "Waveforms"
 
 [node name="H" type="HBoxContainer" parent="."]
 anchor_right = 1.0
@@ -908,7 +971,7 @@ __meta__ = {
 [connection signal="about_to_show" from="WaveImport" to="." method="_on_WaveImport_about_to_show"]
 [connection signal="confirmed" from="WaveImport" to="." method="_on_WaveImport_confirmed"]
 [connection signal="pressed" from="WaveImport/Margin/V/HBoxContainer/btnSquish" to="." method="_on_btnSquish_pressed"]
-[connection signal="file_selected" from="WaveImport/Dialog" to="." method="_on_Dialog_file_selected"]
+[connection signal="file_selected" from="WaveImport/QAFileDialog" to="." method="_on_Dialog_file_selected"]
 [connection signal="about_to_show" from="SmoothDialog" to="SmoothDialog" method="_on_SmoothDialog_about_to_show"]
 [connection signal="value_changed" from="SmoothDialog/V/Amount" to="SmoothDialog" method="_on_Amount_value_changed"]
 [connection signal="value_changed" from="SmoothDialog/V/Preserve Center" to="SmoothDialog" method="_on_Amount_value_changed"]

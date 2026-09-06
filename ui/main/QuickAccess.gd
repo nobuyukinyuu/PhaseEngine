@@ -1,6 +1,7 @@
 extends WindowDialog
 const MRUD_MAX = 10
-const q = "Quick Access"  #Config category name
+export var category = "Quick Access"  #Config category name
+
 
 onready var config = ConfigFile.new()
 var mruds = []
@@ -14,14 +15,17 @@ func _ready():
 	$V/Faves/List.add_font_override("font", get_font(""))
 	$V/MRUDs/List.add_font_override("font", get_font(""))
 	
+	#Check the quick access category from parent if it's a QAFileDialog.
+	if owner is QAFileDialog:  category = owner.quick_access_category
+	
 	var loaded = config.load("user://quick_access.cfg")
 	
 	if loaded == ERR_FILE_NOT_FOUND:  #Create new config
 		config.save("user://quick_access.cfg")
 	
 	elif loaded == OK:  #Load the MRUDs.
-		faves = config.get_value(q, "faves", [])
-		mruds = config.get_value(q, "mruds")
+		faves = config.get_value(category, "faves", [])
+		mruds = config.get_value(category, "mruds", [])
 		
 		clean(ALL)  #This forces a refresh
 #		refresh(ALL)
@@ -34,7 +38,7 @@ func clean(which):
 	if which & MRUDS == MRUDS:  	items[MRUDS] = mruds
 
 	if items.empty():
-		printerr("QuickSelect.gd:  Invalid list specified to clean!")
+		printerr("QuickAccess.gd:  Invalid list specified to clean!")
 		return
 
 	var replacements:Dictionary
@@ -81,7 +85,7 @@ func add_dir(which_list, name, push_to_front=false, limit=0xFFFF):
 		MRUDS:
 			arr = mruds
 		_:
-			printerr("QuickSelect.gd:  Invalid list specified to add to!")
+			printerr("QuickAccess.gd:  Invalid list specified to add to!")
 			return
 			
 	#Scan for existing, if so, bring it to the top.
@@ -141,8 +145,8 @@ func refresh(what):
 		
 
 func save():
-	config.set_value(q, "faves", faves)
-	config.set_value(q, "mruds", mruds)
+	config.set_value(category, "faves", faves)
+	config.set_value(category, "mruds", mruds)
 	config.save("user://quick_access.cfg")
 
 
@@ -221,3 +225,8 @@ func _on_btnDown_pressed():
 	refresh(FAVES)
 	$V/Faves/List.select(selected[0] +1)
 	save()
+
+
+func _on_QuickAccess_about_to_show():
+	if owner is QAFileDialog:
+		rect_position = Vector2(owner.rect_position.x + owner.rect_size.x, owner.rect_position.y)

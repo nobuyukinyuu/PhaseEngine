@@ -104,17 +104,28 @@ var formats = {
 	5120: "Norris",
 	5121: "ISIAudio",
 	5376: "Soundspace Music Compression",
-	8192: "AC3 DVM"
+	8192: "AC3 DVM",
+	
+	#Extensible wave format uses a GUID to extend the format chunk. See below for details.
+	#https://www.mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/WAVE.html#:~:text=Extensible%20Format
+	0xFFFE:  "Extensible:  " 
+	#TODO:  improve extensible class structure to better support 24-bit waves and floating-point samples
 }
 
 class Wave:
+	#Position of the data pointer when reading samples sequentially.
+	var __datapos = 0  setget _set_datapos
+	func _set_datapos(_val):
+		#Don't let this field be accessed directly.
+		printerr("!RiffWave.gd:  WARNING, attempting to set private member __datapos..")
+
 	var bits = 8
 	var channels = 1
 	var hz = 44100
-	var data = []
+	var data = []  #Unformatted raw data (usually from a 'data' chunk), headerless
 	
 	var byteRate = 44100  #Byte rate per second.  Hz*Channels*Bits/8.
-	var bytesPerSample = 1  #channels*bits/8.  Number of bytes in one sample.
+	var bytesPerSample = 1  #channels*bits/8 for pcm and iee data.  Number of bytes in one sample.
 	var chunkSize = 0  #Size of the data in bytes
 	var dataStartPos = 0  #Seek position when deciding where to start striding from.
 	
@@ -127,3 +138,62 @@ class Wave:
 		output += "Size: %s bytes\n" % chunkSize
 		
 		return output
+
+	#Returns a sample, by default an array of size bytesPerSample.
+	func get_next_sample():
+		var output = []
+		if data.empty():  return output
+
+		for i in bytesPerSample:
+			output.append(data[__datapos + i])
+
+		return output
+
+	func reset_sample_reader():
+		__datapos = 0
+	
+	func eof():  return true if __datapos >= data.size() else false
+	
+	func get_all_samples():
+		var output = []
+		for i in range(0,data.size, bytesPerSample):  #Will crash with unaligned block sizes
+			var samp = []
+			for j in bytesPerSample:
+				samp.append(data[i+j])
+			output.append(samp)
+		return output
+
+	#These functions use a StreamPeerBuffer to automatically convert raw bytes to IEEE floats.
+	func samp_to_float(bytes: PoolByteArray) -> float:
+		var buffer = StreamPeerBuffer.new()
+		buffer.set_data_array(bytes)
+		
+		var sz = bytes.size()
+		match sz:
+			4:	return buffer.get_float() 
+			8:	return buffer.get_double()
+			_:
+				printerr("!RiffWave:  WARNING, unsupported conversion of buffer size %s to float" % sz)
+				return NAN
+
+	func samp_to_signed_int(bytes: PoolByteArray) -> float:
+		var buffer = StreamPeerBuffer.new()
+		buffer.set_data_array(bytes)
+		
+		var sz = bytes.size()
+		match sz:
+			1:  return buffer.get_8()
+			2:  return buffer.get_16()
+
+			3:  #24-bit sample conversion can't be done automatically with built-in methods.
+				#We construct a result based off the sample size.
+				
+				#TODO
+				pass
+			
+			4:  return buffer.get_32()
+			8:  return buffer.get_64()
+			_:
+				printerr("!RiffWave:  WARNING, unsupported conversion of buffer size %s to float" % sz)
+
+		return NAN

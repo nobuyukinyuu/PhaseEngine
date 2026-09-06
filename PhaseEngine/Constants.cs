@@ -8,7 +8,7 @@ namespace PhaseEngine
     internal static class Global
     {
         //Automagically generated string based on the most recent GitHub commit.  Can be attached to various things for debugging purposes.
-        public const string BUILD_VERSION = "1d5a164"; //Generated on 19 Nov 2025, 10:04 PM
+        public const string BUILD_VERSION = "1fb1778"; //Generated on 6 Sep 2026, 03:32 AM
         public const int FORMAT_VERSION = 12;  //Version number attached to JSON output of voices/instruments
         public const byte DEFAULT_SEED = 1;  //Default reset state for most noise generators; used when the phase is reset on an oscillator with sync enabled
 

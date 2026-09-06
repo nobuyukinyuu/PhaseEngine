@@ -53,6 +53,9 @@ func _ready():
 	$Amplify.get_cancel().theme_type_variation = "BigMarginButton"
 	$Amplify.get_ok().theme_type_variation = "BigMarginButton"
 
+	$WaveImport.get_ok().theme_type_variation = "BigMarginButton"
+	$WaveImport.get_cancel().theme_type_variation = "BigMarginButton"
+
 	var check = AtlasTexture.new()
 	var uncheck = AtlasTexture.new()
 	
@@ -63,6 +66,8 @@ func _ready():
 	
 	$H/Banks.get_popup().add_icon_override("radio_unchecked", uncheck)
 	$H/Banks.get_popup().add_icon_override("radio_checked", check)
+	$WaveImport/Margin/V/H2/OptionButton.get_popup().add_icon_override("radio_unchecked", uncheck)
+	$WaveImport/Margin/V/H2/OptionButton.get_popup().add_icon_override("radio_checked", check)
 
 	connect("value_changed", self, "_on_value_changed")
 
@@ -101,7 +106,10 @@ func fetch_table(bank=0):
 func _on_menu_item_selected(index):  #Called when needing to add or remove banks
 	match index:
 		0:  #Import bank from wave file
-			$WaveImport/Dialog.popup_centered()
+			#Make the dialog box wider than the import modal, since it's really thin (hacky)
+			$WaveImport/QAFileDialog.rect_size.x = rect_size.x * 2
+			$WaveImport/QAFileDialog.popup_centered()
+			
 		2:  #Amplify
 			$Amplify.popup_centered()
 
@@ -188,7 +196,11 @@ func _on_Dialog_file_selected(path):
 						wave.hz = f.get_32()
 						
 						wave.byteRate = f.get_32() #Avg bytes/sec
-						wave.bytesPerSample = f.get_16()  #data block size per sample (8-bit = 1, 16-bit = 2, etc)
+						
+						#Atomic data size per sample, in bytes. (eg: 8-bit mono=1, 16-bit mono=2)
+						#Bytes are interleaved for multichannel data.
+						#This value should always equal (channels*bits)/8 for PCM/IEEE data.
+						wave.bytesPerSample = f.get_16()  
 						wave.bits = f.get_16()  #Bits per sample.  8-bit / 16-bit etc
 						
 						#End of a 16-byte format chunk.  If we still have data to seek, seek now.
@@ -202,11 +214,15 @@ func _on_Dialog_file_selected(path):
 
 					0x6C766177:  #'wavl' chunk.  The file is cursed.  Abandon hope
 						f.seek_end()
+						#wavl is a list chunk for discontiguous data blocks. Most don't support this.
+						#See the following URL for more details
+						
 					0x74636166:  #'fact' chunk.
 						#Next 4 bytes would specify number of samples per channel, for extended waves.
 						#Floating-point formats probably require this chunk but we don't support those
 						pass
 					0x6C706D73:  #'smpl' chunk
+						#Sample periods and loop points would be here. We don't support those yet.
 						pass
 					0x6C62616C, 0x65746F6E:  #'labl' or 'note' chunk.
 						#Next 4 bytes here would be a GUID, then a null-terminated string.
@@ -230,7 +246,6 @@ func _on_Dialog_file_selected(path):
 	f.close()
 	handle_open = false
 
-#	owner.modulate.a = 0.5
 	$WaveImport/Margin/V/Header.text = wave.to_string()
 	$WaveImport.popup_centered()
 
@@ -239,7 +254,7 @@ func _on_Dialog_file_selected(path):
 
 func _on_WaveImport_about_to_show():
 	#Set the default settings based on what we detected from the file.
-	if wave.bits == 16:
+	if wave.bits >= 16:
 		#Signed integer is default.
 		$WaveImport/Margin/V/chkSigned.pressed = true
 		$WaveImport/Margin/V/chkBits.pressed = true

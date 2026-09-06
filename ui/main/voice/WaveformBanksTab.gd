@@ -144,7 +144,7 @@ func edit(bank):
 	add_child(p)
 	p.owner = owner
 #	p.popup(Rect2(get_global_mouse_position()-Vector2(0,p.rect_size.y), p.rect_size))
-	p.rect_position=rect_global_position + Vector2(8,8)
+	p.rect_position=rect_global_position + Vector2(8+rect_size.x,8)
 	if p.rect_position.y+p.rect_size.y > get_viewport_rect().size.y:
 		p.rect_position.y = get_viewport_rect().size.y - p.rect_size.y - 8
 	p.connect("wave_updated", self, "finish_edit", [p])

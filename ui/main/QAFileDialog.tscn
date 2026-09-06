@@ -1,0 +1,42 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://ui/main/QuickAccess.tscn" type="PackedScene" id=1]
+[ext_resource path="res://ui/main/QuickAccessFileDialog.gd" type="Script" id=2]
+[ext_resource path="res://ui/DialogDarkener.stylebox" type="StyleBox" id=3]
+[ext_resource path="res://ui/FileDialog.theme" type="Theme" id=4]
+
+[node name="QAFileDialog" type="FileDialog"]
+margin_right = -384.0
+margin_bottom = -166.0
+rect_min_size = Vector2( 640, 70 )
+theme = ExtResource( 4 )
+popup_exclusive = true
+window_title = "Open a File"
+resizable = true
+mode = 0
+access = 2
+show_hidden_files = true
+script = ExtResource( 2 )
+
+[node name="QuickAccess" parent="." instance=ExtResource( 1 )]
+unique_name_in_owner = true
+visible = true
+margin_left = -632.0
+margin_top = 8.0
+margin_right = -312.0
+margin_bottom = 408.0
+rect_min_size = Vector2( 320, 400 )
+size_flags_horizontal = 0
+size_flags_vertical = 0
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="Darkener" type="Panel" parent="."]
+show_behind_parent = true
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 632.0
+margin_bottom = 408.0
+mouse_filter = 2
+custom_styles/panel = ExtResource( 3 )
