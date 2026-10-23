@@ -66,9 +66,10 @@ func _on_P_popup_hide():
 	emit_signal("table_updated", -1, -1, intent)  #-1 tells EGPanel to blast the update all message to the chip.
 
 
-func _on_Curve_updated(column, value):
+#Called when internal curve is asked to update. Sometimes called with intent, but we use our own intent.
+func _on_Curve_updated(column, value, __intent=null):  
 	#Update some column(s) of the table we represent for the EGPanel to catch.
-	emit_signal("table_updated", column, value, intent)
+	emit_signal("table_updated", column, value, self.intent)
 	update()
 
 

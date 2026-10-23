@@ -55,9 +55,9 @@ _global_script_classes=[ {
 "path": "res://ui/knob/Knob.gd"
 }, {
 "base": "VoicePanel",
-"class": "LinearPanel",
+"class": "MorphPanel",
 "language": "GDScript",
-"path": "res://ui/panels/LinearPanel.gd"
+"path": "res://ui/panels/MorphPanel.gd"
 }, {
 "base": "FileDialog",
 "class": "QAFileDialog",
@@ -94,7 +94,7 @@ _global_script_class_icons={
 "FilterTooltip": "",
 "KanbanColumn": "",
 "Knob": "res://ui/knob/icon_knob.svg",
-"LinearPanel": "res://gfx/ui/ops/icon_linear.svg",
+"MorphPanel": "res://gfx/ui/ops/icon_linear.svg",
 "QAFileDialog": "",
 "TimeRuler": "res://gfx/ui/godot_icons/Sub.svg",
 "VoiceIODialogs": "res://gfx/ui/godot_icons/Save.svg",

@@ -17,7 +17,12 @@ namespace PhaseEngine
         readonly static short[] dt2_coarse_ratios = { 0, 6, 8, 9};
         readonly static short[] dt2_fine_ratios = { 0, 0, -20, 50};
 
-        static double ClockMult = 55930.0/Global.MixRate * Global.ClockMult;  //Ratio needed to translate one OPM clock to a PhaseEngine clock at current mixrate
+
+        //Ratios needed to translate one OPM clock to a PhaseEngine clock at current mixrate
+        const double FREQ_JAPANESE_NTSC = 55930.390625;  //Derived from clock sync rate of ~3.57 MHz, common in NTSC countries like Japan
+        const float FREQ_WESTERN = 62500; //Used when the clock was synced to a 4MHz chip like on Atari boards
+        static double ClockMult = FREQ_JAPANESE_NTSC/Global.MixRate * Global.ClockMult;  
+
         // static double ClockMult = 1;  //Ratio needed to translate one OPM clock to a PhaseEngine clock at current mixrate
 
 
@@ -31,7 +36,7 @@ namespace PhaseEngine
 
 
         // const float RATIO_TL = (Envelope.L_MAX) / (float)(TL_MAX+0);  //127<<3 = 1016; 1016/128 = ratio
-        const float RATIO_TL = 9.1f; 
+        const float RATIO_TL = 7.25f; 
         // const float RATIO_DL = (Envelope.L_MAX) / (float)(DL_MAX+0);
         const float RATIO_DL = RATIO_TL * 8.0f;
 
@@ -148,7 +153,13 @@ namespace PhaseEngine
 
                             case "CH:":  //Voice configuration options.
                                 v.Pan = Convert.ToByte(splitLine[1]) / 128.0f * 2 -1; //VOPM appears to set PAN to 64 by default, so we want to make sure 0 is our default
+
                                 v.egs[0].feedback = Convert.ToByte(splitLine[2]);  //Set operator 1 to the feedback level specified.
+                                //Due to some differences in how PhaseEngine calculates feedback, the output sounds much more accurate when
+                                //adding 1 to any nonzero feedback amount.  So let's do this and FIXME later (if it needs fixing....)
+                                if (v.egs[0].feedback>0)  v.egs[0].feedback++;
+
+
                                 var algNum=Convert.ToByte(splitLine[3]);
                                 v.alg = Algorithm.FromPreset(algNum, Algorithm.PresetType.OPM); 
                                 ams = Convert.ToByte(splitLine[4]) << 1;  //Max value:  6
@@ -196,7 +207,7 @@ namespace PhaseEngine
 
                                     var dt2 = Convert.ToUInt16(splitLine[10]);
                                     v.pgs[opNum].mult = Convert.ToUInt16(splitLine[8]);
-                                    v.pgs[opNum].Detune = dt1_ratios[Convert.ToUInt16(splitLine[9])];  //DT1
+                                    v.pgs[opNum].Detune = dt1_ratios[Convert.ToUInt16(splitLine[9])] * 0.5f;  //DT1
                                     v.pgs[opNum].coarse = dt2_coarse_ratios[dt2];  //DT2
                                     v.pgs[opNum].fine = dt2_fine_ratios[dt2];
 

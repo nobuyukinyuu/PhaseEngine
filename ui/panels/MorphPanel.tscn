@@ -1,29 +1,30 @@
-[gd_scene load_steps=36 format=2]
+[gd_scene load_steps=38 format=2]
 
-[ext_resource path="res://gfx/ui/envelope_editor/icon_loop.png" type="Texture" id=1]
-[ext_resource path="res://gfx/ui/envelope_editor/icon_sustain.png" type="Texture" id=2]
-[ext_resource path="res://gfx/ui/godot_icons/icon_action_paste.svg" type="Texture" id=3]
-[ext_resource path="res://gfx/ui/godot_icons/icon_action_copy.svg" type="Texture" id=4]
-[ext_resource path="res://gfx/ui/envelope_editor/icon_remove_point.png" type="Texture" id=5]
-[ext_resource path="res://gfx/ui/envelope_editor/icon_zoom_in.png" type="Texture" id=6]
-[ext_resource path="res://gfx/ui/envelope_editor/icon_new_point_inverted.png" type="Texture" id=7]
-[ext_resource path="res://gfx/ui/envelope_editor/icon_zoom_out.png" type="Texture" id=8]
-[ext_resource path="res://ui/FileDialog.theme" type="Theme" id=9]
-[ext_resource path="res://gfx/ui/hSlider.theme" type="Theme" id=10]
-[ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=11]
-[ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=12]
-[ext_resource path="res://ui/panels/BasePanel.tscn" type="PackedScene" id=13]
-[ext_resource path="res://ui/panels/MixingTriangle.gd" type="Script" id=14]
+[ext_resource path="res://gfx/fonts/spelunkid_font_bold.tres" type="BitmapFont" id=1]
+[ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=2]
+[ext_resource path="res://gfx/ui/envelope_editor/icon_sustain.png" type="Texture" id=3]
+[ext_resource path="res://gfx/ui/envelope_editor/icon_loop.png" type="Texture" id=4]
+[ext_resource path="res://ui/EGSlider.tscn" type="PackedScene" id=5]
+[ext_resource path="res://gfx/ui/hSlider.theme" type="Theme" id=6]
+[ext_resource path="res://ui/FileDialog.theme" type="Theme" id=7]
+[ext_resource path="res://ui/TabContainer.theme" type="Theme" id=8]
+[ext_resource path="res://gfx/ui/envelope_editor/icon_remove_point.png" type="Texture" id=9]
+[ext_resource path="res://gfx/ui/envelope_editor/icon_zoom_in.png" type="Texture" id=10]
+[ext_resource path="res://gfx/ui/envelope_editor/icon_zoom_out.png" type="Texture" id=11]
+[ext_resource path="res://gfx/ui/godot_icons/icon_action_paste.svg" type="Texture" id=12]
+[ext_resource path="res://gfx/ui/godot_icons/icon_action_copy.svg" type="Texture" id=13]
+[ext_resource path="res://gfx/ui/envelope_editor/icon_new_point_inverted.png" type="Texture" id=14]
 [ext_resource path="res://ui/panels/WaveBankSpinBox.tscn" type="PackedScene" id=15]
-[ext_resource path="res://gfx/fonts/spelunkid_font.tres" type="BitmapFont" id=16]
-[ext_resource path="res://gfx/fonts/NoteFont.tres" type="BitmapFont" id=17]
-[ext_resource path="res://gfx/ui/partial.png" type="Texture" id=18]
-[ext_resource path="res://ui/panels/MorphEnvelopeTimeline.tscn" type="PackedScene" id=19]
-[ext_resource path="res://gfx/ui/linear_timeline_mockup.png" type="Texture" id=20]
-[ext_resource path="res://ui/FlatButton.theme" type="Theme" id=21]
-[ext_resource path="res://ui/panels/LinearPanel.gd" type="Script" id=22]
-[ext_resource path="res://ui/envelope_editor/TimeRuler.tscn" type="PackedScene" id=23]
-[ext_resource path="res://ui/TabContainer.theme" type="Theme" id=24]
+[ext_resource path="res://gfx/fonts/NoteFont.tres" type="BitmapFont" id=16]
+[ext_resource path="res://ui/FlatButton.theme" type="Theme" id=17]
+[ext_resource path="res://gfx/ui/linear_timeline_mockup.png" type="Texture" id=18]
+[ext_resource path="res://gfx/ui/partial.png" type="Texture" id=19]
+[ext_resource path="res://ui/envelope_editor/TimeRuler.tscn" type="PackedScene" id=20]
+[ext_resource path="res://ui/panels/BasePanel.tscn" type="PackedScene" id=21]
+[ext_resource path="res://ui/panels/MorphEnvelopeTimeline.tscn" type="PackedScene" id=22]
+[ext_resource path="res://ui/panels/MixingTriangle.gd" type="Script" id=23]
+[ext_resource path="res://ui/panels/MorphPanel.gd" type="Script" id=24]
+[ext_resource path="res://gfx/ui/linear_panel/icon_rotate.svg" type="Texture" id=25]
 
 [sub_resource type="StyleBoxFlat" id=12]
 bg_color = Color( 0.447059, 0.172549, 0.145098, 1 )
@@ -143,9 +144,11 @@ func update_selection(target, toggle=false):
 	owner.set_disable_buttons(state==0)
 "
 
-[node name="LinearPanel" instance=ExtResource( 13 )]
+[sub_resource type="StyleBoxEmpty" id=26]
+
+[node name="LinearPanel" instance=ExtResource( 21 )]
 rect_min_size = Vector2( 342, 368 )
-script = ExtResource( 22 )
+script = ExtResource( 24 )
 __meta__ = {
 "_edit_horizontal_guides_": [  ],
 "_edit_lock_": true,
@@ -159,7 +162,7 @@ __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="Zoom" parent="." index="1" instance=ExtResource( 12 )]
+[node name="Zoom" parent="." index="1" instance=ExtResource( 5 )]
 visible = false
 margin_left = 232.0
 margin_top = 312.0
@@ -174,10 +177,10 @@ margin_left = 32.0
 margin_top = 8.0
 margin_right = 224.0
 margin_bottom = 160.0
-theme = ExtResource( 10 )
-script = ExtResource( 14 )
+theme = ExtResource( 6 )
+script = ExtResource( 23 )
 
-[node name="Balance" parent="." index="3" instance=ExtResource( 12 )]
+[node name="Balance" parent="." index="3" instance=ExtResource( 5 )]
 margin_left = 28.0
 margin_top = 162.0
 margin_right = 228.0
@@ -185,7 +188,7 @@ margin_bottom = 182.0
 max_value = 10000.0
 special_display = 4
 
-[node name="Dry Mix" parent="." index="4" instance=ExtResource( 12 )]
+[node name="Dry Mix" parent="." index="4" instance=ExtResource( 5 )]
 margin_left = 4.0
 margin_top = 168.0
 margin_right = 164.0
@@ -199,7 +202,7 @@ margin_left = 280.0
 margin_top = 8.0
 margin_right = 338.0
 margin_bottom = 24.0
-custom_fonts/font = ExtResource( 11 )
+custom_fonts/font = ExtResource( 1 )
 custom_styles/pressed = SubResource( 12 )
 custom_styles/normal = SubResource( 13 )
 toggle_mode = true
@@ -213,7 +216,7 @@ margin_left = 216.0
 margin_top = 8.0
 margin_right = 274.0
 margin_bottom = 24.0
-custom_fonts/font = ExtResource( 11 )
+custom_fonts/font = ExtResource( 1 )
 custom_styles/pressed = SubResource( 14 )
 custom_styles/normal = SubResource( 13 )
 toggle_mode = true
@@ -227,7 +230,7 @@ margin_left = 28.0
 margin_top = 8.0
 margin_right = 116.0
 margin_bottom = 16.0
-custom_fonts/font = ExtResource( 11 )
+custom_fonts/font = ExtResource( 1 )
 text = "Input /"
 align = 2
 
@@ -237,8 +240,8 @@ margin_top = 128.0
 margin_right = 228.0
 margin_bottom = 156.0
 mouse_filter = 2
-custom_fonts/bold_font = ExtResource( 11 )
-custom_fonts/normal_font = ExtResource( 16 )
+custom_fonts/bold_font = ExtResource( 1 )
+custom_fonts/normal_font = ExtResource( 2 )
 bbcode_enabled = true
 bbcode_text = "[center][b]A                      B[/b]
 
@@ -260,7 +263,7 @@ margin_left = 264.0
 margin_top = 8.0
 margin_right = 321.0
 margin_bottom = 52.0
-theme = ExtResource( 9 )
+theme = ExtResource( 7 )
 custom_constants/vseparation = 8
 custom_constants/hseparation = 8
 columns = 2
@@ -275,7 +278,7 @@ hint_tooltip = "Add a new point to the envelope."
 disabled = true
 shortcut_in_tooltip = false
 shortcut = SubResource( 20 )
-icon = ExtResource( 7 )
+icon = ExtResource( 14 )
 
 [node name="1" type="Button" parent="P/Btn" index="1"]
 margin_left = 32.0
@@ -285,7 +288,7 @@ hint_tooltip = "Removes selected point from the envelope."
 disabled = true
 shortcut_in_tooltip = false
 shortcut = SubResource( 22 )
-icon = ExtResource( 5 )
+icon = ExtResource( 9 )
 
 [node name="VSeparator" type="VSeparator" parent="P/Btn" index="2"]
 visible = false
@@ -302,7 +305,7 @@ hint_tooltip = "Copies a normalized version
 of this envelope to the clipboard."
 disabled = true
 shortcut_in_tooltip = false
-icon = ExtResource( 4 )
+icon = ExtResource( 13 )
 
 [node name="3" type="Button" parent="P/Btn" index="4"]
 visible = false
@@ -312,7 +315,7 @@ margin_bottom = 18.0
 hint_tooltip = "Paste a previously copied envelope."
 disabled = true
 shortcut_in_tooltip = false
-icon = ExtResource( 3 )
+icon = ExtResource( 12 )
 
 [node name="VSeparator2" type="VSeparator" parent="P/Btn" index="5"]
 visible = false
@@ -330,7 +333,7 @@ custom_styles/pressed = SubResource( 17 )
 disabled = true
 toggle_mode = true
 shortcut_in_tooltip = false
-icon = ExtResource( 1 )
+icon = ExtResource( 4 )
 
 [node name="5" type="Button" parent="P/Btn" index="7"]
 margin_left = 32.0
@@ -344,7 +347,7 @@ custom_styles/pressed = SubResource( 17 )
 disabled = true
 toggle_mode = true
 shortcut_in_tooltip = false
-icon = ExtResource( 2 )
+icon = ExtResource( 3 )
 
 [node name="WavePreviewFail" type="TextureRect" parent="P" index="1"]
 margin_left = 256.0
@@ -363,17 +366,17 @@ margin_bottom = 119.0
 
 [node name="LinearTimelineMockup" type="Sprite" parent="P" index="3"]
 position = Vector2( 8, 34 )
-texture = ExtResource( 20 )
+texture = ExtResource( 18 )
 offset = Vector2( -128, 0 )
 
-[node name="TimeLine0" parent="P" index="4" instance=ExtResource( 19 )]
+[node name="TimeLine0" parent="P" index="4" instance=ExtResource( 22 )]
 margin_left = 32.0
 margin_top = 8.0
 margin_right = 256.0
 margin_bottom = 24.0
 color = Color( 0, 0.0313726, 0.0470588, 0.501961 )
 
-[node name="TimeLine1" parent="P" index="5" instance=ExtResource( 19 )]
+[node name="TimeLine1" parent="P" index="5" instance=ExtResource( 22 )]
 margin_left = 32.0
 margin_top = 24.0
 margin_right = 256.0
@@ -381,7 +384,7 @@ margin_bottom = 60.0
 color = Color( 0, 0.0313726, 0.0470588, 0.501961 )
 element_color = Color( 0, 1, 1, 1 )
 
-[node name="TimeRuler" parent="P" index="6" instance=ExtResource( 23 )]
+[node name="TimeRuler" parent="P" index="6" instance=ExtResource( 20 )]
 unique_name_in_owner = true
 margin_left = 32.0
 margin_top = 44.0
@@ -404,7 +407,7 @@ __meta__ = {
 [node name="img0" type="TextureRect" parent="P/ZoomBar" index="0"]
 margin_right = 16.0
 margin_bottom = 16.0
-texture = ExtResource( 8 )
+texture = ExtResource( 11 )
 stretch_mode = 4
 
 [node name="Slider" type="HSlider" parent="P/ZoomBar" index="1"]
@@ -413,7 +416,7 @@ margin_right = 296.0
 margin_bottom = 16.0
 rect_min_size = Vector2( 16, 16 )
 size_flags_horizontal = 3
-theme = ExtResource( 10 )
+theme = ExtResource( 6 )
 theme_type_variation = "HSliderNoLabel"
 min_value = 100.0
 max_value = 10000.0
@@ -425,7 +428,7 @@ tick_count = 11
 margin_left = 300.0
 margin_right = 316.0
 margin_bottom = 16.0
-texture = ExtResource( 6 )
+texture = ExtResource( 10 )
 stretch_mode = 4
 
 [node name="AB" type="Label" parent="P" index="8"]
@@ -433,7 +436,7 @@ margin_top = 8.0
 margin_right = 32.0
 margin_bottom = 40.0
 custom_constants/line_spacing = 8
-custom_fonts/font = ExtResource( 17 )
+custom_fonts/font = ExtResource( 16 )
 text = "A
 B"
 align = 1
@@ -450,13 +453,13 @@ mouse_filter = 0
 custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
 custom_constants/shadow_offset_x = 1
 custom_constants/shadow_offset_y = 1
-custom_fonts/font = ExtResource( 16 )
+custom_fonts/font = ExtResource( 2 )
 text = ">"
 align = 2
 valign = 2
 script = SubResource( 25 )
 
-[node name="Offset" parent="P" index="9" instance=ExtResource( 12 )]
+[node name="Offset" parent="P" index="9" instance=ExtResource( 5 )]
 unique_name_in_owner = true
 margin_left = 8.0
 margin_top = 96.0
@@ -475,7 +478,7 @@ custom_constants/separation = 8
 [node name="Partial" type="TextureRect" parent="P/H" index="0"]
 margin_right = 52.0
 margin_bottom = 12.0
-texture = ExtResource( 18 )
+texture = ExtResource( 19 )
 stretch_mode = 4
 
 [node name="lblCurrent" type="Label" parent="P/H" index="1"]
@@ -484,7 +487,7 @@ margin_left = 60.0
 margin_right = 90.0
 margin_bottom = 12.0
 size_flags_vertical = 3
-custom_fonts/font = ExtResource( 17 )
+custom_fonts/font = ExtResource( 16 )
 text = "B-1"
 valign = 2
 
@@ -494,7 +497,7 @@ margin_right = 328.0
 margin_bottom = 12.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-custom_fonts/font = ExtResource( 11 )
+custom_fonts/font = ExtResource( 1 )
 text = "250ms"
 align = 2
 valign = 1
@@ -504,8 +507,8 @@ margin_left = 8.0
 margin_top = 44.0
 margin_right = 20.0
 margin_bottom = 64.0
-theme = ExtResource( 21 )
-custom_fonts/font = ExtResource( 11 )
+theme = ExtResource( 17 )
+custom_fonts/font = ExtResource( 1 )
 text = "}"
 
 [node name="Tune" type="GridContainer" parent="." index="10"]
@@ -519,7 +522,7 @@ __meta__ = {
 "_edit_group_": true
 }
 
-[node name="Mult" parent="Tune" index="0" instance=ExtResource( 12 )]
+[node name="Mult" parent="Tune" index="0" instance=ExtResource( 5 )]
 margin_right = 96.0
 rect_min_size = Vector2( 96, 20 )
 size_flags_horizontal = 3
@@ -530,7 +533,7 @@ tick_count = 5
 associated_property = "mult"
 bind_abilities = 1
 
-[node name="Coarse" parent="Tune" index="1" instance=ExtResource( 12 )]
+[node name="Coarse" parent="Tune" index="1" instance=ExtResource( 5 )]
 margin_top = 28.0
 margin_right = 96.0
 margin_bottom = 48.0
@@ -542,7 +545,7 @@ tick_count = 9
 associated_property = "coarse"
 bind_abilities = 1
 
-[node name="Fine" parent="Tune" index="2" instance=ExtResource( 12 )]
+[node name="Fine" parent="Tune" index="2" instance=ExtResource( 5 )]
 margin_top = 56.0
 margin_right = 96.0
 margin_bottom = 76.0
@@ -553,7 +556,7 @@ tick_count = 9
 associated_property = "fine"
 bind_abilities = 1
 
-[node name="Detune" parent="Tune" index="3" instance=ExtResource( 12 )]
+[node name="Detune" parent="Tune" index="3" instance=ExtResource( 5 )]
 margin_top = 84.0
 margin_right = 96.0
 margin_bottom = 104.0
@@ -567,7 +570,7 @@ associated_property = "Detune"
 bind_abilities = 1
 special_display = 4
 
-[node name="Total Level" parent="." index="11" instance=ExtResource( 12 )]
+[node name="Total Level" parent="." index="11" instance=ExtResource( 5 )]
 margin_left = 176.0
 margin_top = 36.0
 margin_right = 336.0
@@ -586,8 +589,8 @@ margin_left = 360.0
 margin_top = 8.0
 margin_right = 464.0
 margin_bottom = 352.0
-theme = ExtResource( 24 )
-custom_fonts/font = ExtResource( 17 )
+theme = ExtResource( 8 )
+custom_fonts/font = ExtResource( 16 )
 tab_align = 0
 
 [node name="A" type="Container" parent="TabContainer" index="0"]
@@ -606,3 +609,12 @@ margin_left = 4.0
 margin_top = 32.0
 margin_right = -4.0
 margin_bottom = -4.0
+
+[node name="FlipInterface" type="Button" parent="." index="13"]
+margin_left = 440.0
+margin_top = 8.0
+margin_right = 464.0
+margin_bottom = 28.0
+custom_styles/normal = SubResource( 26 )
+icon = ExtResource( 25 )
+icon_align = 1

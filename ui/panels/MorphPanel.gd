@@ -1,5 +1,5 @@
 extends VoicePanel
-class_name LinearPanel, "res://gfx/ui/ops/icon_linear.svg"
+class_name MorphPanel, "res://gfx/ui/ops/icon_linear.svg"
 
 var lo=0  #Minimum value of env output
 var hi=63 #Max value of env output

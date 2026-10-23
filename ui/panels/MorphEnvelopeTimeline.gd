@@ -30,7 +30,7 @@ export (Color) var element_color = Color(1,1,0)
 var pts = []
 
 func _ready():
-	if owner is LinearPanel:
+	if owner is MorphPanel:
 		owner.get_node("%ZoomBar/Slider").connect("value_changed", self, "set_zoom")
 		owner.get_node("%Offset").connect("value_changed", self, "set_offset")
 	pass
@@ -58,7 +58,7 @@ func _gui_input(event):
 		#First, check if the window is in the background.  If so, move the window up.
 		var parent = owner.get_parent()
 	
-		if owner is LinearPanel:
+		if owner is MorphPanel:
 			match event.button_index:
 				BUTTON_WHEEL_DOWN:
 					owner.get_node("%ZoomBar/Slider").value *= QUAD_ROOT_OF_2
@@ -94,4 +94,4 @@ func draw_pt(n, x):
 	draw_string(font, Vector2(x-5, 4), str(n).pad_zeros(2))
 	draw_texture(chevron, Vector2(x-3,ruler_pos()-3), element_color)
 
-func ruler_pos(): return rect_size.y if not owner is LinearPanel else owner.dist_to_time_ruler(self)
+func ruler_pos(): return rect_size.y if not owner is MorphPanel else owner.dist_to_time_ruler(self)

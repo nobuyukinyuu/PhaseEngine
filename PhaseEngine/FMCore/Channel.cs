@@ -191,6 +191,11 @@ namespace PhaseEngine
 
             byte opsToProcess = (byte) Math.Min(voice.alg.processOrder.Length, ops.Length); //Prevents out of bounds if the voice changed while notes are still on.
 
+            //TODO:  Before processing the samples from each operator, we should assemble a list of PD ops and which ops are attached to them.
+            //       From there, modify the phase accumulators of each op based on the value of their increment and the position of the distortion envelope
+            //       in the PD operators which modulate them. PD operates bottom-up on the modulation stack compared to top-down for other operators.
+
+
             //For each height level in the stack, look for operators to mix down.
             for (byte o=0; o < opsToProcess;  o++)
             {

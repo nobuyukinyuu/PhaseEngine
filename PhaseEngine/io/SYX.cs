@@ -269,19 +269,21 @@ namespace PhaseEngine
                             } //End Operator loop
                             
                             //// Feedback ////
-                            var fb = p.Feedback * (v.alg.intent[presetMap[p.algorithm][feedbackOperatorForPreset[p.algorithm]]]==OpBase.Intents.FM_HQ? 25.5 : 1.0);
+                            // var fb = p.Feedback * (v.alg.intent[presetMap[p.algorithm][feedbackOperatorForPreset[p.algorithm]]]==OpBase.Intents.FM_HQ? 25.5 : 1.0);
+                            Func<int, int, double> get_fb = (opNum, opsInFBLoop) => p.Feedback * (v.alg.intent[opNum]==OpBase.Intents.FM_HQ? 25.5 : 1.0) / opsInFBLoop;
                             switch(sysex.voices[i].algorithm){ //Algorithms 4 and 6 have special feedback stacks which we'll handle here.
                                 case 3:  //3-op stack, we'll split the feedback into 3rds and apply a bit to each operator.
-                                    // eg.feedback = (byte)(fb / 3.0);
-                                    v.egs[1].feedback = (byte)(fb / 3.0);
-                                    v.egs[3].feedback = (byte)(fb / 3.0);
-                                    v.egs[5].feedback = (byte)(fb / 3.0);
+                                    v.egs[1].feedback = (byte)get_fb(1,3);
+                                    v.egs[3].feedback = (byte)get_fb(3,3);
+                                    v.egs[5].feedback = (byte)get_fb(5,3);
+
                                     break;
                                 case 5: //2-op stack with feedback, we'll split the feedback in half and apply it to each operator.
-                                    v.egs[2].feedback = (byte)(fb / 2.0);
-                                    v.egs[5].feedback = (byte)(fb / 2.0);
+                                    v.egs[2].feedback = (byte)get_fb(2,2);
+                                    v.egs[5].feedback = (byte)get_fb(5,2);
                                     break;
                                 default:
+                                    var fb = p.Feedback * (v.alg.intent[presetMap[p.algorithm][feedbackOperatorForPreset[p.algorithm]]]==OpBase.Intents.FM_HQ? 25.5 : 1.0);
                                     v.egs[presetMap[p.algorithm][feedbackOperatorForPreset[p.algorithm]]].feedback = (byte)fb;
                                     break;
                             }                            

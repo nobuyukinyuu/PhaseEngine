@@ -152,7 +152,7 @@ namespace PhaseEngine
 
                                     buf = br.ReadByte();  //DT/SR.  Bits 0-4 are SR.  Bits 5-7 are detune.
                                     e.sr = (byte)((buf & 0x1F) * RATIO_SR);  //Get first 5 bits (SR up to 32)
-                                    v[idx].pgs[i].Detune = dt1_ratios[ (buf>>5) & 0x7 ] * 0.6667f;  //DT1 lookup
+                                    v[idx].pgs[i].Detune = dt1_ratios[ (buf>>5) & 0x7 ] * 0.4f;  //DT1 lookup
 
                                     buf = br.ReadByte();  //SL/RR.  Low nibble:  Release, High nibble:  Sustain rate
                                     e.rr = (byte)(((buf & 0xF)<<0) * RATIO_RR);  buf >>= 4;
